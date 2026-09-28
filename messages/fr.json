@@ -1,0 +1,164 @@
+{
+  "app": {
+    "name": "Virgule",
+    "tagline": "Brainstorming en petit comité, sans compte.",
+    "description": "Déclarez des thèmes, proposez des idées, votez, et gardez les meilleures tour après tour."
+  },
+  "common": {
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "backHome": "Retour à l'accueil"
+  },
+  "home": {
+    "title": "Lancez une séance de brainstorming",
+    "subtitle": "Jusqu'à {max} participants, un simple lien à partager, aucun compte à créer.",
+    "roomName": "Nom de la séance",
+    "roomNamePlaceholder": "Ex. : Offsite produit Q4",
+    "pseudo": "Votre pseudo",
+    "pseudoPlaceholder": "Ex. : Camille",
+    "submit": "Créer la room",
+    "hostHint": "Vous serez l'animateur : vous déclarez les thèmes et pilotez les phases.",
+    "steps": {
+      "themes": "L'animateur déclare les thèmes.",
+      "ideas": "Chacun propose ses idées et vote pour ou contre, anonymement.",
+      "recap": "Le récap classe les idées ; on relance un tour avec celles retenues."
+    }
+  },
+  "join": {
+    "title": "Rejoindre « {name} »",
+    "subtitle": "Choisissez un pseudo pour participer.",
+    "pseudo": "Votre pseudo",
+    "submit": "Rejoindre",
+    "seats": "{count, plural, =0 {Aucun participant} one {# participant} other {# participants}} sur {max}",
+    "full": "Cette room est complète ({max} participants maximum).",
+    "closed": "Cette séance est terminée, il n'est plus possible de la rejoindre."
+  },
+  "expired": {
+    "title": "Cette room a expiré",
+    "body": "Les rooms sont conservées {days} jours. Créez-en une nouvelle pour relancer une séance.",
+    "cta": "Créer une nouvelle room"
+  },
+  "notFound": {
+    "title": "Room introuvable",
+    "body": "Le lien est peut-être incorrect ou la room a été supprimée.",
+    "cta": "Retour à l'accueil"
+  },
+  "room": {
+    "round": "Tour {round}",
+    "participants": "{count}/{max} participants",
+    "host": "Animateur",
+    "you": "vous",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié dans le presse-papiers",
+    "expiresOn": "Disponible jusqu'au {date, date, long}",
+    "phases": {
+      "THEMES": "Thèmes",
+      "IDEAS": "Idées & votes",
+      "RECAP": "Récapitulatif",
+      "CLOSED": "Terminée"
+    }
+  },
+  "themes": {
+    "title": "Déclaration des thèmes",
+    "hostSubtitle": "Ajoutez les thèmes sur lesquels le groupe va réfléchir, puis lancez la phase d'idées.",
+    "guestSubtitle": "L'animateur prépare les thèmes. La séance démarrera automatiquement.",
+    "empty": "Aucun thème pour l'instant.",
+    "add": "Ajouter le thème",
+    "titleLabel": "Thème",
+    "titlePlaceholder": "Ex. : Comment améliorer l'onboarding ?",
+    "descriptionLabel": "Précisions (facultatif)",
+    "descriptionPlaceholder": "Contexte, contraintes, objectif…",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "settings": "Réglages",
+    "allowSelfVote": "Autoriser le vote sur ses propres idées",
+    "allowSelfVoteHint": "Si désactivé, un participant ne peut pas voter pour ou contre les idées qu'il a proposées.",
+    "start": "Lancer la phase d'idées",
+    "startHint": "Au moins un thème est nécessaire."
+  },
+  "ideas": {
+    "title": "Idées & votes",
+    "subtitle": "Proposez vos idées et votez pour ou contre. Tout est anonyme ; vous pouvez changer d'avis jusqu'à la clôture.",
+    "roundSubtitle": "Tour {round} : les idées retenues au tour précédent sont remises au vote, et vous pouvez en proposer de nouvelles.",
+    "empty": "Aucune idée pour ce thème. Lancez-vous !",
+    "placeholder": "Votre idée…",
+    "add": "Proposer",
+    "mine": "Votre idée",
+    "carriedOver": "Retenue au tour précédent",
+    "voteUp": "Pour",
+    "voteDown": "Contre",
+    "delete": "Retirer mon idée",
+    "selfVoteDisabled": "Le vote sur vos propres idées est désactivé.",
+    "myVotes": "Vous avez voté sur {voted} idée(s) sur {total}.",
+    "finish": "Clore les votes et voir le récap",
+    "finishConfirm": "Clore les votes pour tout le monde ?"
+  },
+  "recap": {
+    "title": "Récapitulatif",
+    "closedTitle": "Séance terminée",
+    "closedBody": "Merci à tous ! Vous pouvez consulter et exporter les résultats jusqu'à l'expiration de la room.",
+    "roundTab": "Tour {round}",
+    "summary": "{qualified} idée(s) retenue(s) sur {total}",
+    "qualified": "Retenue",
+    "notQualified": "Écartée",
+    "empty": "Aucune idée pour ce thème.",
+    "up": "{count} pour",
+    "down": "{count} contre",
+    "net": "Score {net}",
+    "hostControls": "Pilotage",
+    "requireNetPositive": "Exiger un score positif",
+    "requireNetPositiveHint": "Activé : une idée est retenue si elle a plus de « pour » que de « contre ». Désactivé : un seul « pour » suffit.",
+    "reopen": "Rouvrir les votes",
+    "nextRound": "Lancer un nouveau tour",
+    "nextRoundHint": "{count, plural, =0 {Aucune idée retenue : seules les nouvelles idées seront au vote.} one {# idée retenue sera remise au vote, et chacun pourra en proposer de nouvelles.} other {# idées retenues seront remises au vote, et chacun pourra en proposer de nouvelles.}}",
+    "nextRoundConfirm": "Lancer le tour {round} ? Les idées écartées seront retirées et les votes remis à zéro.",
+    "close": "Terminer la séance",
+    "closeConfirm": "Terminer la séance ? Plus personne ne pourra proposer ni voter.",
+    "waitingHost": "L'animateur décide de la suite : nouveau tour ou fin de séance."
+  },
+  "export": {
+    "button": "Exporter",
+    "markdown": "Markdown (.md)",
+    "markdownHint": "Lisible, à coller dans Notion, Teams, Confluence…",
+    "csv": "CSV (.csv)",
+    "csvHint": "À ouvrir dans Excel ou Google Sheets",
+    "print": "Imprimer / PDF",
+    "printHint": "Via la boîte d'impression du navigateur",
+    "fileTitle": "Récapitulatif — {name}",
+    "generatedOn": "Exporté le {date}",
+    "participants": "Participants",
+    "rules": "Règle de qualification",
+    "ruleNetPositive": "score positif (pour > contre)",
+    "ruleAnyUpvote": "au moins un vote « pour »",
+    "columns": {
+      "round": "Tour",
+      "theme": "Thème",
+      "idea": "Idée",
+      "up": "Pour",
+      "down": "Contre",
+      "net": "Score",
+      "status": "Statut"
+    }
+  },
+  "errors": {
+    "invalidInput": "Saisie invalide.",
+    "roomNotFound": "Room introuvable.",
+    "roomExpired": "Cette room a expiré.",
+    "roomFull": "La room est complète.",
+    "roomClosed": "La séance est terminée.",
+    "pseudoTaken": "Ce pseudo est déjà utilisé dans la room.",
+    "notJoined": "Vous devez rejoindre la room.",
+    "notHost": "Seul l'animateur peut faire cela.",
+    "wrongPhase": "Action impossible dans la phase actuelle.",
+    "tooManyThemes": "Nombre maximum de thèmes atteint.",
+    "noThemes": "Ajoutez au moins un thème.",
+    "ideaNotFound": "Cette idée n'est plus disponible.",
+    "notAuthor": "Vous ne pouvez retirer que vos propres idées du tour en cours.",
+    "selfVoteForbidden": "Le vote sur ses propres idées est désactivé.",
+    "unknown": "Une erreur est survenue, réessayez."
+  }
+}

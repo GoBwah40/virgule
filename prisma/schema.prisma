@@ -1,0 +1,105 @@
+// Schéma Virgule — SQLite en local, Turso (libSQL) en production.
+// Après modification : `pnpm db:migrate` (local) puis `pnpm db:migrate:prod` (Turso).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+/// Phases d'une room, pilotées par l'animateur.
+enum Phase {
+  THEMES // l'animateur déclare les thèmes
+  IDEAS // les participants proposent et votent
+  RECAP // résultats du tour courant
+  CLOSED // séance terminée (lecture seule)
+}
+
+model Room {
+  id               String        @id @default(cuid())
+  /// Identifiant court utilisé dans le lien de partage (/r/<slug>).
+  slug             String        @unique
+  name             String
+  phase            Phase         @default(THEMES)
+  /// Tour courant, commence à 1.
+  round            Int           @default(1)
+  /// Un participant peut-il voter pour/contre ses propres idées ?
+  allowSelfVote    Boolean       @default(true)
+  /// true : une idée est retenue si pour > contre. false : dès 1 vote « pour ».
+  requireNetPositive Boolean     @default(true)
+  createdAt        DateTime      @default(now())
+  expiresAt        DateTime
+  participants     Participant[]
+  themes           Theme[]
+  ideas            Idea[]
+
+  @@index([expiresAt])
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  roomId    String
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  pseudo    String
+  /// Secret stocké dans un cookie httpOnly, permet la reconnexion.
+  token     String   @unique
+  isHost    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  ideas     Idea[]
+  votes     Vote[]
+
+  @@unique([roomId, pseudo])
+}
+
+model Theme {
+  id          String   @id @default(cuid())
+  roomId      String
+  room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  position    Int
+  createdAt   DateTime @default(now())
+  ideas       Idea[]
+
+  @@index([roomId, position])
+}
+
+model Idea {
+  id               String      @id @default(cuid())
+  roomId           String
+  room             Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  themeId          String
+  theme            Theme       @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  /// Conservé pour la règle d'auto-vote ; jamais exposé aux autres participants.
+  authorId         String
+  author           Participant @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content          String
+  /// Tour pendant lequel l'idée a été proposée.
+  createdRound     Int
+  /// Premier tour auquel l'idée ne participe plus (null = toujours en lice).
+  eliminatedRound  Int?
+  createdAt        DateTime    @default(now())
+  votes            Vote[]
+
+  @@index([roomId])
+  @@index([themeId])
+}
+
+model Vote {
+  id            String      @id @default(cuid())
+  ideaId        String
+  idea          Idea        @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+  /// Les votes sont remis à zéro à chaque tour : on garde l'historique par tour.
+  round         Int
+  /// true = pour, false = contre.
+  positive      Boolean
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([ideaId, participantId, round])
+  @@index([participantId])
+}
