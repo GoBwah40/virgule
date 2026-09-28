@@ -55,11 +55,30 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | `pnpm db:migrate:prod` | Applique les migrations en attente sur Turso |
 | `pnpm db:studio` | Prisma Studio (base locale) |
 
+## En production
+
+**https://virgule.vercel.app**
+
+| | |
+| --- | --- |
+| Hébergement | Vercel, projet `gobwah40s-projects/virgule`, fonctions à Dublin (`dub1`) |
+| Base | Turso `virgule`, Irlande (`aws-eu-west-1`) |
+| Déploiement | Automatique à chaque push sur `main` |
+| Temps réel | Rafraîchissement toutes les 3 secondes (Pusher pas encore activé) |
+
+Ce qu'il reste à faire (variables à renseigner ou nettoyer, Pusher, base de prévisualisation, CI…) est suivi dans **[A_FAIRE.md](A_FAIRE.md)**.
+
 ## Déploiement sur Vercel
 
 La production tourne sur Vercel, avec une base [Turso](https://turso.tech) (SQLite hébergé) : le disque de Vercel est éphémère, un fichier SQLite n'y survivrait pas. Pusher est optionnel.
 
 Le pas-à-pas complet (création de la base, migrations, variables d'environnement, cron, vérifications, dépannage) est dans **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
+
+Les valeurs de production sont gardées en local dans `.env.production.local` (ignoré par git). Pour appliquer une migration sur Turso :
+
+```bash
+(set -a; . ./.env.production.local; set +a; pnpm db:migrate:prod)
+```
 
 ## Charte graphique
 
@@ -72,6 +91,8 @@ Le pas-à-pas complet (création de la base, migrations, variables d'environneme
 
 ```
 .docs/                      Maquettes et charte graphique (HTML autonomes, voir .docs/README.md)
+A_FAIRE.md                  Suivi de ce qu'il reste à faire en production
+DEPLOIEMENT.md              Déploiement pas à pas sur Vercel + Turso
 messages/fr.json            Traductions (toutes les chaînes de l'UI)
 prisma/schema.prisma        Modèle : Room, Participant, Theme, Idea, Vote
 scripts/migrate-turso.mts   Application des migrations sur Turso
