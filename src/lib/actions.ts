@@ -16,7 +16,7 @@ import { getRoomContext, phasePath } from "@/lib/room";
 import { setParticipantToken } from "@/lib/session";
 
 // Clés de messages i18n (namespace « errors » dans messages/fr.json).
-export type ActionError =
+type ActionError =
   | "invalidInput"
   | "roomNotFound"
   | "roomExpired"

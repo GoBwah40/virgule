@@ -1,6 +1,6 @@
 # Virgule
 
-Application de brainstorming en ligne pour petits groupes (6 personnes maximum), sans compte : on partage un lien, chacun choisit un pseudo.
+Application de brainstorming et de planification en petit groupe (6 personnes maximum), sans compte : on partage un lien, chacun donne son prénom, propose des idées et vote.
 
 ## Déroulé d'une séance
 
@@ -24,7 +24,7 @@ Une room expire **7 jours** après sa création ; une tâche planifiée quotidie
 | Base de données | Prisma 7 + adapter libSQL : fichier SQLite en local, [Turso](https://turso.tech) en production |
 | Temps réel | [Pusher Channels](https://pusher.com/channels) (optionnel), avec repli automatique sur du polling |
 | i18n | next-intl (français uniquement pour l'instant) |
-| Tests | Vitest |
+| Qualité | Vitest + Testing Library, Storybook 10, ESLint, knip |
 | Hébergement | Vercel (+ Vercel Cron pour la purge) |
 
 ## Démarrage en local
@@ -46,8 +46,11 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | --- | --- |
 | `pnpm dev` | Serveur de développement |
 | `pnpm build` | `prisma generate` + build de production |
+| `pnpm check` | Lint, types, tests et knip : à lancer avant chaque commit |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
-| `pnpm test` | Tests unitaires (Vitest) |
+| `pnpm test` | Tests Vitest : logique (Node) et composants (jsdom) |
+| `pnpm knip` | Détecte fichiers, exports et dépendances inutilisés |
+| `pnpm storybook` | Catalogue des composants globaux sur http://localhost:6006 |
 | `pnpm db:migrate` | Crée ou applique une migration sur la base locale |
 | `pnpm db:migrate:prod` | Applique les migrations en attente sur Turso |
 | `pnpm db:studio` | Prisma Studio (base locale) |
@@ -58,9 +61,17 @@ La production tourne sur Vercel, avec une base [Turso](https://turso.tech) (SQLi
 
 Le pas-à-pas complet (création de la base, migrations, variables d'environnement, cron, vérifications, dépannage) est dans **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
 
+## Charte graphique
+
+- **Couleurs** (tokens dans `src/app/globals.css`, mode sombre selon le réglage du système) : papaye `#F26A2E` (marque), papaye brûlée `#C2410C` (actions), mangue `#FFC23D` (mise en avant), sable `#FFF7F0` (fond), encre figue `#2A1A24` (texte). Olivier `#1F7A4D` et grenade `#B8283F` sont réservés aux résultats des votes. Tous les couples texte/fond respectent le contraste AA.
+- **Typographies** (`src/app/fonts.ts`) : Bricolage Grotesque pour les titres, Figtree pour le texte, DM Mono pour les lettres de siège.
+- **Mobile d'abord** : cibles tactiles de 44 px, une colonne, actions principales en pleine largeur.
+- **Ton** : tutoiement, voix du groupe (« on »), prénoms plutôt que rôles, pas d'argot ni d'emoji. Vocabulaire : séance, participants, sujets, idées, bilan ; la personne qui crée la séance « l'anime ».
+
 ## Architecture
 
 ```
+.docs/                      Maquettes et charte graphique (HTML autonomes, voir .docs/README.md)
 messages/fr.json            Traductions (toutes les chaînes de l'UI)
 prisma/schema.prisma        Modèle : Room, Participant, Theme, Idea, Vote
 scripts/migrate-turso.mts   Application des migrations sur Turso
@@ -72,7 +83,9 @@ src/
     r/[slug]/themes|ideas|recap/page.tsx   Une page par phase
     r/[slug]/export/route.ts               Export Markdown / CSV
     api/cron/purge/route.ts                Purge des rooms expirées
-  components/phases/        UI de chaque phase
+  components/*.tsx          Composants globaux réutilisables (+ .stories.tsx et .test.tsx)
+  components/ui/            Primitives shadcn/ui (Base UI)
+  components/phases/        Assemblage des composants globaux pour chaque phase
   components/room/          En-tête, formulaire d'accès, synchro temps réel
   lib/actions.ts            Toutes les mutations (Server Actions) et leurs contrôles
   lib/room.ts               Lectures : contexte de room, vue de vote, récapitulatif
@@ -92,6 +105,6 @@ src/
 
 ### Ajouter une langue
 
-1. Créer `messages/<locale>.json` avec les mêmes clés que `fr.json` (le typage signale les clés manquantes).
-2. Ajouter la locale dans `src/i18n/config.ts`.
+1. Créer `messages/<locale>.json` avec exactement les mêmes clés que `fr.json`. La règle est vérifiée par `src/i18n/messages.test.ts` : une clé présente dans une langue doit exister dans toutes les autres, et aucune traduction ne peut être vide.
+2. Ajouter la locale au type `Locale` dans `src/i18n/config.ts`.
 3. Déterminer la locale dans `src/i18n/request.ts` (cookie, en-tête `Accept-Language`, etc.) et ajouter éventuellement un sélecteur de langue dans l'UI.

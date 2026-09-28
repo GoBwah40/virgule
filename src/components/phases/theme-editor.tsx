@@ -5,11 +5,13 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 
 import { ConfirmButton } from "@/components/confirm-button";
+import { FormField } from "@/components/form-field";
+import { ListItem } from "@/components/list-item";
+import { SettingSwitch } from "@/components/setting-switch";
+import { SuggestionChips } from "@/components/suggestion-chips";
 import { Button } from "@/components/ui/button";
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, startIdeasPhase, updateTheme } from "@/lib/actions";
@@ -17,52 +19,62 @@ import { LIMITS } from "@/lib/config";
 
 type Theme = { id: string; title: string; description: string | null; ideaCount: number };
 
-export function ThemeEditor({
-  slug,
-  themes,
-  allowSelfVote,
-}: {
-  slug: string;
-  themes: Theme[];
-  allowSelfVote: boolean;
-}) {
+/** Sujets courants proposés en un tap (clés du namespace themes.suggestions). */
+const SUGGESTIONS = ["goal", "dates", "place", "budget", "priorities", "roles"] as const;
+
+export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; themes: Theme[]; allowSelfVote: boolean }) {
   const t = useTranslations("themes");
   const [pending, run] = useAction();
   // Retour depuis la phase d'idées : on reprend plutôt qu'on ne lance.
   const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
+  const existing = new Set(themes.map((th) => th.title.toLowerCase()));
+  const suggestions = SUGGESTIONS.map((key) => ({ id: key, label: t(`suggestions.${key}.title`) })).filter(
+    (s) => !existing.has(s.label.toLowerCase()),
+  );
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-3">
-        {themes.length === 0 && <p className="text-muted-foreground">{t("empty")}</p>}
-        {themes.map((theme, i) => (
-          <ThemeRow key={theme.id} slug={slug} theme={theme} isFirst={i === 0} isLast={i === themes.length - 1} />
-        ))}
-        <ThemeForm
-          submitLabel={t("add")}
-          onSubmit={(values, reset) => run(() => addTheme(slug, values), reset)}
-          pending={pending}
+      <div className="space-y-4">
+        {themes.length === 0 ? (
+          <p className="text-muted-foreground">{t("empty")}</p>
+        ) : (
+          <ul className="space-y-2">
+            {themes.map((theme, i) => (
+              <ThemeRow key={theme.id} slug={slug} theme={theme} isFirst={i === 0} isLast={i === themes.length - 1} />
+            ))}
+          </ul>
+        )}
+
+        <SuggestionChips
+          label={t("suggestionsLabel")}
+          items={suggestions}
+          disabled={pending}
+          onSelect={(key) => {
+            const k = key as (typeof SUGGESTIONS)[number];
+            run(() =>
+              addTheme(slug, { title: t(`suggestions.${k}.title`), description: t(`suggestions.${k}.description`) }),
+            );
+          }}
         />
+
+        <ThemeForm submitLabel={t("add")} pending={pending} onSubmit={(values, reset) => run(() => addTheme(slug, values), reset)} />
       </div>
 
       <aside className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>{t("settings")}</CardTitle>
+            <CardTitle className="font-heading text-lg font-bold">{t("settings")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <Label htmlFor="self-vote">{t("allowSelfVote")}</Label>
-                <p className="text-xs text-muted-foreground">{t("allowSelfVoteHint")}</p>
-              </div>
-              <Switch
-                id="self-vote"
-                checked={allowSelfVote}
-                disabled={pending}
-                onCheckedChange={(checked) => run(() => setAllowSelfVote(slug, checked))}
-              />
-            </div>
+            <SettingSwitch
+              id="self-vote"
+              label={t("allowSelfVote")}
+              hint={t("allowSelfVoteHint")}
+              checked={allowSelfVote}
+              disabled={pending}
+              onCheckedChange={(checked) => run(() => setAllowSelfVote(slug, checked))}
+            />
           </CardContent>
         </Card>
 
@@ -76,7 +88,7 @@ export function ThemeEditor({
           <Play data-icon="inline-start" />
           {startLabel}
         </ConfirmButton>
-        {themes.length === 0 && <p className="text-center text-xs text-muted-foreground">{t("startHint")}</p>}
+        {themes.length === 0 && <p className="text-center text-sm text-muted-foreground">{t("startHint")}</p>}
       </aside>
     </div>
   );
@@ -89,22 +101,26 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
 
   if (editing) {
     return (
-      <ThemeForm
-        initial={theme}
-        submitLabel={t("save")}
-        pending={pending}
-        onCancel={() => setEditing(false)}
-        onSubmit={(values) => run(() => updateTheme(slug, theme.id, values), () => setEditing(false))}
-      />
+      <li>
+        <ThemeForm
+          initial={theme}
+          submitLabel={t("save")}
+          pending={pending}
+          onCancel={() => setEditing(false)}
+          onSubmit={(values) => run(() => updateTheme(slug, theme.id, values), () => setEditing(false))}
+        />
+      </li>
     );
   }
 
+  const remove = () => run(() => deleteTheme(slug, theme.id));
+
   return (
-    <Card size="sm">
-      <CardHeader>
-        <CardTitle>{theme.title}</CardTitle>
-        {theme.description && <CardDescription>{theme.description}</CardDescription>}
-        <CardAction className="flex gap-1">
+    <ListItem
+      tone="plain"
+      meta={theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}
+      actions={
+        <>
           <Button variant="ghost" size="icon-sm" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
             <ArrowUp />
           </Button>
@@ -123,18 +139,20 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
               title={t("deleteConfirm", { title: theme.title })}
               description={t("deleteConfirmHint", { count: theme.ideaCount })}
               confirmLabel={t("delete")}
-              onConfirm={() => run(() => deleteTheme(slug, theme.id))}
+              onConfirm={remove}
             >
               <Trash2 />
             </ConfirmButton>
           ) : (
-            <Button variant="ghost" size="icon-sm" aria-label={t("delete")} disabled={pending} onClick={() => run(() => deleteTheme(slug, theme.id))}>
+            <Button variant="ghost" size="icon-sm" aria-label={t("delete")} disabled={pending} onClick={remove}>
               <Trash2 />
             </Button>
           )}
-        </CardAction>
-      </CardHeader>
-    </Card>
+        </>
+      }
+    >
+      {theme.title}
+    </ListItem>
   );
 }
 
@@ -169,8 +187,7 @@ function ThemeForm({
             });
           }}
         >
-          <div className="space-y-2">
-            <Label htmlFor={`${idPrefix}-title`}>{t("titleLabel")}</Label>
+          <FormField id={`${idPrefix}-title`} label={t("titleLabel")}>
             <Input
               id={`${idPrefix}-title`}
               value={title}
@@ -180,9 +197,8 @@ function ThemeForm({
               required
               autoFocus={!!initial}
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor={`${idPrefix}-description`}>{t("descriptionLabel")}</Label>
+          </FormField>
+          <FormField id={`${idPrefix}-description`} label={t("descriptionLabel")}>
             <Textarea
               id={`${idPrefix}-description`}
               value={description}
@@ -191,8 +207,8 @@ function ThemeForm({
               maxLength={LIMITS.themeDescription}
               rows={2}
             />
-          </div>
-          <div className="flex justify-end gap-2">
+          </FormField>
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {onCancel && (
               <Button type="button" variant="ghost" onClick={onCancel}>
                 {t("cancel")}

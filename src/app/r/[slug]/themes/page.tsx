@@ -1,9 +1,9 @@
 import { getTranslations } from "next-intl/server";
 
+import { ListItem } from "@/components/list-item";
+import { PageHeader } from "@/components/page-header";
 import { ThemeEditor } from "@/components/phases/theme-editor";
-import { PhaseTitle } from "@/components/phases/phase-title";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getThemes, loadPhasePage } from "@/lib/room";
+import { getThemes, hostName, loadPhasePage } from "@/lib/room";
 
 export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes">) {
   const { slug } = await params;
@@ -16,7 +16,7 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
   if (page.me.isHost) {
     return (
       <>
-        <PhaseTitle title={t("title")} subtitle={t("hostSubtitle")} />
+        <PageHeader title={t("title")} subtitle={t("hostSubtitle")} />
         <ThemeEditor slug={slug} themes={themes} allowSelfVote={page.room.allowSelfVote} />
       </>
     );
@@ -24,20 +24,17 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
 
   return (
     <>
-      <PhaseTitle title={t("title")} subtitle={t("guestSubtitle")} />
+      <PageHeader title={t("title")} subtitle={t("guestSubtitle", { host: hostName(page.participants) })} />
       {themes.length === 0 ? (
         <p className="text-muted-foreground">{t("empty")}</p>
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-2 md:grid-cols-2">
           {themes.map((theme) => (
-            <Card key={theme.id}>
-              <CardHeader>
-                <CardTitle>{theme.title}</CardTitle>
-                {theme.description && <CardDescription>{theme.description}</CardDescription>}
-              </CardHeader>
-            </Card>
+            <ListItem key={theme.id} tone="plain" meta={theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}>
+              {theme.title}
+            </ListItem>
           ))}
-        </div>
+        </ul>
       )}
     </>
   );

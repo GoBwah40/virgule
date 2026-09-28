@@ -1,11 +1,14 @@
+import { Plus } from "lucide-react";
+import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
-import { PhaseTitle } from "@/components/phases/phase-title";
+import { PageHeader } from "@/components/page-header";
 import { ExportMenu, RecapHostControls } from "@/components/phases/recap-controls";
 import { RecapRoundView } from "@/components/phases/recap-round";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getRecap, loadPhasePage } from "@/lib/room";
+import { getRecap, hostName, loadPhasePage } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
 export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">) {
@@ -21,10 +24,21 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
 
   return (
     <>
-      <PhaseTitle
+      <PageHeader
         title={closed ? t("closedTitle") : t("title")}
         subtitle={t("summary", { qualified: current.qualifiedCount, total: current.ideaCount })}
-        actions={<ExportMenu slug={slug} />}
+        actions={
+          <>
+            {closed && (
+              // Séance terminée : retour à l'accueil pour en créer une autre.
+              <Button nativeButton={false} render={<Link href="/" />} className="print:hidden">
+                <Plus data-icon="inline-start" />
+                {t("newSession")}
+              </Button>
+            )}
+            <ExportMenu slug={slug} />
+          </>
+        }
       />
 
       {closed && (
@@ -65,7 +79,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
                 qualifiedCount={current.qualifiedCount}
               />
             ) : (
-              <p className="text-sm text-muted-foreground">{t("waitingHost")}</p>
+              <p className="text-muted-foreground">{t("waitingHost", { host: hostName(page.participants) })}</p>
             )}
           </aside>
         )}

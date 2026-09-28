@@ -63,6 +63,10 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
   };
 });
 
+/** Prénom de la personne qui organise, pour les textes (« Camille prépare les sujets »). */
+export const hostName = (participants: { pseudo: string; isHost: boolean }[]) =>
+  participants.find((p) => p.isHost)?.pseudo ?? "";
+
 export async function getThemes(roomId: string) {
   const themes = await db.theme.findMany({
     where: { roomId },
@@ -134,7 +138,7 @@ export async function getVotingView(
 
 // ─── Récapitulatif (tous les tours) ────────────────────────────────────────
 
-export type RecapIdea = {
+type RecapIdea = {
   id: string;
   content: string;
   score: Score;
@@ -142,7 +146,7 @@ export type RecapIdea = {
   isMine: boolean;
 };
 
-export type RecapTheme = { id: string; title: string; description: string | null; ideas: RecapIdea[] };
+type RecapTheme = { id: string; title: string; description: string | null; ideas: RecapIdea[] };
 
 export type RecapRound = { round: number; themes: RecapTheme[]; qualifiedCount: number; ideaCount: number };
 

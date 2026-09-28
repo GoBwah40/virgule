@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charte Virgule</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap">
+<style>
+  :root {
+    --sable: #FFF7F0;
+    --carte: #FFFFFF;
+    --creux: #F7EBE1;
+    --encre: #2A1A24;
+    --encre-douce: #6F5A62;
+    --ligne: #EEDCCF;
+    --papaye: #F26A2E;
+    --action: #C2410C;
+    --action-fg: #FFFFFF;
+    --mangue: #FFC23D;
+    --mangue-pale: #FFF0C7;
+    --olivier: #1F7A4D;
+    --grenade: #B8283F;
+    --focus: #2A1A24;
+    --ombre: 0 1px 2px rgb(42 26 36 / .06), 0 8px 24px -12px rgb(42 26 36 / .18);
+    --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --texte: "Figtree", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --sable: #1C1216;
+      --carte: #261A1F;
+      --creux: #30222A;
+      --encre: #FBEFE6;
+      --encre-douce: #B7A3AA;
+      --ligne: #3D2C34;
+      --papaye: #FF8A55;
+      --action: #FF8A55;
+      --action-fg: #1C1216;
+      --mangue: #FFC23D;
+      --mangue-pale: #4A3717;
+      --olivier: #5CC98E;
+      --grenade: #FF6B81;
+      --focus: #FBEFE6;
+      --ombre: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --sable: #1C1216;
+    --carte: #261A1F;
+    --creux: #30222A;
+    --encre: #FBEFE6;
+    --encre-douce: #B7A3AA;
+    --ligne: #3D2C34;
+    --papaye: #FF8A55;
+    --action: #FF8A55;
+    --action-fg: #1C1216;
+    --mangue: #FFC23D;
+    --mangue-pale: #4A3717;
+    --olivier: #5CC98E;
+    --grenade: #FF6B81;
+    --focus: #FBEFE6;
+    --ombre: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--sable);
+    color: var(--encre);
+    font-family: var(--texte);
+    font-size: 16px;
+    line-height: 1.55;
+    padding-inline: 16px;
+    padding-block: 28px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 1040px; margin-inline: auto; display: grid; gap: 72px; }
+  h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+  h1 { font-size: clamp(40px, 9vw, 72px); line-height: .98; font-weight: 800; }
+  h2 { font-size: clamp(26px, 5vw, 34px); line-height: 1.1; font-weight: 700; }
+  h3 { font-size: 20px; line-height: 1.2; font-weight: 700; }
+  p { margin: 0; }
+  .muted { color: var(--encre-douce); }
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--action); }
+  .lede { font-size: 18px; max-width: 58ch; color: var(--encre-douce); }
+  section { display: grid; gap: 24px; }
+  .sec-head { display: grid; gap: 8px; max-width: 62ch; }
+  .sec-head p { color: var(--encre-douce); }
+  .num { font-variant-numeric: tabular-nums; }
+
+  /* ── Hero ── */
+  .hero { display: grid; gap: 32px; align-items: center; grid-template-columns: 1fr; }
+  @media (min-width: 860px) { .hero { grid-template-columns: 1.1fr .9fr; } }
+  .hero-text { display: grid; gap: 18px; }
+  .hero h1 span { color: var(--papaye); }
+  .pitch { display: flex; flex-wrap: wrap; gap: 8px; }
+  .pitch li { list-style: none; }
+  .pitch { padding: 0; margin: 0; }
+  .tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--carte); border: 1px solid var(--ligne); font-size: 14px; font-weight: 600; }
+
+  /* ── Téléphone ── */
+  .phone {
+    width: 100%; max-width: 340px; margin-inline: auto;
+    background: var(--sable); border: 1px solid var(--ligne); border-radius: 36px;
+    padding: 14px 14px 20px; box-shadow: var(--ombre);
+    display: grid; gap: 12px; align-content: start;
+  }
+  .phone-bar { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; padding: 2px 10px 0; }
+  .phone-notch { width: 90px; height: 22px; border-radius: 999px; background: var(--encre); opacity: .9; }
+  .phone-caption { text-align: center; font-size: 13px; color: var(--encre-douce); margin-top: 10px; }
+
+  /* ── Composants de l'app (maquettes) ── */
+  .app-head { display: grid; gap: 10px; padding: 4px 6px 0; }
+  .app-title { font-family: var(--display); font-weight: 700; font-size: 22px; line-height: 1.1; }
+  .app-sub { font-size: 14px; color: var(--encre-douce); }
+  .steps { display: flex; gap: 6px; flex-wrap: wrap; font-size: 13px; font-weight: 600; }
+  .step { padding: 4px 10px; border-radius: 999px; color: var(--encre-douce); background: var(--creux); }
+  .step.on { background: var(--encre); color: var(--sable); }
+
+  .seats { display: flex; gap: 6px; align-items: flex-end; }
+  .seat { display: grid; justify-items: center; gap: 3px; }
+  .seat-box {
+    width: 38px; height: 40px; border-radius: 10px 10px 6px 6px;
+    display: grid; place-items: center; font-weight: 700; font-size: 13px;
+    background: var(--mangue-pale); color: var(--encre); border: 1.5px solid transparent;
+  }
+  .seat-box.moi { background: var(--mangue); color: #2A1A24; }
+  .seat-box.libre { background: transparent; border: 1.5px dashed var(--ligne); color: var(--encre-douce); font-weight: 500; }
+  .seat-letter { font-family: var(--mono); font-size: 10px; color: var(--encre-douce); }
+  .seat-aisle { width: 10px; }
+
+  .card { background: var(--carte); border: 1px solid var(--ligne); border-radius: 18px; padding: 14px; display: grid; gap: 10px; }
+  .card-title { font-family: var(--display); font-weight: 700; font-size: 18px; }
+  .card-desc { font-size: 14px; color: var(--encre-douce); margin-top: -6px; }
+
+  .idea { display: flex; align-items: center; gap: 10px; justify-content: space-between; padding: 10px 10px 10px 12px; border-radius: 14px; background: var(--creux); }
+  .idea-text { font-size: 15px; font-weight: 500; }
+  .idea-meta { font-size: 12px; color: var(--encre-douce); }
+  .votes { display: flex; gap: 6px; flex-shrink: 0; }
+  .vbtn {
+    width: 44px; height: 44px; border-radius: 14px; border: 1.5px solid var(--ligne); background: var(--carte);
+    display: grid; place-items: center; color: var(--encre-douce); cursor: pointer; padding: 0;
+    transition: transform .12s ease, background .12s, color .12s, border-color .12s;
+  }
+  .vbtn svg { width: 20px; height: 20px; }
+  .vbtn:active { transform: scale(.94); }
+  .vbtn:focus-visible, .btn:focus-visible, .seg button:focus-visible, .status:focus-visible { outline: 2.5px solid var(--focus); outline-offset: 2px; }
+  .vbtn.up[aria-pressed="true"] { background: var(--olivier); border-color: var(--olivier); color: var(--carte); }
+  .vbtn.down[aria-pressed="true"] { background: var(--grenade); border-color: var(--grenade); color: var(--carte); }
+
+  .composer { display: flex; gap: 8px; }
+  .field {
+    flex: 1; min-width: 0; height: 46px; border-radius: 14px; border: 1.5px solid var(--ligne); background: var(--carte);
+    padding: 0 14px; font: inherit; font-size: 15px; color: var(--encre);
+  }
+  .field::placeholder { color: var(--encre-douce); }
+  .field:focus { outline: none; border-color: var(--action); box-shadow: 0 0 0 3px color-mix(in oklch, var(--action) 22%, transparent); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    min-height: 46px; padding: 0 18px; border-radius: 14px; border: 1.5px solid transparent;
+    font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; white-space: nowrap;
+  }
+  .btn svg { width: 18px; height: 18px; }
+  .btn-primary { background: var(--action); color: var(--action-fg); }
+  .btn-secondary { background: var(--carte); color: var(--encre); border-color: var(--ligne); }
+  .btn-ghost { background: transparent; color: var(--encre); }
+  .btn-danger { background: color-mix(in oklch, var(--grenade) 12%, var(--carte)); color: var(--grenade); }
+  .btn-block { width: 100%; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 11px 12px; border-radius: 14px; border: 1.5px solid transparent; }
+  .row.ok { background: color-mix(in oklch, var(--olivier) 10%, var(--carte)); border-color: color-mix(in oklch, var(--olivier) 35%, var(--carte)); }
+  .row.ko { background: color-mix(in oklch, var(--grenade) 9%, var(--carte)); border-color: color-mix(in oklch, var(--grenade) 32%, var(--carte)); }
+  .row.nul { background: var(--creux); }
+  .status { position: relative; display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: default; flex-shrink: 0; }
+  .status svg { width: 14px; height: 14px; }
+  .row.ok .status, .status.ok { background: var(--olivier); color: var(--carte); }
+  .row.ko .status, .status.ko { color: var(--grenade); border: 1.5px solid color-mix(in oklch, var(--grenade) 50%, var(--carte)); }
+  .row.nul .status.ok { background: var(--olivier); }
+  .tip {
+    position: absolute; bottom: calc(100% + 8px); right: 0; white-space: nowrap;
+    background: var(--encre); color: var(--sable); font-size: 12px; font-weight: 500; padding: 6px 10px; border-radius: 10px;
+    opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity .12s, transform .12s; z-index: 3;
+  }
+  .status:hover .tip, .status:focus-visible .tip, .status.show .tip { opacity: 1; transform: none; }
+
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
+  .badge-mine { background: var(--mangue-pale); color: var(--encre); }
+  .badge-round { background: var(--carte); border: 1px solid var(--ligne); color: var(--encre); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px; background: var(--carte); border: 1.5px dashed var(--ligne); font-size: 14px; font-weight: 600; }
+  .chip svg { width: 14px; height: 14px; color: var(--action); }
+
+  .code { font-family: var(--mono); font-size: 14px; letter-spacing: .04em; }
+
+  /* ── Grilles de la charte ── */
+  .grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .principle { background: var(--carte); border: 1px solid var(--ligne); border-radius: 20px; padding: 20px; display: grid; gap: 8px; align-content: start; }
+  .principle-icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--mangue-pale); color: var(--action); }
+  .principle-icon svg { width: 22px; height: 22px; }
+
+  .swatches { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .swatch { border-radius: 18px; overflow: hidden; border: 1px solid var(--ligne); background: var(--carte); display: grid; }
+  .swatch-chip { height: 84px; display: flex; align-items: flex-end; padding: 10px 12px; font-family: var(--display); font-weight: 700; font-size: 22px; }
+  .swatch-info { padding: 10px 12px 12px; display: grid; gap: 2px; font-size: 13px; }
+  .swatch-info b { font-size: 15px; }
+  .swatch-info .code { font-size: 12px; color: var(--encre-douce); }
+  .aa { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: var(--creux); margin-top: 4px; justify-self: start; }
+
+  .sub-h { font-family: var(--texte); font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--encre-douce); }
+
+  .type-specimen { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .spec { background: var(--carte); border: 1px solid var(--ligne); border-radius: 20px; padding: 22px; display: grid; gap: 10px; align-content: start; }
+  .spec-big { font-size: 56px; line-height: 1; }
+  .scale { display: grid; gap: 0; background: var(--carte); border: 1px solid var(--ligne); border-radius: 20px; overflow: hidden; }
+  .scale-row { display: grid; grid-template-columns: 92px 1fr; gap: 12px; align-items: baseline; padding: 14px 18px; border-top: 1px solid var(--ligne); }
+  .scale-row:first-child { border-top: 0; }
+  .scale-row .code { font-size: 12px; color: var(--encre-douce); }
+  .scale-row > div { min-width: 0; overflow-wrap: anywhere; }
+
+  .components { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .comp { background: var(--carte); border: 1px solid var(--ligne); border-radius: 20px; padding: 20px; display: grid; gap: 14px; align-content: start; }
+  .comp .demo { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .comp .stack { display: grid; gap: 8px; }
+  .spec-list { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; color: var(--encre-douce); }
+  .spec-list b { color: var(--encre); font-weight: 600; }
+
+  .signature { background: var(--carte); border: 1px solid var(--ligne); border-radius: 24px; padding: 24px; display: grid; gap: 20px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .signature { grid-template-columns: 1fr 1fr; align-items: center; } }
+  .plane-row { display: grid; gap: 10px; justify-items: center; padding: 20px 12px; border-radius: 18px; background: var(--creux); }
+  .plane-row .seat-box { width: 46px; height: 50px; font-size: 15px; }
+  .row-label { font-family: var(--mono); font-size: 12px; color: var(--encre-douce); }
+
+  /* Ton */
+  .tone-rules { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .rule { border-radius: 18px; padding: 16px 18px; background: var(--carte); border: 1px solid var(--ligne); display: grid; gap: 6px; }
+  .rule-title { font-weight: 700; }
+  .seg { display: inline-flex; background: var(--creux); border-radius: 999px; padding: 4px; gap: 4px; }
+  .seg button { font: inherit; font-size: 14px; font-weight: 700; border: 0; background: transparent; color: var(--encre-douce); padding: 8px 16px; border-radius: 999px; cursor: pointer; min-height: 38px; }
+  .seg button[aria-pressed="true"] { background: var(--carte); color: var(--encre); box-shadow: var(--ombre); }
+  .copy-table-wrap { overflow-x: auto; border-radius: 20px; border: 1px solid var(--ligne); background: var(--carte); }
+  table { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 14px 16px; border-top: 1px solid var(--ligne); }
+  thead th { border-top: 0; font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--encre-douce); background: var(--creux); }
+  td.where { font-weight: 600; width: 22%; }
+  td.before { color: var(--encre-douce); width: 34%; }
+  td.after { font-weight: 500; }
+  .glossary { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .term { background: var(--carte); border: 1px solid var(--ligne); border-radius: 16px; padding: 12px 14px; display: grid; gap: 2px; }
+  .term s { color: var(--encre-douce); font-size: 13px; }
+  .term b { font-size: 16px; }
+
+  .screens { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items: start; }
+
+  .decisions { background: var(--mangue-pale); border-radius: 24px; padding: 24px; display: grid; gap: 12px; }
+  .decisions ol { margin: 0; padding-left: 22px; display: grid; gap: 8px; }
+
+  @media (prefers-reduced-motion: reduce) { .vbtn, .tip { transition: none; } }
+</style>
+
+<div class="page">
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-text">
+      <span class="eyebrow">Charte graphique · proposition</span>
+      <h1>On part où<span>,</span> ensemble ?</h1>
+      <p class="lede">Virgule aide un groupe d'amis à décider d'un voyage : destination, dates, logement, activités. Chacun propose, tout le monde vote, et on garde ce qui fait envie. La charte vise une app chaleureuse et lisible, pensée pour le téléphone qu'on a en main à l'apéro.</p>
+      <ul class="pitch">
+        <li><span class="tag">Groupes d'amis, 6 personnes</span></li>
+        <li><span class="tag">Mobile d'abord</span></li>
+        <li><span class="tag">Couleurs chaudes, contraste AA</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="phone" aria-label="Aperçu de l'écran de vote">
+        <div class="phone-bar"><span>20:41</span><span class="phone-notch"></span><span>87 %</span></div>
+        <div class="app-head">
+          <div class="steps"><span class="step">Sujets</span><span class="step on">Idées</span><span class="step">Bilan</span></div>
+          <div class="app-title">Lisbonne en mai</div>
+          <div class="seats" data-seats="3"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Où dort-on ?</div>
+          <div class="card-desc">Budget autour de 40 € par nuit et par personne</div>
+          <div class="idea"><div><div class="idea-text">Appartement à Alfama</div><span class="badge badge-mine" style="margin-top:4px">Votre idée</span></div><div class="votes" data-vote="up"></div></div>
+          <div class="idea"><div><div class="idea-text">Auberge avec rooftop</div></div><div class="votes" data-vote=""></div></div>
+          <div class="composer"><input class="field" id="hero-idea" placeholder="Une idée pour ce sujet…" aria-label="Une idée pour ce sujet"><button class="btn btn-primary" type="button">Ajouter</button></div>
+        </div>
+      </div>
+      <p class="phone-caption">Écran « Idées », 360 px de large. Les flèches sont cliquables.</p>
+    </div>
+  </header>
+
+  <!-- Principes -->
+  <section>
+    <div class="sec-head">
+      <h2>Trois principes</h2>
+      <p>Ils servent à trancher quand une décision de design hésite.</p>
+    </div>
+    <div class="grid-3">
+      <div class="principle">
+        <div class="principle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>Lisible avant tout</h3>
+        <p class="muted">Texte de 16 px minimum, contraste AA partout, une seule action principale par écran. Les couleurs chaudes habillent, elles ne remplacent jamais un libellé.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
+        <h3>Pensé pour le pouce</h3>
+        <p class="muted">Cibles tactiles de 44 px, actions importantes en bas d'écran, une colonne sur mobile. Le bureau reçoit la même interface, simplement plus aérée.</p>
+      </div>
+      <div class="principle">
+        <div class="principle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M15 20a4.5 4.5 0 0 1 6-4.2"/></svg></div>
+        <h3>Le groupe d'abord</h3>
+        <p class="muted">L'app parle au collectif (« on »), montre qui est là, et garde les votes anonymes. Personne ne doit se sentir jugé pour une idée.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Couleurs -->
+  <section>
+    <div class="sec-head">
+      <h2>Couleurs</h2>
+      <p>Une palette de fin de journée en terrasse : papaye, mangue, sable. Le vert olive et le rouge grenade restent réservés au résultat des votes, pour qu'ils ne se confondent jamais avec l'orange de marque.</p>
+    </div>
+    <span class="sub-h">Marque et interface</span>
+    <div class="swatches">
+      <div class="swatch"><div class="swatch-chip" style="background:#F26A2E;color:#2A1A24">Aa</div><div class="swatch-info"><b>Papaye</b><span class="code">#F26A2E · sombre #FF8A55</span><span>Marque, illustrations, virgule du logo. Jamais en fond de texte blanc.</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#C2410C;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Papaye brûlée</b><span class="code">#C2410C</span><span>Boutons principaux, liens, focus des champs.</span><span class="aa">Blanc dessus : 5,2:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#FFC23D;color:#2A1A24">Aa</div><div class="swatch-info"><b>Mangue</b><span class="code">#FFC23D · pâle #FFF0C7</span><span>Participant courant, « Votre idée », mises en avant.</span><span class="aa">Encre dessus : 10,3:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#FFF7F0;color:#2A1A24;border-bottom:1px solid #EEDCCF">Aa</div><div class="swatch-info"><b>Sable</b><span class="code">#FFF7F0 · sombre #1C1216</span><span>Fond de page. Les cartes sont blanches par-dessus.</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#2A1A24;color:#FFF7F0">Aa</div><div class="swatch-info"><b>Encre figue</b><span class="code">#2A1A24</span><span>Texte principal : un noir chaud plutôt qu'un gris neutre.</span><span class="aa">Sur sable : 15,6:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#6F5A62;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Encre douce</b><span class="code">#6F5A62</span><span>Textes secondaires, aides, métadonnées.</span><span class="aa">Sur sable : 6,0:1</span></div></div>
+    </div>
+    <span class="sub-h">Résultats des votes</span>
+    <div class="swatches">
+      <div class="swatch"><div class="swatch-chip" style="background:#1F7A4D;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Olivier</b><span class="code">#1F7A4D · sombre #5CC98E</span><span>Vote « pour », idée retenue.</span><span class="aa">Blanc dessus : 5,3:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#B8283F;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Grenade</b><span class="code">#B8283F · sombre #FF6B81</span><span>Vote « contre », idée écartée, actions destructives.</span><span class="aa">Blanc dessus : 6,2:1</span></div></div>
+    </div>
+  </section>
+
+  <!-- Typographie -->
+  <section>
+    <div class="sec-head">
+      <h2>Typographie</h2>
+      <p>Deux familles gratuites (Google Fonts), bien dessinées pour l'écran et complètes pour le français.</p>
+    </div>
+    <div class="type-specimen">
+      <div class="spec">
+        <span class="sub-h">Titres · Bricolage Grotesque</span>
+        <div class="spec-big" style="font-family:var(--display);font-weight:800">Où dort-on ?</div>
+        <p class="muted">Une grotesque aux formes un peu irrégulières, chaleureuse sans être enfantine. Réservée aux titres de page, noms de voyage et de sujets. Graisses 700 et 800.</p>
+      </div>
+      <div class="spec">
+        <span class="sub-h">Texte et interface · Figtree</span>
+        <div class="spec-big" style="font-family:var(--texte);font-weight:600">Appart à Alfama</div>
+        <p class="muted">Ronde et très lisible en petit. Idées, boutons, formulaires, aides. Graisses 400 à 700. Chiffres alignés (<span class="code">tabular-nums</span>) pour les compteurs.</p>
+      </div>
+    </div>
+    <div class="scale" role="table" aria-label="Échelle typographique mobile">
+      <div class="scale-row"><span class="code">Titre 1 · 28</span><div style="font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1">Lisbonne en mai</div></div>
+      <div class="scale-row"><span class="code">Titre 2 · 22</span><div style="font-family:var(--display);font-weight:700;font-size:22px;line-height:1.15">Qu'est-ce qu'on fait sur place ?</div></div>
+      <div class="scale-row"><span class="code">Titre 3 · 18</span><div style="font-family:var(--display);font-weight:700;font-size:18px">Où dort-on ?</div></div>
+      <div class="scale-row"><span class="code">Texte · 16</span><div>Proposez une idée, votez pour celles des autres. Vous pouvez changer d'avis jusqu'au bilan.</div></div>
+      <div class="scale-row"><span class="code">Petit · 14</span><div class="muted">3 idées sur 5 retenues pour le tour 2.</div></div>
+      <div class="scale-row"><span class="code">Étiquette · 12</span><div style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase" class="muted">Tour 2 · Bilan</div></div>
+    </div>
+  </section>
+
+  <!-- Signature -->
+  <section>
+    <div class="sec-head">
+      <h2>Le détail signature : une rangée de sièges</h2>
+      <p>Une room accueille 6 personnes, exactement une rangée d'avion de A à F. Les participants s'affichent comme des sièges : on voit d'un coup d'œil qui est à bord et combien de places restent.</p>
+    </div>
+    <div class="signature">
+      <div class="plane-row" aria-label="4 places occupées sur 6">
+        <div class="seats" data-seats="4" data-big="1"></div>
+        <span class="row-label">RANGÉE 12 · 4/6 À BORD</span>
+      </div>
+      <ul class="spec-list">
+        <li><b>Siège occupé</b> : initiale du prénom sur fond mangue pâle, prénom complet au survol ou à l'appui long.</li>
+        <li><b>Vous</b> : fond mangue plein.</li>
+        <li><b>Place libre</b> : contour pointillé, au tap on copie le lien d'invitation.</li>
+        <li><b>Organisateur</b> : petite couronne au-dessus du siège.</li>
+        <li>Allée entre C et D, lettres de siège en DM Mono : une touche de carte d'embarquement, sans aller plus loin.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- Composants -->
+  <section>
+    <div class="sec-head">
+      <h2>Formes et composants</h2>
+      <p>Des coins généreux (14 px pour les contrôles, 18 à 20 px pour les cartes, pilule pour les états) et des contours plutôt que des ombres. L'espacement suit une grille de 4 px.</p>
+    </div>
+    <div class="components">
+      <div class="comp">
+        <span class="sub-h">Boutons</span>
+        <div class="stack">
+          <button class="btn btn-primary btn-block" type="button">Lancer les idées</button>
+          <button class="btn btn-secondary btn-block" type="button">Copier le lien d'invitation</button>
+          <div class="demo"><button class="btn btn-ghost" type="button">Annuler</button><button class="btn btn-danger" type="button">Terminer la séance</button></div>
+        </div>
+        <ul class="spec-list"><li><b>46 px</b> de haut, texte en 15 px gras.</li><li>Un seul bouton principal par écran, en pleine largeur sur mobile.</li></ul>
+      </div>
+      <div class="comp">
+        <span class="sub-h">Votes</span>
+        <div class="demo"><div class="votes" data-vote="up"></div><div class="votes" data-vote="down"></div><div class="votes" data-vote=""></div></div>
+        <ul class="spec-list"><li><b>44 × 44 px</b>, flèches épaisses de 20 px.</li><li>Olivier plein pour « pour », grenade plein pour « contre », contour neutre sans vote.</li><li>Léger enfoncement au tap ; un second tap retire le vote.</li></ul>
+      </div>
+      <div class="comp">
+        <span class="sub-h">Résultats (bilan)</span>
+        <div class="stack">
+          <div class="row ok"><span class="idea-text">Appartement à Alfama</span><span class="status show" tabindex="0">✓ Retenue<span class="tip">Score +3 · 4 pour, 1 contre</span></span></div>
+          <div class="row nul"><span class="idea-text">Auberge avec rooftop</span><span class="status ok" tabindex="0">✓ Retenue<span class="tip">Score 0 · 2 pour, 2 contre</span></span></div>
+          <div class="row ko"><span class="idea-text">Camping à Sintra</span><span class="status" tabindex="0">✕ Écartée<span class="tip">Score −3 · 1 pour, 4 contre</span></span></div>
+        </div>
+        <ul class="spec-list"><li>Fond à 10 % et bordure teintée ; neutre quand le score est nul.</li><li>Détail des votes au survol ou au tap du statut.</li></ul>
+      </div>
+      <div class="comp">
+        <span class="sub-h">Badges et suggestions</span>
+        <div class="demo"><span class="badge badge-mine">Votre idée</span><span class="badge badge-round">Tour 2</span><span class="badge badge-round">Retenue au tour 1</span></div>
+        <div class="chips" aria-label="Sujets suggérés">
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Destination</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Dates</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Budget</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Logement</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Activités</span>
+        </div>
+        <ul class="spec-list"><li>Suggestion : proposer ces sujets de voyage en un tap à l'organisateur.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ton -->
+  <section>
+    <div class="sec-head">
+      <h2>Ton et vocabulaire</h2>
+      <p>Proche sans être familier : on parle comme l'ami organisé du groupe, celui qui fait avancer sans prendre de haut. Phrases courtes, verbes d'action, aucun jargon technique.</p>
+    </div>
+    <div class="tone-rules">
+      <div class="rule"><span class="rule-title">Parler au groupe avec « on »</span><span class="muted">« On garde les idées retenues pour le tour 2. » Le « on » crée la complicité et évite de choisir entre tu et vous dans la plupart des textes.</span></div>
+      <div class="rule"><span class="rule-title">Chaleureux, pas copain</span><span class="muted">Pas d'argot ni d'emoji dans l'interface, un point d'exclamation au maximum par écran. L'enthousiasme vient des couleurs, pas des mots.</span></div>
+      <div class="rule"><span class="rule-title">Dire quoi faire ensuite</span><span class="muted">Chaque message d'erreur ou d'attente dit ce qui se passe et ce qu'on peut faire. « Ce prénom est déjà pris : ajoutez une initiale. »</span></div>
+      <div class="rule"><span class="rule-title">Les prénoms plutôt que les rôles</span><span class="muted">« Camille prépare les sujets » plutôt que « L'animateur prépare les thèmes ». On évite aussi les accords genrés.</span></div>
+    </div>
+
+    <span class="sub-h">Vocabulaire</span>
+    <div class="glossary">
+      <div class="term"><s>Room</s><b>Voyage</b><span class="muted">« Créer un voyage »</span></div>
+      <div class="term"><s>Animateur</s><b>Organisateur</b><span class="muted">affiché par son prénom</span></div>
+      <div class="term"><s>Participants</s><b>Voyageurs</b><span class="muted">« 4 voyageurs sur 6 »</span></div>
+      <div class="term"><s>Thèmes</s><b>Sujets</b><span class="muted">Destination, Dates…</span></div>
+      <div class="term"><s>Récapitulatif</s><b>Bilan</b><span class="muted">« Voir le bilan »</span></div>
+      <div class="term"><s>Pseudo</s><b>Prénom</b><span class="muted">« ou surnom »</span></div>
+    </div>
+
+    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+      <span class="sub-h">Exemples de textes</span>
+      <div class="seg" role="group" aria-label="Forme d'adresse">
+        <button type="button" data-form="vous" aria-pressed="true">Vouvoiement</button>
+        <button type="button" data-form="tu" aria-pressed="false">Tutoiement</button>
+      </div>
+    </div>
+    <div class="copy-table-wrap">
+      <table>
+        <thead><tr><th>Où</th><th>Aujourd'hui</th><th>Proposé</th></tr></thead>
+        <tbody id="copy-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Écrans -->
+  <section>
+    <div class="sec-head">
+      <h2>Trois écrans mobiles</h2>
+      <p>La charte appliquée aux étapes clés, à 360 px de large.</p>
+    </div>
+    <div class="screens">
+      <div>
+        <div class="phone">
+          <div class="phone-bar"><span>18:02</span><span class="phone-notch"></span><span>92 %</span></div>
+          <div class="app-head" style="gap:14px;padding-top:12px">
+            <span class="eyebrow" style="font-size:12px">Virgule</span>
+            <div class="app-title" style="font-size:28px">On décide ensemble du prochain voyage.</div>
+            <div class="app-sub">Jusqu'à 6 voyageurs, un lien à partager, aucun compte à créer.</div>
+          </div>
+          <div class="card" style="gap:12px">
+            <label class="idea-meta" for="s1-name" style="font-weight:700;color:var(--encre)">Nom du voyage</label>
+            <input class="field" id="s1-name" value="Lisbonne en mai">
+            <label class="idea-meta" for="s1-me" style="font-weight:700;color:var(--encre)">Votre prénom</label>
+            <input class="field" id="s1-me" placeholder="Ex. : Camille">
+            <button class="btn btn-primary btn-block" type="button">Créer le voyage</button>
+          </div>
+        </div>
+        <p class="phone-caption">Accueil</p>
+      </div>
+      <div>
+        <div class="phone">
+          <div class="phone-bar"><span>18:10</span><span class="phone-notch"></span><span>90 %</span></div>
+          <div class="app-head">
+            <div class="steps"><span class="step on">Sujets</span><span class="step">Idées</span><span class="step">Bilan</span></div>
+            <div class="app-title">Lisbonne en mai</div>
+            <div class="seats" data-seats="2"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Sur quoi faut-il trancher ?</div>
+            <div class="card-desc" style="margin-top:0">Camille prépare les sujets. La suite s'affichera ici automatiquement.</div>
+            <div class="idea"><div class="idea-text">Dates</div></div>
+            <div class="idea"><div class="idea-text">Où dort-on ?</div></div>
+            <div class="idea"><div class="idea-text">Qu'est-ce qu'on fait sur place ?</div></div>
+          </div>
+          <button class="btn btn-secondary btn-block" type="button">Copier le lien d'invitation</button>
+        </div>
+        <p class="phone-caption">Sujets, vus par un voyageur</p>
+      </div>
+      <div>
+        <div class="phone">
+          <div class="phone-bar"><span>21:37</span><span class="phone-notch"></span><span>64 %</span></div>
+          <div class="app-head">
+            <div class="steps"><span class="step">Sujets</span><span class="step">Idées</span><span class="step on">Bilan</span></div>
+            <div class="app-title">Le bilan du tour 1</div>
+            <div class="app-sub">4 idées retenues sur 7. Touchez un statut pour voir les votes.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">Où dort-on ?</div>
+            <div class="row ok"><span class="idea-text">Appartement à Alfama</span><span class="status" tabindex="0">✓ Retenue<span class="tip">Score +3 · 4 pour, 1 contre</span></span></div>
+            <div class="row ko"><span class="idea-text">Camping à Sintra</span><span class="status" tabindex="0">✕ Écartée<span class="tip">Score −3 · 1 pour, 4 contre</span></span></div>
+          </div>
+          <button class="btn btn-primary btn-block" type="button">On repart pour un tour</button>
+        </div>
+        <p class="phone-caption">Bilan, vu par l'organisateur</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="decisions">
+    <h2>À décider avant l'intégration</h2>
+    <ol>
+      <li><b>Tu ou vous</b> pour les textes qui ne passent pas par le « on » (le sélecteur plus haut montre les deux versions).</li>
+      <li><b>Vocabulaire voyage</b> : « voyage », « organisateur », « sujets », « bilan » à la place des termes actuels ?</li>
+      <li><b>La rangée de sièges</b> pour afficher les participants : oui ou non ?</li>
+      <li><b>Les sujets suggérés</b> (Destination, Dates, Budget, Logement, Activités) sur la page des sujets ?</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+  const ICON = {
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>',
+    crown: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 5l4.5 6L21 7l-2 11H5z"/></svg>'
+  };
+
+  // Boutons de vote interactifs
+  document.querySelectorAll(".votes").forEach((group) => {
+    group.innerHTML =
+      `<button type="button" class="vbtn up" aria-label="Pour" title="Pour">${ICON.up}</button>` +
+      `<button type="button" class="vbtn down" aria-label="Contre" title="Contre">${ICON.down}</button>`;
+    const [up, down] = group.querySelectorAll("button");
+    const render = () => {
+      up.setAttribute("aria-pressed", String(group.dataset.vote === "up"));
+      down.setAttribute("aria-pressed", String(group.dataset.vote === "down"));
+    };
+    up.onclick = () => { group.dataset.vote = group.dataset.vote === "up" ? "" : "up"; render(); };
+    down.onclick = () => { group.dataset.vote = group.dataset.vote === "down" ? "" : "down"; render(); };
+    render();
+  });
+
+  // Rangées de sièges : 6 places, allée entre C et D
+  const PEOPLE = ["Camille", "Sacha", "Inès", "Noah"];
+  document.querySelectorAll(".seats").forEach((row) => {
+    const filled = Number(row.dataset.seats);
+    let html = "";
+    "ABCDEF".split("").forEach((letter, i) => {
+      if (i === 3) html += '<span class="seat-aisle" aria-hidden="true"></span>';
+      const name = PEOPLE[i];
+      const taken = i < filled;
+      // Siège A : l'organisateur (couronne) ; siège B : vous.
+      const cls = !taken ? "libre" : i === 1 ? "moi" : "";
+      const label = !taken ? "Place libre" : i === 0 ? `${name}, organise le voyage` : i === 1 ? `${name} (vous)` : name;
+      html += `<span class="seat" title="${label}">
+        <span style="height:12px;color:var(--action)">${i === 0 && taken ? ICON.crown : ""}</span>
+        <span class="seat-box ${cls}" aria-label="${label}">${taken ? name[0] : "+"}</span>
+        <span class="seat-letter">${letter}</span>
+      </span>`;
+    });
+    row.innerHTML = html;
+  });
+
+  // Exemples de textes : vouvoiement / tutoiement
+  const COPY = [
+    ["Accueil, titre", "Lancez une séance de brainstorming", "On décide ensemble du prochain voyage.", "On décide ensemble du prochain voyage."],
+    ["Accueil, bouton", "Créer la room", "Créer le voyage", "Créer le voyage"],
+    ["Rejoindre", "Rejoindre « Lisbonne en mai » · Choisissez un pseudo", "Camille vous invite à préparer « Lisbonne en mai ». Quel est votre prénom ?", "Camille t'invite à préparer « Lisbonne en mai ». C'est quoi ton prénom ?"],
+    ["Pseudo déjà pris", "Ce pseudo est déjà utilisé dans la room.", "Ce prénom est déjà pris dans le groupe. Ajoutez une initiale, par exemple « Léa M. ».", "Ce prénom est déjà pris dans le groupe. Ajoute une initiale, par exemple « Léa M. »."],
+    ["Room complète", "Cette room est complète (6 participants maximum).", "Les 6 places sont prises. Demandez à Camille si quelqu'un peut vous céder la sienne.", "Les 6 places sont prises. Demande à Camille si quelqu'un peut te céder la sienne."],
+    ["Attente des sujets", "L'animateur prépare les thèmes. La séance démarrera automatiquement.", "Camille prépare les sujets. La suite s'affichera ici automatiquement.", "Camille prépare les sujets. La suite s'affichera ici automatiquement."],
+    ["Sujet sans idée", "Aucune idée pour ce thème. Lancez-vous !", "Pas encore d'idée ici. Qui commence ?", "Pas encore d'idée ici. Qui commence ?"],
+    ["Nouveau tour", "Lancer le tour 2 ? Les idées écartées seront retirées et les votes remis à zéro.", "On repart pour un tour ? Les idées écartées sortent de la course et les votes repartent de zéro.", "On repart pour un tour ? Les idées écartées sortent de la course et les votes repartent de zéro."],
+    ["Fin de séance", "Terminer la séance ? Plus personne ne pourra proposer ni voter.", "C'est décidé ? Une fois la séance terminée, plus personne ne pourra proposer ni voter.", "C'est décidé ? Une fois la séance terminée, plus personne ne pourra proposer ni voter."]
+  ];
+  const tbody = document.getElementById("copy-rows");
+  const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+  function renderCopy(form) {
+    tbody.innerHTML = COPY.map(([where, before, vous, tu]) =>
+      `<tr><td class="where">${esc(where)}</td><td class="before">${esc(before)}</td><td class="after">${esc(form === "tu" ? tu : vous)}</td></tr>`
+    ).join("");
+  }
+  const segButtons = document.querySelectorAll(".seg button");
+  segButtons.forEach((b) => b.addEventListener("click", () => {
+    segButtons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    renderCopy(b.dataset.form);
+  }));
+  renderCopy("vous");
+
+  // Infobulle ouverte en exemple : se referme au premier survol d'un autre statut
+  document.addEventListener("pointerover", (e) => {
+    if (e.target.closest(".status")) document.querySelectorAll(".status.show").forEach((el) => el.classList.remove("show"));
+  });
+  // Sur mobile, un tap ouvre l'infobulle (focus)
+  document.querySelectorAll(".status").forEach((s) => s.addEventListener("click", () => s.focus()));
+</script>

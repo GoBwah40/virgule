@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
+import { PageHeader } from "@/components/page-header";
 import { BackToThemesButton, FinishVotingButton, ThemeIdeas } from "@/components/phases/voting-board";
-import { PhaseTitle } from "@/components/phases/phase-title";
 import { getVotingView, loadPhasePage } from "@/lib/room";
 
 export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">) {
@@ -18,14 +18,14 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
 
   return (
     <>
-      <PhaseTitle
+      <PageHeader
         title={t("title")}
         subtitle={room.round > 1 ? t("roundSubtitle", { round: room.round }) : t("subtitle")}
         actions={
           me.isHost && (
             <>
-              <BackToThemesButton slug={slug} />
               <FinishVotingButton slug={slug} />
+              <BackToThemesButton slug={slug} />
             </>
           )
         }

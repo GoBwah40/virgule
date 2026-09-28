@@ -4,6 +4,7 @@ import { Download, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } 
 import { useTranslations } from "next-intl";
 
 import { ConfirmButton } from "@/components/confirm-button";
+import { SettingSwitch } from "@/components/setting-switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -12,9 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Switch } from "@/components/ui/switch";
 import { useAction } from "@/hooks/use-action";
 import { closeSession, reopenVoting, setRequireNetPositive, startNextRound } from "@/lib/actions";
 
@@ -35,21 +34,17 @@ export function RecapHostControls({
   return (
     <Card className="print:hidden">
       <CardHeader>
-        <CardTitle>{t("hostControls")}</CardTitle>
+        <CardTitle className="font-heading text-lg font-bold">{t("hostControls")}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1">
-            <Label htmlFor="net-positive">{t("requireNetPositive")}</Label>
-            <p className="text-xs text-muted-foreground">{t("requireNetPositiveHint")}</p>
-          </div>
-          <Switch
-            id="net-positive"
-            checked={requireNetPositive}
-            disabled={pending}
-            onCheckedChange={(checked) => run(() => setRequireNetPositive(slug, checked))}
-          />
-        </div>
+        <SettingSwitch
+          id="net-positive"
+          label={t("requireNetPositive")}
+          hint={t("requireNetPositiveHint")}
+          checked={requireNetPositive}
+          disabled={pending}
+          onCheckedChange={(checked) => run(() => setRequireNetPositive(slug, checked))}
+        />
 
         <Separator />
 
@@ -58,13 +53,13 @@ export function RecapHostControls({
             className="w-full"
             disabled={pending}
             title={t("nextRoundConfirm", { round: nextRound })}
-            description={t("nextRoundHint", { count: qualifiedCount })}
+            description={t("nextRoundConfirmHint")}
             onConfirm={() => run(() => startNextRound(slug))}
           >
             <RotateCcw data-icon="inline-start" />
             {t("nextRound")}
           </ConfirmButton>
-          <p className="text-xs text-muted-foreground">{t("nextRoundHint", { count: qualifiedCount })}</p>
+          <p className="text-sm text-muted-foreground">{t("nextRoundHint", { count: qualifiedCount })}</p>
         </div>
         <Button variant="outline" className="w-full" disabled={pending} onClick={() => run(() => reopenVoting(slug))}>
           <Undo2 data-icon="inline-start" />
@@ -75,6 +70,8 @@ export function RecapHostControls({
           className="w-full"
           disabled={pending}
           title={t("closeConfirm")}
+          description={t("closeConfirmHint")}
+          confirmLabel={t("close")}
           onConfirm={() => run(() => closeSession(slug))}
         >
           <Flag data-icon="inline-start" />

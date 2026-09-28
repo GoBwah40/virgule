@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="fr">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Récap Virgule, variantes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --card: #ffffff;
+    --fg: #18181b;
+    --muted: #6b6b76;
+    --line: #e4e4e9;
+    --ok: #059669;
+    --ko: #e11d48;
+    --ok-text: #047857;
+    --ko-text: #be123c;
+    --chip: #f0f0f3;
+    --tip-bg: #18181b;
+    --tip-fg: #fafafa;
+    --focus: #6366f1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #0e0e11;
+      --card: #17171b;
+      --fg: #f4f4f5;
+      --muted: #a1a1ab;
+      --line: #2a2a31;
+      --ok: #10b981;
+      --ko: #f43f5e;
+      --ok-text: #34d399;
+      --ko-text: #fb7185;
+      --chip: #24242a;
+      --tip-bg: #f4f4f5;
+      --tip-fg: #18181b;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0e0e11;
+    --card: #17171b;
+    --fg: #f4f4f5;
+    --muted: #a1a1ab;
+    --line: #2a2a31;
+    --ok: #10b981;
+    --ko: #f43f5e;
+    --ok-text: #34d399;
+    --ko-text: #fb7185;
+    --chip: #24242a;
+    --tip-bg: #f4f4f5;
+    --tip-fg: #18181b;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding-inline: 16px;
+    padding-block: 32px 64px;
+  }
+  .wrap { max-width: 1080px; margin-inline: auto; display: grid; gap: 40px; }
+
+  header.intro { display: grid; gap: 8px; max-width: 68ch; }
+  .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0; font-weight: 600; text-wrap: balance; }
+  h2 { font-size: 18px; margin: 0; font-weight: 600; text-wrap: balance; }
+  p { margin: 0; }
+  .lead { color: var(--muted); font-size: 15px; }
+
+  section.block { display: grid; gap: 16px; }
+  .block-head { display: grid; gap: 4px; max-width: 70ch; }
+  .block-head p { color: var(--muted); }
+
+  .variants { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .variant { display: grid; gap: 10px; align-content: start; }
+  .variant-label { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .variant-label strong { font-family: "Geist Mono", ui-monospace, monospace; font-size: 12px; font-weight: 500; background: var(--chip); padding: 2px 8px; border-radius: 6px; }
+  .variant-label span { color: var(--muted); font-size: 13px; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 14px; }
+  .card-head { display: grid; gap: 2px; }
+  .card-head h3 { margin: 0; font-size: 16px; font-weight: 600; }
+  .card-head p { color: var(--muted); font-size: 13px; }
+
+  ol.ideas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .idea {
+    --tint: 10%;
+    --tone: var(--ok);
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px;
+    padding: 10px 12px; border-radius: 10px;
+    background: color-mix(in oklch, var(--tone) var(--tint), var(--card));
+  }
+  .idea.ko { --tone: var(--ko); }
+  .t20 .idea { --tint: 20%; }
+  .bordered .idea { border: 1px solid color-mix(in oklch, var(--tone) 35%, var(--card)); }
+  .idea-main { display: grid; gap: 4px; min-width: 0; flex: 1 1 160px; }
+  .idea-text { overflow-wrap: anywhere; }
+  .mine { justify-self: start; font-size: 11px; font-weight: 500; background: color-mix(in oklch, var(--fg) 8%, transparent); padding: 1px 8px; border-radius: 999px; }
+
+  .idea-side { display: flex; align-items: center; gap: 10px; }
+  .status { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; padding: 2px 9px; border-radius: 999px; }
+  .idea .status { color: var(--card); background: var(--tone); }
+  .idea.ko .status { background: transparent; color: var(--ko-text); border: 1px solid color-mix(in oklch, var(--ko) 45%, var(--card)); }
+  .status svg { width: 13px; height: 13px; }
+
+  /* Compteurs de votes + infobulle du score */
+  .votes { position: relative; display: inline-flex; align-items: center; gap: 10px; font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 500; padding: 3px 6px; border-radius: 8px; cursor: default; }
+  .votes:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .votes .up, .votes .down { display: inline-flex; align-items: center; gap: 2px; }
+  .votes .up { color: var(--ok-text); }
+  .votes .down { color: var(--ko-text); }
+  .votes svg { width: 15px; height: 15px; }
+  .votes .tip {
+    position: absolute; bottom: calc(100% + 8px); right: 0;
+    background: var(--tip-bg); color: var(--tip-fg);
+    font-size: 12px; font-weight: 400; white-space: nowrap;
+    padding: 6px 10px; border-radius: 8px;
+    opacity: 0; transform: translateY(4px); pointer-events: none;
+    transition: opacity .12s ease, transform .12s ease;
+    z-index: 2;
+  }
+  .votes .tip b { font-weight: 600; }
+  .votes:hover .tip, .votes:focus-visible .tip { opacity: 1; transform: none; }
+  .demo-open .tip { opacity: 1; transform: none; }
+
+  /* Boutons de vote (phase idées) */
+  .vote-demo { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .vote-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+  .vote-btns { display: inline-flex; gap: 6px; }
+  .vbtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 9px;
+    border: 1px solid var(--line); background: var(--card); color: var(--muted);
+    cursor: pointer; transition: background .12s, color .12s, border-color .12s;
+  }
+  .vbtn svg { width: 18px; height: 18px; }
+  .vbtn:hover { color: var(--fg); background: var(--chip); }
+  .vbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .vbtn.up[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; }
+  .vbtn.down[aria-pressed="true"] { background: var(--ko); border-color: var(--ko); color: #fff; }
+  .hint { color: var(--muted); font-size: 13px; }
+
+  .notes { display: grid; gap: 6px; padding-left: 18px; margin: 0; color: var(--muted); max-width: 70ch; }
+  .notes b { color: var(--fg); font-weight: 500; }
+
+  @media (prefers-reduced-motion: reduce) { .votes .tip, .vbtn { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Virgule · page récapitulative</span>
+    <h1>Fond coloré par statut et votes en flèches</h1>
+    <p class="lead">Trois intensités de fond pour les idées retenues (vert) et écartées (rouge). Les votes s'affichent avec ↑ et ↓, et le score n'apparaît qu'au survol des compteurs. Passez la souris sur un compteur pour voir l'infobulle.</p>
+  </header>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>Fond des idées</h2>
+      <p>Même contenu dans les trois variantes. Les séparateurs sont remplacés par des lignes espacées, et les idées écartées gardent un texte pleinement lisible.</p>
+    </div>
+
+    <div class="variants" id="variants"></div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>Boutons de vote, phase « Idées &amp; votes »</h2>
+      <p>Si vous voulez aussi des flèches pendant le vote : des boutons icône sans texte, avec « Pour » et « Contre » dans l'infobulle et le libellé d'accessibilité. Cliquez pour essayer.</p>
+    </div>
+    <div class="vote-demo">
+      <div class="vote-row">
+        <span>Osaka</span>
+        <span class="vote-btns" data-vote="up">
+          <button class="vbtn up" type="button" aria-pressed="true" aria-label="Pour" title="Pour"></button>
+          <button class="vbtn down" type="button" aria-pressed="false" aria-label="Contre" title="Contre"></button>
+        </span>
+      </div>
+      <div class="vote-row">
+        <span>Manger des takoyaki</span>
+        <span class="vote-btns" data-vote="">
+          <button class="vbtn up" type="button" aria-pressed="false" aria-label="Pour" title="Pour"></button>
+          <button class="vbtn down" type="button" aria-pressed="false" aria-label="Contre" title="Contre"></button>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="block-head">
+      <h2>À décider</h2>
+    </div>
+    <ul class="notes">
+      <li><b>Intensité</b> : A (10 %), B (20 %) ou C (10 % avec bordure).</li>
+      <li><b>Infobulle</b> : « Score +1 · 1 pour, 0 contre » comme ici, ou le score seul.</li>
+      <li><b>Boutons de vote</b> : passer aussi aux flèches pendant la phase de vote, ou garder « Pour / Contre » en texte.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  const ICONS = {
+    up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>',
+    down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>',
+    x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'
+  };
+
+  // Données d'exemple (reprises de la capture, complétées).
+  const THEMES = [
+    { title: "Ville", desc: "Quelle ville vous voulez visiter ?", ideas: [
+      { text: "Osaka", up: 4, down: 1, ok: true, mine: true },
+      { text: "Kyoto", up: 3, down: 2, ok: true },
+      { text: "Sapporo", up: 1, down: 3, ok: false }
+    ]},
+    { title: "Activité", desc: "Quelles activités vous voulez faire ?", ideas: [
+      { text: "Onsen à Hakone", up: 5, down: 0, ok: true },
+      { text: "Manger", up: 0, down: 1, ok: false, mine: true }
+    ]}
+  ];
+
+  const VARIANTS = [
+    { key: "A", cls: "", label: "Fond 10 %" },
+    { key: "B", cls: "t20", label: "Fond 20 %" },
+    { key: "C", cls: "bordered", label: "Fond 10 % + bordure teintée" }
+  ];
+
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const signed = (n) => (n > 0 ? "+" + n : String(n));
+
+  function ideaRow(i, openTip) {
+    const net = i.up - i.down;
+    return `
+      <li class="idea ${i.ok ? "" : "ko"}">
+        <div class="idea-main">
+          <span class="idea-text">${esc(i.text)}</span>
+          ${i.mine ? '<span class="mine">Votre idée</span>' : ""}
+        </div>
+        <div class="idea-side">
+          <span class="votes${openTip ? " demo-open" : ""}" tabindex="0" aria-label="Score ${signed(net)}, ${i.up} pour, ${i.down} contre">
+            <span class="up">${ICONS.up}${i.up}</span>
+            <span class="down">${ICONS.down}${i.down}</span>
+            <span class="tip" role="tooltip"><b>Score ${signed(net)}</b> · ${i.up} pour, ${i.down} contre</span>
+          </span>
+          <span class="status">${i.ok ? ICONS.check + "Retenue" : ICONS.x + "Écartée"}</span>
+        </div>
+      </li>`;
+  }
+
+  document.getElementById("variants").innerHTML = VARIANTS.map((v, vi) => `
+    <div class="variant ${v.cls}">
+      <div class="variant-label"><strong>${v.key}</strong><span>${v.label}</span></div>
+      ${THEMES.map((t, ti) => `
+        <div class="card">
+          <div class="card-head"><h3>${t.title}</h3><p>${t.desc}</p></div>
+          <ol class="ideas">${t.ideas.map((i, ii) => ideaRow(i, vi === 0 && ti === 0 && ii === 1)).join("")}</ol>
+        </div>`).join("")}
+    </div>`).join("");
+
+  // Infobulle ouverte en exemple sur la variante A : on la referme dès qu'on survole ailleurs.
+  document.addEventListener("pointerover", (e) => {
+    if (e.target.closest(".votes")) document.querySelectorAll(".demo-open").forEach((el) => el.classList.remove("demo-open"));
+  });
+
+  // Boutons de vote : un clic sélectionne, un second clic retire le vote.
+  document.querySelectorAll(".vote-btns").forEach((group) => {
+    const [up, down] = group.querySelectorAll(".vbtn");
+    up.innerHTML = ICONS.up;
+    down.innerHTML = ICONS.down;
+    const render = () => {
+      up.setAttribute("aria-pressed", String(group.dataset.vote === "up"));
+      down.setAttribute("aria-pressed", String(group.dataset.vote === "down"));
+    };
+    up.addEventListener("click", () => { group.dataset.vote = group.dataset.vote === "up" ? "" : "up"; render(); });
+    down.addEventListener("click", () => { group.dataset.vote = group.dataset.vote === "down" ? "" : "down"; render(); });
+    render();
+  });
+</script>
