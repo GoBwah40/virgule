@@ -37,8 +37,10 @@ Sans Homebrew, utilisez `curl -sSfL https://get.tur.so/install.sh | bash`. Pour 
 Créez la base :
 
 ```bash
-turso db create virgule
+turso db create virgule --location aws-eu-west-1
 ```
+
+Turso ne propose pas Paris : l'Irlande (`aws-eu-west-1`) est la région européenne la plus proche. Les fonctions Vercel tournent à Dublin (`"regions": ["dub1"]` dans `vercel.json`), à côté de la base : chaque requête fait plusieurs allers-retours vers la base, c'est donc cette distance qui compte le plus.
 
 Récupérez son URL. Elle commence par `libsql://` :
 
