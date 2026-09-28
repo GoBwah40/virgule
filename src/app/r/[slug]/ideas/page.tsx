@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { FinishVotingButton, ThemeIdeas } from "@/components/phases/voting-board";
+import { BackToThemesButton, FinishVotingButton, ThemeIdeas } from "@/components/phases/voting-board";
 import { PhaseTitle } from "@/components/phases/phase-title";
 import { getVotingView, loadPhasePage } from "@/lib/room";
 
@@ -21,7 +21,14 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
       <PhaseTitle
         title={t("title")}
         subtitle={room.round > 1 ? t("roundSubtitle", { round: room.round }) : t("subtitle")}
-        actions={me.isHost && <FinishVotingButton slug={slug} />}
+        actions={
+          me.isHost && (
+            <>
+              <BackToThemesButton slug={slug} />
+              <FinishVotingButton slug={slug} />
+            </>
+          )
+        }
       />
       {votable.length > 0 && (
         <p className="mb-4 text-sm text-muted-foreground">{t("myVotes", { voted, total: votable.length })}</p>

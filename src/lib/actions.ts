@@ -265,6 +265,14 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
   });
 }
 
+/** Retour à la déclaration des thèmes : idées et votes sont conservés. */
+export async function backToThemes(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "IDEAS" });
+    await db.room.update({ where: { id: room.id }, data: { phase: "THEMES" } });
+  });
+}
+
 export async function goToRecap(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });

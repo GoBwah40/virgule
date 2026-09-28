@@ -64,11 +64,12 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
 });
 
 export async function getThemes(roomId: string) {
-  return db.theme.findMany({
+  const themes = await db.theme.findMany({
     where: { roomId },
     orderBy: { position: "asc" },
-    select: { id: true, title: true, description: true },
+    select: { id: true, title: true, description: true, _count: { select: { ideas: true } } },
   });
+  return themes.map(({ _count, ...theme }) => ({ ...theme, ideaCount: _count.ideas }));
 }
 
 // ─── Phase « idées & votes » ───────────────────────────────────────────────

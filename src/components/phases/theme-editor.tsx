@@ -15,7 +15,7 @@ import { useAction } from "@/hooks/use-action";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { LIMITS } from "@/lib/config";
 
-type Theme = { id: string; title: string; description: string | null };
+type Theme = { id: string; title: string; description: string | null; ideaCount: number };
 
 export function ThemeEditor({
   slug,
@@ -28,6 +28,8 @@ export function ThemeEditor({
 }) {
   const t = useTranslations("themes");
   const [pending, run] = useAction();
+  // Retour depuis la phase d'idées : on reprend plutôt qu'on ne lance.
+  const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -68,11 +70,11 @@ export function ThemeEditor({
           size="lg"
           className="w-full"
           disabled={pending || themes.length === 0}
-          title={t("start")}
+          title={startLabel}
           onConfirm={() => run(() => startIdeasPhase(slug))}
         >
           <Play data-icon="inline-start" />
-          {t("start")}
+          {startLabel}
         </ConfirmButton>
         {themes.length === 0 && <p className="text-center text-xs text-muted-foreground">{t("startHint")}</p>}
       </aside>
@@ -112,9 +114,24 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
           <Button variant="ghost" size="icon-sm" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>
             <Pencil />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={t("delete")} disabled={pending} onClick={() => run(() => deleteTheme(slug, theme.id))}>
-            <Trash2 />
-          </Button>
+          {theme.ideaCount > 0 ? (
+            <ConfirmButton
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t("delete")}
+              disabled={pending}
+              title={t("deleteConfirm", { title: theme.title })}
+              description={t("deleteConfirmHint", { count: theme.ideaCount })}
+              confirmLabel={t("delete")}
+              onConfirm={() => run(() => deleteTheme(slug, theme.id))}
+            >
+              <Trash2 />
+            </ConfirmButton>
+          ) : (
+            <Button variant="ghost" size="icon-sm" aria-label={t("delete")} disabled={pending} onClick={() => run(() => deleteTheme(slug, theme.id))}>
+              <Trash2 />
+            </Button>
+          )}
         </CardAction>
       </CardHeader>
     </Card>

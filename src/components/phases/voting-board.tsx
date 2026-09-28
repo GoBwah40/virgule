@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ListChecks, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ListChecks, Tags, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAction } from "@/hooks/use-action";
-import { addIdea, castVote, deleteIdea, goToRecap } from "@/lib/actions";
+import { addIdea, backToThemes, castVote, deleteIdea, goToRecap } from "@/lib/actions";
 import { LIMITS } from "@/lib/config";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
 import { cn } from "@/lib/utils";
@@ -173,6 +173,25 @@ function VoteButton({
       <TooltipTrigger render={button} />
       <TooltipContent>{label}</TooltipContent>
     </Tooltip>
+  );
+}
+
+export function BackToThemesButton({ slug }: { slug: string }) {
+  const t = useTranslations("ideas");
+  const [pending, run] = useAction();
+  return (
+    <ConfirmButton
+      size="lg"
+      variant="outline"
+      disabled={pending}
+      title={t("backToThemesConfirm")}
+      description={t("backToThemesHint")}
+      confirmLabel={t("backToThemes")}
+      onConfirm={() => run(() => backToThemes(slug))}
+    >
+      <Tags data-icon="inline-start" />
+      {t("backToThemes")}
+    </ConfirmButton>
   );
 }
 
