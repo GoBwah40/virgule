@@ -54,23 +54,9 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 
 ## Déploiement sur Vercel
 
-Le système de fichiers de Vercel est éphémère : un fichier SQLite n'y survivrait pas. La production utilise donc **Turso**, qui est du SQLite hébergé (offre gratuite).
+La production tourne sur Vercel, avec une base [Turso](https://turso.tech) (SQLite hébergé) : le disque de Vercel est éphémère, un fichier SQLite n'y survivrait pas. Pusher est optionnel.
 
-1. **Créer la base Turso** :
-   ```bash
-   turso db create virgule
-   turso db show virgule --url      # → TURSO_DATABASE_URL
-   turso db tokens create virgule   # → TURSO_AUTH_TOKEN
-   ```
-2. **Appliquer les migrations** depuis votre poste :
-   ```bash
-   TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... pnpm db:migrate:prod
-   ```
-   Refaites cette étape à chaque nouvelle migration, avant de déployer le code qui en dépend.
-3. **(Optionnel) Temps réel** : créez une app *Channels* sur Pusher (offre Sandbox gratuite : 200 000 messages/jour, 100 connexions simultanées). Sans Pusher, les clients se resynchronisent toutes les 3 secondes, ce qui suffit largement pour 6 personnes.
-4. **Importer le repo dans Vercel** et renseigner les variables d'environnement (voir `.env.example`) :
-   `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `CRON_SECRET` (chaîne aléatoire), et éventuellement `PUSHER_APP_ID`, `PUSHER_SECRET`, `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`.
-5. **Déployer**. `vercel.json` déclare une tâche planifiée quotidienne (`/api/cron/purge`) qui supprime les rooms expirées.
+Le pas-à-pas complet (création de la base, migrations, variables d'environnement, cron, vérifications, dépannage) est dans **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
 
 ## Architecture
 
