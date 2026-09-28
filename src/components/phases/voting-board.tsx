@@ -1,6 +1,6 @@
 "use client";
 
-import { ListChecks, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ListChecks, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
@@ -82,29 +82,25 @@ function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
   };
 
   const voteButtons = (
-    <div className="flex shrink-0 gap-1">
-      <Button
-        variant={vote === true ? "default" : "outline"}
-        size="sm"
-        aria-pressed={vote === true}
+    <div className="flex shrink-0 gap-1.5">
+      <VoteButton
+        label={t("voteUp")}
+        pressed={vote === true}
         disabled={!idea.canVote}
         onClick={() => toggle(true)}
-        className={cn(vote === true && "bg-emerald-600 hover:bg-emerald-600/90")}
+        pressedClassName="border-emerald-600 bg-emerald-600 text-white hover:bg-emerald-600/90 hover:text-white"
       >
-        <ThumbsUp data-icon="inline-start" />
-        {t("voteUp")}
-      </Button>
-      <Button
-        variant={vote === false ? "default" : "outline"}
-        size="sm"
-        aria-pressed={vote === false}
+        <ArrowUp />
+      </VoteButton>
+      <VoteButton
+        label={t("voteDown")}
+        pressed={vote === false}
         disabled={!idea.canVote}
         onClick={() => toggle(false)}
-        className={cn(vote === false && "bg-rose-600 hover:bg-rose-600/90")}
+        pressedClassName="border-rose-600 bg-rose-600 text-white hover:bg-rose-600/90 hover:text-white"
       >
-        <ThumbsDown data-icon="inline-start" />
-        {t("voteDown")}
-      </Button>
+        <ArrowDown />
+      </VoteButton>
     </div>
   );
 
@@ -138,6 +134,45 @@ function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
         )}
       </div>
     </div>
+  );
+}
+
+/** Bouton icône ; le libellé « Pour » / « Contre » est dans l'infobulle et l'aria-label. */
+function VoteButton({
+  label,
+  pressed,
+  disabled,
+  onClick,
+  pressedClassName,
+  children,
+}: {
+  label: string;
+  pressed: boolean;
+  disabled: boolean;
+  onClick: () => void;
+  pressedClassName: string;
+  children: React.ReactNode;
+}) {
+  const button = (
+    <Button
+      variant="outline"
+      size="icon"
+      aria-label={label}
+      aria-pressed={pressed}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn("[&_svg:not([class*='size-'])]:size-4.5", pressed && pressedClassName)}
+    >
+      {children}
+    </Button>
+  );
+  // Un bouton désactivé ne déclenche pas d'infobulle : c'est le groupe qui explique pourquoi.
+  if (disabled) return button;
+  return (
+    <Tooltip>
+      <TooltipTrigger render={button} />
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
   );
 }
 
