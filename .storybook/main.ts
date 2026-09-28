@@ -5,7 +5,6 @@ const config: StorybookConfig = {
   // Une story par composant global (src/components/*.stories.tsx).
   stories: ["../src/**/*.stories.@(ts|tsx)"],
   addons: ["@storybook/addon-docs", "@storybook/addon-a11y"],
-  staticDirs: ["../public"],
 };
 
 export default config;

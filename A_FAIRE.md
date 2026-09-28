@@ -59,7 +59,8 @@ Aujourd'hui, les déploiements de prévisualisation (branches, pull requests) ut
 
 ### Qualité et exploitation
 
-- [ ] **Intégration continue** : une action GitHub qui lance `pnpm check` et `pnpm build-storybook` sur chaque pull request. Rien ne bloque aujourd'hui un push qui casse les tests.
+- [x] **Intégration continue** : `.github/workflows/ci.yml` lance `pnpm check` et le build Storybook à chaque push sur `main` et sur chaque pull request.
+- [ ] **Rendre la CI obligatoire** : sur GitHub, *Settings → Branches → Add rule* pour `main`, cocher « Require status checks to pass » et choisir « Lint, types, tests, knip ». Sans cette règle, la CI signale un problème mais n'empêche pas de fusionner.
 - [ ] **Domaine personnalisé** si besoin : Vercel, *Settings → Domains*.
 - [ ] **Rotation du jeton Turso** de temps en temps : `turso db tokens create virgule`, mettre à jour `TURSO_AUTH_TOKEN` dans Vercel et dans `.env.production.local`, redéployer, puis révoquer l'ancien (`turso db tokens invalidate virgule` invalide tous les jetons existants).
 - [ ] **Sauvegardes** : vérifier les options de restauration de ton offre Turso.

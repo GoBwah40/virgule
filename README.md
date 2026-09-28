@@ -46,7 +46,7 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | --- | --- |
 | `pnpm dev` | Serveur de développement |
 | `pnpm build` | `prisma generate` + build de production |
-| `pnpm check` | Lint, types, tests et knip : à lancer avant chaque commit |
+| `pnpm check` | Lint, types, tests et knip : à lancer avant chaque commit (la CI GitHub Actions le relance à chaque push et pull request) |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
 | `pnpm test` | Tests Vitest : logique (Node) et composants (jsdom) |
 | `pnpm knip` | Détecte fichiers, exports et dépendances inutilisés |
@@ -66,7 +66,7 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | Déploiement | Automatique à chaque push sur `main` |
 | Temps réel | Rafraîchissement toutes les 3 secondes (Pusher pas encore activé) |
 
-Ce qu'il reste à faire (variables à renseigner ou nettoyer, Pusher, base de prévisualisation, CI…) est suivi dans **[A_FAIRE.md](A_FAIRE.md)**.
+Ce qu'il reste à faire (variables à renseigner ou nettoyer, Pusher, base de prévisualisation…) est suivi dans **[A_FAIRE.md](A_FAIRE.md)**.
 
 ## Déploiement sur Vercel
 
