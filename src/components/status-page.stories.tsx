@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Clock, SearchX } from "lucide-react";
 
 import { StatusPage } from "./status-page";
 import { Button } from "./ui/button";
@@ -18,3 +19,11 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+export const Introuvable: Story = { args: { icon: SearchX } };
+export const Expiree: Story = {
+  args: {
+    icon: Clock,
+    title: "Cette séance n'est plus disponible",
+    body: "Les séances restent en ligne 7 jours. Crée-en une nouvelle pour reprendre.",
+  },
+};

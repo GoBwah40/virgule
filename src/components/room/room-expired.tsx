@@ -1,3 +1,4 @@
+import { Clock } from "lucide-react";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
@@ -8,7 +9,7 @@ import { ROOM_TTL_DAYS } from "@/lib/config";
 export async function RoomExpired() {
   const t = await getTranslations("expired");
   return (
-    <StatusPage title={t("title")} body={t("body", { days: ROOM_TTL_DAYS })}>
+    <StatusPage title={t("title")} body={t("body", { days: ROOM_TTL_DAYS })} icon={Clock}>
       <Button nativeButton={false} render={<Link href="/" />}>
         {t("cta")}
       </Button>
