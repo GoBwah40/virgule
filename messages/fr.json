@@ -9,6 +9,20 @@
     "confirm": "Confirmer",
     "backHome": "Retour à l'accueil"
   },
+  "loading": {
+    "themes": "Chargement des sujets…",
+    "ideas": "Chargement des idées…",
+    "recap": "Chargement du bilan…"
+  },
+  "errorPage": {
+    "title": "Quelque chose n'a pas marché",
+    "body": "La page n'a pas pu s'afficher. Réessaie : le plus souvent, ça suffit.",
+    "roomTitle": "Cette étape n'a pas pu s'afficher",
+    "roomBody": "Les idées déjà proposées et les votes déjà faits sont enregistrés. Réessaie dans un instant.",
+    "retry": "Réessayer",
+    "home": "Retour à l'accueil",
+    "digest": "Code d'erreur : {digest}"
+  },
   "home": {
     "title": "Toutes les idées, une décision commune.",
     "subtitle": "Jusqu'à {max} participants, un lien à partager, aucun compte à créer.",
@@ -76,12 +90,30 @@
     "descriptionPlaceholder": "Contexte, contraintes, envies…",
     "suggestionsLabel": "Idées de sujets",
     "suggestions": {
-      "goal": { "title": "Objectif", "description": "Qu'est-ce qu'on veut obtenir ?" },
-      "dates": { "title": "Dates", "description": "Quand est-ce que tout le monde est dispo ?" },
-      "place": { "title": "Lieu", "description": "Où est-ce que ça se passe ?" },
-      "budget": { "title": "Budget", "description": "Combien on est prêts à dépenser ?" },
-      "priorities": { "title": "Priorités", "description": "Par quoi on commence ?" },
-      "roles": { "title": "Qui fait quoi", "description": "Comment on se répartit les tâches ?" }
+      "goal": {
+        "title": "Objectif",
+        "description": "Qu'est-ce qu'on veut obtenir ?"
+      },
+      "dates": {
+        "title": "Dates",
+        "description": "Quand est-ce que tout le monde est dispo ?"
+      },
+      "place": {
+        "title": "Lieu",
+        "description": "Où est-ce que ça se passe ?"
+      },
+      "budget": {
+        "title": "Budget",
+        "description": "Combien on est prêts à dépenser ?"
+      },
+      "priorities": {
+        "title": "Priorités",
+        "description": "Par quoi on commence ?"
+      },
+      "roles": {
+        "title": "Qui fait quoi",
+        "description": "Comment on se répartit les tâches ?"
+      }
     },
     "edit": "Modifier",
     "save": "Enregistrer",

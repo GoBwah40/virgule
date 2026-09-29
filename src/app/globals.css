@@ -177,3 +177,8 @@
     animation-delay: 0s !important;
   }
 }
+
+/* Squelette de chargement : il s'efface vite pour laisser entrer le vrai contenu. */
+::view-transition-old(.loading-exit) {
+  animation: 120ms ease-in both vt-fade reverse;
+}

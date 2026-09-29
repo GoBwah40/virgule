@@ -1,11 +1,6 @@
-import * as React from "react";
+import { ViewTransition } from "@/lib/view-transition";
 
 type Props = { children: React.ReactNode; className?: string };
-
-// `ViewTransition` n'existe que dans la version canary de React embarquée par Next
-// (App Router). Ailleurs (tests, Storybook) on rend simplement le contenu.
-const ViewTransition: React.ComponentType<React.ViewTransitionProps> =
-  React.ViewTransition ?? (({ children }) => <>{children}</>);
 
 /**
  * Transition d'entrée / de sortie d'une étape de la séance (Sujets → Idées → Bilan).
