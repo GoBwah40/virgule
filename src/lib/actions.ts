@@ -12,7 +12,8 @@ import { LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/confi
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
 import { isActiveInRound, isQualified, scoreVotes } from "@/lib/results";
-import { getRoomContext, phasePath } from "@/lib/room";
+import { phasePath } from "@/lib/phase-path";
+import { getRoomContext } from "@/lib/room";
 import { setParticipantToken } from "@/lib/session";
 
 // Clés de messages i18n (namespace « errors » dans messages/fr.json).
@@ -61,8 +62,14 @@ async function guard(slug: string, opts: { host?: boolean; phase?: Phase } = {})
   return { room: ctx.room, me: ctx.me };
 }
 
-/** Enveloppe commune : traduit les erreurs, rafraîchit l'appelant et notifie les autres. */
-async function run(slug: string, fn: () => Promise<void>): Promise<ActionResult> {
+/**
+ * Enveloppe commune : traduit les erreurs, notifie les autres participants, puis
+ * - rafraîchit la page de l'appelant (cas général) ;
+ * - ou, si l'action change d'étape (`goTo`), l'envoie directement sur la nouvelle page.
+ *   Rafraîchir l'ancienne page la ferait rediriger côté serveur, avec un rendu vide
+ *   intermédiaire qui casse la transition entre étapes.
+ */
+async function run(slug: string, fn: () => Promise<void>, goTo?: Phase): Promise<ActionResult> {
   try {
     await fn();
   } catch (error) {
@@ -71,6 +78,7 @@ async function run(slug: string, fn: () => Promise<void>): Promise<ActionResult>
     return fail("unknown");
   }
   await notifyRoom(slug);
+  if (goTo) redirect(phasePath(slug, goTo));
   refresh();
   return ok();
 }
@@ -209,7 +217,7 @@ export async function startIdeasPhase(slug: string) {
     const count = await db.theme.count({ where: { roomId: room.id } });
     if (count === 0) throw new ActionFailure("noThemes");
     await db.room.update({ where: { id: room.id }, data: { phase: "IDEAS" } });
-  });
+  }, "IDEAS");
 }
 
 // ─── Phase 2 : idées & votes ───────────────────────────────────────────────
@@ -270,14 +278,14 @@ export async function backToThemes(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
     await db.room.update({ where: { id: room.id }, data: { phase: "THEMES" } });
-  });
+  }, "THEMES");
 }
 
 export async function goToRecap(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
     await db.room.update({ where: { id: room.id }, data: { phase: "RECAP" } });
-  });
+  }, "RECAP");
 }
 
 // ─── Phase 3 : récapitulatif (animateur) ───────────────────────────────────
@@ -286,7 +294,7 @@ export async function reopenVoting(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
     await db.room.update({ where: { id: room.id }, data: { phase: "IDEAS" } });
-  });
+  }, "IDEAS");
 }
 
 export async function setRequireNetPositive(slug: string, value: boolean) {
@@ -312,7 +320,7 @@ export async function startNextRound(slug: string) {
       db.idea.updateMany({ where: { id: { in: eliminated } }, data: { eliminatedRound: nextRound } }),
       db.room.update({ where: { id: room.id }, data: { round: nextRound, phase: "IDEAS" } }),
     ]);
-  });
+  }, "IDEAS");
 }
 
 export async function closeSession(slug: string) {

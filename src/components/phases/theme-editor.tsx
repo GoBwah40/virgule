@@ -78,16 +78,15 @@ export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; the
           </CardContent>
         </Card>
 
-        <ConfirmButton
+        <Button
           size="lg"
           className="w-full"
           disabled={pending || themes.length === 0}
-          title={startLabel}
-          onConfirm={() => run(() => startIdeasPhase(slug))}
+          onClick={() => run(() => startIdeasPhase(slug))}
         >
           <Play data-icon="inline-start" />
           {startLabel}
-        </ConfirmButton>
+        </Button>
         {themes.length === 0 && <p className="text-center text-sm text-muted-foreground">{t("startHint")}</p>}
       </aside>
     </div>

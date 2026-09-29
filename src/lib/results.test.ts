@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareByScore, isActiveInRound, isQualified, scoreVotes } from "@/lib/results";
+import { compareByScore, isActiveInRound, isQualified, scoreVotes, voteProgress } from "@/lib/results";
 
 const votes = (up: number, down: number) => [
   ...Array.from({ length: up }, () => ({ positive: true })),
@@ -42,5 +42,23 @@ describe("compareByScore", () => {
   it("classe par score net puis par nombre de « pour »", () => {
     const scores = [scoreVotes(votes(1, 0)), scoreVotes(votes(3, 2)), scoreVotes(votes(4, 1))];
     expect(scores.sort(compareByScore).map((s) => s.up)).toEqual([4, 3, 1]);
+  });
+});
+
+describe("voteProgress", () => {
+  const participantIds = ["camille", "sacha", "ines"];
+
+  it("compte les participants ayant voté au moins une fois", () => {
+    const res = voteProgress({ participantIds, ideaAuthorIds: ["camille"], voterIds: new Set(["sacha"]), allowSelfVote: true });
+    expect(res).toEqual({ done: 1, total: 3 });
+  });
+
+  it("exclut ceux qui n'ont que leurs propres idées quand l'auto-vote est désactivé", () => {
+    const res = voteProgress({ participantIds, ideaAuthorIds: ["camille"], voterIds: new Set(["sacha", "ines"]), allowSelfVote: false });
+    expect(res).toEqual({ done: 2, total: 2 });
+  });
+
+  it("total nul quand il n'y a aucune idée", () => {
+    expect(voteProgress({ participantIds, ideaAuthorIds: [], voterIds: new Set(), allowSelfVote: true })).toEqual({ done: 0, total: 0 });
   });
 });

@@ -76,7 +76,12 @@ function VoteButton({
       aria-pressed={pressed}
       disabled={disabled}
       onClick={onClick}
-      className={cn("border-[1.5px] active:scale-95 [&_svg:not([class*='size-'])]:size-5", pressed && pressedClassName)}
+      className={cn(
+        "border-[1.5px] active:scale-95 [&_svg:not([class*='size-'])]:size-5",
+        pressed && pressedClassName,
+        // Rebond quand le vote passe à « actif » ; rien quand on le retire.
+        pressed && "motion-safe:animate-pop",
+      )}
     >
       {children}
     </Button>

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/page-header";
+import { PhaseTransition } from "@/components/phase-transition";
 import { ExportMenu, RecapHostControls } from "@/components/phases/recap-controls";
 import { RecapRoundView } from "@/components/phases/recap-round";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,7 +24,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
   const closed = room.phase === "CLOSED";
 
   return (
-    <>
+    <PhaseTransition>
       <PageHeader
         title={closed ? t("closedTitle") : t("title")}
         subtitle={t("summary", { qualified: current.qualifiedCount, total: current.ideaCount })}
@@ -61,7 +62,11 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
                 ))}
               </TabsList>
               {rounds.map((r) => (
-                <TabsContent key={r.round} value={String(r.round)}>
+                <TabsContent
+                  key={r.round}
+                  value={String(r.round)}
+                  className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
+                >
                   <RecapRoundView round={r} />
                 </TabsContent>
               ))}
@@ -84,6 +89,6 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
           </aside>
         )}
       </div>
-    </>
+    </PhaseTransition>
   );
 }
