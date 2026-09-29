@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
-import { getRoomContext, phasePath } from "@/lib/room";
+import { phasePath } from "@/lib/phase-path";
+import { getRoomContext } from "@/lib/room";
 
 /** Lien de partage : envoie chacun vers la phase en cours. */
 export default async function RoomIndex({ params }: PageProps<"/r/[slug]">) {

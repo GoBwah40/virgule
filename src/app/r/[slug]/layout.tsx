@@ -47,7 +47,7 @@ export default async function RoomLayout({ children, params }: LayoutProps<"/r/[
           }
         />
         {/* Met à jour le nombre de places pendant qu'on hésite sur son pseudo. */}
-        <RoomLive slug={slug} />
+        <RoomLive slug={slug} followPhase={false} />
       </main>
     );
   }

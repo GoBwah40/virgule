@@ -35,3 +35,20 @@ export function isActiveInRound(
 export function compareByScore(a: Score, b: Score): number {
   return b.net - a.net || b.up - a.up;
 }
+
+/**
+ * Avancement des votes : parmi les participants qui ont au moins une idée sur laquelle
+ * voter, combien ont voté au moins une fois. Ceux qui n'ont rien à voter (seulement
+ * leurs propres idées, auto-vote désactivé) sont exclus pour ne pas bloquer le total.
+ */
+export function voteProgress(input: {
+  participantIds: string[];
+  ideaAuthorIds: string[];
+  voterIds: Set<string>;
+  allowSelfVote: boolean;
+}): { done: number; total: number } {
+  const concerned = input.participantIds.filter((id) =>
+    input.ideaAuthorIds.some((author) => input.allowSelfVote || author !== id),
+  );
+  return { done: concerned.filter((id) => input.voterIds.has(id)).length, total: concerned.length };
+}

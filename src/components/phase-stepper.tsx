@@ -19,7 +19,7 @@ export function PhaseStepper({ steps, current, extra, label, className }: Props)
           key={step.id}
           aria-current={i === current ? "step" : undefined}
           className={cn(
-            "rounded-full px-3 py-1",
+            "rounded-full px-3 py-1 transition-colors duration-300",
             i === current ? "bg-foreground text-background" : "bg-muted",
             i > current ? "text-muted-foreground" : i < current && "text-foreground",
           )}

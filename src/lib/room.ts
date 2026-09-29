@@ -5,7 +5,8 @@ import { cache } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
-import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score } from "@/lib/results";
+import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, voteProgress } from "@/lib/results";
+import { phasePath } from "@/lib/phase-path";
 import { getParticipantToken } from "@/lib/session";
 
 export type RoomContext =
@@ -136,6 +137,27 @@ export async function getVotingView(
   }));
 }
 
+/**
+ * Avancement des votes du tour, pour l'animateur (règle : `voteProgress`).
+ * Seul un total est calculé, jamais qui a voté quoi.
+ */
+export async function getVoteProgress(roomId: string, round: number, allowSelfVote: boolean) {
+  const [participants, ideas, votes] = await Promise.all([
+    db.participant.findMany({ where: { roomId }, select: { id: true } }),
+    db.idea.findMany({
+      where: { roomId, createdRound: { lte: round }, OR: [{ eliminatedRound: null }, { eliminatedRound: { gt: round } }] },
+      select: { authorId: true },
+    }),
+    db.vote.findMany({ where: { round, idea: { roomId } }, select: { participantId: true }, distinct: ["participantId"] }),
+  ]);
+  return voteProgress({
+    participantIds: participants.map((p) => p.id),
+    ideaAuthorIds: ideas.map((idea) => idea.authorId),
+    voterIds: new Set(votes.map((v) => v.participantId)),
+    allowSelfVote,
+  });
+}
+
 // ─── Récapitulatif (tous les tours) ────────────────────────────────────────
 
 type RecapIdea = {
@@ -206,14 +228,3 @@ export async function loadPhasePage(slug: string, allowed: Phase[]) {
   return { room: ctx.room, me: ctx.me, participants: ctx.participants };
 }
 
-export const phasePath = (slug: string, phase: Phase) => {
-  switch (phase) {
-    case "THEMES":
-      return `/r/${slug}/themes`;
-    case "IDEAS":
-      return `/r/${slug}/ideas`;
-    case "RECAP":
-    case "CLOSED":
-      return `/r/${slug}/recap`;
-  }
-};

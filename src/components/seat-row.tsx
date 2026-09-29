@@ -38,6 +38,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, size = "sm",
           <span
             className={cn(
               "grid place-items-center rounded-t-[10px] rounded-b-md font-bold",
+              "motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 motion-safe:duration-300",
               box,
               seat.isMe ? "bg-highlight text-[#2a1a24]" : "bg-highlight-soft text-highlight-foreground",
             )}
@@ -56,10 +57,16 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, size = "sm",
         );
 
         return (
-          <li key={seat?.id ?? `free-${letter}`} className={cn("grid justify-items-center gap-0.5", i === aisle && "ml-2.5")}>
-            <span className="h-3 text-primary" aria-hidden>
-              {seat?.isHost && <Crown className="size-3" />}
-            </span>
+          <li
+            key={seat?.id ?? `free-${letter}`}
+            className={cn("relative grid justify-items-center gap-0.5", i === aisle && "ml-2.5")}
+          >
+            {seat?.isHost && (
+              // Couronne posée sur le siège : pas de ligne réservée au-dessus de chaque place.
+              <span className="absolute -top-2 left-1/2 z-10 -translate-x-1/2 rounded-full bg-card px-0.5 text-primary" aria-hidden>
+                <Crown className="size-3" />
+              </span>
+            )}
             <Tooltip>
               <TooltipTrigger
                 render={
