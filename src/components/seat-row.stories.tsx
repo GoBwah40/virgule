@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Crown, UserMinus } from "lucide-react";
 import { fn } from "storybook/test";
 
 import { SeatRow } from "./seat-row";
@@ -36,3 +37,19 @@ export const PlacesCliquables: Story = {
 };
 
 export const Grand: Story = { args: { size: "md" } };
+
+export const MenuDesPlaces: Story = {
+  args: {
+    menu: {
+      label: (seat) => `Place de ${seat.name} : options`,
+      actions: (seat) =>
+        seat.isMe
+          ? []
+          : [
+              { id: "host", label: "Confier l'animation", icon: Crown },
+              { id: "remove", label: "Retirer de la séance", icon: UserMinus, destructive: true },
+            ],
+      onSelect: fn(),
+    },
+  },
+};

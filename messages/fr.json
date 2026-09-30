@@ -82,7 +82,14 @@
     "seats": {
       "row": "{count, plural, one {# participant} other {# participants}} sur {max}",
       "free": "Place libre : touche pour copier le lien d'invitation",
-      "freeStatic": "Place libre"
+      "freeStatic": "Place libre",
+      "manage": "Place de {name} : options",
+      "makeHost": "Confier l'animation",
+      "makeHostConfirm": "Confier l'animation à {name} ?",
+      "makeHostConfirmHint": "{name} pilotera les étapes. Tu restes dans la séance comme participant.",
+      "remove": "Retirer de la séance",
+      "removeConfirm": "Retirer {name} de la séance ?",
+      "removeConfirmHint": "Ses idées et ses votes sont supprimés. {name} pourra revenir avec le lien s'il reste une place."
     }
   },
   "themes": {
@@ -149,6 +156,10 @@
     "settings": "Réglages",
     "allowSelfVote": "Voter sur ses propres idées",
     "allowSelfVoteHint": "Si c'est désactivé, personne ne peut voter pour ou contre les idées qu'il a proposées.",
+    "timerLabel": "Minuteur des idées",
+    "timerHint": "Le temps démarre au lancement des idées. À la fin, rien n'est bloqué : c'est un repère pour garder le rythme.",
+    "timerOff": "Aucun",
+    "timerMinutes": "{count} min",
     "start": "Lancer les idées",
     "resume": "Reprendre les idées",
     "startHint": "Ajoute au moins un sujet pour commencer."
@@ -157,6 +168,12 @@
     "title": "Les idées",
     "subtitle": "Propose tes idées et vote pour celles des autres. Personne ne sait qui a voté quoi, et tu peux changer d'avis jusqu'au bilan.",
     "roundSubtitle": "Tour {round} : on revote sur les idées retenues, et tu peux en proposer de nouvelles.",
+    "tiebreakSubtitle": "Tour {round}, départage : on revote seulement sur les idées à égalité en tête. Pas de nouvelle idée pendant ce tour.",
+    "tiebreakNoComposer": "Tour de départage : pas de nouvelle idée.",
+    "timerLabel": "Temps restant pour les idées",
+    "timerExpired": "Temps écoulé",
+    "timerExtend": "+{count} min",
+    "timerStop": "Arrêter le minuteur",
     "empty": "Pas encore d'idée ici. Qui commence ?",
     "placeholder": "Ton idée…",
     "date": "Date",
@@ -196,6 +213,7 @@
     "summary": "{qualified} idée(s) retenue(s) sur {total}",
     "qualified": "Retenue",
     "notQualified": "Écartée",
+    "tied": "Ex æquo",
     "empty": "Aucune idée sur ce sujet.",
     "votesUp": "{count} pour",
     "votesDown": "{count} contre",
@@ -207,6 +225,11 @@
     "nextRoundHint": "{count, plural, =0 {Aucune idée retenue : seules les nouvelles idées seront au vote.} one {# idée retenue repasse au vote, et chacun peut en proposer de nouvelles.} other {# idées retenues repassent au vote, et chacun peut en proposer de nouvelles.}}",
     "nextRoundConfirm": "On lance le tour {round} ?",
     "nextRoundConfirmHint": "Les idées écartées sortent de la course et les votes repartent de zéro.",
+    "tiesNotice": "{count, plural, one {# sujet a des idées ex æquo en tête.} other {# sujets ont des idées ex æquo en tête.}}",
+    "tiebreak": "Départager les ex æquo",
+    "tiebreakHint": "On revote seulement sur les idées à égalité en tête.",
+    "tiebreakConfirm": "Lancer un tour de départage ?",
+    "tiebreakConfirmHint": "Dans chaque sujet, seules les idées en tête restent : les ex æquo, ou l'idée gagnante s'il n'y a pas d'égalité. Les votes repartent de zéro et on ne peut pas ajouter d'idée.",
     "close": "Terminer la séance",
     "closeConfirm": "C'est décidé ?",
     "closeConfirmHint": "Une fois la séance terminée, plus personne ne pourra proposer ni voter.",
@@ -255,7 +278,11 @@
     "invalidDateRange": "La date de fin doit être le même jour ou après la date de début.",
     "invalidAmountRange": "Le second montant doit être supérieur ou égal au premier.",
     "themeKindLocked": "Des idées ont déjà été proposées sur ce sujet : son type de réponse ne peut plus changer.",
-    "duplicateIdea": "Cette idée est déjà proposée dans ce sujet : tu peux voter pour elle."
+    "duplicateIdea": "Cette idée est déjà proposée dans ce sujet : tu peux voter pour elle.",
+    "tiebreakNoNewIdeas": "C'est un tour de départage : on revote seulement sur les idées à égalité, sans nouvelle idée.",
+    "noTies": "Aucune égalité à départager dans ce tour.",
+    "participantNotFound": "Cette personne n'est plus dans la séance.",
+    "cannotTargetSelf": "Tu ne peux pas faire ça sur ta propre place."
   },
   "theme": {
     "label": "Thème",

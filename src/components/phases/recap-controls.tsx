@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
+import { Download, Equal, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { ConfirmButton } from "@/components/confirm-button";
@@ -15,18 +15,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useAction } from "@/hooks/use-action";
-import { closeSession, reopenVoting, setRequireNetPositive, startNextRound } from "@/lib/actions";
+import { closeSession, reopenVoting, setRequireNetPositive, startNextRound, startTiebreakRound } from "@/lib/actions";
 
 export function RecapHostControls({
   slug,
   requireNetPositive,
   nextRound,
   qualifiedCount,
+  tiedThemeCount,
 }: {
   slug: string;
   requireNetPositive: boolean;
   nextRound: number;
   qualifiedCount: number;
+  tiedThemeCount: number;
 }) {
   const t = useTranslations("recap");
   const [pending, run] = useAction();
@@ -61,6 +63,25 @@ export function RecapHostControls({
           </ConfirmButton>
           <p className="text-sm text-muted-foreground">{t("nextRoundHint", { count: qualifiedCount })}</p>
         </div>
+        {tiedThemeCount > 0 && (
+          <div className="space-y-2">
+            <ConfirmButton
+              variant="outline"
+              className="w-full"
+              disabled={pending}
+              title={t("tiebreakConfirm")}
+              description={t("tiebreakConfirmHint")}
+              confirmLabel={t("tiebreak")}
+              onConfirm={() => run(() => startTiebreakRound(slug))}
+            >
+              <Equal data-icon="inline-start" />
+              {t("tiebreak")}
+            </ConfirmButton>
+            <p className="text-sm text-muted-foreground">
+              {t("tiesNotice", { count: tiedThemeCount })} {t("tiebreakHint")}
+            </p>
+          </div>
+        )}
         <Button variant="outline" className="w-full" disabled={pending} onClick={() => run(() => reopenVoting(slug))}>
           <Undo2 data-icon="inline-start" />
           {t("reopen")}

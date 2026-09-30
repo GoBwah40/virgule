@@ -32,6 +32,14 @@ model Room {
   requireNetPositive Boolean     @default(true)
   createdAt        DateTime      @default(now())
   expiresAt        DateTime
+  // Colonnes ajoutées après la création : en fin de liste pour que SQLite les ajoute
+  // par ALTER TABLE sans reconstruire la table (cf. CLAUDE.md, migrations additives).
+  /// Durée du minuteur de la phase IDEAS, en minutes (null = pas de minuteur).
+  ideasTimerMinutes Int?
+  /// Fin du minuteur en cours (null = pas de minuteur actif).
+  phaseEndsAt      DateTime?
+  /// Tour de départage : seules les idées ex æquo en tête sont revotées, sans nouvelle idée.
+  tiebreak         Boolean       @default(false)
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]

@@ -52,3 +52,13 @@ export function voteProgress(input: {
   );
   return { done: concerned.filter((id) => input.voterIds.has(id)).length, total: concerned.length };
 }
+
+/**
+ * Idées en tête d'un sujet : les idées retenues au meilleur score (même score net et même
+ * nombre de « pour »). Plusieurs idées = ex æquo, que l'on peut départager par un tour dédié.
+ */
+export function topQualified<T extends { score: Score; qualified: boolean }>(ideas: T[]): T[] {
+  const qualified = ideas.filter((idea) => idea.qualified).sort((a, b) => compareByScore(a.score, b.score));
+  if (qualified.length === 0) return [];
+  return qualified.filter((idea) => compareByScore(idea.score, qualified[0].score) === 0);
+}

@@ -8,11 +8,11 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { Phase } from "@/generated/prisma/enums";
-import { LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/config";
+import { EXTEND_TIMER_MINUTES, IDEAS_TIMER_OPTIONS, LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/config";
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
 import { ideaKey, type IdeaInput, parseIdeaInput, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
-import { isActiveInRound, isQualified, scoreVotes } from "@/lib/results";
+import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getRoomContext } from "@/lib/room";
 import { setParticipantToken } from "@/lib/session";
@@ -37,6 +37,10 @@ type ActionError =
   | "invalidAmountRange"
   | "themeKindLocked"
   | "duplicateIdea"
+  | "tiebreakNoNewIdeas"
+  | "noTies"
+  | "participantNotFound"
+  | "cannotTargetSelf"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -49,6 +53,9 @@ const newSlug = customAlphabet("23456789abcdefghijkmnpqrstuvwxyz", 10);
 const newToken = () => randomBytes(24).toString("base64url");
 
 const text = (max: number) => z.string().trim().min(1).max(max);
+
+/** Fin du minuteur des idées, si la personne qui anime en a réglé un. */
+const timerEnd = (minutes: number | null) => (minutes ? new Date(Date.now() + minutes * 60_000) : null);
 
 class ActionFailure extends Error {
   constructor(public readonly code: ActionError) {
@@ -232,8 +239,20 @@ export async function startIdeasPhase(slug: string) {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     const count = await db.theme.count({ where: { roomId: room.id } });
     if (count === 0) throw new ActionFailure("noThemes");
-    await db.room.update({ where: { id: room.id }, data: { phase: "IDEAS" } });
+    await db.room.update({
+      where: { id: room.id },
+      data: { phase: "IDEAS", phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
+    });
   }, "IDEAS");
+}
+
+/** Minuteur de la phase des idées (null = aucun), réglé avant de lancer les idées. */
+export async function setIdeasTimer(slug: string, minutes: number | null) {
+  if (minutes !== null && !IDEAS_TIMER_OPTIONS.includes(minutes)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "THEMES" });
+    await db.room.update({ where: { id: room.id }, data: { ideasTimerMinutes: minutes } });
+  });
 }
 
 // ─── Phase 2 : idées & votes ───────────────────────────────────────────────
@@ -252,6 +271,7 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
   if (!raw.success) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
+    if (room.tiebreak) throw new ActionFailure("tiebreakNoNewIdeas");
     const theme = await db.theme.findFirst({ where: { id: themeId, roomId: room.id } });
     if (!theme) throw new ActionFailure("invalidInput");
     const parsed = parseIdeaInput(theme.kind, raw.data);
@@ -310,15 +330,34 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
 export async function backToThemes(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
-    await db.room.update({ where: { id: room.id }, data: { phase: "THEMES" } });
+    await db.room.update({ where: { id: room.id }, data: { phase: "THEMES", phaseEndsAt: null } });
   }, "THEMES");
 }
 
 export async function goToRecap(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
-    await db.room.update({ where: { id: room.id }, data: { phase: "RECAP" } });
+    await db.room.update({ where: { id: room.id }, data: { phase: "RECAP", phaseEndsAt: null } });
   }, "RECAP");
+}
+
+/** Ajoute du temps au minuteur en cours (repart de maintenant s'il est déjà écoulé). */
+export async function extendTimer(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "IDEAS" });
+    const from = Math.max(Date.now(), room.phaseEndsAt?.getTime() ?? 0);
+    await db.room.update({
+      where: { id: room.id },
+      data: { phaseEndsAt: new Date(from + EXTEND_TIMER_MINUTES * 60_000) },
+    });
+  });
+}
+
+export async function stopTimer(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "IDEAS" });
+    await db.room.update({ where: { id: room.id }, data: { phaseEndsAt: null } });
+  });
 }
 
 // ─── Phase 3 : récapitulatif (animateur) ───────────────────────────────────
@@ -326,7 +365,10 @@ export async function goToRecap(slug: string) {
 export async function reopenVoting(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
-    await db.room.update({ where: { id: room.id }, data: { phase: "IDEAS" } });
+    await db.room.update({
+      where: { id: room.id },
+      data: { phase: "IDEAS", phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
+    });
   }, "IDEAS");
 }
 
@@ -351,7 +393,50 @@ export async function startNextRound(slug: string) {
     const nextRound = room.round + 1;
     await db.$transaction([
       db.idea.updateMany({ where: { id: { in: eliminated } }, data: { eliminatedRound: nextRound } }),
-      db.room.update({ where: { id: room.id }, data: { round: nextRound, phase: "IDEAS" } }),
+      db.room.update({
+        where: { id: room.id },
+        data: { round: nextRound, phase: "IDEAS", tiebreak: false, phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
+      }),
+    ]);
+  }, "IDEAS");
+}
+
+/**
+ * Tour de départage : dans chaque sujet, seules les idées en tête restent (les ex æquo,
+ * ou l'idée gagnante quand il n'y a pas d'égalité). Votes remis à zéro, pas de nouvelle idée.
+ */
+export async function startTiebreakRound(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "RECAP" });
+    const ideas = await db.idea.findMany({
+      where: { roomId: room.id, eliminatedRound: null },
+      include: { votes: { where: { round: room.round }, select: { positive: true } } },
+    });
+    const scored = ideas.map((idea) => {
+      const score = scoreVotes(idea.votes);
+      return { id: idea.id, themeId: idea.themeId, score, qualified: isQualified(score, room.requireNetPositive) };
+    });
+    const byTheme = new Map<string, typeof scored>();
+    for (const idea of scored) byTheme.set(idea.themeId, [...(byTheme.get(idea.themeId) ?? []), idea]);
+    const kept = new Set<string>();
+    let hasTie = false;
+    for (const themeIdeas of byTheme.values()) {
+      const top = topQualified(themeIdeas);
+      if (top.length > 1) hasTie = true;
+      for (const idea of top) kept.add(idea.id);
+    }
+    if (!hasTie) throw new ActionFailure("noTies");
+
+    const nextRound = room.round + 1;
+    await db.$transaction([
+      db.idea.updateMany({
+        where: { id: { in: scored.filter((idea) => !kept.has(idea.id)).map((idea) => idea.id) } },
+        data: { eliminatedRound: nextRound },
+      }),
+      db.room.update({
+        where: { id: room.id },
+        data: { round: nextRound, phase: "IDEAS", tiebreak: true, phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
+      }),
     ]);
   }, "IDEAS");
 }
@@ -360,5 +445,38 @@ export async function closeSession(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
     await db.room.update({ where: { id: room.id }, data: { phase: "CLOSED" } });
+  });
+}
+
+// ─── Participants (animateur) ──────────────────────────────────────────────
+
+async function otherParticipant(roomId: string, meId: string, participantId: string) {
+  if (participantId === meId) throw new ActionFailure("cannotTargetSelf");
+  const target = await db.participant.findFirst({ where: { id: participantId, roomId } });
+  if (!target) throw new ActionFailure("participantNotFound");
+  return target;
+}
+
+/** Confie l'animation à un autre participant ; la personne qui animait reste dans la séance. */
+export async function transferHost(slug: string, participantId: string) {
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { host: true });
+    const target = await otherParticipant(room.id, me.id, participantId);
+    await db.$transaction([
+      db.participant.update({ where: { id: me.id }, data: { isHost: false } }),
+      db.participant.update({ where: { id: target.id }, data: { isHost: true } }),
+    ]);
+  });
+}
+
+/**
+ * Retire un participant (place prise par erreur). Ses idées et ses votes sont supprimés
+ * avec lui ; il peut revenir avec le lien s'il reste une place.
+ */
+export async function removeParticipant(slug: string, participantId: string) {
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { host: true });
+    const target = await otherParticipant(room.id, me.id, participantId);
+    await db.participant.delete({ where: { id: target.id } });
   });
 }

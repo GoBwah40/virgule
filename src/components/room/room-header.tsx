@@ -55,6 +55,8 @@ export async function RoomHeader({ room, participants, meId }: Props) {
             />
           </div>
           <RoomSeats
+            slug={room.slug}
+            canManage={participants.some((p) => p.id === meId && p.isHost)}
             className="order-last col-span-2 sm:order-none"
             invitePath={invitePath}
             seats={participants.map((p) => ({ id: p.id, name: p.pseudo, isHost: p.isHost, isMe: p.id === meId }))}

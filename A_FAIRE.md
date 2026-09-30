@@ -99,7 +99,7 @@ Chaque nouvelle migration s'applique aux deux bases : la production (commande da
 
 ## Limites connues
 
-- Le rôle d'animateur est lié au cookie du navigateur qui a créé la séance : sur un autre appareil ou après effacement des cookies, il est perdu, et il n'existe pas de transfert.
+- Le rôle d'animateur est lié au cookie du navigateur qui a créé la séance : sur un autre appareil ou après effacement des cookies, il est perdu. La personne qui anime peut le confier à quelqu'un d'autre (menu d'une place), mais seulement tant qu'elle l'a encore.
 - 6 participants maximum par séance.
 - Français uniquement ; la structure i18n est prête (voir « Ajouter une langue » dans le README).
 

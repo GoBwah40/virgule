@@ -1,6 +1,6 @@
 "use client";
 
-import { ListChecks, Tags, Trash2 } from "lucide-react";
+import { ListChecks, Plus, Tags, TimerOff, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
@@ -16,13 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { addIdea, backToThemes, castVote, deleteIdea, goToRecap } from "@/lib/actions";
-import { LIMITS } from "@/lib/config";
+import { addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, stopTimer } from "@/lib/actions";
+import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
 import type { IdeaInput, ThemeKind } from "@/lib/idea-value";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
-export function ThemeIdeas({ slug, theme }: { slug: string; theme: VotingTheme }) {
+export function ThemeIdeas({ slug, theme, allowNewIdeas }: { slug: string; theme: VotingTheme; allowNewIdeas: boolean }) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");
 
@@ -46,9 +46,14 @@ export function ThemeIdeas({ slug, theme }: { slug: string; theme: VotingTheme }
           </ul>
         )}
       </CardContent>
-      <CardFooter className="border-t bg-muted/50 py-3">
-        <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
-      </CardFooter>
+      {/* Tour de départage : on revote sur les ex æquo, sans nouvelle idée. */}
+      {allowNewIdeas ? (
+        <CardFooter className="border-t bg-muted/50 py-3">
+          <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
+        </CardFooter>
+      ) : (
+        <CardFooter className="border-t bg-muted/50 py-3 text-sm text-muted-foreground">{t("tiebreakNoComposer")}</CardFooter>
+      )}
     </Card>
   );
 }
@@ -232,5 +237,29 @@ export function FinishVotingButton({ slug }: { slug: string }) {
       <ListChecks data-icon="inline-start" />
       {t("finish")}
     </ConfirmButton>
+  );
+}
+
+/** Boutons de la personne qui anime pour le minuteur en cours. */
+export function TimerControls({ slug }: { slug: string }) {
+  const t = useTranslations("ideas");
+  const [pending, run] = useAction();
+  return (
+    <div className="flex gap-2">
+      <Button variant="outline" disabled={pending} onClick={() => run(() => extendTimer(slug))}>
+        <Plus data-icon="inline-start" />
+        {t("timerExtend", { count: EXTEND_TIMER_MINUTES })}
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label={t("timerStop")}
+        title={t("timerStop")}
+        disabled={pending}
+        onClick={() => run(() => stopTimer(slug))}
+      >
+        <TimerOff />
+      </Button>
+    </div>
   );
 }
