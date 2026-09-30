@@ -299,7 +299,8 @@
       "down": "Contre",
       "net": "Score",
       "status": "Statut"
-    }
+    },
+    "overviewStatus": "Synthèse"
   },
   "errors": {
     "invalidInput": "Vérifie ce que tu as saisi : un champ est vide ou trop long.",

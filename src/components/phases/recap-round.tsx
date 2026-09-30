@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { VoteSummary } from "@/components/vote-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getIdeaFormat } from "@/lib/idea-format";
+import { getOverviewText } from "@/lib/overview-format";
 import type { RecapOverview, RecapRound } from "@/lib/room";
 
 export async function RecapRoundView({ round }: { round: RecapRound }) {
@@ -86,18 +86,13 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
 async function ThemeOverview({ overview }: { overview: RecapOverview }) {
   const t = await getTranslations("recap");
   const locale = await getLocale();
-  const format = await getIdeaFormat();
-  const { best } = overview;
-  const common = best.count === best.total;
+  const text = (await getOverviewText())(overview);
+  const summary = <OverviewSummary common={text.common} summary={text.summary} detail={text.detail} />;
 
   if (overview.type === "dates") {
     return (
       <div className="space-y-3">
-        <OverviewSummary
-          common={common}
-          summary={t(common ? "dateCommon" : "dateBest", { range: format.dateSpan(overview.best.start, overview.best.end) })}
-          detail={t(common ? "dateCommonDetail" : "dateBestDetail", { count: best.count, total: best.total })}
-        />
+        {summary}
         <DateOverview
           periods={overview.periods}
           best={overview.best}
@@ -118,11 +113,7 @@ async function ThemeOverview({ overview }: { overview: RecapOverview }) {
 
   return (
     <div className="space-y-3">
-      <OverviewSummary
-        common={common}
-        summary={t(common ? "amountCommon" : "amountBest", { range: format.amountSpan(overview.best.start, overview.best.end) })}
-        detail={t(common ? "amountCommonDetail" : "amountBestDetail", { count: best.count, total: best.total })}
-      />
+      {summary}
       <AmountOverview
         ranges={overview.ranges}
         best={overview.best}
