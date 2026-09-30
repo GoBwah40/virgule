@@ -64,9 +64,9 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | Hébergement | Vercel, projet `gobwah40s-projects/virgule`, fonctions à Dublin (`dub1`) |
 | Base | Turso `virgule`, Irlande (`aws-eu-west-1`) |
 | Déploiement | Automatique à chaque push sur `main` |
-| Temps réel | Rafraîchissement toutes les 3 secondes (Pusher pas encore activé) |
+| Temps réel | Pusher Channels (cluster `eu`), avec rafraîchissement de secours toutes les 30 secondes |
 
-Ce qu'il reste à faire (variables à renseigner ou nettoyer, Pusher, base de prévisualisation…) est suivi dans **[A_FAIRE.md](A_FAIRE.md)**.
+Ce qu'il reste à faire (variables à nettoyer, base de prévisualisation, test sur téléphone…) est suivi dans **[A_FAIRE.md](A_FAIRE.md)**.
 
 ## Déploiement sur Vercel
 
