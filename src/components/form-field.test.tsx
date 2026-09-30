@@ -15,4 +15,15 @@ describe("FormField", () => {
     expect(screen.getByLabelText("Session name")).toHaveAttribute("id", "session");
     expect(screen.getByText("Visible to everyone")).toBeInTheDocument();
   });
+
+  it("shows the action on the control's row, above the hint", () => {
+    renderUi(
+      <FormField id="place" label="Place" hint="We add the map link" action={<button type="submit">Add</button>}>
+        <input id="place" />
+      </FormField>,
+    );
+    const row = screen.getByRole("button", { name: "Add" }).parentElement;
+    expect(row).toContainElement(screen.getByLabelText("Place"));
+    expect(row).not.toContainElement(screen.getByText("We add the map link"));
+  });
 });
