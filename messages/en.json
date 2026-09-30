@@ -4,6 +4,9 @@
     "tagline": "Every idea, one shared decision.",
     "description": "Plan and decide together: everyone suggests, everyone votes, we keep the best ideas."
   },
+  "footer": {
+    "source": "Source code"
+  },
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",

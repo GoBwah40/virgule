@@ -2,6 +2,11 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.5.1 — 2026-09-30
+
+- Les nouveautés s'ouvrent en glissant depuis le bas, et prennent plus de place sur ordinateur.
+- Un lien vers le code source de Virgule en bas de page.
+
 ## 0.4.0 — 2026-09-30
 
 - Nouvelle page d'accueil.

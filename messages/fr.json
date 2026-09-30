@@ -4,6 +4,9 @@
     "tagline": "Toutes les idées, une décision commune.",
     "description": "Planifiez et décidez à plusieurs : chacun propose, tout le monde vote, on garde les meilleures idées."
   },
+  "footer": {
+    "source": "Code source"
+  },
   "common": {
     "cancel": "Annuler",
     "confirm": "Confirmer",

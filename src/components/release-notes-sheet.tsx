@@ -64,10 +64,17 @@ export function ReleaseNotesSheet({ version, releases, unread = false, onOpenCha
       <SheetContent
         side="bottom"
         showCloseButton={false}
-        className="mx-auto max-h-[85dvh] w-full max-w-lg gap-0 rounded-t-3xl border-x pb-[env(safe-area-inset-bottom)] motion-reduce:transition-none"
+        className={cn(
+          "mx-auto max-h-[85dvh] w-full max-w-lg gap-0 rounded-t-3xl border-x pb-[env(safe-area-inset-bottom)] sm:max-w-2xl",
+          // Phone: slides up from the bottom edge, no fade (`!` to win over the Sheet's own styles).
+          "duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] data-ending-style:duration-200 data-ending-style:ease-in max-sm:data-ending-style:translate-y-full! max-sm:data-ending-style:opacity-100! max-sm:data-starting-style:translate-y-full! max-sm:data-starting-style:opacity-100!",
+          // Large screen: wider floating panel that fades in from slightly lower.
+          "sm:bottom-6 sm:max-h-[min(85dvh,48rem)] sm:rounded-3xl sm:border",
+          "motion-reduce:transition-none",
+        )}
       >
-        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border" aria-hidden />
-        <div className="flex items-start justify-between gap-4 border-b px-5 pt-3 pb-4">
+        <div className="mx-auto mt-2 h-1 w-10 rounded-full bg-border sm:hidden" aria-hidden />
+        <div className="flex items-start justify-between gap-4 border-b px-5 pt-3 pb-4 sm:px-8 sm:pt-6">
           <div className="space-y-1">
             <SheetTitle className="text-2xl font-extrabold">{labels.title}</SheetTitle>
             <SheetDescription>{labels.description}</SheetDescription>
@@ -77,7 +84,7 @@ export function ReleaseNotesSheet({ version, releases, unread = false, onOpenCha
             <span className="sr-only">{labels.close}</span>
           </SheetClose>
         </div>
-        <div className="divide-y divide-dashed overflow-y-auto px-5">
+        <div className="divide-y divide-dashed overflow-y-auto px-5 sm:px-8">
           {releases.map((release, index) => (
             <section key={release.version} className="space-y-4 py-5" aria-labelledby={`release-${release.version}`}>
               <h2 id={`release-${release.version}`} className="flex flex-wrap items-baseline gap-2">
