@@ -25,12 +25,12 @@ Values are masked in Vercel; this table shows where each variable exists and wha
 | `TURSO_AUTH_TOKEN` | ✅ | ⚠️ | Same. | Replace the Preview value. |
 | `CRON_SECRET` | ✅ | — | The cron only runs in production. | Done: no Preview value. |
 | `DATABASE_URL` | — | — | Only used locally. | Done: removed from both environments. |
-| `PUSHER_APP_ID` | ✅ | ⚠️ | Production: Pusher app `eu`. Preview: old value from September 28, unknown. | Preview: replace, or delete to sync by polling. |
-| `PUSHER_SECRET` | ✅ | ⏳ | Same. | Same. |
-| `NEXT_PUBLIC_PUSHER_KEY` | ✅ | ⚠️ | Public by nature (read by the browser): *Config* type, not *Secret*. The Preview value is still a *Secret*. | Same. |
-| `NEXT_PUBLIC_PUSHER_CLUSTER` | ✅ | ⚠️ | `eu`, *Config* type. The Preview value is still a *Secret*. | Same. |
+| `PUSHER_APP_ID` | ✅ | — | Production: Pusher app `eu`. Preview: removed on September 30, preview deployments sync by polling. | Preview: fill in if needed. |
+| `PUSHER_SECRET` | ✅ | — | Same. | Same. |
+| `NEXT_PUBLIC_PUSHER_KEY` | ✅ | — | Public by nature (read by the browser): *Config* type, not *Secret*. | Same (with `--no-sensitive`). |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | ✅ | — | `eu`, *Config* type. | Same. |
 
-Legend: ✅ in place · ⚠️ to check or clean up · ⏳ to fill in later.
+Legend: ✅ in place · ⚠️ to check or clean up · ⏳ to fill in later · — not set.
 
 Locally, production values are in `.env.production.local` and preview values in `.env.preview.local` (ignored by git, readable only by you). Do not share them and never commit them.
 
@@ -42,11 +42,7 @@ Run from the project root. Values go through standard input: they are not displa
 (set -a; . ./.env.preview.local; set +a; printf %s "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL preview --force --sensitive; printf %s "$TURSO_AUTH_TOKEN" | vercel env add TURSO_AUTH_TOKEN preview --force --sensitive)
 ```
 
-Then `vercel env ls` to check (as of September 30, `CRON_SECRET` and `DATABASE_URL` are already gone from Preview). Without Pusher values for Preview, preview deployments sync by polling; to remove the old ones:
-
-```bash
-for v in PUSHER_APP_ID PUSHER_SECRET NEXT_PUBLIC_PUSHER_KEY NEXT_PUBLIC_PUSHER_CLUSTER; do vercel env rm $v preview -y; done
-```
+Then `vercel env ls` to check: Preview should only contain `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`, with a recent creation date. `CRON_SECRET`, `DATABASE_URL` and the Preview Pusher values were removed on September 30.
 
 ## Before inviting people
 
