@@ -1,12 +1,17 @@
 import { Equal } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
+import { AmountOverview } from "@/components/amount-overview";
+import { DateOverview } from "@/components/date-overview";
 import { ExpandableListItem } from "@/components/expandable-list-item";
+import { MapLink } from "@/components/map-link";
+import { OverviewSummary } from "@/components/overview-summary";
 import { StatusBadge } from "@/components/status-badge";
 import { VoteSummary } from "@/components/vote-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import type { RecapRound } from "@/lib/room";
+import { getIdeaFormat } from "@/lib/idea-format";
+import type { RecapOverview, RecapRound } from "@/lib/room";
 
 export async function RecapRoundView({ round }: { round: RecapRound }) {
   const t = await getTranslations("recap");
@@ -20,7 +25,8 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
             <CardTitle className="font-heading text-xl font-bold">{theme.title}</CardTitle>
             {theme.description && <CardDescription>{theme.description}</CardDescription>}
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
+            {theme.overview && <ThemeOverview overview={theme.overview} />}
             {theme.ideas.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("empty")}</p>
             ) : (
@@ -51,7 +57,9 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
                     }
                     // Les votes restent discrets : ils se déplient au toucher (ou au clic, au clavier).
                     details={
-                      <VoteSummary
+                      <div className="space-y-2">
+                        {idea.mapQuery && <MapLink query={idea.mapQuery} label={tIdeas("mapLink")} />}
+                        <VoteSummary
                         up={idea.score.up}
                         down={idea.score.down}
                         labels={{
@@ -59,6 +67,7 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
                           down: t("votesDown", { count: idea.score.down }),
                         }}
                       />
+                      </div>
                     }
                   >
                     {idea.content}
@@ -69,6 +78,57 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+/** Synthèse « créneau commun » ou « budget compatible » au-dessus des idées du sujet. */
+async function ThemeOverview({ overview }: { overview: RecapOverview }) {
+  const t = await getTranslations("recap");
+  const locale = await getLocale();
+  const format = await getIdeaFormat();
+  const { best } = overview;
+  const common = best.count === best.total;
+
+  if (overview.type === "dates") {
+    return (
+      <div className="space-y-3">
+        <OverviewSummary
+          common={common}
+          summary={t(common ? "dateCommon" : "dateBest", { range: format.dateSpan(overview.best.start, overview.best.end) })}
+          detail={t(common ? "dateCommonDetail" : "dateBestDetail", { count: best.count, total: best.total })}
+        />
+        <DateOverview
+          periods={overview.periods}
+          best={overview.best}
+          locale={locale}
+          labels={{
+            view: t("viewLabel"),
+            timeline: t("viewTimeline"),
+            calendar: t("viewCalendar"),
+            period: t("overviewPeriod"),
+            overlap: t("overviewOverlap"),
+            best: t("overviewBest"),
+            days: t("overviewDays"),
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <OverviewSummary
+        common={common}
+        summary={t(common ? "amountCommon" : "amountBest", { range: format.amountSpan(overview.best.start, overview.best.end) })}
+        detail={t(common ? "amountCommonDetail" : "amountBestDetail", { count: best.count, total: best.total })}
+      />
+      <AmountOverview
+        ranges={overview.ranges}
+        best={overview.best}
+        locale={locale}
+        labels={{ range: t("overviewRange"), zone: t("overviewZone"), amounts: t("overviewAmounts") }}
+      />
     </div>
   );
 }

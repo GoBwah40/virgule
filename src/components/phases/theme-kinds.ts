@@ -1,4 +1,4 @@
-import { CalendarDays, CalendarRange, Coins, Euro, Type, type LucideIcon } from "lucide-react";
+import { CalendarDays, CalendarRange, Coins, Euro, List, MapPin, Type, type LucideIcon } from "lucide-react";
 
 import type { ThemeKind } from "@/lib/idea-value";
 
@@ -9,4 +9,6 @@ export const THEME_KIND_ICONS: Record<ThemeKind, LucideIcon> = {
   DATE_RANGE: CalendarRange,
   AMOUNT: Euro,
   AMOUNT_RANGE: Coins,
+  PLACE: MapPin,
+  CHOICE: List,
 };

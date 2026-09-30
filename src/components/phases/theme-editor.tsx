@@ -8,6 +8,7 @@ import { ConfirmButton } from "@/components/confirm-button";
 import { FormField } from "@/components/form-field";
 import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
+import { OptionListField } from "@/components/option-list-field";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { SegmentedControl } from "@/components/segmented-control";
 import { SettingSwitch } from "@/components/setting-switch";
@@ -19,15 +20,31 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { IDEAS_TIMER_OPTIONS, LIMITS } from "@/lib/config";
-import { THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
+import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 
-type Theme = { id: string; title: string; description: string | null; kind: ThemeKind; ideaCount: number };
+type Theme = {
+  id: string;
+  title: string;
+  description: string | null;
+  kind: ThemeKind;
+  options: string[];
+  allowOtherIdeas: boolean;
+  ideaCount: number;
+};
+
+type ThemeValues = {
+  title: string;
+  description: string;
+  kind: ThemeKind;
+  options: string[];
+  allowOtherIdeas: boolean;
+};
 
 /** Sujets courants proposés en un tap (clés du namespace themes.suggestions), avec leur type de réponse. */
 const SUGGESTIONS = {
   goal: "TEXT",
   dates: "DATE_RANGE",
-  place: "TEXT",
+  place: "PLACE",
   budget: "AMOUNT_RANGE",
   priorities: "TEXT",
   roles: "TEXT",
@@ -212,13 +229,16 @@ function ThemeForm({
   initial?: Theme;
   submitLabel: string;
   pending: boolean;
-  onSubmit: (values: { title: string; description: string; kind: ThemeKind }, reset: () => void) => void;
+  onSubmit: (values: ThemeValues, reset: () => void) => void;
   onCancel?: () => void;
 }) {
   const t = useTranslations("themes");
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
   const [kind, setKind] = useState<ThemeKind>(initial?.kind ?? "TEXT");
+  const [options, setOptions] = useState<string[]>(initial?.options ?? []);
+  const [allowOtherIdeas, setAllowOtherIdeas] = useState(initial?.allowOtherIdeas ?? false);
+  const optionsMissing = kind === "CHOICE" && options.length < CHOICE_OPTIONS.min;
   const idPrefix = initial?.id ?? "new";
   // Des idées existent déjà : changer leur type les rendrait illisibles.
   const kindLocked = (initial?.ideaCount ?? 0) > 0;
@@ -230,10 +250,12 @@ function ThemeForm({
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit({ title, description, kind }, () => {
+            onSubmit({ title, description, kind, options, allowOtherIdeas }, () => {
               setTitle("");
               setDescription("");
               setKind("TEXT");
+              setOptions([]);
+              setAllowOtherIdeas(false);
             });
           }}
         >
@@ -267,13 +289,38 @@ function ThemeForm({
             disabled={kindLocked}
             hint={kindLocked ? t("kindLocked") : t(`kindHints.${kind}`)}
           />
+          {kind === "CHOICE" && (
+            <div className="space-y-4 rounded-xl bg-muted/50 p-3 motion-safe:animate-in motion-safe:fade-in">
+              <OptionListField
+                idPrefix={idPrefix}
+                value={options}
+                onChange={setOptions}
+                max={CHOICE_OPTIONS.max}
+                maxLength={MAX_OPTION_LENGTH}
+                labels={{
+                  label: t("optionsLabel"),
+                  hint: t("optionsHint", { min: CHOICE_OPTIONS.min, max: CHOICE_OPTIONS.max }),
+                  placeholder: t("optionPlaceholder"),
+                  add: t("optionAdd"),
+                  remove: (option) => t("optionRemove", { option }),
+                }}
+              />
+              <SettingSwitch
+                id={`${idPrefix}-other-ideas`}
+                label={t("allowOtherIdeas")}
+                hint={t("allowOtherIdeasHint")}
+                checked={allowOtherIdeas}
+                onCheckedChange={setAllowOtherIdeas}
+              />
+            </div>
+          )}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {onCancel && (
               <Button type="button" variant="ghost" onClick={onCancel}>
                 {t("cancel")}
               </Button>
             )}
-            <Button type="submit" disabled={pending || !title.trim()}>
+            <Button type="submit" disabled={pending || !title.trim() || optionsMissing}>
               {submitLabel}
             </Button>
           </div>

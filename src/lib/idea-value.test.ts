@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { describeIdea, ideaKey, isIsoDate, MAX_AMOUNT, parseIdeaInput, rangeStartPrecision, withFirstOrdinal, type IdeaFields } from "@/lib/idea-value";
+import { describeIdea, ideaKey, mapSearchUrl, parseChoiceOptions, readChoiceOptions, isIsoDate, MAX_AMOUNT, parseIdeaInput, rangeStartPrecision, withFirstOrdinal, type IdeaFields } from "@/lib/idea-value";
 
 const format = {
   date: (iso: string) => `date(${iso})`,
@@ -122,5 +122,37 @@ describe("ideaKey", () => {
     expect(ideaKey("DATE_RANGE", a)).toBe(ideaKey("DATE_RANGE", { ...a }));
     expect(ideaKey("DATE_RANGE", a)).not.toBe(ideaKey("DATE_RANGE", { ...a, dateEnd: "2027-06-15" }));
     expect(ideaKey("AMOUNT_RANGE", fields({ amountMin: 300, amountMax: 500 }))).toBe("300/500");
+  });
+});
+
+describe("sujets Lieu et Liste", () => {
+  it("valident une proposition comme du texte", () => {
+    expect(parseIdeaInput("PLACE", { content: "  Gîte du Vercors " })).toEqual({
+      ok: true,
+      fields: fields({ content: "Gîte du Vercors" }),
+    });
+    expect(parseIdeaInput("CHOICE", { content: "" })).toEqual({ ok: false, error: "invalidInput" });
+  });
+
+  it("parseChoiceOptions accepte 2 à 10 options distinctes", () => {
+    expect(parseChoiceOptions([" Mer ", "Montagne", "Ville"])).toEqual(["Mer", "Montagne", "Ville"]);
+    expect(parseChoiceOptions(["Mer"])).toBeNull();
+    expect(parseChoiceOptions(["Mer", "mer !"])).toBeNull();
+    expect(parseChoiceOptions(["Mer", ""])).toBeNull();
+    expect(parseChoiceOptions(Array.from({ length: 11 }, (_, i) => `Option ${i}`))).toBeNull();
+    expect(parseChoiceOptions("Mer")).toBeNull();
+  });
+
+  it("readChoiceOptions tolère une valeur absente ou illisible", () => {
+    expect(readChoiceOptions('["Mer","Ville"]')).toEqual(["Mer", "Ville"]);
+    expect(readChoiceOptions(null)).toEqual([]);
+    expect(readChoiceOptions("pas du json")).toEqual([]);
+  });
+
+  it("mapSearchUrl vise Plans sur Apple, Google Maps ailleurs", () => {
+    expect(mapSearchUrl("Gîte, Vercors", true)).toBe("https://maps.apple.com/?q=G%C3%AEte%2C%20Vercors");
+    expect(mapSearchUrl("Gîte, Vercors", false)).toBe(
+      "https://www.google.com/maps/search/?api=1&query=G%C3%AEte%2C%20Vercors",
+    );
   });
 });
