@@ -1,0 +1,67 @@
+"use client";
+
+import { ChevronDown } from "lucide-react";
+import { useId, useState } from "react";
+
+import { LIST_ITEM_TONES } from "@/components/list-item";
+import { cn } from "@/lib/utils";
+
+type Props = {
+  children: React.ReactNode;
+  meta?: React.ReactNode;
+  /** Éléments affichés à droite (non interactifs : toute la ligne est déjà un bouton). */
+  aside?: React.ReactNode;
+  /** Contenu déplié sous la ligne au toucher (ex. détail des votes). */
+  details: React.ReactNode;
+  tone?: keyof typeof LIST_ITEM_TONES;
+  defaultOpen?: boolean;
+  className?: string;
+};
+
+/**
+ * Ligne de liste qui se déplie au toucher, au clic ou au clavier : même apparence que
+ * ListItem, avec un chevron qui indique qu'il y a un détail à voir.
+ */
+export function ExpandableListItem({ children, meta, aside, details, tone = "neutral", defaultOpen = false, className }: Props) {
+  const [open, setOpen] = useState(defaultOpen);
+  const detailsId = useId();
+
+  return (
+    <li
+      className={cn(
+        "overflow-hidden rounded-xl border-[1.5px] transition-colors duration-300",
+        "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2",
+        LIST_ITEM_TONES[tone],
+        className,
+      )}
+    >
+      <button
+        type="button"
+        aria-expanded={open}
+        aria-controls={detailsId}
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full cursor-pointer flex-col gap-2.5 px-3.5 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset sm:flex-row sm:items-center sm:justify-between sm:gap-3"
+      >
+        <span className="min-w-0 flex-1 space-y-1.5">
+          <span className="block text-[15px] font-medium break-words whitespace-pre-wrap">{children}</span>
+          {meta && <span className="flex flex-wrap items-center gap-1.5">{meta}</span>}
+        </span>
+        <span className="flex shrink-0 items-center gap-2 self-end sm:self-center">
+          {aside}
+          <ChevronDown
+            className={cn("size-5 text-muted-foreground transition-transform duration-200", open && "rotate-180")}
+            aria-hidden
+          />
+        </span>
+      </button>
+      {/* `hidden` retire le détail de l'arbre d'accessibilité quand il est replié ; il apparaît en fondu. */}
+      <div
+        id={detailsId}
+        hidden={!open}
+        className="px-3.5 pb-3.5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1"
+      >
+        {details}
+      </div>
+    </li>
+  );
+}

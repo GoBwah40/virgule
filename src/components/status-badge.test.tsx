@@ -6,15 +6,14 @@ import { renderUi } from "@/test/render";
 import { StatusBadge } from "./status-badge";
 
 describe("StatusBadge", () => {
-  it("expose le détail des votes aux lecteurs d'écran sans l'afficher", () => {
-    renderUi(<StatusBadge status="retained" label="Retenue" tooltip="Score +2 · 2 pour, 0 contre" />);
-    const badge = screen.getByLabelText("Retenue · Score +2 · 2 pour, 0 contre");
-    expect(badge).toHaveTextContent("Retenue");
-    expect(badge).not.toHaveTextContent("2 pour");
+  it("affiche le statut retenu", () => {
+    renderUi(<StatusBadge status="retained" label="Retenue" />);
+    expect(screen.getByText("Retenue")).toBeInTheDocument();
   });
 
-  it("s'affiche sans infobulle", () => {
-    renderUi(<StatusBadge status="rejected" label="Écartée" />);
+  it("affiche le statut écarté, sans élément focusable (il peut vivre dans un bouton)", () => {
+    const { container } = renderUi(<StatusBadge status="rejected" label="Écartée" />);
     expect(screen.getByText("Écartée")).toBeInTheDocument();
+    expect(container.querySelector("[tabindex], button, a")).toBeNull();
   });
 });
