@@ -5,7 +5,6 @@ Changes that make an existing feature clearer, faster or more pleasant. Format a
 ## 0.5.3 — 2026-09-30
 
 - Fields, focus outlines and dotted edges stand out better, in light and dark mode, and the days in the date calendar are easier to read.
-- A button that is not available yet is shown in gray instead of faded orange.
 
 ## 0.5.2 — 2026-09-30
 
