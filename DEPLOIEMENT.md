@@ -145,6 +145,8 @@ L'ordre compte : la base doit être migrée **avant** que le nouveau code ne tou
 
 Préférez des migrations compatibles avec l'ancien code : ajouter une colonne facultative plutôt que renommer ou supprimer. Ainsi, rien ne casse entre les étapes 2 et 3.
 
+**Les migrations doivent être additives.** Quand SQLite ne sait pas modifier une table en place (ajout d'une valeur par défaut à une colonne existante, changement de type…), Prisma génère une reconstruction : `DROP TABLE` précédé de `PRAGMA foreign_keys=OFF`. Or `pnpm db:migrate:prod` applique chaque migration dans une transaction, où SQLite ignore ce PRAGMA : le `DROP TABLE` supprimerait en cascade les votes et les idées. Le script refuse donc toute migration contenant `DROP TABLE` ou `foreign_keys=OFF`. Dans ce cas, réécrivez la migration en `ALTER TABLE … ADD COLUMN` (voir `prisma/migrations/20260930091500_sujets_types` pour un exemple).
+
 ### Prévisualisations et production sur la même base
 
 Par défaut, les variables Turso s'appliquent à tous les environnements Vercel : les déploiements de prévisualisation écrivent donc dans la base de production. Pour les séparer, créez une seconde base (`turso db create virgule-preview`), migrez-la, puis, dans Vercel, donnez aux variables `TURSO_*` une valeur différente pour l'environnement *Preview*.

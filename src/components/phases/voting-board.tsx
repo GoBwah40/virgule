@@ -4,8 +4,12 @@ import { ListChecks, Tags, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
+import { AmountField } from "@/components/amount-field";
 import { ConfirmButton } from "@/components/confirm-button";
+import { DateField } from "@/components/date-field";
+import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
+import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { VoteButtons } from "@/components/vote-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,20 +18,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addIdea, backToThemes, castVote, deleteIdea, goToRecap } from "@/lib/actions";
 import { LIMITS } from "@/lib/config";
+import type { IdeaInput, ThemeKind } from "@/lib/idea-value";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
+import { cn } from "@/lib/utils";
 
 export function ThemeIdeas({ slug, theme }: { slug: string; theme: VotingTheme }) {
   const t = useTranslations("ideas");
-  const [content, setContent] = useState("");
-  const [pending, run] = useAction();
-
-  const submit = () => run(() => addIdea(slug, theme.id, { content }), () => setContent(""));
+  const tThemes = useTranslations("themes");
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-heading text-xl font-bold">{theme.title}</CardTitle>
         {theme.description && <CardDescription>{theme.description}</CardDescription>}
+        {theme.kind !== "TEXT" && (
+          <IconBadge className="mt-1" icon={THEME_KIND_ICONS[theme.kind]} label={tThemes(`kinds.${theme.kind}`)} />
+        )}
       </CardHeader>
       <CardContent>
         {theme.ideas.length === 0 ? (
@@ -41,35 +47,109 @@ export function ThemeIdeas({ slug, theme }: { slug: string; theme: VotingTheme }
         )}
       </CardContent>
       <CardFooter className="border-t bg-muted/50 py-3">
-        <form
-          className="flex w-full items-end gap-2"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit();
-          }}
-        >
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            onKeyDown={(e) => {
-              // Entrée pour envoyer, Maj+Entrée pour un retour à la ligne.
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                if (content.trim()) submit();
-              }
-            }}
-            aria-label={t("placeholder")}
-            placeholder={t("placeholder")}
-            maxLength={LIMITS.idea}
-            rows={1}
-            className="min-h-11"
-          />
-          <Button type="submit" disabled={pending || !content.trim()}>
-            {t("add")}
-          </Button>
-        </form>
+        <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
       </CardFooter>
     </Card>
+  );
+}
+
+const EMPTY_DATES = { start: "", end: "" };
+const EMPTY_AMOUNTS = { min: "", max: "" };
+
+/** Saisie d'une idée adaptée au type du sujet : texte, date, période, montant ou fourchette. */
+function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; kind: ThemeKind }) {
+  const t = useTranslations("ideas");
+  const [pending, run] = useAction();
+  const [content, setContent] = useState("");
+  const [dates, setDates] = useState(EMPTY_DATES);
+  const [amounts, setAmounts] = useState(EMPTY_AMOUNTS);
+
+  // Validation côté client pour activer le bouton ; le serveur revalide (parseIdeaInput).
+  const input: IdeaInput | null = (() => {
+    switch (kind) {
+      case "TEXT":
+        return content.trim() ? { content } : null;
+      case "DATE":
+        return dates.start ? { dateStart: dates.start } : null;
+      case "DATE_RANGE":
+        return dates.start && dates.end && dates.end >= dates.start ? { dateStart: dates.start, dateEnd: dates.end } : null;
+      case "AMOUNT":
+        return amounts.min ? { amountMin: Number(amounts.min) } : null;
+      case "AMOUNT_RANGE":
+        return amounts.min && amounts.max && Number(amounts.max) >= Number(amounts.min)
+          ? { amountMin: Number(amounts.min), amountMax: Number(amounts.max) }
+          : null;
+    }
+  })();
+
+  const submit = () => {
+    if (!input) return;
+    run(
+      () => addIdea(slug, themeId, input),
+      () => {
+        setContent("");
+        setDates(EMPTY_DATES);
+        setAmounts(EMPTY_AMOUNTS);
+      },
+    );
+  };
+
+  const button = (
+    <Button type="submit" disabled={pending || !input} className="sm:self-end">
+      {t("add")}
+    </Button>
+  );
+
+  return (
+    <form
+      className={cn("flex w-full gap-2", kind === "TEXT" ? "items-end" : "flex-col sm:flex-row sm:items-end")}
+      onSubmit={(e) => {
+        e.preventDefault();
+        submit();
+      }}
+    >
+      {kind === "TEXT" && (
+        <Textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            // Entrée pour envoyer, Maj+Entrée pour un retour à la ligne.
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          aria-label={t("placeholder")}
+          placeholder={t("placeholder")}
+          maxLength={LIMITS.idea}
+          rows={1}
+          className="min-h-11"
+        />
+      )}
+      {(kind === "DATE" || kind === "DATE_RANGE") && (
+        <div className="min-w-0 flex-1">
+          <DateField
+            mode={kind === "DATE" ? "single" : "range"}
+            idPrefix={`idea-${themeId}`}
+            value={dates}
+            onChange={setDates}
+            labels={{ date: t("date"), from: t("dateFrom"), to: t("dateTo") }}
+          />
+        </div>
+      )}
+      {(kind === "AMOUNT" || kind === "AMOUNT_RANGE") && (
+        <div className="min-w-0 flex-1">
+          <AmountField
+            mode={kind === "AMOUNT" ? "single" : "range"}
+            idPrefix={`idea-${themeId}`}
+            value={amounts}
+            onChange={setAmounts}
+            labels={{ amount: t("amount"), min: t("amountMin"), max: t("amountMax"), currency: t("currency") }}
+          />
+        </div>
+      )}
+      {button}
+    </form>
   );
 }
 

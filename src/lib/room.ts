@@ -7,6 +7,8 @@ import type { Phase } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
 import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, voteProgress } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
+import { getIdeaFormat } from "@/lib/idea-format";
+import { describeIdea, type ThemeKind } from "@/lib/idea-value";
 import { getParticipantToken } from "@/lib/session";
 
 export type RoomContext =
@@ -72,7 +74,7 @@ export async function getThemes(roomId: string) {
   const themes = await db.theme.findMany({
     where: { roomId },
     orderBy: { position: "asc" },
-    select: { id: true, title: true, description: true, _count: { select: { ideas: true } } },
+    select: { id: true, title: true, description: true, kind: true, _count: { select: { ideas: true } } },
   });
   return themes.map(({ _count, ...theme }) => ({ ...theme, ideaCount: _count.ideas }));
 }
@@ -93,6 +95,7 @@ export type VotingTheme = {
   id: string;
   title: string;
   description: string | null;
+  kind: ThemeKind;
   ideas: VotingIdea[];
 };
 
@@ -116,18 +119,21 @@ export async function getVotingView(
       },
     },
   });
+  const format = await getIdeaFormat();
 
   return themes.map((theme) => ({
     id: theme.id,
     title: theme.title,
     description: theme.description,
+    kind: theme.kind,
     ideas: theme.ideas
       .filter((idea) => isActiveInRound(idea, round))
       .map((idea) => {
         const isMine = idea.authorId === meId;
         return {
           id: idea.id,
-          content: idea.content,
+          // Sujets typés : texte mis en forme à partir des dates / montants.
+          content: describeIdea(theme.kind, idea, format),
           isMine,
           isNew: idea.createdRound === round,
           myVote: idea.votes[0]?.positive ?? null,
@@ -192,6 +198,7 @@ export async function getRecap(
     },
   });
 
+  const format = await getIdeaFormat();
   const rounds: RecapRound[] = [];
   for (let round = 1; round <= room.round; round++) {
     let qualifiedCount = 0;
@@ -207,7 +214,7 @@ export async function getRecap(
               : isQualified(score, room.requireNetPositive);
           ideaCount++;
           if (qualified) qualifiedCount++;
-          return { id: idea.id, content: idea.content, score, qualified, isMine: idea.authorId === meId };
+          return { id: idea.id, content: describeIdea(theme.kind, idea, format), score, qualified, isMine: idea.authorId === meId };
         })
         .sort((a, b) => compareByScore(a.score, b.score));
       return { id: theme.id, title: theme.title, description: theme.description, ideas };

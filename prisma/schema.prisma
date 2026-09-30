@@ -54,12 +54,23 @@ model Participant {
   @@unique([roomId, pseudo])
 }
 
+/// Type de réponse attendu pour les idées d'un sujet.
+enum ThemeKind {
+  TEXT // texte libre
+  DATE // une date
+  DATE_RANGE // une période (du… au…)
+  AMOUNT // un montant en euros
+  AMOUNT_RANGE // une fourchette de montants en euros
+}
+
 model Theme {
   id          String   @id @default(cuid())
   roomId      String
   room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   title       String
   description String?
+  /// Non modifiable une fois que des idées existent (elles perdraient leur sens).
+  kind        ThemeKind @default(TEXT)
   position    Int
   createdAt   DateTime @default(now())
   ideas       Idea[]
@@ -76,7 +87,15 @@ model Idea {
   /// Conservé pour la règle d'auto-vote ; jamais exposé aux autres participants.
   authorId         String
   author           Participant @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  /// Texte de l'idée (sujets TEXT) ; chaîne vide pour les sujets typés, affichés à partir des champs ci-dessous.
+  /// Pas de valeur par défaut : en ajouter une forcerait SQLite à reconstruire la table.
   content          String
+  /// Sujets DATE / DATE_RANGE : dates calendaires « AAAA-MM-JJ » (sans heure ni fuseau).
+  dateStart        String?
+  dateEnd          String?
+  /// Sujets AMOUNT / AMOUNT_RANGE : montants en euros entiers.
+  amountMin        Int?
+  amountMax        Int?
   /// Tour pendant lequel l'idée a été proposée.
   createdRound     Int
   /// Premier tour auquel l'idée ne participe plus (null = toujours en lice).

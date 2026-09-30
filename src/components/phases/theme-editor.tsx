@@ -6,7 +6,10 @@ import { useState } from "react";
 
 import { ConfirmButton } from "@/components/confirm-button";
 import { FormField } from "@/components/form-field";
+import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
+import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
+import { SegmentedControl } from "@/components/segmented-control";
 import { SettingSwitch } from "@/components/setting-switch";
 import { SuggestionChips } from "@/components/suggestion-chips";
 import { Button } from "@/components/ui/button";
@@ -16,11 +19,20 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { LIMITS } from "@/lib/config";
+import { THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 
-type Theme = { id: string; title: string; description: string | null; ideaCount: number };
+type Theme = { id: string; title: string; description: string | null; kind: ThemeKind; ideaCount: number };
 
-/** Sujets courants proposés en un tap (clés du namespace themes.suggestions). */
-const SUGGESTIONS = ["goal", "dates", "place", "budget", "priorities", "roles"] as const;
+/** Sujets courants proposés en un tap (clés du namespace themes.suggestions), avec leur type de réponse. */
+const SUGGESTIONS = {
+  goal: "TEXT",
+  dates: "DATE_RANGE",
+  place: "TEXT",
+  budget: "AMOUNT_RANGE",
+  priorities: "TEXT",
+  roles: "TEXT",
+} as const satisfies Record<string, ThemeKind>;
+type SuggestionKey = keyof typeof SUGGESTIONS;
 
 export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; themes: Theme[]; allowSelfVote: boolean }) {
   const t = useTranslations("themes");
@@ -29,7 +41,9 @@ export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; the
   const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
   const existing = new Set(themes.map((th) => th.title.toLowerCase()));
-  const suggestions = SUGGESTIONS.map((key) => ({ id: key, label: t(`suggestions.${key}.title`) })).filter(
+  const suggestions = (Object.keys(SUGGESTIONS) as SuggestionKey[])
+    .map((key) => ({ id: key, label: t(`suggestions.${key}.title`) }))
+    .filter(
     (s) => !existing.has(s.label.toLowerCase()),
   );
 
@@ -51,9 +65,13 @@ export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; the
           items={suggestions}
           disabled={pending}
           onSelect={(key) => {
-            const k = key as (typeof SUGGESTIONS)[number];
+            const k = key as SuggestionKey;
             run(() =>
-              addTheme(slug, { title: t(`suggestions.${k}.title`), description: t(`suggestions.${k}.description`) }),
+              addTheme(slug, {
+                title: t(`suggestions.${k}.title`),
+                description: t(`suggestions.${k}.description`),
+                kind: SUGGESTIONS[k],
+              }),
             );
           }}
         />
@@ -117,7 +135,14 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
   return (
     <ListItem
       tone="plain"
-      meta={theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}
+      meta={
+        (theme.description || theme.kind !== "TEXT") && (
+          <>
+            {theme.kind !== "TEXT" && <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={t(`kinds.${theme.kind}`)} />}
+            {theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}
+          </>
+        )
+      }
       actions={
         <>
           <Button variant="ghost" size="icon-sm" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
@@ -165,13 +190,16 @@ function ThemeForm({
   initial?: Theme;
   submitLabel: string;
   pending: boolean;
-  onSubmit: (values: { title: string; description: string }, reset: () => void) => void;
+  onSubmit: (values: { title: string; description: string; kind: ThemeKind }, reset: () => void) => void;
   onCancel?: () => void;
 }) {
   const t = useTranslations("themes");
   const [title, setTitle] = useState(initial?.title ?? "");
   const [description, setDescription] = useState(initial?.description ?? "");
+  const [kind, setKind] = useState<ThemeKind>(initial?.kind ?? "TEXT");
   const idPrefix = initial?.id ?? "new";
+  // Des idées existent déjà : changer leur type les rendrait illisibles.
+  const kindLocked = (initial?.ideaCount ?? 0) > 0;
 
   return (
     <Card size="sm" className={initial ? undefined : "border-dashed"}>
@@ -180,9 +208,10 @@ function ThemeForm({
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit({ title, description }, () => {
+            onSubmit({ title, description, kind }, () => {
               setTitle("");
               setDescription("");
+              setKind("TEXT");
             });
           }}
         >
@@ -207,6 +236,15 @@ function ThemeForm({
               rows={2}
             />
           </FormField>
+          <SegmentedControl
+            name={`${idPrefix}-kind`}
+            label={t("kindLabel")}
+            options={THEME_KINDS.map((k) => ({ value: k, label: t(`kinds.${k}`), icon: THEME_KIND_ICONS[k] }))}
+            value={kind}
+            onChange={setKind}
+            disabled={kindLocked}
+            hint={kindLocked ? t("kindLocked") : t(`kindHints.${kind}`)}
+          />
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {onCancel && (
               <Button type="button" variant="ghost" onClick={onCancel}>

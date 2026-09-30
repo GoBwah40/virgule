@@ -39,6 +39,24 @@ if (pending.length === 0) {
   process.exit(0);
 }
 
+/**
+ * Garde-fou : une migration qui reconstruit une table (DROP TABLE, ou désactivation des
+ * clés étrangères comme le fait Prisma pour « RedefineTables ») supprimerait des données.
+ * Dans une transaction, SQLite ignore `PRAGMA foreign_keys=OFF` : le DROP TABLE déclenche
+ * alors les suppressions en cascade (votes, idées…). On refuse avant d'appliquer quoi que ce soit.
+ */
+const DANGEROUS = [/\bDROP\s+TABLE\b/i, /PRAGMA\s+foreign_keys\s*=\s*OFF/i];
+for (const name of pending) {
+  const sql = await readFile(path.join(migrationsDir, name, "migration.sql"), "utf8");
+  if (DANGEROUS.some((re) => re.test(sql))) {
+    console.error(
+      `✘ ${name} reconstruit une table (DROP TABLE / foreign_keys=OFF) : elle effacerait des données en production.\n` +
+        "  Réécris-la en migration additive (ALTER TABLE … ADD COLUMN), voir DEPLOIEMENT.md.",
+    );
+    process.exit(1);
+  }
+}
+
 for (const name of pending) {
   const sql = await readFile(path.join(migrationsDir, name, "migration.sql"), "utf8");
   console.log(`→ ${name}`);
