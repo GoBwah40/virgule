@@ -46,8 +46,15 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
             ariaLabel={t("voteProgressLabel")}
           />
         )}
+        {/* Relance douce : chacun voit ce qu'il lui reste, sans rien savoir des autres. */}
         {votable.length > 0 && (
-          <p className="text-sm text-muted-foreground">{t("myVotes", { voted, total: votable.length })}</p>
+          <ProgressMeter
+            value={voted}
+            max={votable.length}
+            label={t("myVotesLeft", { count: votable.length - voted })}
+            completeLabel={t("myVotesComplete")}
+            ariaLabel={t("myVotesLabel")}
+          />
         )}
       </div>
       <div className="grid items-start gap-6 md:grid-cols-2">

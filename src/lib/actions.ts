@@ -11,7 +11,7 @@ import type { Phase } from "@/generated/prisma/enums";
 import { LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/config";
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
-import { type IdeaInput, parseIdeaInput, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
+import { ideaKey, type IdeaInput, parseIdeaInput, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { isActiveInRound, isQualified, scoreVotes } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getRoomContext } from "@/lib/room";
@@ -36,6 +36,7 @@ type ActionError =
   | "invalidDateRange"
   | "invalidAmountRange"
   | "themeKindLocked"
+  | "duplicateIdea"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -255,6 +256,12 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
     if (!theme) throw new ActionFailure("invalidInput");
     const parsed = parseIdeaInput(theme.kind, raw.data);
     if (!parsed.ok) throw new ActionFailure(parsed.error);
+    // Doublon : même valeur qu'une idée encore en lice dans ce sujet (visible de tous).
+    const existing = await db.idea.findMany({ where: { themeId } });
+    const key = ideaKey(theme.kind, parsed.fields);
+    if (existing.some((idea) => isActiveInRound(idea, room.round) && ideaKey(theme.kind, idea) === key)) {
+      throw new ActionFailure("duplicateIdea");
+    }
     await db.idea.create({
       data: {
         roomId: room.id,

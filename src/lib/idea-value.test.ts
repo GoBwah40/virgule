@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { describeIdea, isIsoDate, MAX_AMOUNT, parseIdeaInput, rangeStartPrecision, withFirstOrdinal, type IdeaFields } from "@/lib/idea-value";
+import { describeIdea, ideaKey, isIsoDate, MAX_AMOUNT, parseIdeaInput, rangeStartPrecision, withFirstOrdinal, type IdeaFields } from "@/lib/idea-value";
 
 const format = {
   date: (iso: string) => `date(${iso})`,
@@ -105,5 +105,22 @@ describe("withFirstOrdinal", () => {
   it("laisse les autres jours intacts", () => {
     expect(withFirstOrdinal("10 octobre 2026")).toBe("10 octobre 2026");
     expect(withFirstOrdinal("21 octobre 2026")).toBe("21 octobre 2026");
+  });
+});
+
+describe("ideaKey", () => {
+  it("ignore casse, accents, ponctuation et espaces pour le texte", () => {
+    expect(ideaKey("TEXT", fields({ content: "Pique-nique à l'Étang !" }))).toBe(
+      ideaKey("TEXT", fields({ content: "  pique nique a l etang" })),
+    );
+  });
+  it("distingue deux textes différents", () => {
+    expect(ideaKey("TEXT", fields({ content: "Lyon" }))).not.toBe(ideaKey("TEXT", fields({ content: "Lille" })));
+  });
+  it("compare les valeurs des sujets typés", () => {
+    const a = fields({ dateStart: "2027-06-12", dateEnd: "2027-06-14" });
+    expect(ideaKey("DATE_RANGE", a)).toBe(ideaKey("DATE_RANGE", { ...a }));
+    expect(ideaKey("DATE_RANGE", a)).not.toBe(ideaKey("DATE_RANGE", { ...a, dateEnd: "2027-06-15" }));
+    expect(ideaKey("AMOUNT_RANGE", fields({ amountMin: 300, amountMax: 500 }))).toBe("300/500");
   });
 });

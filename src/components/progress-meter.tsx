@@ -14,8 +14,11 @@ type Props = {
   className?: string;
 };
 
+/** Au-delà, les pastilles deviennent illisibles : on passe à une barre. */
+const MAX_DOTS = 10;
+
 /**
- * Avancement d'un petit nombre d'étapes (≤ 10) : une pastille par unité, remplie en
+ * Avancement : une pastille par unité (jusqu'à 10, une barre au-delà), remplie en
  * mangue, puis tout passe en vert quand c'est complet.
  */
 export function ProgressMeter({ value, max, label, completeLabel, ariaLabel, className }: Props) {
@@ -35,17 +38,26 @@ export function ProgressMeter({ value, max, label, completeLabel, ariaLabel, cla
         className,
       )}
     >
-      <span className="flex gap-1" aria-hidden>
-        {Array.from({ length: max }, (_, i) => (
+      {max > MAX_DOTS ? (
+        <span className="h-2.5 w-16 overflow-hidden rounded-full bg-muted" aria-hidden>
           <span
-            key={i}
-            className={cn(
-              "size-2.5 rounded-full transition-colors duration-300",
-              complete ? "bg-success" : i < value ? "bg-highlight" : "bg-muted",
-            )}
+            className={cn("block h-full rounded-full transition-all duration-300", complete ? "bg-success" : "bg-highlight")}
+            style={{ width: `${Math.min(100, (value / max) * 100)}%` }}
           />
-        ))}
-      </span>
+        </span>
+      ) : (
+        <span className="flex gap-1" aria-hidden>
+          {Array.from({ length: max }, (_, i) => (
+            <span
+              key={i}
+              className={cn(
+                "size-2.5 rounded-full transition-colors duration-300",
+                complete ? "bg-success" : i < value ? "bg-highlight" : "bg-muted",
+              )}
+            />
+          ))}
+        </span>
+      )}
       {complete && <Check className="size-4 motion-safe:animate-pop" aria-hidden />}
       <span aria-live="polite">{complete ? completeLabel : label}</span>
     </div>

@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { CopyButton } from "@/components/copy-button";
 import { PhaseStepper } from "@/components/phase-stepper";
+import { InviteDialog } from "@/components/room/invite-dialog";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
 import type { Phase } from "@/generated/prisma/enums";
@@ -37,15 +38,22 @@ export async function RoomHeader({ room, participants, meId }: Props) {
         {/* Colonne de droite : lien puis sièges, serrés l'un sous l'autre sur desktop.
             Sur mobile, `contents` laisse le bouton à côté du nom et les sièges en dernière ligne. */}
         <div className="contents sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:flex sm:flex-col sm:items-end sm:gap-4">
-          <CopyButton
-            size="icon"
-            className="shrink-0 justify-self-end sm:w-auto sm:px-4"
-            value={invitePath}
-            absolute
-            label={t("copyLink")}
-            successMessage={t("linkCopied")}
-            hideLabelOnMobile
-          />
+          <div className="flex shrink-0 gap-2 justify-self-end">
+            <InviteDialog
+              invitePath={invitePath}
+              roomName={room.name}
+              freeSeats={Math.max(0, MAX_PARTICIPANTS - participants.length)}
+            />
+            <CopyButton
+              size="icon"
+              className="sm:w-auto sm:px-4"
+              value={invitePath}
+              absolute
+              label={t("copyLink")}
+              successMessage={t("linkCopied")}
+              hideLabelOnMobile
+            />
+          </div>
           <RoomSeats
             className="order-last col-span-2 sm:order-none"
             invitePath={invitePath}
