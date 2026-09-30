@@ -1,11 +1,12 @@
 {
   "name": "virgule",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
+    "preprod": "bash scripts/preprod.sh",
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "knip": "knip",
@@ -17,6 +18,7 @@
     "postinstall": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:migrate:prod": "tsx scripts/migrate-turso.mts",
+    "db:migrate:preview": "set -a && . ./.env.preview.local && set +a && tsx scripts/migrate-turso.mts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

@@ -1,5 +1,5 @@
 import { ListChecks, Lightbulb, Tags } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getFormatter, getTranslations } from "next-intl/server";
 
 import { CreateRoomForm } from "@/components/home/create-room-form";
 import { IconList } from "@/components/icon-list";
@@ -7,17 +7,26 @@ import { KeyFigures } from "@/components/key-figures";
 import { Logo } from "@/components/logo";
 import { PhaseTransition } from "@/components/phase-transition";
 import { Rosette } from "@/components/rosette";
+import { ReleaseNotes } from "@/components/site/release-notes";
 import { MAX_PARTICIPANTS, ROOM_TTL_DAYS } from "@/lib/config";
+import { APP_VERSION, getReleaseNotes } from "@/lib/release-notes-source";
 
 export default async function HomePage() {
   const t = await getTranslations("home");
   const tApp = await getTranslations("app");
+  const format = await getFormatter();
+  // Dates de mise en production (« AAAA-MM-JJ ») lues en UTC, comme les dates des idées.
+  const releases = (await getReleaseNotes()).map((release) => ({
+    ...release,
+    date: format.dateTime(new Date(`${release.date}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" }),
+  }));
 
   // `overflow-x-clip` : la rosace peut dépasser du bord de l'écran sans créer de défilement horizontal.
   return (
     <PhaseTransition className="flex flex-1 flex-col overflow-x-clip">
-      <header className="mx-auto w-full max-w-5xl px-4 pt-6">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pt-6">
         <Logo label={tApp("name")} className="text-[28px]" />
+        <ReleaseNotes version={APP_VERSION} releases={releases} />
       </header>
       <main className="mx-auto grid w-full max-w-5xl flex-1 items-center gap-x-12 gap-y-10 px-4 py-10 md:grid-cols-2 md:py-16">
         <section className="space-y-6">
