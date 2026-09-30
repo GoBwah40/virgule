@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.5.3 — 2026-09-30
+
+- En mode sombre, les champs, les contours de sélection et les pointillés ressortent mieux, et les jours du calendrier des dates se lisent plus facilement.
+
 ## 0.5.2 — 2026-09-30
 
 - Les choix de langue et de thème en bas de page deviennent des menus plus discrets.

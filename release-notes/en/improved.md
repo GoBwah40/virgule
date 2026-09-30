@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.5.3 — 2026-09-30
+
+- In dark mode, fields, focus outlines and dotted edges stand out better, and the days in the date calendar are easier to read.
+
 ## 0.5.2 — 2026-09-30
 
 - The language and theme choices at the bottom of the page are now quieter menus.
