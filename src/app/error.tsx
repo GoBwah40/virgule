@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 import { ErrorFallback } from "@/components/error-fallback";
 
-/** Erreur inattendue dans une page (hors séance) : sous le layout racine, traductions disponibles. */
+/** Unexpected error in a page (outside a session): under the root layout, translations available. */
 export default function AppError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   const t = useTranslations("errorPage");
 

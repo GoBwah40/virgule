@@ -3,17 +3,17 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
-  /** Nombre de lignes simulées dans la carte. */
+  /** Number of placeholder rows in the card. */
   rows?: number;
-  /** Actions des lignes (voir ListItemSkeleton). */
+  /** Row actions (see ListItemSkeleton). */
   rowActions?: React.ComponentProps<typeof ListItemSkeleton>["actions"];
-  /** Simule le champ d'ajout en bas de carte (page des idées). */
+  /** Mimics the add field at the bottom of the card (ideas page). */
   withComposer?: boolean;
 };
 
 const ROW_WIDTHS = ["long", "medium", "short"] as const;
 
-/** Squelette d'une carte de sujet : titre, description, lignes et, au besoin, champ d'ajout. */
+/** Skeleton of a topic card: title, description, rows and, if needed, the add field. */
 export function CardSkeleton({ rows = 2, rowActions = "none", withComposer }: Props) {
   return (
     <Card>

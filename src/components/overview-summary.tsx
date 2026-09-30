@@ -1,16 +1,16 @@
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** Phrase principale (« Créneau commun : du 12 au 14 juin 2027 »). */
+  /** Main sentence ("Common slot: June 12 – 14, 2027"). */
   summary: string;
-  /** Précision (« Commun aux 3 périodes retenues. »). */
+  /** Detail ("Shared by all 3 periods kept."). */
   detail: string;
-  /** Vrai si la zone est commune à toutes les propositions retenues. */
+  /** True if the zone is shared by every proposal kept. */
   common: boolean;
   className?: string;
 };
 
-/** Encadré de synthèse du bilan : vert si tout le monde se recoupe, mangue sinon. */
+/** Recap summary box: green if everyone overlaps, mango otherwise. */
 export function OverviewSummary({ summary, detail, common, className }: Props) {
   return (
     <div

@@ -6,17 +6,17 @@ import { renderUi } from "@/test/render";
 import { KeyFigures } from "./key-figures";
 
 describe("KeyFigures", () => {
-  it("affiche chaque chiffre avec son libellé", () => {
+  it("shows each figure with its label", () => {
     renderUi(
       <KeyFigures
         items={[
-          { value: 6, label: "places" },
-          { value: 7, label: "jours en ligne" },
+          { value: 6, label: "seats" },
+          { value: 7, label: "days online" },
         ]}
       />,
     );
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
-    expect(items[1]).toHaveTextContent("7jours en ligne");
+    expect(items[1]).toHaveTextContent("7days online");
   });
 });

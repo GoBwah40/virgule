@@ -4,14 +4,14 @@ import { fn } from "storybook/test";
 import { ConfirmDialog } from "./confirm-dialog";
 
 const meta = {
-  title: "Composants/ConfirmDialog",
+  title: "Components/ConfirmDialog",
   component: ConfirmDialog,
   args: {
     open: true,
     onOpenChange: fn(),
-    title: "Retirer Léo de la séance ?",
-    description: "Ses idées et ses votes sont supprimés. Léo pourra revenir avec le lien s'il reste une place.",
-    confirmLabel: "Retirer de la séance",
+    title: "Remove Leo from the session?",
+    description: "Their ideas and votes are deleted. Leo can come back with the link if a seat is still free.",
+    confirmLabel: "Remove from the session",
     destructive: true,
     onConfirm: fn(),
   },
@@ -20,12 +20,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Destructif: Story = {};
+export const Destructive: Story = {};
 export const Simple: Story = {
   args: {
-    title: "Confier l'animation à Léo ?",
-    description: "Léo pilotera les étapes. Tu restes dans la séance comme participant.",
-    confirmLabel: "Confier l'animation",
+    title: "Hand over hosting to Leo?",
+    description: "Leo will run the steps. You stay in the session as a participant.",
+    confirmLabel: "Hand over hosting",
     destructive: false,
   },
 };

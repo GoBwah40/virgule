@@ -1,4 +1,4 @@
-/** En-tête de page : titre, sous-titre et actions principales. */
+/** Page header: title, subtitle and main actions. */
 export function PageHeader({
   title,
   subtitle,
@@ -14,7 +14,7 @@ export function PageHeader({
         <h2 className="text-[28px] leading-tight font-extrabold tracking-tight">{title}</h2>
         {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
       </div>
-      {/* Mobile : actions empilées en pleine largeur, à portée de pouce. */}
+      {/* Mobile: full-width stacked actions, within thumb reach. */}
       {actions && <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">{actions}</div>}
     </div>
   );

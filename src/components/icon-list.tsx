@@ -7,7 +7,7 @@ type Props = {
   className?: string;
 };
 
-/** Liste d'étapes ou d'arguments, chaque ligne précédée d'une icône en pastille mangue. */
+/** List of steps or selling points, each row led by an icon in a mango chip. */
 export function IconList({ items, className }: Props) {
   return (
     <ul className={cn("space-y-3", className)}>

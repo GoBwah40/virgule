@@ -4,12 +4,12 @@ import { fn } from "storybook/test";
 import { SuggestionChips } from "./suggestion-chips";
 
 const meta = {
-  title: "Composants/SuggestionChips",
+  title: "Components/SuggestionChips",
   component: SuggestionChips,
   args: {
-    label: "Idées de sujets",
+    label: "Topic ideas",
     onSelect: fn(),
-    items: ["Objectif", "Dates", "Lieu", "Budget", "Priorités", "Qui fait quoi"].map((label) => ({ id: label, label })),
+    items: ["Goal", "Dates", "Place", "Budget", "Priorities", "Who does what"].map((label) => ({ id: label, label })),
   },
 } satisfies Meta<typeof SuggestionChips>;
 
@@ -17,4 +17,4 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const Desactive: Story = { args: { disabled: true } };
+export const Disabled: Story = { args: { disabled: true } };

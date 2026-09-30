@@ -3,19 +3,20 @@ import { describe, expect, it } from "vitest";
 import { exportFileName, toCsv, toMarkdown, type ExportData, type ExportLabels } from "@/lib/export";
 
 const labels: ExportLabels = {
-  title: "Récap",
-  generatedOn: "Exporté",
+  csvSeparator: ";",
+  title: "Recap",
+  generatedOn: "Exported",
   participants: "Participants",
-  rules: "Règle",
-  rule: "score positif",
-  roundTitle: (r) => `Tour ${r}`,
+  rules: "Rule",
+  rule: "positive score",
+  roundTitle: (r) => `Round ${r}`,
   summary: (q, t) => `${q}/${t}`,
-  empty: "Aucune idée",
-  qualified: "Retenue",
-  notQualified: "Écartée",
-  overview: (o) => ({ summary: `Créneau commun : ${o.best.start} → ${o.best.end}`, detail: `Commun aux ${o.best.total} périodes retenues.` }),
-  overviewStatus: "Synthèse",
-  columns: { round: "Tour", theme: "Thème", idea: "Idée", up: "Pour", down: "Contre", net: "Score", status: "Statut" },
+  empty: "No ideas",
+  qualified: "Kept",
+  notQualified: "Dropped",
+  overview: (o) => ({ summary: `Common slot: ${o.best.start} → ${o.best.end}`, detail: `Shared by the ${o.best.total} kept periods.` }),
+  overviewStatus: "Overview",
+  columns: { round: "Round", theme: "Theme", idea: "Idea", up: "For", down: "Against", net: "Score", status: "Status" },
 };
 
 const data: ExportData = {
@@ -34,7 +35,7 @@ const data: ExportData = {
           kind: "TEXT",
           overview: null,
           ideas: [
-            { id: "i1", content: "Vidéo | tuto\nen 2 min", score: { up: 2, down: 0, net: 2 }, qualified: true, tied: false, isMine: false, mapQuery: null },
+            { id: "i1", content: "Video | tutorial\nin 2 min", score: { up: 2, down: 0, net: 2 }, qualified: true, tied: false, isMine: false, mapQuery: null },
             { id: "i2", content: '=HYPERLINK("x"); test', score: { up: 0, down: 1, net: -1 }, qualified: false, tied: false, isMine: false, mapQuery: null },
           ],
         },
@@ -44,32 +45,39 @@ const data: ExportData = {
 };
 
 describe("toMarkdown", () => {
-  it("échappe les pipes et les retours à la ligne", () => {
+  it("escapes pipes and line breaks", () => {
     const md = toMarkdown(data, labels);
-    expect(md).toContain("| Vidéo \\| tuto<br>en 2 min | 2 | 0 | 2 | ✅ Retenue |");
-    expect(md).toContain("## Tour 1");
+    expect(md).toContain("| Video \\| tutorial<br>in 2 min | 2 | 0 | 2 | ✅ Kept |");
+    expect(md).toContain("## Round 1");
     expect(md).toContain("Camille, Sacha");
   });
 });
 
 describe("toCsv", () => {
-  it("ajoute le BOM, utilise « ; » et neutralise les formules", () => {
+  it("adds the BOM, uses \";\" and neutralises formulas", () => {
     const csv = toCsv(data, labels);
-    expect(csv.startsWith("﻿Tour;Thème;Idée")).toBe(true);
-    expect(csv).toContain('1;Onboarding;"Vidéo | tuto\nen 2 min";2;0;2;Retenue');
+    expect(csv.startsWith("﻿Round;Theme;Idea")).toBe(true);
+    expect(csv).toContain('1;Onboarding;"Video | tutorial\nin 2 min";2;0;2;Kept');
     expect(csv).toContain(`"'=HYPERLINK(""x""); test"`);
+  });
+
+  it("uses \",\" in English and quotes cells containing a comma", () => {
+    const csv = toCsv(data, { ...labels, csvSeparator: "," });
+    expect(csv.startsWith("\uFEFFRound,Theme,Idea")).toBe(true);
+    expect(csv).toContain('1,Onboarding,"Video | tutorial\nin 2 min",2,0,2,Kept');
+    expect(csv).toContain(`"'=HYPERLINK(""x""); test",0,1,-1,Dropped`);
   });
 });
 
 describe("exportFileName", () => {
-  it("produit un nom de fichier sans accents ni espaces", () => {
-    expect(exportFileName("Offsite Produit — Q4 ", new Date("2026-09-28T10:00:00Z"))).toBe(
-      "virgule-offsite-produit-q4-2026-09-28",
+  it("produces a file name without accents or spaces", () => {
+    expect(exportFileName("Café Offsite — Q4 ", new Date("2026-09-28T10:00:00Z"))).toBe(
+      "virgule-cafe-offsite-q4-2026-09-28",
     );
   });
 });
 
-describe("synthèse des sujets Période et Fourchette", () => {
+describe("overview of Period and Range topics", () => {
   const withOverview: ExportData = {
     participants: ["Camille"],
     rounds: [
@@ -94,15 +102,15 @@ describe("synthèse des sujets Période et Fourchette", () => {
     ],
   };
 
-  it("l'ajoute sous le titre du sujet en Markdown", () => {
+  it("adds it under the topic title in Markdown", () => {
     expect(toMarkdown(withOverview, labels)).toContain(
-      "### Dates\n\n**Créneau commun : 2027-06-12 → 2027-06-14**. Commun aux 2 périodes retenues.\n",
+      "### Dates\n\n**Common slot: 2027-06-12 → 2027-06-14**. Shared by the 2 kept periods.\n",
     );
   });
 
-  it("l'ajoute en première ligne du sujet dans le CSV, sans score", () => {
+  it("adds it as the topic's first row in the CSV, without a score", () => {
     expect(toCsv(withOverview, labels)).toContain(
-      "1;Dates;Créneau commun : 2027-06-12 → 2027-06-14. Commun aux 2 périodes retenues.;;;;Synthèse\r\n1;Dates;",
+      "1;Dates;Common slot: 2027-06-12 → 2027-06-14. Shared by the 2 kept periods.;;;;Overview\r\n1;Dates;",
     );
   });
 });

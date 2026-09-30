@@ -3,13 +3,13 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PageHeader } from "./page-header";
 import { PhaseTransition } from "./phase-transition";
 
-// Storybook utilise React stable : la transition ne s'y joue pas (elle n'existe que dans
-// le React embarqué par Next). La story documente l'usage et vérifie le rendu du contenu.
+// Storybook uses stable React: the transition doesn't play there (it only exists in the
+// React bundled with Next). The story documents usage and checks the content renders.
 const meta = {
-  title: "Composants/PhaseTransition",
+  title: "Components/PhaseTransition",
   component: PhaseTransition,
   args: {
-    children: <PageHeader title="Les idées" subtitle="Propose tes idées et vote pour celles des autres." />,
+    children: <PageHeader title="The ideas" subtitle="Suggest your ideas and vote on everyone else's." />,
   },
 } satisfies Meta<typeof PhaseTransition>;
 

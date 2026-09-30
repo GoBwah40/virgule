@@ -12,7 +12,7 @@ type Props = Omit<React.ComponentProps<typeof Button>, "onClick"> & {
   onConfirm: () => void;
 };
 
-/** Bouton qui demande confirmation avant une action structurante (changement de phase…). */
+/** Button that asks for confirmation before a major action (phase change…). */
 export function ConfirmButton({ title, description, confirmLabel, onConfirm, children, ...props }: Props) {
   const [open, setOpen] = useState(false);
 

@@ -4,7 +4,7 @@ import { CardSkeleton } from "@/components/card-skeleton";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeaderSkeleton } from "@/components/page-header-skeleton";
 
-/** Chargement de l'étape « Idées » : cartes de sujets avec lignes de vote et champ d'ajout. */
+/** Loading of the "Ideas" step: topic cards with vote rows and an input field. */
 export default async function IdeasLoading() {
   const t = await getTranslations("loading");
   return (

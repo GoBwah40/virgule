@@ -4,34 +4,34 @@ import { fn } from "storybook/test";
 import { ReleaseNotesSheet } from "./release-notes-sheet";
 
 const meta = {
-  title: "Composants/ReleaseNotesSheet",
+  title: "Components/ReleaseNotesSheet",
   component: ReleaseNotesSheet,
   args: {
     version: "0.4.0",
     onOpenChange: fn(),
     labels: {
-      trigger: "Nouveautés",
-      unread: "Nouvelle version",
-      title: "Nouveautés",
-      description: "Ce qui a changé dans Virgule, version par version.",
-      close: "Fermer",
-      latest: "Dernière",
-      categories: { added: "Ajouts", improved: "Améliorations", fixed: "Corrections" },
+      trigger: "What's new",
+      unread: "New version",
+      title: "What's new",
+      description: "What changed in Virgule, version by version.",
+      close: "Close",
+      latest: "Latest",
+      categories: { added: "Added", improved: "Improved", fixed: "Fixed" },
     },
     releases: [
       {
         version: "0.4.0",
-        date: "30 septembre 2026",
+        date: "September 30, 2026",
         changes: {
-          added: ["Tour de départage des ex æquo", "Minuteur pendant les idées"],
-          improved: ["Nouvelle page d'accueil"],
+          added: ["Tiebreak round for tied ideas", "Timer during the ideas"],
+          improved: ["New home page"],
           fixed: [],
         },
       },
       {
         version: "0.3.0",
-        date: "30 septembre 2026",
-        changes: { added: ["Sujets typés"], improved: [], fixed: ["Votes lisibles en mode sombre"] },
+        date: "September 30, 2026",
+        changes: { added: ["Typed topics"], improved: [], fixed: ["Votes readable in dark mode"] },
       },
     ],
   },
@@ -40,5 +40,5 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const DejaVue: Story = {};
-export const NouvelleVersion: Story = { args: { unread: true } };
+export const Seen: Story = {};
+export const NewVersion: Story = { args: { unread: true } };

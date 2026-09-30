@@ -1,9 +1,9 @@
 /**
- * Applique les migrations Prisma (prisma/migrations/<horodatage>_<nom>/migration.sql)
- * sur la base Turso de production. Chaque migration n'est appliquée qu'une fois :
- * l'historique est conservé dans la table `_virgule_migrations`.
+ * Applies Prisma migrations (prisma/migrations/<timestamp>_<name>/migration.sql)
+ * to the production Turso database. Each migration is applied only once:
+ * the history is kept in the `_virgule_migrations` table.
  *
- * Usage : TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... pnpm db:migrate:prod
+ * Usage: TURSO_DATABASE_URL=... TURSO_AUTH_TOKEN=... pnpm db:migrate:prod
  */
 import "dotenv/config";
 
@@ -14,7 +14,7 @@ import { createClient } from "@libsql/client";
 
 const url = process.env.TURSO_DATABASE_URL;
 if (!url) {
-  console.error("TURSO_DATABASE_URL manquant.");
+  console.error("TURSO_DATABASE_URL is missing.");
   process.exit(1);
 }
 
@@ -35,23 +35,23 @@ const pending = entries
   .sort();
 
 if (pending.length === 0) {
-  console.log("✔ Base à jour, aucune migration à appliquer.");
+  console.log("✔ Database up to date, no migration to apply.");
   process.exit(0);
 }
 
 /**
- * Garde-fou : une migration qui reconstruit une table (DROP TABLE, ou désactivation des
- * clés étrangères comme le fait Prisma pour « RedefineTables ») supprimerait des données.
- * Dans une transaction, SQLite ignore `PRAGMA foreign_keys=OFF` : le DROP TABLE déclenche
- * alors les suppressions en cascade (votes, idées…). On refuse avant d'appliquer quoi que ce soit.
+ * Safeguard: a migration that rebuilds a table (DROP TABLE, or disabling foreign keys
+ * as Prisma does for "RedefineTables") would delete data.
+ * Inside a transaction, SQLite ignores `PRAGMA foreign_keys=OFF`: the DROP TABLE then
+ * triggers the cascading deletes (votes, ideas…). We refuse before applying anything.
  */
 const DANGEROUS = [/\bDROP\s+TABLE\b/i, /PRAGMA\s+foreign_keys\s*=\s*OFF/i];
 for (const name of pending) {
   const sql = await readFile(path.join(migrationsDir, name, "migration.sql"), "utf8");
   if (DANGEROUS.some((re) => re.test(sql))) {
     console.error(
-      `✘ ${name} reconstruit une table (DROP TABLE / foreign_keys=OFF) : elle effacerait des données en production.\n` +
-        "  Réécris-la en migration additive (ALTER TABLE … ADD COLUMN), voir DEPLOIEMENT.md.",
+      `✘ ${name} rebuilds a table (DROP TABLE / foreign_keys=OFF): it would erase data in production.\n` +
+        "  Rewrite it as an additive migration (ALTER TABLE … ADD COLUMN), see DEPLOYMENT.md.",
     );
     process.exit(1);
   }
@@ -60,10 +60,10 @@ for (const name of pending) {
 for (const name of pending) {
   const sql = await readFile(path.join(migrationsDir, name, "migration.sql"), "utf8");
   console.log(`→ ${name}`);
-  // La migration et son enregistrement sont appliqués ensemble ou pas du tout.
+  // The migration and its record are applied together or not at all.
   await client.executeMultiple(
     `BEGIN;\n${sql}\nINSERT INTO _virgule_migrations (name, applied_at) VALUES ('${name}', datetime('now'));\nCOMMIT;`,
   );
 }
 
-console.log(`✔ ${pending.length} migration(s) appliquée(s).`);
+console.log(`✔ ${pending.length} migration(s) applied.`);

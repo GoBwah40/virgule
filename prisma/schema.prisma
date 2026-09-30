@@ -1,5 +1,5 @@
-// Schéma Virgule — SQLite en local, Turso (libSQL) en production.
-// Après modification : `pnpm db:migrate` (local) puis `pnpm db:migrate:prod` (Turso).
+// Virgule schema: SQLite locally, Turso (libSQL) in production.
+// After a change: `pnpm db:migrate` (local), then `pnpm db:migrate:prod` (Turso).
 
 generator client {
   provider = "prisma-client"
@@ -10,35 +10,35 @@ datasource db {
   provider = "sqlite"
 }
 
-/// Phases d'une room, pilotées par l'animateur.
+/// Phases of a room, driven by the host.
 enum Phase {
-  THEMES // l'animateur déclare les thèmes
-  IDEAS // les participants proposent et votent
-  RECAP // résultats du tour courant
-  CLOSED // séance terminée (lecture seule)
+  THEMES // the host sets the topics
+  IDEAS // participants suggest ideas and vote
+  RECAP // results of the current round
+  CLOSED // session over (read-only)
 }
 
 model Room {
   id               String        @id @default(cuid())
-  /// Identifiant court utilisé dans le lien de partage (/r/<slug>).
+  /// Short identifier used in the share link (/r/<slug>).
   slug             String        @unique
   name             String
   phase            Phase         @default(THEMES)
-  /// Tour courant, commence à 1.
+  /// Current round, starts at 1.
   round            Int           @default(1)
-  /// Un participant peut-il voter pour/contre ses propres idées ?
+  /// Can a participant vote for/against their own ideas?
   allowSelfVote    Boolean       @default(true)
-  /// true : une idée est retenue si pour > contre. false : dès 1 vote « pour ».
+  /// true: an idea is kept if for > against. false: as soon as it has 1 "for" vote.
   requireNetPositive Boolean     @default(true)
   createdAt        DateTime      @default(now())
   expiresAt        DateTime
-  // Colonnes ajoutées après la création : en fin de liste pour que SQLite les ajoute
-  // par ALTER TABLE sans reconstruire la table (cf. CLAUDE.md, migrations additives).
-  /// Durée du minuteur de la phase IDEAS, en minutes (null = pas de minuteur).
+  // Columns added after creation: at the end of the list so SQLite adds them
+  // with ALTER TABLE without rebuilding the table (see CLAUDE.md, additive migrations).
+  /// Timer length for the IDEAS phase, in minutes (null = no timer).
   ideasTimerMinutes Int?
-  /// Fin du minuteur en cours (null = pas de minuteur actif).
+  /// End of the running timer (null = no active timer).
   phaseEndsAt      DateTime?
-  /// Tour de départage : seules les idées ex æquo en tête sont revotées, sans nouvelle idée.
+  /// Tiebreak round: only the ideas tied at the top are voted on again, with no new ideas.
   tiebreak         Boolean       @default(false)
   participants     Participant[]
   themes           Theme[]
@@ -52,7 +52,7 @@ model Participant {
   roomId    String
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   pseudo    String
-  /// Secret stocké dans un cookie httpOnly, permet la reconnexion.
+  /// Secret stored in an httpOnly cookie, used to reconnect.
   token     String   @unique
   isHost    Boolean  @default(false)
   createdAt DateTime @default(now())
@@ -62,15 +62,15 @@ model Participant {
   @@unique([roomId, pseudo])
 }
 
-/// Type de réponse attendu pour les idées d'un sujet.
+/// Kind of answer expected for a topic's ideas.
 enum ThemeKind {
-  TEXT // texte libre
-  DATE // une date
-  DATE_RANGE // une période (du… au…)
-  AMOUNT // un montant en euros
-  AMOUNT_RANGE // une fourchette de montants en euros
-  PLACE // un lieu (texte, avec lien vers la carte)
-  CHOICE // une option parmi une liste fixée par l'animateur
+  TEXT // free text
+  DATE // a date
+  DATE_RANGE // a period (from… to…)
+  AMOUNT // an amount in euros
+  AMOUNT_RANGE // a range of amounts in euros
+  PLACE // a place (text, with a link to the map)
+  CHOICE // one option from a list set by the host
 }
 
 model Theme {
@@ -79,14 +79,14 @@ model Theme {
   room        Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   title       String
   description String?
-  /// Non modifiable une fois que des idées existent (elles perdraient leur sens).
+  /// Cannot be changed once ideas exist (they would lose their meaning).
   kind        ThemeKind @default(TEXT)
   position    Int
   createdAt   DateTime @default(now())
-  // Colonnes ajoutées après la création (en fin de liste : ALTER TABLE sans reconstruction).
-  /// Sujets CHOICE : options fixées par l'animateur (tableau JSON de chaînes).
+  // Columns added after creation (at the end of the list: ALTER TABLE without a rebuild).
+  /// CHOICE topics: options set by the host (JSON array of strings).
   options     String?
-  /// Sujets CHOICE : les participants peuvent-ils proposer d'autres idées ?
+  /// CHOICE topics: can participants suggest other ideas?
   allowOtherIdeas Boolean @default(false)
   ideas       Idea[]
 
@@ -99,25 +99,25 @@ model Idea {
   room             Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
   themeId          String
   theme            Theme       @relation(fields: [themeId], references: [id], onDelete: Cascade)
-  /// Conservé pour la règle d'auto-vote ; jamais exposé aux autres participants.
+  /// Kept for the self-vote rule; never exposed to other participants.
   authorId         String
   author           Participant @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  /// Texte de l'idée (sujets TEXT) ; chaîne vide pour les sujets typés, affichés à partir des champs ci-dessous.
-  /// Pas de valeur par défaut : en ajouter une forcerait SQLite à reconstruire la table.
+  /// Idea text (TEXT topics); empty string for typed topics, which are displayed from the fields below.
+  /// No default value: adding one would force SQLite to rebuild the table.
   content          String
-  /// Sujets DATE / DATE_RANGE : dates calendaires « AAAA-MM-JJ » (sans heure ni fuseau).
+  /// DATE / DATE_RANGE topics: calendar dates "YYYY-MM-DD" (no time or time zone).
   dateStart        String?
   dateEnd          String?
-  /// Sujets AMOUNT / AMOUNT_RANGE : montants en euros entiers.
+  /// AMOUNT / AMOUNT_RANGE topics: whole-euro amounts.
   amountMin        Int?
   amountMax        Int?
-  /// Tour pendant lequel l'idée a été proposée.
+  /// Round in which the idea was suggested.
   createdRound     Int
-  /// Premier tour auquel l'idée ne participe plus (null = toujours en lice).
+  /// First round the idea no longer takes part in (null = still in the running).
   eliminatedRound  Int?
   createdAt        DateTime    @default(now())
-  /// Option d'un sujet CHOICE (créée au lancement des idées) : n'appartient à personne en
-  /// particulier, donc votable par tous et retirable par la personne qui anime.
+  /// Option of a CHOICE topic (created when ideas start): belongs to no one in
+  /// particular, so anyone can vote on it and the host can remove it.
   isOption         Boolean     @default(false)
   votes            Vote[]
 
@@ -131,9 +131,9 @@ model Vote {
   idea          Idea        @relation(fields: [ideaId], references: [id], onDelete: Cascade)
   participantId String
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
-  /// Les votes sont remis à zéro à chaque tour : on garde l'historique par tour.
+  /// Votes are reset each round: history is kept per round.
   round         Int
-  /// true = pour, false = contre.
+  /// true = for, false = against.
   positive      Boolean
   updatedAt     DateTime    @updatedAt
 

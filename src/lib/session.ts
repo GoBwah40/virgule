@@ -4,8 +4,8 @@ import { cookies } from "next/headers";
 
 import { ROOM_TTL_DAYS } from "@/lib/config";
 
-// Pas de compte : chaque participant reçoit un token secret, stocké dans un cookie
-// httpOnly propre à la room. Il permet de revenir dans la room sans reprendre de place.
+// No accounts: each participant gets a secret token, stored in an httpOnly cookie
+// specific to the room. It lets them come back to the room without taking another seat.
 
 const cookieName = (slug: string) => `virgule_${slug}`;
 

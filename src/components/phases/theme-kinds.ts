@@ -2,7 +2,7 @@ import { CalendarDays, CalendarRange, Coins, Euro, List, MapPin, Type, type Luci
 
 import type { ThemeKind } from "@/lib/idea-value";
 
-/** Icône de chaque type de réponse (sélecteur, badges des sujets). */
+/** Icon of each answer kind (picker, topic badges). */
 export const THEME_KIND_ICONS: Record<ThemeKind, LucideIcon> = {
   TEXT: Type,
   DATE: CalendarDays,

@@ -9,12 +9,12 @@ import { cn } from "@/lib/utils";
 type Props = { query: string; label: string; className?: string };
 
 const noop = () => () => {};
-// iPhone, iPad (iPadOS se présente comme un Mac) et Mac : le lien Plans ouvre l'app.
+// iPhone, iPad (iPadOS reports itself as a Mac) and Mac: the Apple Maps link opens the app.
 const isApple = () => /iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent);
 
 /**
- * Lien « Voir sur la carte » qui ouvre l'app installée : Plans sur Apple, Google Maps
- * ailleurs. Le rendu serveur vise Google Maps, puis le navigateur ajuste.
+ * "View on the map" link that opens the installed app: Apple Maps on Apple, Google Maps
+ * elsewhere. The server render targets Google Maps, then the browser adjusts.
  */
 export function MapLink({ query, label, className }: Props) {
   const apple = useSyncExternalStore(noop, isApple, () => false);

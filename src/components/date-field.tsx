@@ -6,19 +6,19 @@ import { Label } from "@/components/ui/label";
 type Value = { start: string; end: string };
 
 type Props = {
-  /** `single` : une date ; `range` : une période du… au… */
+  /** `single`: one date; `range`: a period from… to… */
   mode: "single" | "range";
   value: Value;
   onChange: (value: Value) => void;
   labels: { date: string; from: string; to: string };
-  /** Préfixe des `id` des champs (unique dans la page). */
+  /** Prefix for the field `id`s (unique in the page). */
   idPrefix: string;
   disabled?: boolean;
 };
 
 /**
- * Saisie d'une date ou d'une période avec le sélecteur natif du téléphone.
- * Les valeurs sont au format « AAAA-MM-JJ ». En période, la fin ne peut pas précéder le début.
+ * Date or period input using the phone's native picker.
+ * Values are "YYYY-MM-DD". In a period, the end cannot come before the start.
  */
 export function DateField({ mode, value, onChange, labels, idPrefix, disabled }: Props) {
   if (mode === "single") {
@@ -50,7 +50,7 @@ export function DateField({ mode, value, onChange, labels, idPrefix, disabled }:
           value={value.start}
           max={value.end || undefined}
           disabled={disabled}
-          // Si la nouvelle date de début dépasse la fin, la fin la suit.
+          // If the new start date passes the end, the end follows it.
           onChange={(e) => {
             const start = e.target.value;
             onChange({ start, end: value.end && value.end < start ? start : value.end });

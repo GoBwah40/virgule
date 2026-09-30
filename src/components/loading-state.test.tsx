@@ -7,15 +7,15 @@ import { LoadingState } from "./loading-state";
 import { PageHeaderSkeleton } from "./page-header-skeleton";
 
 describe("LoadingState", () => {
-  it("annonce le chargement et masque les squelettes aux lecteurs d'écran", () => {
+  it("announces loading and hides the skeletons from screen readers", () => {
     renderUi(
-      <LoadingState label="Chargement des idées…">
+      <LoadingState label="Loading ideas…">
         <PageHeaderSkeleton />
       </LoadingState>,
     );
     const status = screen.getByRole("status");
     expect(status).toHaveAttribute("aria-busy", "true");
-    expect(status).toHaveTextContent("Chargement des idées…");
+    expect(status).toHaveTextContent("Loading ideas…");
     expect(status.querySelector("[aria-hidden]")).not.toBeNull();
   });
 });

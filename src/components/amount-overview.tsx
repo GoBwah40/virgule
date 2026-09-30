@@ -1,23 +1,23 @@
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** Fourchettes retenues, en euros entiers. */
+  /** Ranges kept, in whole euros. */
   ranges: { min: number; max: number }[];
-  /** Zone mise en avant (la plus partagée). */
+  /** Highlighted zone (the most shared). */
   best: { start: number; end: number };
   locale: string;
   labels: { range: string; zone: string; amounts: string };
   className?: string;
 };
 
-/** Pas de graduation « rond » (1, 2 ou 5 × 10ⁿ) pour environ 4 intervalles. */
+/** "Round" tick step (1, 2 or 5 × 10ⁿ) for about 4 intervals. */
 function niceStep(max: number) {
   const raw = max / 4;
   const power = 10 ** Math.floor(Math.log10(raw || 1));
   return [1, 2, 5, 10].map((n) => n * power).find((s) => s >= raw) ?? power * 10;
 }
 
-/** Fourchettes retenues sur une même échelle, zone compatible encadrée. */
+/** Ranges kept on the same scale, with the compatible zone outlined. */
 export function AmountOverview({ ranges, best, locale, labels, className }: Props) {
   const top = Math.max(...ranges.map((r) => r.max));
   const step = niceStep(top);

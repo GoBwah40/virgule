@@ -5,21 +5,21 @@ import { cn } from "@/lib/utils";
 type Props = {
   value: number;
   max: number;
-  /** Texte affiché à côté des pastilles (ex. « 3 personnes sur 5 ont voté »). */
+  /** Text shown next to the dots (e.g. "3 people out of 5 have voted"). */
   label: string;
-  /** Texte affiché une fois l'objectif atteint (ex. « Tout le monde a voté »). */
+  /** Text shown once the goal is reached (e.g. "Everyone has voted"). */
   completeLabel: string;
-  /** Nom lu par les lecteurs d'écran (ex. « Participants ayant voté »). */
+  /** Name read by screen readers (e.g. "Participants who voted"). */
   ariaLabel: string;
   className?: string;
 };
 
-/** Au-delà, les pastilles deviennent illisibles : on passe à une barre. */
+/** Above this, dots become unreadable: switch to a bar. */
 const MAX_DOTS = 10;
 
 /**
- * Avancement : une pastille par unité (jusqu'à 10, une barre au-delà), remplie en
- * mangue, puis tout passe en vert quand c'est complet.
+ * Progress: one dot per unit (up to 10, a bar above that), filled in mango, then
+ * everything turns green when complete.
  */
 export function ProgressMeter({ value, max, label, completeLabel, ariaLabel, className }: Props) {
   const complete = max > 0 && value >= max;

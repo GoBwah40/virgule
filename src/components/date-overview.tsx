@@ -9,11 +9,11 @@ import { cn } from "@/lib/utils";
 type Period = { start: string; end: string };
 
 type Props = {
-  /** Périodes retenues (« AAAA-MM-JJ »). */
+  /** Periods kept ("YYYY-MM-DD"). */
   periods: Period[];
-  /** Créneau mis en avant (le plus partagé). */
+  /** Highlighted slot (the most shared). */
   best: Period;
-  /** Langue des noms de mois et de jours. */
+  /** Language of month and day names. */
   locale: string;
   labels: {
     view: string;
@@ -29,7 +29,7 @@ type Props = {
 
 type View = "timeline" | "calendar";
 
-// Intensité du vert selon la part des périodes qui couvrent le jour (classes statiques).
+// Green intensity by the share of periods covering the day (static classes).
 const SHADES = ["bg-muted", "bg-success/20", "bg-success/40", "bg-success/60", "bg-success/85"];
 const shade = (count: number, total: number) =>
   count === 0 ? SHADES[0] : SHADES[Math.max(1, Math.ceil((count / total) * (SHADES.length - 1)))];
@@ -38,8 +38,8 @@ const toDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
 const isWeekend = (iso: string) => [0, 6].includes(toDate(iso).getUTCDay());
 
 /**
- * Où les périodes retenues se recoupent : frise des jours (une barre par période, puis le
- * cumul) ou calendrier des mois concernés. On passe de l'un à l'autre avec une courte transition.
+ * Where the periods kept overlap: a day timeline (one bar per period, then the
+ * total) or a calendar of the months involved. Switching between them uses a short transition.
  */
 export function DateOverview({ periods, best, locale, labels, className }: Props) {
   const [view, setView] = useState<View>("timeline");
@@ -59,7 +59,7 @@ export function DateOverview({ periods, best, locale, labels, className }: Props
         value={view}
         onChange={setView}
       />
-      {/* Nouvelle clé à chaque bascule : l'affichage réapparaît en fondu. */}
+      {/* New key on each switch: the view fades back in. */}
       <div
         key={view}
         className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1 motion-safe:duration-200"
@@ -107,7 +107,7 @@ function Timeline({
   const index = (iso: string) => days.findIndex((d) => d.date === iso);
 
   return (
-    // Au-delà d'un mois, la frise défile dans son cadre plutôt que d'élargir la page.
+    // Beyond a month, the timeline scrolls in its frame rather than widening the page.
     <div className="overflow-x-auto pb-1" role="img" aria-label={label}>
       <div className="grid min-w-full gap-1 tabular-nums" style={{ width: `max(100%, ${days.length * 1.4}rem)` }}>
         <div className="grid gap-0.5 font-mono text-[10px] text-muted-foreground" style={columns}>
@@ -154,7 +154,7 @@ function Calendar({
   const counts = new Map(days.map((d) => [d.date, d.count]));
   const months = [...new Set(days.map((d) => d.date.slice(0, 7)))];
   const monthName = new Intl.DateTimeFormat(locale, { month: "long", year: "numeric", timeZone: "UTC" });
-  // Initiales des jours, lundi en premier (le 7 juin 2027 est un lundi).
+  // Day initials, Monday first (June 7, 2027 is a Monday).
   const weekday = new Intl.DateTimeFormat(locale, { weekday: "narrow", timeZone: "UTC" });
   const initials = Array.from({ length: 7 }, (_, i) => weekday.format(new Date(Date.UTC(2027, 5, 7 + i))));
 
@@ -175,7 +175,7 @@ function Calendar({
                 </span>
               ))}
               {Array.from({ length: offset }, (_, i) => (
-                <span key={`vide-${i}`} />
+                <span key={`empty-${i}`} />
               ))}
               {Array.from({ length }, (_, i) => {
                 const iso = `${month}-${String(i + 1).padStart(2, "0")}`;

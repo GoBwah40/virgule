@@ -6,9 +6,9 @@ import { renderUi } from "@/test/render";
 import { QrCode } from "./qr-code";
 
 describe("QrCode", () => {
-  it("dessine un QR code décrit pour les lecteurs d'écran", () => {
-    renderUi(<QrCode value="https://virgule.vercel.app/r/abc" label="QR code du lien" />);
-    const img = screen.getByRole("img", { name: "QR code du lien" });
+  it("draws a QR code described for screen readers", () => {
+    renderUi(<QrCode value="https://virgule.vercel.app/r/abc" label="QR code for the link" />);
+    const img = screen.getByRole("img", { name: "QR code for the link" });
     expect(img.tagName.toLowerCase()).toBe("svg");
     expect(img.querySelector("path")).not.toBeNull();
   });

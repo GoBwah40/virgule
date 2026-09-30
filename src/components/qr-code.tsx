@@ -3,19 +3,19 @@ import { QRCodeSVG } from "qrcode.react";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** Texte encodé (en pratique, une URL absolue). */
+  /** Encoded text (in practice, an absolute URL). */
   value: string;
-  /** Description lue par les lecteurs d'écran. */
+  /** Description read by screen readers. */
   label: string;
   className?: string;
 };
 
-// Exception à la règle des jetons : un QR code se scanne mal en couleurs inversées,
-// il reste donc encre sur blanc, y compris en thème sombre.
+// Exception to the token rule: a QR code scans poorly with inverted colors,
+// so it stays ink on white, dark theme included.
 const INK = "#2a1a24";
 const PAPER = "#ffffff";
 
-/** QR code carré qui s'adapte à la largeur disponible. */
+/** Square QR code that fits the available width. */
 export function QrCode({ value, label, className }: Props) {
   return (
     <div className={cn("rounded-xl p-3", className)} style={{ backgroundColor: PAPER }}>

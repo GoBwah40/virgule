@@ -59,8 +59,8 @@ export function ThemeIdeas({
           </ul>
         )}
       </CardContent>
-      {/* Tour de départage : on revote sur les ex æquo, sans nouvelle idée.
-          Liste fermée : on vote seulement sur les options de la personne qui anime. */}
+      {/* Tiebreak round: we vote again on the tied ideas, with no new ideas.
+          Closed list: we only vote on the host's options. */}
       {allowNewIdeas && theme.acceptsIdeas ? (
         <CardFooter className="border-t bg-muted/50 py-3">
           <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
@@ -77,7 +77,7 @@ export function ThemeIdeas({
 const EMPTY_DATES = { start: "", end: "" };
 const EMPTY_AMOUNTS = { min: "", max: "" };
 
-/** Saisie d'une idée adaptée au type du sujet : texte, date, période, montant ou fourchette. */
+/** Idea input matching the topic kind: text, date, period, amount or range. */
 function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; kind: ThemeKind }) {
   const t = useTranslations("ideas");
   const [pending, run] = useAction();
@@ -85,7 +85,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
   const [dates, setDates] = useState(EMPTY_DATES);
   const [amounts, setAmounts] = useState(EMPTY_AMOUNTS);
 
-  // Validation côté client pour activer le bouton ; le serveur revalide (parseIdeaInput).
+  // Client-side validation to enable the button; the server validates again (parseIdeaInput).
   const input: IdeaInput | null = (() => {
     switch (kind) {
       case "TEXT":
@@ -151,7 +151,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
           value={content}
           onChange={(e) => setContent(e.target.value)}
           onKeyDown={(e) => {
-            // Entrée pour envoyer, Maj+Entrée pour un retour à la ligne.
+            // Enter to send, Shift+Enter for a line break.
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               submit();
@@ -194,7 +194,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
 function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
   const t = useTranslations("ideas");
   const [pending, run] = useAction();
-  // Affiche le vote immédiatement ; revient à la valeur serveur en cas d'erreur.
+  // Shows the vote immediately; reverts to the server value on error.
   const [vote, setOptimisticVote] = useOptimistic(idea.myVote);
 
   return (
@@ -274,7 +274,7 @@ export function FinishVotingButton({ slug }: { slug: string }) {
   );
 }
 
-/** Boutons de la personne qui anime pour le minuteur en cours. */
+/** Host buttons for the running timer. */
 export function TimerControls({ slug }: { slug: string }) {
   const t = useTranslations("ideas");
   const [pending, run] = useAction();

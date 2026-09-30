@@ -1,4 +1,4 @@
-// Logique pure (sans I/O) de décompte des votes — testée dans results.test.ts.
+// Pure vote counting logic (no I/O) — tested in results.test.ts.
 
 export type VoteLike = { positive: boolean };
 
@@ -15,15 +15,15 @@ export function scoreVotes(votes: VoteLike[]): Score {
 }
 
 /**
- * Une idée est retenue pour le tour suivant :
- * - requireNetPositive = true  → plus de « pour » que de « contre »
- * - requireNetPositive = false → au moins un « pour »
+ * An idea is kept for the next round:
+ * - requireNetPositive = true  → more "for" than "against"
+ * - requireNetPositive = false → at least one "for"
  */
 export function isQualified(score: Score, requireNetPositive: boolean): boolean {
   return requireNetPositive ? score.net > 0 : score.up >= 1;
 }
 
-/** Une idée participe au tour `round` si elle existait et n'avait pas été éliminée. */
+/** An idea takes part in round `round` if it existed and had not been eliminated. */
 export function isActiveInRound(
   idea: { createdRound: number; eliminatedRound: number | null },
   round: number,
@@ -31,15 +31,15 @@ export function isActiveInRound(
   return idea.createdRound <= round && (idea.eliminatedRound === null || idea.eliminatedRound > round);
 }
 
-/** Tri du récap : meilleur score net, puis plus de « pour », puis ordre de création. */
+/** Recap sort: best net score, then most "for", then creation order. */
 export function compareByScore(a: Score, b: Score): number {
   return b.net - a.net || b.up - a.up;
 }
 
 /**
- * Avancement des votes : parmi les participants qui ont au moins une idée sur laquelle
- * voter, combien ont voté au moins une fois. Ceux qui n'ont rien à voter (seulement
- * leurs propres idées, auto-vote désactivé) sont exclus pour ne pas bloquer le total.
+ * Vote progress: among participants who have at least one idea to vote on, how many
+ * have voted at least once. Those with nothing to vote on (only their own ideas,
+ * self-voting disabled) are excluded so as not to block the total.
  */
 export function voteProgress(input: {
   participantIds: string[];
@@ -54,8 +54,8 @@ export function voteProgress(input: {
 }
 
 /**
- * Idées en tête d'un sujet : les idées retenues au meilleur score (même score net et même
- * nombre de « pour »). Plusieurs idées = ex æquo, que l'on peut départager par un tour dédié.
+ * Leading ideas of a topic: the kept ideas with the best score (same net score and same
+ * number of "for"). Several ideas = a tie, which a dedicated round can break.
  */
 export function topQualified<T extends { score: Score; qualified: boolean }>(ideas: T[]): T[] {
   const qualified = ideas.filter((idea) => idea.qualified).sort((a, b) => compareByScore(a.score, b.score));

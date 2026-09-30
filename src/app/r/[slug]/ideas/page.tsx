@@ -16,7 +16,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
   const { room, me } = page;
   const [themes, progress] = await Promise.all([
     getVotingView(room.id, room.round, me, room.allowSelfVote),
-    // Réservé à l'animateur : savoir si tout le monde a voté avant de clore.
+    // Host only: know whether everyone has voted before closing.
     me.isHost ? getVoteProgress(room.id, room.round, room.allowSelfVote) : null,
   ]);
 
@@ -62,7 +62,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
             ariaLabel={t("voteProgressLabel")}
           />
         )}
-        {/* Relance douce : chacun voit ce qu'il lui reste, sans rien savoir des autres. */}
+        {/* Gentle nudge: everyone sees what they have left, without knowing anything about the others. */}
         {votable.length > 0 && (
           <ProgressMeter
             value={voted}

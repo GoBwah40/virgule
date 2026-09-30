@@ -5,19 +5,19 @@ import { cn } from "@/lib/utils";
 type Props = {
   title: string;
   body: string;
-  /** Icône en pastille au-dessus du titre. */
+  /** Icon badge above the title. */
   icon?: LucideIcon;
-  /** Détail technique discret (ex. code d'erreur à communiquer). */
+  /** Discreet technical detail (e.g. an error code to pass on). */
   details?: string;
-  /** Actions proposées (boutons, liens). */
+  /** Suggested actions (buttons, links). */
   children?: React.ReactNode;
-  /** `full` : occupe la page (<main>, <h1>) ; `section` : s'insère sous un en-tête existant (<div>, <h2>). */
+  /** `full`: fills the page (<main>, <h1>); `section`: sits under an existing header (<div>, <h2>). */
   size?: "full" | "section";
 };
 
-/** Écran d'état (introuvable, expiré, erreur…) : message clair et action pour s'en sortir. */
+/** Status screen (not found, expired, error…): a clear message and an action to move on. */
 export function StatusPage({ title, body, icon: Icon, details, children, size = "full" }: Props) {
-  // Pleine page : zone principale et titre de page. Section : déjà dans un <main> sous un <h1>.
+  // Full page: main landmark and page title. Section: already inside a <main> under an <h1>.
   const Root = size === "full" ? "main" : "div";
   const Heading = size === "full" ? "h1" : "h2";
   return (

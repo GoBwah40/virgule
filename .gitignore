@@ -1,4 +1,4 @@
-# Dépendances
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -15,27 +15,27 @@ next-env.d.ts
 # Build
 /build
 
-# Prisma : client généré (recréé par `prisma generate` au postinstall)
+# Prisma: generated client (recreated by `prisma generate` on postinstall)
 /src/generated/
 
-# Base SQLite locale
+# Local SQLite database
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
 
-# Variables d'environnement (seul .env.example est versionné)
+# Environment variables (only .env.example is committed)
 .env*
 !.env.example
 
 # Vercel
 .vercel
 
-# Claude Code : fichiers locaux
+# Claude Code: local files
 .claude/settings.local.json
 .claude/worktrees/
 
-# Divers
+# Misc
 .DS_Store
 *.pem
 npm-debug.log*

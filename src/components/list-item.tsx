@@ -2,16 +2,16 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   children: React.ReactNode;
-  /** Badges ou informations sous le contenu. */
+  /** Badges or details under the content. */
   meta?: React.ReactNode;
-  /** Actions à droite (votes, statut…). */
+  /** Actions on the right (votes, status…). */
   actions?: React.ReactNode;
-  /** Teinte de fond : positive (vert), negative (rouge), neutral (sable) ou plain (carte). */
+  /** Background tint: positive (green), negative (red), neutral (sand) or plain (card). */
   tone?: "plain" | "neutral" | "positive" | "negative";
   className?: string;
 };
 
-/** Teintes de ligne, partagées avec ExpandableListItem. */
+/** Row tints, shared with ExpandableListItem. */
 export const LIST_ITEM_TONES = {
   plain: "border-border bg-card",
   neutral: "border-transparent bg-muted",
@@ -19,13 +19,13 @@ export const LIST_ITEM_TONES = {
   negative: "border-destructive/35 bg-destructive/10",
 } as const;
 
-/** Ligne de liste (idée, sujet…) : contenu, métadonnées et actions, empilés sur mobile. */
+/** List row (idea, topic…): content, metadata and actions, stacked on mobile. */
 export function ListItem({ children, meta, actions, tone = "neutral", className }: Props) {
   return (
     <li
       className={cn(
         "flex flex-col gap-2.5 rounded-xl border-[1.5px] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
-        // Arrivée d'une ligne (y compris celle d'un autre participant) et changement de teinte au bilan.
+        // A row arriving (including another participant's) and the tint changing at the recap.
         "transition-colors duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2",
         LIST_ITEM_TONES[tone],
         className,

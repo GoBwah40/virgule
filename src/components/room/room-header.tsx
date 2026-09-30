@@ -24,10 +24,10 @@ export async function RoomHeader({ room, participants, meId }: Props) {
   const invitePath = `/r/${room.slug}`;
 
   return (
-    // Nom de transition fixe : l'en-tête ne bouge pas quand on change d'étape (cf. globals.css).
+    // Fixed transition name: the header does not move when the step changes (see globals.css).
     <header className="border-b bg-card" style={{ viewTransitionName: "room-header" }}>
-      {/* Grille 2 colonnes : à gauche nom puis étapes, à droite lien puis sièges.
-          Les étapes suivent directement le nom, sans attendre la hauteur des sièges. */}
+      {/* 2-column grid: name then steps on the left, link then seats on the right.
+          The steps follow the name directly, without waiting for the seats' height. */}
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto] items-start gap-x-4 gap-y-3 px-4 py-4">
         <div className="min-w-0 space-y-0.5">
           <Link href="/" className="inline-flex text-lg">
@@ -36,8 +36,8 @@ export async function RoomHeader({ room, participants, meId }: Props) {
           <h1 className="truncate text-2xl leading-tight font-extrabold">{room.name}</h1>
           <p className="text-xs text-muted-foreground">{t("expiresOn", { date: room.expiresAt })}</p>
         </div>
-        {/* Colonne de droite : lien puis sièges, serrés l'un sous l'autre sur desktop.
-            Sur mobile, `contents` laisse le bouton à côté du nom et les sièges en dernière ligne. */}
+        {/* Right column: link then seats, stacked tightly on desktop.
+            On mobile, `contents` keeps the button next to the name and the seats on the last row. */}
         <div className="contents sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:flex sm:flex-col sm:items-end sm:gap-4">
           <div className="flex shrink-0 gap-2 justify-self-end">
             <InviteDialog

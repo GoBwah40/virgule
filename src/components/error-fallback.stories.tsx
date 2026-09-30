@@ -4,26 +4,26 @@ import { fn } from "storybook/test";
 import { ErrorFallback } from "./error-fallback";
 
 const meta = {
-  title: "Composants/ErrorFallback",
+  title: "Components/ErrorFallback",
   component: ErrorFallback,
   parameters: { layout: "fullscreen" },
   args: {
-    title: "Quelque chose n'a pas marché",
-    body: "La page n'a pas pu s'afficher. Réessaie : le plus souvent, ça suffit.",
-    labels: { retry: "Réessayer", home: "Retour à l'accueil" },
+    title: "Something went wrong",
+    body: "The page couldn't be displayed. Try again: most of the time, that's enough.",
+    labels: { retry: "Try again", home: "Back to home" },
     onRetry: fn(),
-    details: "Code d'erreur : 3187542011",
+    details: "Error code: 3187542011",
   },
 } satisfies Meta<typeof ErrorFallback>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const PleinePage: Story = {};
-export const DansUneSeance: Story = {
+export const FullPage: Story = {};
+export const InSession: Story = {
   args: {
     size: "section",
-    title: "Cette étape n'a pas pu s'afficher",
-    body: "Les idées déjà proposées et les votes déjà faits sont enregistrés. Réessaie dans un instant.",
+    title: "This step couldn't be displayed",
+    body: "Ideas already suggested and votes already cast are saved. Try again in a moment.",
   },
 };

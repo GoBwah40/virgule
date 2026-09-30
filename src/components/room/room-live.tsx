@@ -13,17 +13,17 @@ const PUSHER_CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
 
 type Props = {
   slug: string;
-  /** Suivre les changements d'étape (faux sur l'écran « Rejoindre », qui reste en place). */
+  /** Follow step changes (false on the "Join" screen, which stays in place). */
   followPhase?: boolean;
 };
 
 /**
- * Garde la page synchronisée avec les autres participants.
- * - Pusher configuré : se met à jour à chaque notification (+ polling lent de secours).
- * - Sinon : polling toutes les quelques secondes.
- * À chaque mise à jour, on vérifie d'abord l'étape en cours : si elle a changé, on
- * navigue directement vers sa page (une seule transition, sans écran vide) ; sinon on
- * rafraîchit les Server Components de la page actuelle.
+ * Keeps the page in sync with the other participants.
+ * - Pusher configured: updates on every notification (+ slow fallback polling).
+ * - Otherwise: polling every few seconds.
+ * On each update, the current step is checked first: if it has changed, we navigate
+ * straight to its page (a single transition, no blank screen); otherwise we refresh
+ * the Server Components of the current page.
  */
 export function RoomLive({ slug, followPhase = true }: Props) {
   const router = useRouter();
@@ -50,7 +50,7 @@ export function RoomLive({ slug, followPhase = true }: Props) {
             }
           }
         } catch {
-          // Réseau indisponible : on se rabat sur le rafraîchissement simple.
+          // Network unavailable: fall back to a plain refresh.
         }
       }
       router.refresh();

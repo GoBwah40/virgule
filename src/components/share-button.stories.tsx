@@ -2,14 +2,14 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { ShareButton } from "./share-button";
 
-// Visible uniquement dans un navigateur qui propose le partage natif (téléphone, Safari…).
+// Only visible in a browser that offers native sharing (phone, Safari…).
 const meta = {
-  title: "Composants/ShareButton",
+  title: "Components/ShareButton",
   component: ShareButton,
-  args: { path: "/r/ab23cd45ef", title: "Week-end de juin", text: "Rejoins la séance", label: "Partager" },
+  args: { path: "/r/ab23cd45ef", title: "June weekend", text: "Join the session", label: "Share" },
 } satisfies Meta<typeof ShareButton>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Partager: Story = {};
+export const Share: Story = {};

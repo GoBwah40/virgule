@@ -7,9 +7,9 @@ import { renderUi } from "@/test/render";
 import { IconBadge } from "./icon-badge";
 
 describe("IconBadge", () => {
-  it("affiche le libellé, l'icône restant décorative", () => {
-    const { container } = renderUi(<IconBadge icon={CalendarRange} label="Période" />);
-    expect(screen.getByText("Période")).toBeInTheDocument();
+  it("shows the label, the icon staying decorative", () => {
+    const { container } = renderUi(<IconBadge icon={CalendarRange} label="Period" />);
+    expect(screen.getByText("Period")).toBeInTheDocument();
     expect(container.querySelector("svg")).toHaveAttribute("aria-hidden", "true");
   });
 });

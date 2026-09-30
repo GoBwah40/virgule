@@ -17,7 +17,7 @@ import { phasePath } from "@/lib/phase-path";
 import { getRoomContext } from "@/lib/room";
 import { setParticipantToken } from "@/lib/session";
 
-// Clés de messages i18n (namespace « errors » dans messages/fr.json).
+// i18n message keys ("errors" namespace in messages/*.json).
 type ActionError =
   | "invalidInput"
   | "roomNotFound"
@@ -50,13 +50,13 @@ export type ActionResult = { ok: true } | { ok: false; error: ActionError };
 const fail = (error: ActionError): ActionResult => ({ ok: false, error });
 const ok = (): ActionResult => ({ ok: true });
 
-// Slug lisible et non devinable : 10 caractères sans ambiguïté (pas de 0/O, 1/l…).
+// Readable, unguessable slug: 10 unambiguous characters (no 0/O, 1/l…).
 const newSlug = customAlphabet("23456789abcdefghijkmnpqrstuvwxyz", 10);
 const newToken = () => randomBytes(24).toString("base64url");
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 
-/** Fin du minuteur des idées, si la personne qui anime en a réglé un. */
+/** End of the ideas timer, if the host has set one. */
 const timerEnd = (minutes: number | null) => (minutes ? new Date(Date.now() + minutes * 60_000) : null);
 
 class ActionFailure extends Error {
@@ -65,7 +65,7 @@ class ActionFailure extends Error {
   }
 }
 
-/** Vérifie que l'appelant a rejoint la room (et, si demandé, qu'il est animateur / dans la bonne phase). */
+/** Checks that the caller has joined the room (and, if asked, is the host / in the right phase). */
 async function guard(slug: string, opts: { host?: boolean; phase?: Phase } = {}) {
   const ctx = await getRoomContext(slug);
   if (ctx.status === "not_found") throw new ActionFailure("roomNotFound");
@@ -77,11 +77,11 @@ async function guard(slug: string, opts: { host?: boolean; phase?: Phase } = {})
 }
 
 /**
- * Enveloppe commune : traduit les erreurs, notifie les autres participants, puis
- * - rafraîchit la page de l'appelant (cas général) ;
- * - ou, si l'action change d'étape (`goTo`), l'envoie directement sur la nouvelle page.
- *   Rafraîchir l'ancienne page la ferait rediriger côté serveur, avec un rendu vide
- *   intermédiaire qui casse la transition entre étapes.
+ * Shared wrapper: translates errors, notifies the other participants, then
+ * - refreshes the caller's page (general case);
+ * - or, if the action changes step (`goTo`), sends them straight to the new page.
+ *   Refreshing the old page would make it redirect server-side, with an empty
+ *   intermediate render that breaks the transition between steps.
  */
 async function run(slug: string, fn: () => Promise<void>, goTo?: Phase): Promise<ActionResult> {
   try {
@@ -97,7 +97,7 @@ async function run(slug: string, fn: () => Promise<void>, goTo?: Phase): Promise
   return ok();
 }
 
-// ─── Création / accès ──────────────────────────────────────────────────────
+// ─── Creation / access ─────────────────────────────────────────────────────
 
 const createSchema = z.object({ name: text(LIMITS.roomName), pseudo: text(LIMITS.pseudo) });
 
@@ -138,13 +138,13 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
   try {
     await db.$transaction(async (tx) => {
       await tx.participant.create({ data: { roomId: ctx.room.id, pseudo, token } });
-      // Recompte après insertion : protège contre deux arrivées simultanées sur la dernière place.
+      // Recount after insert: guards against two people taking the last seat at the same time.
       const count = await tx.participant.count({ where: { roomId: ctx.room.id } });
       if (count > MAX_PARTICIPANTS) throw new ActionFailure("roomFull");
     });
   } catch (error) {
     if (error instanceof ActionFailure) return fail(error.code);
-    // Contrainte d'unicité (roomId, pseudo) violée par une arrivée concurrente.
+    // Unique constraint (roomId, pseudo) violated by a concurrent join.
     return fail("pseudoTaken");
   }
 
@@ -153,7 +153,7 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
   redirect(phasePath(slug, ctx.room.phase));
 }
 
-// ─── Phase 1 : thèmes (animateur) ──────────────────────────────────────────
+// ─── Phase 1: themes (host) ────────────────────────────────────────────────
 
 const themeSchema = z.object({
   title: text(LIMITS.themeTitle),
@@ -167,12 +167,12 @@ type ThemeInput = {
   title: string;
   description?: string;
   kind?: ThemeKind;
-  /** Sujets CHOICE : options fixées par l'animateur. */
+  /** CHOICE topics: options set by the host. */
   options?: string[];
   allowOtherIdeas?: boolean;
 };
 
-/** Champs d'un sujet à enregistrer ; les options n'existent que pour une liste. */
+/** Topic fields to save; options only exist for a list. */
 function themeFields(data: z.infer<typeof themeSchema>) {
   const base = { title: data.title, description: data.description || null, kind: data.kind };
   if (data.kind !== "CHOICE") return { ...base, options: null, allowOtherIdeas: false };
@@ -209,7 +209,7 @@ export async function updateTheme(
       select: { kind: true, _count: { select: { ideas: true } } },
     });
     if (!theme) throw new ActionFailure("invalidInput");
-    // Changer le type rendrait illisibles les idées déjà proposées.
+    // Changing the kind would make ideas already submitted unreadable.
     if (theme.kind !== parsed.data.kind && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
     await db.theme.update({ where: { id: themeId }, data: themeFields(parsed.data) });
   });
@@ -253,8 +253,8 @@ export async function startIdeasPhase(slug: string) {
       include: { ideas: { select: { content: true, createdRound: true, eliminatedRound: true } } },
     });
     if (themes.length === 0) throw new ActionFailure("noThemes");
-    // Listes : chaque option devient une idée à voter. Au retour depuis les idées, seules
-    // les options ajoutées entre-temps sont créées (celles retirées restent, supprimables).
+    // Lists: each option becomes an idea to vote on. When coming back from the ideas, only
+    // options added in the meantime are created (removed ones stay, and can be deleted).
     const optionIdeas = themes.flatMap((theme) => {
       if (theme.kind !== "CHOICE") return [];
       const present = new Set(theme.ideas.filter((i) => isActiveInRound(i, room.round)).map((i) => textKey(i.content)));
@@ -279,7 +279,7 @@ export async function startIdeasPhase(slug: string) {
   }, "IDEAS");
 }
 
-/** Minuteur de la phase des idées (null = aucun), réglé avant de lancer les idées. */
+/** Ideas phase timer (null = none), set before starting the ideas. */
 export async function setIdeasTimer(slug: string, minutes: number | null) {
   if (minutes !== null && !IDEAS_TIMER_OPTIONS.includes(minutes)) return fail("invalidInput");
   return run(slug, async () => {
@@ -288,7 +288,7 @@ export async function setIdeasTimer(slug: string, minutes: number | null) {
   });
 }
 
-// ─── Phase 2 : idées & votes ───────────────────────────────────────────────
+// ─── Phase 2: ideas & votes ────────────────────────────────────────────────
 
 const ideaInputSchema = z.object({
   content: z.string().optional(),
@@ -298,7 +298,7 @@ const ideaInputSchema = z.object({
   amountMax: z.number().optional(),
 });
 
-/** Idée texte (`content`) ou typée (dates / montants), validée selon le type du sujet. */
+/** Text idea (`content`) or typed one (dates / amounts), validated against the topic kind. */
 export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
   const raw = ideaInputSchema.safeParse(input);
   if (!raw.success) return fail("invalidInput");
@@ -310,7 +310,7 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
     if (theme.kind === "CHOICE" && !theme.allowOtherIdeas) throw new ActionFailure("choiceClosed");
     const parsed = parseIdeaInput(theme.kind, raw.data);
     if (!parsed.ok) throw new ActionFailure(parsed.error);
-    // Doublon : même valeur qu'une idée encore en lice dans ce sujet (visible de tous).
+    // Duplicate: same value as an idea still in the running in this topic (visible to all).
     const existing = await db.idea.findMany({ where: { themeId } });
     const key = ideaKey(theme.kind, parsed.fields);
     if (existing.some((idea) => isActiveInRound(idea, room.round) && ideaKey(theme.kind, idea) === key)) {
@@ -333,15 +333,15 @@ export async function deleteIdea(slug: string, ideaId: string) {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
     if (!idea) throw new ActionFailure("ideaNotFound");
-    // Une idée reprise d'un tour précédent ne peut plus être retirée. Les options d'une
-    // liste appartiennent à la personne qui anime, quelle qu'elle soit.
+    // An idea carried over from a previous round can no longer be removed. List options
+    // belong to whoever is hosting.
     const owner = idea.isOption ? me.isHost : idea.authorId === me.id;
     if (!owner || idea.createdRound !== room.round) throw new ActionFailure("notAuthor");
     await db.idea.delete({ where: { id: idea.id } });
   });
 }
 
-/** `positive = null` retire le vote. */
+/** `positive = null` removes the vote. */
 export async function castVote(slug: string, ideaId: string, positive: boolean | null) {
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
@@ -362,7 +362,7 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
   });
 }
 
-/** Retour à la déclaration des thèmes : idées et votes sont conservés. */
+/** Back to defining themes: ideas and votes are kept. */
 export async function backToThemes(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
@@ -377,7 +377,7 @@ export async function goToRecap(slug: string) {
   }, "RECAP");
 }
 
-/** Ajoute du temps au minuteur en cours (repart de maintenant s'il est déjà écoulé). */
+/** Adds time to the running timer (restarts from now if it has already run out). */
 export async function extendTimer(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
@@ -396,7 +396,7 @@ export async function stopTimer(slug: string) {
   });
 }
 
-// ─── Phase 3 : récapitulatif (animateur) ───────────────────────────────────
+// ─── Phase 3: recap (host) ─────────────────────────────────────────────────
 
 export async function reopenVoting(slug: string) {
   return run(slug, async () => {
@@ -415,7 +415,7 @@ export async function setRequireNetPositive(slug: string, value: boolean) {
   });
 }
 
-/** Élimine les idées non retenues puis ouvre le tour suivant (votes remis à zéro). */
+/** Eliminates the ideas not kept, then opens the next round (votes reset). */
 export async function startNextRound(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
@@ -438,8 +438,8 @@ export async function startNextRound(slug: string) {
 }
 
 /**
- * Tour de départage : dans chaque sujet, seules les idées en tête restent (les ex æquo,
- * ou l'idée gagnante quand il n'y a pas d'égalité). Votes remis à zéro, pas de nouvelle idée.
+ * Tiebreak round: in each topic, only the leading ideas remain (the tied ones, or the
+ * winning idea when there is no tie). Votes reset, no new ideas.
  */
 export async function startTiebreakRound(slug: string) {
   return run(slug, async () => {
@@ -484,7 +484,7 @@ export async function closeSession(slug: string) {
   });
 }
 
-// ─── Participants (animateur) ──────────────────────────────────────────────
+// ─── Participants (host) ───────────────────────────────────────────────────
 
 async function otherParticipant(roomId: string, meId: string, participantId: string) {
   if (participantId === meId) throw new ActionFailure("cannotTargetSelf");
@@ -493,7 +493,7 @@ async function otherParticipant(roomId: string, meId: string, participantId: str
   return target;
 }
 
-/** Confie l'animation à un autre participant ; la personne qui animait reste dans la séance. */
+/** Hands hosting over to another participant; the former host stays in the session. */
 export async function transferHost(slug: string, participantId: string) {
   return run(slug, async () => {
     const { room, me } = await guard(slug, { host: true });
@@ -506,15 +506,15 @@ export async function transferHost(slug: string, participantId: string) {
 }
 
 /**
- * Retire un participant (place prise par erreur). Ses idées et ses votes sont supprimés
- * avec lui ; il peut revenir avec le lien s'il reste une place.
+ * Removes a participant (seat taken by mistake). Their ideas and votes are deleted with
+ * them; they can come back with the link if a seat is left.
  */
 export async function removeParticipant(slug: string, participantId: string) {
   return run(slug, async () => {
     const { room, me } = await guard(slug, { host: true });
     const target = await otherParticipant(room.id, me.id, participantId);
     await db.$transaction([
-      // Les options d'une liste créées par cette personne (quand elle animait) restent.
+      // List options created by this person (while they were hosting) are kept.
       db.idea.updateMany({ where: { authorId: target.id, isOption: true }, data: { authorId: me.id } }),
       db.participant.delete({ where: { id: target.id } }),
     ]);

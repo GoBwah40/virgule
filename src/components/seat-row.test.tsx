@@ -7,46 +7,46 @@ import { renderUi } from "@/test/render";
 
 import { SeatRow } from "./seat-row";
 
-const labels = { row: "2 participants sur 6", free: "Place libre", you: "toi", host: "anime la séance" };
+const labels = { row: "2 participants out of 6", free: "Free seat", you: "you", host: "is hosting" };
 const seats = [
   { id: "1", name: "Camille", isHost: true },
-  { id: "2", name: "sacha", isMe: true },
+  { id: "2", name: "sasha", isMe: true },
 ];
 
 describe("SeatRow", () => {
-  it("affiche autant de sièges que de places, avec initiale et rôle", () => {
+  it("shows as many seats as capacity, with initial and role", () => {
     renderUi(<SeatRow seats={seats} capacity={6} labels={labels} />);
     expect(screen.getByRole("list", { name: labels.row }).children).toHaveLength(6);
-    expect(screen.getByLabelText("Camille · anime la séance")).toHaveTextContent("C");
-    expect(screen.getByLabelText("sacha · toi")).toHaveTextContent("S");
-    expect(screen.getAllByLabelText("Place libre")).toHaveLength(4);
+    expect(screen.getByLabelText("Camille · is hosting")).toHaveTextContent("C");
+    expect(screen.getByLabelText("sasha · you")).toHaveTextContent("S");
+    expect(screen.getAllByLabelText("Free seat")).toHaveLength(4);
   });
 
-  it("rend les places libres cliquables seulement si une action est fournie", async () => {
+  it("makes free seats clickable only when an action is provided", async () => {
     const { unmount } = renderUi(<SeatRow seats={seats} capacity={6} labels={labels} />);
-    expect(screen.queryAllByRole("button", { name: "Place libre" })).toHaveLength(0);
+    expect(screen.queryAllByRole("button", { name: "Free seat" })).toHaveLength(0);
     unmount();
 
     const onFreeSeatClick = vi.fn();
     renderUi(<SeatRow seats={seats} capacity={6} labels={labels} onFreeSeatClick={onFreeSeatClick} />);
-    await userEvent.click(screen.getAllByRole("button", { name: "Place libre" })[0]);
+    await userEvent.click(screen.getAllByRole("button", { name: "Free seat" })[0]);
     expect(onFreeSeatClick).toHaveBeenCalledOnce();
   });
 
-  it("ouvre le menu d'une place occupée au clic droit et transmet l'action choisie", async () => {
+  it("opens a taken seat's menu on right click and passes on the chosen action", async () => {
     const onSelect = vi.fn();
     const menu = {
-      label: (seat: { name: string }) => `Place de ${seat.name} : options`,
+      label: (seat: { name: string }) => `${seat.name}'s seat: options`,
       actions: (seat: { isMe?: boolean }) =>
-        seat.isMe ? [] : [{ id: "remove", label: "Retirer de la séance", icon: UserMinus, destructive: true }],
+        seat.isMe ? [] : [{ id: "remove", label: "Remove from the session", icon: UserMinus, destructive: true }],
       onSelect,
     };
     renderUi(<SeatRow seats={seats} capacity={6} labels={labels} menu={menu} />);
-    // Pas de menu sur sa propre place.
-    expect(screen.queryByRole("button", { name: "Place de sacha : options" })).toBeNull();
+    // No menu on your own seat.
+    expect(screen.queryByRole("button", { name: "sasha's seat: options" })).toBeNull();
 
-    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Place de Camille : options" }) });
-    await userEvent.click(await screen.findByRole("menuitem", { name: "Retirer de la séance" }));
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Camille's seat: options" }) });
+    await userEvent.click(await screen.findByRole("menuitem", { name: "Remove from the session" }));
     expect(onSelect).toHaveBeenCalledWith(seats[0], "remove");
   });
 });

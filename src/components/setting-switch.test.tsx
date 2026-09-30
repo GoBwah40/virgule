@@ -7,9 +7,9 @@ import { renderUi } from "@/test/render";
 import { SettingSwitch } from "./setting-switch";
 
 describe("SettingSwitch", () => {
-  it("bascule le réglage", async () => {
+  it("toggles the setting", async () => {
     const onCheckedChange = vi.fn();
-    renderUi(<SettingSwitch id="s" label="Voter sur ses propres idées" checked={false} onCheckedChange={onCheckedChange} />);
+    renderUi(<SettingSwitch id="s" label="Vote on your own ideas" checked={false} onCheckedChange={onCheckedChange} />);
     await userEvent.click(screen.getByRole("switch"));
     expect(onCheckedChange).toHaveBeenCalledWith(true, expect.anything());
   });

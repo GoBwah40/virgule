@@ -24,7 +24,7 @@ export default async function HomePage() {
     date: format.dateTime(new Date(`${release.date}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" }),
   }));
 
-  // `overflow-x-clip` : la rosace peut dépasser du bord de l'écran sans créer de défilement horizontal.
+  // `overflow-x-clip`: the rosette can overflow the screen edge without creating horizontal scroll.
   return (
     <PhaseTransition className="flex flex-1 flex-col overflow-x-clip">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pt-6">
@@ -35,7 +35,7 @@ export default async function HomePage() {
         <section className="space-y-6">
           <h1 className="text-[40px] leading-[1.02] font-extrabold tracking-tight md:text-6xl">
             {t.rich("title", {
-              // Surlignage mangue sous la fin du titre ; plus sourd en sombre pour garder le texte lisible.
+              // Mango highlight under the end of the title; more muted in dark mode to keep the text readable.
               hl: (chunks) => (
                 <span className="box-decoration-clone bg-[linear-gradient(transparent_62%,var(--color-highlight)_62%,var(--color-highlight)_92%,transparent_92%)] px-[0.04em] dark:bg-[linear-gradient(transparent_62%,var(--color-highlight-soft)_62%,var(--color-highlight-soft)_92%,transparent_92%)]">
                   {chunks}
@@ -52,7 +52,7 @@ export default async function HomePage() {
             ]}
           />
         </section>
-        {/* La rosace déborde derrière le coin de la carte : `isolate` garde son z-index local. */}
+        {/* The rosette overflows behind the card corner: `isolate` keeps its z-index local. */}
         <div className="relative isolate">
           <Rosette className="absolute -top-16 -right-10 -z-10 size-44 md:-top-24 md:-right-16 md:size-56" />
           <CreateRoomForm />

@@ -9,17 +9,17 @@ import { cn } from "@/lib/utils";
 
 export type ReleaseNotesEntry = {
   version: string;
-  /** Date déjà mise en forme (« 30 septembre 2026 »). */
+  /** Already formatted date ("September 30, 2026"). */
   date: string;
   changes: Record<ReleaseCategory, string[]>;
 };
 
 type Props = {
-  /** Version en ligne, affichée sur le bouton. */
+  /** Live version, shown on the button. */
   version: string;
-  /** De la plus récente à la plus ancienne. */
+  /** From newest to oldest. */
   releases: ReleaseNotesEntry[];
-  /** Pastille papaye tant que la personne n'a pas ouvert les notes de cette version. */
+  /** Papaya dot until the person has opened this version's notes. */
   unread?: boolean;
   onOpenChange?: (open: boolean) => void;
   labels: {
@@ -40,7 +40,7 @@ const CATEGORY_MARK: Record<ReleaseCategory, string> = {
   fixed: "bg-success",
 };
 
-/** Bouton discret « v0.4.0 Nouveautés » qui ouvre, depuis le bas de l'écran, les notes de chaque version. */
+/** Discreet "v0.4.0 What's new" button that opens the notes for each version from the bottom of the screen. */
 export function ReleaseNotesSheet({ version, releases, unread = false, onOpenChange, labels, className }: Props) {
   return (
     <Sheet onOpenChange={(open) => onOpenChange?.(open)}>

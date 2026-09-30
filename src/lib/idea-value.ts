@@ -1,13 +1,13 @@
-// Sujets typés : validation des idées et mise en forme de leur valeur (fonctions pures,
-// testées dans idea-value.test.ts). La mise en forme reçoit ses formateurs en paramètre
-// pour rester indépendante de next-intl.
+// Typed topics: idea validation and value formatting (pure functions, tested in
+// idea-value.test.ts). Formatting receives its formatters as a parameter to stay
+// independent of next-intl.
 
 import { LIMITS } from "@/lib/config";
 
 export const THEME_KINDS = ["TEXT", "DATE", "DATE_RANGE", "AMOUNT", "AMOUNT_RANGE", "PLACE", "CHOICE"] as const;
 export type ThemeKind = (typeof THEME_KINDS)[number];
 
-/** Saisie brute envoyée par le formulaire d'idée. */
+/** Raw input sent by the idea form. */
 export type IdeaInput = {
   content?: string;
   dateStart?: string;
@@ -16,7 +16,7 @@ export type IdeaInput = {
   amountMax?: number;
 };
 
-/** Champs enregistrés en base pour une idée. */
+/** Fields stored in the database for an idea. */
 export type IdeaFields = {
   content: string;
   dateStart: string | null;
@@ -27,12 +27,12 @@ export type IdeaFields = {
 
 export type IdeaValueError = "invalidInput" | "invalidDateRange" | "invalidAmountRange";
 
-/** Montant maximal accepté (euros entiers). */
+/** Maximum accepted amount (whole euros). */
 export const MAX_AMOUNT = 10_000_000;
 
 const EMPTY: IdeaFields = { content: "", dateStart: null, dateEnd: null, amountMin: null, amountMax: null };
 
-/** Date calendaire « AAAA-MM-JJ » réellement existante (refuse par exemple le 31 février). */
+/** Real calendar date "YYYY-MM-DD" (rejects, for example, February 31). */
 export function isIsoDate(value: unknown): value is string {
   if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const d = new Date(`${value}T00:00:00Z`);
@@ -42,13 +42,13 @@ export function isIsoDate(value: unknown): value is string {
 const isAmount = (value: unknown): value is number =>
   typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= MAX_AMOUNT;
 
-/** Valide la saisie selon le type du sujet et renvoie les champs à enregistrer. */
+/** Validates the input against the topic kind and returns the fields to save. */
 export function parseIdeaInput(
   kind: ThemeKind,
   input: IdeaInput,
 ): { ok: true; fields: IdeaFields } | { ok: false; error: IdeaValueError } {
   switch (kind) {
-    // Lieu et proposition libre d'une liste : du texte, comme un sujet TEXT.
+    // Place and free-form list suggestion: text, like a TEXT topic.
     case "TEXT":
     case "PLACE":
     case "CHOICE": {
@@ -61,7 +61,7 @@ export function parseIdeaInput(
       return { ok: true, fields: { ...EMPTY, dateStart: input.dateStart } };
     case "DATE_RANGE":
       if (!isIsoDate(input.dateStart) || !isIsoDate(input.dateEnd)) return { ok: false, error: "invalidInput" };
-      // Les dates ISO se comparent directement comme des chaînes.
+      // ISO dates compare directly as strings.
       if (input.dateEnd < input.dateStart) return { ok: false, error: "invalidDateRange" };
       return { ok: true, fields: { ...EMPTY, dateStart: input.dateStart, dateEnd: input.dateEnd } };
     case "AMOUNT":
@@ -75,8 +75,8 @@ export function parseIdeaInput(
 }
 
 /**
- * Précision à donner à la date de début d'une période, pour ne pas répéter ce que
- * porte déjà la date de fin : « Du 12 au 14 juin 2027 », « Du 28 juin au 2 juillet 2027 ».
+ * Precision to give the start date of a period, so as not to repeat what the end date
+ * already carries (French output: « Du 12 au 14 juin 2027 », « Du 28 juin au 2 juillet 2027 »).
  */
 export function rangeStartPrecision(startIso: string, endIso: string): "day" | "dayMonth" | "full" {
   if (startIso.slice(0, 4) !== endIso.slice(0, 4)) return "full";
@@ -84,9 +84,9 @@ export function rangeStartPrecision(startIso: string, endIso: string): "day" | "
 }
 
 /**
- * Clé de comparaison pour repérer les doublons au sein d'un sujet. Pour le texte, on ignore
- * la casse, les accents, la ponctuation et les espaces : « Pique-nique ! » = « pique nique ».
- * Pour les sujets typés, deux idées sont identiques si leurs valeurs le sont.
+ * Comparison key to spot duplicates within a topic. For text, case, accents, punctuation
+ * and spaces are ignored: "Pique-nique !" = "pique nique".
+ * For typed topics, two ideas are identical if their values are.
  */
 export function ideaKey(kind: ThemeKind, fields: IdeaFields): string {
   switch (kind) {
@@ -108,10 +108,10 @@ export function ideaKey(kind: ThemeKind, fields: IdeaFields): string {
   }
 }
 
-/** Clé de comparaison d'un texte seul (options d'une liste). */
+/** Comparison key for a plain text (list options). */
 export const textKey = (content: string) => ideaKey("TEXT", { ...EMPTY, content });
 
-/** En français, le premier du mois s'écrit « 1er » (« 1er octobre 2026 », « Du 1er au 30 »). */
+/** In French, the first of the month is written "1er" (« 1er octobre 2026 », « Du 1er au 30 »). */
 export const withFirstOrdinal = (formatted: string) => formatted.replace(/^1(?!\d)/, "1er");
 
 export type IdeaFormat = {
@@ -121,7 +121,7 @@ export type IdeaFormat = {
   amountRange: (min: number, max: number) => string;
 };
 
-/** Texte affiché pour une idée (vote, bilan, exports). */
+/** Text displayed for an idea (voting, recap, exports). */
 export function describeIdea(kind: ThemeKind, fields: IdeaFields, format: IdeaFormat): string {
   switch (kind) {
     case "DATE":
@@ -145,16 +145,16 @@ export function describeIdea(kind: ThemeKind, fields: IdeaFields, format: IdeaFo
   }
 }
 
-// ─── Sujets « Liste » ───────────────────────────────────────────────────────
+// ─── "List" topics ─────────────────────────────────────────────────────────
 
-/** Nombre d'options d'une liste. */
+/** Number of options in a list. */
 export const CHOICE_OPTIONS = { min: 2, max: 10 } as const;
-/** Longueur maximale d'une option. */
+/** Maximum length of an option. */
 export const MAX_OPTION_LENGTH = 60;
 
 /**
- * Valide les options d'une liste : espaces retirés, 2 à 10 options non vides, sans doublon
- * (même comparaison que pour les idées). Renvoie null si la liste n'est pas valide.
+ * Validates list options: trimmed, 2 to 10 non-empty options, no duplicates (same
+ * comparison as for ideas). Returns null if the list is invalid.
  */
 export function parseChoiceOptions(raw: unknown): string[] | null {
   if (!Array.isArray(raw)) return null;
@@ -165,7 +165,7 @@ export function parseChoiceOptions(raw: unknown): string[] | null {
   return new Set(keys).size === keys.length ? options : null;
 }
 
-/** Options enregistrées en base (JSON) ; une valeur illisible donne une liste vide. */
+/** Options stored in the database (JSON); an unreadable value gives an empty list. */
 export function readChoiceOptions(stored: string | null): string[] {
   if (!stored) return [];
   try {
@@ -176,11 +176,11 @@ export function readChoiceOptions(stored: string | null): string[] {
   }
 }
 
-// ─── Sujets « Lieu » ────────────────────────────────────────────────────────
+// ─── "Place" topics ────────────────────────────────────────────────────────
 
 /**
- * Lien de recherche qui ouvre l'app de cartes installée : Plans sur les appareils Apple,
- * Google Maps ailleurs (l'app sur Android, le site sur ordinateur).
+ * Search link that opens the installed maps app: Apple Maps on Apple devices,
+ * Google Maps elsewhere (the app on Android, the website on desktop).
  */
 export function mapSearchUrl(query: string, apple: boolean): string {
   const q = encodeURIComponent(query);

@@ -4,7 +4,7 @@ import { CardSkeleton } from "@/components/card-skeleton";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeaderSkeleton } from "@/components/page-header-skeleton";
 
-/** Chargement du bilan : cartes de résultats avec leur statut. */
+/** Loading of the recap: result cards with their status. */
 export default async function RecapLoading() {
   const t = await getTranslations("loading");
   return (

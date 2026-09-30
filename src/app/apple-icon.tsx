@@ -5,7 +5,7 @@ import { COMMA_PATH } from "@/components/logo";
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
-// Icône d'écran d'accueil iOS : même dessin que icon.svg, sans coins arrondis (iOS les applique).
+// iOS home screen icon: same drawing as icon.svg, without rounded corners (iOS applies them).
 export default function AppleIcon() {
   return new ImageResponse(
     (

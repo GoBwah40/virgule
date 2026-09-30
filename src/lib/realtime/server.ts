@@ -4,7 +4,7 @@ import Pusher from "pusher";
 
 import { ROOM_EVENT, roomChannel } from "@/lib/realtime/shared";
 
-// Pusher est optionnel : sans variables d'environnement, les clients passent en polling.
+// Pusher is optional: without environment variables, clients fall back to polling.
 let pusher: Pusher | null | undefined;
 
 function getPusher(): Pusher | null {
@@ -24,9 +24,9 @@ function getPusher(): Pusher | null {
 }
 
 /**
- * Signale aux autres participants que l'état de la room a changé.
- * Le message ne contient aucune donnée : les clients re-chargent l'état côté serveur,
- * ce qui garantit l'anonymat (rien de sensible ne transite par Pusher).
+ * Tells the other participants that the room state has changed.
+ * The message carries no data: clients reload the state from the server,
+ * which guarantees anonymity (nothing sensitive goes through Pusher).
  */
 export async function notifyRoom(slug: string) {
   const client = getPusher();
@@ -34,7 +34,7 @@ export async function notifyRoom(slug: string) {
   try {
     await client.trigger(roomChannel(slug), ROOM_EVENT, {});
   } catch (error) {
-    // Une notification ratée n'est pas bloquante : le polling de secours prend le relais.
-    console.error("[realtime] échec de notification", error);
+    // A failed notification is not blocking: the fallback polling takes over.
+    console.error("[realtime] notification failed", error);
   }
 }

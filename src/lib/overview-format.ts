@@ -8,8 +8,8 @@ import type { RecapOverview } from "@/lib/room";
 export type OverviewText = { summary: string; detail: string; common: boolean };
 
 /**
- * Textes de la synthèse d'un sujet au bilan, partagés par la page et les exports :
- * « Créneau commun : du 12 au 14 juin 2027 » / « Commun aux 3 périodes retenues. »
+ * Texts of a topic overview in the recap, shared by the page and the exports
+ * (French output: « Créneau commun : du 12 au 14 juin 2027 » / « Commun aux 3 périodes retenues. »).
  */
 export async function getOverviewText(): Promise<(overview: RecapOverview) => OverviewText> {
   const t = await getTranslations("recap");

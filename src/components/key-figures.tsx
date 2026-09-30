@@ -5,7 +5,7 @@ type Props = {
   className?: string;
 };
 
-/** Rangée de repères chiffrés (« 6 places », « 7 jours en ligne »), le chiffre en DM Mono. */
+/** Row of key figures ("6 seats", "7 days online"), the number in DM Mono. */
 export function KeyFigures({ items, className }: Props) {
   return (
     <ul className={cn("flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground", className)}>

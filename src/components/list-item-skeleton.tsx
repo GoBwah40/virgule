@@ -2,17 +2,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** Ce qui s'affiche à droite de la ligne : boutons de vote, statut ou rien. */
+  /** What shows on the right of the row: vote buttons, status or nothing. */
   actions?: "votes" | "status" | "none";
-  /** Ajoute une ligne de badges sous le texte. */
+  /** Adds a row of badges under the text. */
   withMeta?: boolean;
-  /** Largeur du texte, pour varier les lignes d'une même liste. */
+  /** Text width, to vary the rows of one list. */
   width?: "short" | "medium" | "long";
 };
 
 const WIDTHS = { short: "w-2/5", medium: "w-3/5", long: "w-4/5" } as const;
 
-/** Squelette de ListItem : même hauteur, mêmes coins, même empilement sur mobile. */
+/** ListItem skeleton: same height, same corners, same stacking on mobile. */
 export function ListItemSkeleton({ actions = "none", withMeta, width = "medium" }: Props) {
   return (
     <li className="flex flex-col gap-2.5 rounded-xl border-[1.5px] border-transparent bg-muted/60 px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3">

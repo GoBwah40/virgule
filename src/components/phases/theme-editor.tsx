@@ -40,7 +40,7 @@ type ThemeValues = {
   allowOtherIdeas: boolean;
 };
 
-/** Sujets courants proposés en un tap (clés du namespace themes.suggestions), avec leur type de réponse. */
+/** Common topics offered in one tap (keys of the themes.suggestions namespace), with their answer kind. */
 const SUGGESTIONS = {
   goal: "TEXT",
   dates: "DATE_RANGE",
@@ -64,7 +64,7 @@ export function ThemeEditor({
 }) {
   const t = useTranslations("themes");
   const [pending, run] = useAction();
-  // Retour depuis la phase d'idées : on reprend plutôt qu'on ne lance.
+  // Back from the ideas phase: we resume rather than start.
   const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
   const existing = new Set(themes.map((th) => th.title.toLowerCase()));
@@ -240,7 +240,7 @@ function ThemeForm({
   const [allowOtherIdeas, setAllowOtherIdeas] = useState(initial?.allowOtherIdeas ?? false);
   const optionsMissing = kind === "CHOICE" && options.length < CHOICE_OPTIONS.min;
   const idPrefix = initial?.id ?? "new";
-  // Des idées existent déjà : changer leur type les rendrait illisibles.
+  // Ideas already exist: changing their kind would make them unreadable.
   const kindLocked = (initial?.ideaCount ?? 0) > 0;
 
   return (

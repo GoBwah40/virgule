@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore } from "react";
 
 import { type ReleaseNotesEntry, ReleaseNotesSheet } from "@/components/release-notes-sheet";
 
-// Dernière version dont la personne a ouvert les notes, propre à ce navigateur.
+// Last version whose notes the person opened, specific to this browser.
 const SEEN_KEY = "virgule_release_seen";
 
 function readSeen() {
@@ -21,10 +21,10 @@ function subscribe(onChange: () => void) {
   return () => window.removeEventListener("storage", onChange);
 }
 
-/** Notes de version de l'accueil : pastille tant que la version en ligne n'a pas été consultée. */
+/** Home page release notes: a dot until the live version has been viewed. */
 export function ReleaseNotes({ version, releases }: { version: string; releases: ReleaseNotesEntry[] }) {
   const t = useTranslations("releaseNotes");
-  // Côté serveur, on fait comme si c'était vu : pas de pastille qui clignote au chargement.
+  // Server-side, we treat it as seen: no dot flashing on load.
   const seen = useSyncExternalStore(subscribe, readSeen, () => version);
   const [openedNow, setOpenedNow] = useState(false);
 
@@ -34,7 +34,7 @@ export function ReleaseNotes({ version, releases }: { version: string; releases:
     try {
       localStorage.setItem(SEEN_KEY, version);
     } catch {
-      // Stockage indisponible (navigation privée…) : la pastille reviendra, sans gravité.
+      // Storage unavailable (private browsing…): the dot will come back, no big deal.
     }
   };
 

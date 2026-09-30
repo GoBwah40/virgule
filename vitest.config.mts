@@ -11,12 +11,12 @@ export default defineConfig({
   test: {
     projects: [
       {
-        // Logique pure (scores, exports…) : environnement Node.
+        // Pure logic (scores, exports…): Node environment.
         extends: true,
         test: { name: "unit", environment: "node", include: ["src/lib/**/*.test.ts", "src/i18n/**/*.test.ts"] },
       },
       {
-        // Composants globaux : DOM simulé + Testing Library.
+        // Global components: simulated DOM + Testing Library.
         extends: true,
         test: {
           name: "components",

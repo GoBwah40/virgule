@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 
 import { defaultLocale } from "@/i18n/config";
 
-// Règle i18n : une clé présente dans une langue doit exister dans toutes les autres.
-// Avec une seule langue, le test passe ; il protège l'ajout des suivantes.
+// i18n rule: a key present in one language must exist in all the others.
+// It also guards the addition of further languages.
 
 type Messages = { [key: string]: string | Messages };
 
@@ -17,7 +17,7 @@ const locales = readdirSync(dir)
 
 const load = (locale: string): Messages => JSON.parse(readFileSync(path.join(dir, `${locale}.json`), "utf8"));
 
-/** Clés à plat : { a: { b: "…" } } → ["a.b"]. */
+/** Flat keys: { a: { b: "…" } } → ["a.b"]. */
 function flatKeys(messages: Messages, prefix = ""): string[] {
   return Object.entries(messages).flatMap(([key, value]) => {
     const full = prefix ? `${prefix}.${key}` : key;
@@ -25,25 +25,25 @@ function flatKeys(messages: Messages, prefix = ""): string[] {
   });
 }
 
-describe("fichiers de traduction", () => {
-  it("contiennent la langue par défaut", () => {
+describe("translation files", () => {
+  it("include the default language", () => {
     expect(locales).toContain(defaultLocale);
   });
 
   const keysByLocale = new Map(locales.map((locale) => [locale, new Set(flatKeys(load(locale)))]));
   const allKeys = new Set([...keysByLocale.values()].flatMap((keys) => [...keys]));
 
-  it.each(locales)("%s contient toutes les clés des autres langues", (locale) => {
+  it.each(locales)("%s has every key of the other languages", (locale) => {
     const keys = keysByLocale.get(locale)!;
     const missing = [...allKeys].filter((key) => !keys.has(key)).sort();
-    expect(missing, `Clés absentes de messages/${locale}.json`).toEqual([]);
+    expect(missing, `Keys missing from messages/${locale}.json`).toEqual([]);
   });
 
-  it.each(locales)("%s n'a aucune traduction vide", (locale) => {
+  it.each(locales)("%s has no empty translation", (locale) => {
     const empty = flatKeys(load(locale)).filter((key) => {
       const value = key.split(".").reduce<string | Messages>((node, part) => (node as Messages)[part], load(locale));
       return typeof value === "string" && value.trim() === "";
     });
-    expect(empty, `Traductions vides dans messages/${locale}.json`).toEqual([]);
+    expect(empty, `Empty translations in messages/${locale}.json`).toEqual([]);
   });
 });

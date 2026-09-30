@@ -19,21 +19,21 @@ export type Seat = { id: string; name: string; isMe?: boolean; isHost?: boolean 
 
 type SeatAction = { id: string; label: string; icon: LucideIcon; destructive?: boolean };
 
-/** Menu d'une place occupée, ouvert au clic droit, au clic ou au clavier. */
+/** Menu for a taken seat, opened by right click, click or keyboard. */
 type SeatMenu = {
-  /** Nom accessible du bouton de la place (ex. « Place de Léo : options »). */
+  /** Accessible name of the seat button (e.g. "Leo's seat: options"). */
   label: (seat: Seat) => string;
-  /** Actions proposées pour cette place ; aucune = pas de menu. */
+  /** Actions offered for this seat; none = no menu. */
   actions: (seat: Seat) => SeatAction[];
   onSelect: (seat: Seat, actionId: string) => void;
 };
 
 type Props = {
   seats: Seat[];
-  /** Nombre total de places (une rangée d'avion : 6 sièges, allée entre C et D). */
+  /** Total number of seats (an airplane row: 6 seats, aisle between C and D). */
   capacity: number;
   labels: { free: string; you: string; host: string; row: string };
-  /** Action sur une place libre, par exemple copier le lien d'invitation. */
+  /** Action on a free seat, e.g. copying the invite link. */
   onFreeSeatClick?: () => void;
   menu?: SeatMenu;
   size?: "sm" | "md";
@@ -42,7 +42,7 @@ type Props = {
 
 const LETTERS = "ABCDEFGHIJ";
 
-/** Participants affichés comme une rangée de sièges : qui est à bord, combien de places restent. */
+/** Participants shown as a row of seats: who is on board, how many seats are left. */
 export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size = "sm", className }: Props) {
   const aisle = Math.ceil(capacity / 2);
   const box = size === "md" ? "h-12 w-11 text-base" : "h-10 w-9 text-sm";
@@ -84,7 +84,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
             className={cn("relative grid justify-items-center gap-0.5", i === aisle && "ml-2.5")}
           >
             {seat?.isHost && (
-              // Couronne posée sur le siège : pas de ligne réservée au-dessus de chaque place.
+              // Crown sitting on the seat: no row reserved above each seat.
               <span className="absolute -top-2 left-1/2 z-10 -translate-x-1/2 rounded-full bg-card px-0.5 text-primary" aria-hidden>
                 <Crown className="size-3" />
               </span>
@@ -130,7 +130,7 @@ function SeatMenuTrigger({ seat, menu, label, children }: { seat: Seat; menu: Se
             aria-label={menu.label(seat)}
             title={label}
             className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-            // Clic droit (et appui long sur Android) : même menu qu'au clic.
+            // Right click (and long press on Android): same menu as a click.
             onContextMenu={(e) => {
               e.preventDefault();
               setOpen(true);

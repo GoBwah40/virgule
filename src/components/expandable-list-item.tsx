@@ -9,9 +9,9 @@ import { cn } from "@/lib/utils";
 type Props = {
   children: React.ReactNode;
   meta?: React.ReactNode;
-  /** Éléments affichés à droite (non interactifs : toute la ligne est déjà un bouton). */
+  /** Items shown on the right (not interactive: the whole row is already a button). */
   aside?: React.ReactNode;
-  /** Contenu déplié sous la ligne au toucher (ex. détail des votes). */
+  /** Content revealed under the row on tap (e.g. vote details). */
   details: React.ReactNode;
   tone?: keyof typeof LIST_ITEM_TONES;
   defaultOpen?: boolean;
@@ -19,8 +19,8 @@ type Props = {
 };
 
 /**
- * Ligne de liste qui se déplie au toucher, au clic ou au clavier : même apparence que
- * ListItem, avec un chevron qui indique qu'il y a un détail à voir.
+ * List row that expands on tap, click or keyboard: same look as ListItem,
+ * with a chevron hinting that there are details to see.
  */
 export function ExpandableListItem({ children, meta, aside, details, tone = "neutral", defaultOpen = false, className }: Props) {
   const [open, setOpen] = useState(defaultOpen);
@@ -54,7 +54,7 @@ export function ExpandableListItem({ children, meta, aside, details, tone = "neu
           />
         </span>
       </button>
-      {/* `hidden` retire le détail de l'arbre d'accessibilité quand il est replié ; il apparaît en fondu. */}
+      {/* `hidden` removes the details from the accessibility tree when collapsed; they fade in. */}
       <div
         id={detailsId}
         hidden={!open}

@@ -5,7 +5,7 @@ import { renderUi } from "@/test/render";
 import { ListItemSkeleton } from "./list-item-skeleton";
 
 describe("ListItemSkeleton", () => {
-  it("simule les deux boutons de vote", () => {
+  it("mimics the two vote buttons", () => {
     const { container } = renderUi(
       <ul>
         <ListItemSkeleton actions="votes" />

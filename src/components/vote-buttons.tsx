@@ -7,17 +7,17 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** true = pour, false = contre, null = pas de vote. */
+  /** true = for, false = against, null = no vote. */
   value: boolean | null;
-  /** Reçoit la nouvelle valeur ; re-cliquer sur le vote actif le retire (null). */
+  /** Receives the new value; clicking the active vote again removes it (null). */
   onChange: (next: boolean | null) => void;
   labels: { up: string; down: string };
-  /** Si renseigné, les boutons sont désactivés et ce texte explique pourquoi. */
+  /** If set, the buttons are disabled and this text explains why. */
   disabledReason?: string;
   className?: string;
 };
 
-/** Paire de boutons ↑ / ↓ (44 px) ; le libellé est dans l'infobulle et l'aria-label. */
+/** Pair of ↑ / ↓ buttons (44 px); the label is in the tooltip and the aria-label. */
 export function VoteButtons({ value, onChange, labels, disabledReason, className }: Props) {
   const disabled = !!disabledReason;
   const buttons = (
@@ -27,7 +27,7 @@ export function VoteButtons({ value, onChange, labels, disabledReason, className
         pressed={value === true}
         disabled={disabled}
         onClick={() => onChange(value === true ? null : true)}
-        // Les variantes `dark:` sont nécessaires : le bouton `outline` impose son propre fond en mode sombre.
+        // The `dark:` variants are needed: the `outline` button forces its own background in dark mode.
         pressedClassName="border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground dark:border-success dark:bg-success dark:hover:bg-success/90"
       >
         <ArrowUp />
@@ -45,7 +45,7 @@ export function VoteButtons({ value, onChange, labels, disabledReason, className
   );
 
   if (!disabled) return buttons;
-  // Un bouton désactivé ne déclenche pas d'infobulle : c'est le groupe qui explique pourquoi.
+  // A disabled button doesn't trigger a tooltip: the group explains why instead.
   return (
     <Tooltip>
       <TooltipTrigger render={<span tabIndex={0} />}>{buttons}</TooltipTrigger>
@@ -80,7 +80,7 @@ function VoteButton({
       className={cn(
         "border-[1.5px] active:scale-95 [&_svg:not([class*='size-'])]:size-5",
         pressed && pressedClassName,
-        // Rebond quand le vote passe à « actif » ; rien quand on le retire.
+        // Bounce when the vote becomes active; nothing when it's removed.
         pressed && "motion-safe:animate-pop",
       )}
     >

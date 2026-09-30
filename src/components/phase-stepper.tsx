@@ -2,15 +2,15 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   steps: { id: string; label: string }[];
-  /** Index de l'étape en cours ; au-delà de la dernière, toutes sont terminées. */
+  /** Index of the current step; past the last one, all steps are done. */
   current: number;
-  /** Éléments ajoutés en fin de ligne (tour, statut…). */
+  /** Items appended at the end of the row (round, status…). */
   extra?: React.ReactNode;
   label: string;
   className?: string;
 };
 
-/** Étapes de la séance sous forme de pilules. */
+/** Session steps shown as pills. */
 export function PhaseStepper({ steps, current, extra, label, className }: Props) {
   return (
     <ol aria-label={label} className={cn("flex flex-wrap items-center gap-1.5 text-sm font-semibold", className)}>

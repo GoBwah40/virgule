@@ -5,12 +5,12 @@ type Props = {
   id: string;
   label: string;
   hint?: string;
-  /** Le contrôle (Input, Textarea…) doit porter le même `id`. */
+  /** The control (Input, Textarea…) must carry the same `id`. */
   children: React.ReactNode;
   className?: string;
 };
 
-/** Libellé + contrôle + aide, espacés de façon homogène dans tous les formulaires. */
+/** Label + control + hint, spaced consistently across all forms. */
 export function FormField({ id, label, hint, children, className }: Props) {
   return (
     <div className={cn("space-y-2", className)}>

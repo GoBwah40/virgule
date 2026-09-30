@@ -5,12 +5,12 @@ import { fn } from "storybook/test";
 import { SettingSwitch } from "./setting-switch";
 
 const meta = {
-  title: "Composants/SettingSwitch",
+  title: "Components/SettingSwitch",
   component: SettingSwitch,
   args: {
     id: "self-vote",
-    label: "Voter sur ses propres idées",
-    hint: "Si c'est désactivé, personne ne peut voter pour ou contre les idées qu'il a proposées.",
+    label: "Vote on your own ideas",
+    hint: "When off, nobody can vote for or against the ideas they suggested.",
     checked: true,
     onCheckedChange: fn(),
   },
@@ -19,10 +19,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Interactif: Story = {
+export const Interactive: Story = {
   render: (args) => {
     const [checked, setChecked] = useState(args.checked);
     return <SettingSwitch {...args} checked={checked} onCheckedChange={setChecked} />;
   },
 };
-export const Desactive: Story = { args: { disabled: true } };
+export const Disabled: Story = { args: { disabled: true } };

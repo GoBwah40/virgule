@@ -17,8 +17,8 @@ type Props = {
 };
 
 /**
- * Choix du thème en trois icônes (système, clair, sombre). Vrais boutons radio :
- * navigation aux flèches, libellés lus par les lecteurs d'écran et affichés au survol.
+ * Theme picker as three icons (system, light, dark). Real radio buttons: arrow-key
+ * navigation, labels read by screen readers and shown on hover.
  */
 export function ThemeToggle({ value, onChange, labels, className }: Props) {
   return (

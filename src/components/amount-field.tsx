@@ -6,9 +6,9 @@ import { Label } from "@/components/ui/label";
 type Value = { min: string; max: string };
 
 type Props = {
-  /** `single` : un montant ; `range` : une fourchette entre… et… */
+  /** `single`: one amount; `range`: a range between… and… */
   mode: "single" | "range";
-  /** Valeurs saisies (texte brut des champs, converti par l'appelant). */
+  /** Entered values (raw field text, converted by the caller). */
   value: Value;
   onChange: (value: Value) => void;
   labels: { amount: string; min: string; max: string; currency: string };
@@ -16,13 +16,13 @@ type Props = {
   disabled?: boolean;
 };
 
-/** Montant en euros entiers : clavier numérique sur mobile, symbole de la devise dans le champ. */
+/** Amount in whole euros: numeric keypad on mobile, currency symbol inside the field. */
 export function AmountField({ mode, value, onChange, labels, idPrefix, disabled }: Props) {
   const field = (key: keyof Value, label: string) => (
     <div className="space-y-1.5">
       <Label htmlFor={`${idPrefix}-${key}`} className="text-sm font-semibold">
         {label}
-        {/* L'unité est visible dans le champ ; les lecteurs d'écran l'entendent dans le libellé. */}
+        {/* The unit is visible in the field; screen readers hear it in the label. */}
         <span className="sr-only"> ({labels.currency})</span>
       </Label>
       <div className="relative">
@@ -34,7 +34,7 @@ export function AmountField({ mode, value, onChange, labels, idPrefix, disabled 
           autoComplete="off"
           value={value[key]}
           disabled={disabled}
-          // Chiffres uniquement : pas de décimales, pas de signe.
+          // Digits only: no decimals, no sign.
           onChange={(e) => onChange({ ...value, [key]: e.target.value.replace(/\D/g, "").slice(0, 8) })}
           className="pr-9 tabular-nums"
         />

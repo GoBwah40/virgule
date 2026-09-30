@@ -7,16 +7,16 @@ import { renderUi } from "@/test/render";
 import { IconList } from "./icon-list";
 
 describe("IconList", () => {
-  it("affiche une ligne par élément", () => {
+  it("shows one row per item", () => {
     renderUi(
       <IconList
         items={[
-          { icon: Tags, text: "Tu choisis les sujets" },
-          { icon: Tags, text: "Chacun vote" },
+          { icon: Tags, text: "You pick the topics" },
+          { icon: Tags, text: "Everyone votes" },
         ]}
       />,
     );
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
-    expect(screen.getByText("Chacun vote")).toBeInTheDocument();
+    expect(screen.getByText("Everyone votes")).toBeInTheDocument();
   });
 });

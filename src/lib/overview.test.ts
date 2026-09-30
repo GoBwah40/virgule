@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { bestAmountOverlap, bestDateOverlap, dayCoverage } from "@/lib/overview";
 
 describe("dayCoverage", () => {
-  it("compte les périodes qui couvrent chaque jour", () => {
+  it("counts the periods covering each day", () => {
     expect(
       dayCoverage([
         { start: "2027-06-10", end: "2027-06-12" },
@@ -17,7 +17,7 @@ describe("dayCoverage", () => {
     ]);
   });
 
-  it("traverse les changements de mois", () => {
+  it("crosses month boundaries", () => {
     expect(dayCoverage([{ start: "2027-06-30", end: "2027-07-01" }]).map((d) => d.date)).toEqual([
       "2027-06-30",
       "2027-07-01",
@@ -26,7 +26,7 @@ describe("dayCoverage", () => {
 });
 
 describe("bestDateOverlap", () => {
-  it("donne le créneau commun à toutes les périodes", () => {
+  it("gives the slot common to all periods", () => {
     expect(
       bestDateOverlap([
         { start: "2027-06-10", end: "2027-06-14" },
@@ -36,7 +36,7 @@ describe("bestDateOverlap", () => {
     ).toEqual({ start: "2027-06-12", end: "2027-06-14", count: 3, total: 3 });
   });
 
-  it("sans créneau commun, donne le plus partagé", () => {
+  it("without a common slot, gives the most shared one", () => {
     expect(
       bestDateOverlap([
         { start: "2027-06-05", end: "2027-06-07" },
@@ -46,13 +46,13 @@ describe("bestDateOverlap", () => {
     ).toEqual({ start: "2027-06-13", end: "2027-06-14", count: 2, total: 3 });
   });
 
-  it("ne dit rien avec moins de deux périodes", () => {
+  it("says nothing with fewer than two periods", () => {
     expect(bestDateOverlap([{ start: "2027-06-05", end: "2027-06-07" }])).toBeNull();
   });
 });
 
 describe("bestAmountOverlap", () => {
-  it("donne la zone compatible avec toutes les fourchettes", () => {
+  it("gives the zone compatible with all ranges", () => {
     expect(
       bestAmountOverlap([
         { min: 200, max: 400 },
@@ -62,7 +62,7 @@ describe("bestAmountOverlap", () => {
     ).toEqual({ start: 300, end: 400, count: 3, total: 3 });
   });
 
-  it("sans zone commune, donne la plus partagée", () => {
+  it("without a common zone, gives the most shared one", () => {
     expect(
       bestAmountOverlap([
         { min: 100, max: 200 },
@@ -72,7 +72,7 @@ describe("bestAmountOverlap", () => {
     ).toEqual({ start: 350, end: 500, count: 2, total: 3 });
   });
 
-  it("réduit la zone à un montant quand les fourchettes se touchent", () => {
+  it("narrows the zone to one amount when ranges touch", () => {
     expect(bestAmountOverlap([{ min: 100, max: 300 }, { min: 300, max: 500 }])).toEqual({
       start: 300,
       end: 300,
