@@ -27,7 +27,8 @@ export function VoteButtons({ value, onChange, labels, disabledReason, className
         pressed={value === true}
         disabled={disabled}
         onClick={() => onChange(value === true ? null : true)}
-        pressedClassName="border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground"
+        // Les variantes `dark:` sont nécessaires : le bouton `outline` impose son propre fond en mode sombre.
+        pressedClassName="border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground dark:border-success dark:bg-success dark:hover:bg-success/90"
       >
         <ArrowUp />
       </VoteButton>
@@ -36,7 +37,7 @@ export function VoteButtons({ value, onChange, labels, disabledReason, className
         pressed={value === false}
         disabled={disabled}
         onClick={() => onChange(value === false ? null : false)}
-        pressedClassName="border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white dark:text-background dark:hover:text-background"
+        pressedClassName="border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white dark:border-destructive dark:bg-destructive dark:text-background dark:hover:bg-destructive/90 dark:hover:text-background"
       >
         <ArrowDown />
       </VoteButton>
