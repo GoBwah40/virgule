@@ -4,7 +4,8 @@ Changements qui rendent une fonctionnalité existante plus claire, plus rapide o
 
 ## 0.5.3 — 2026-09-30
 
-- En mode sombre, les champs, les contours de sélection et les pointillés ressortent mieux, et les jours du calendrier des dates se lisent plus facilement.
+- Les champs, les contours de sélection et les pointillés ressortent mieux, en mode clair comme en mode sombre, et les jours du calendrier des dates se lisent plus facilement.
+- Un bouton pas encore disponible s'affiche en gris plutôt qu'en orange délavé.
 
 ## 0.5.2 — 2026-09-30
 
