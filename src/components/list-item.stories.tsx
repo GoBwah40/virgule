@@ -24,7 +24,7 @@ export const AvecMeta: Story = {
 export const Retenue: Story = {
   args: {
     tone: "positive",
-    actions: <StatusBadge status="retained" label="Retenue" tooltip="Score +3 · 4 pour, 1 contre" />,
+    actions: <StatusBadge status="retained" label="Retenue" />,
   },
 };
 
@@ -32,7 +32,7 @@ export const Ecartee: Story = {
   args: {
     tone: "negative",
     children: "Soirée karaoké",
-    actions: <StatusBadge status="rejected" label="Écartée" tooltip="Score −3 · 1 pour, 4 contre" />,
+    actions: <StatusBadge status="rejected" label="Écartée" />,
   },
 };
 

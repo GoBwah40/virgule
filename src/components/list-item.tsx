@@ -11,7 +11,8 @@ type Props = {
   className?: string;
 };
 
-const TONES = {
+/** Teintes de ligne, partagées avec ExpandableListItem. */
+export const LIST_ITEM_TONES = {
   plain: "border-border bg-card",
   neutral: "border-transparent bg-muted",
   positive: "border-success/35 bg-success/10",
@@ -26,7 +27,7 @@ export function ListItem({ children, meta, actions, tone = "neutral", className 
         "flex flex-col gap-2.5 rounded-xl border-[1.5px] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
         // Arrivée d'une ligne (y compris celle d'un autre participant) et changement de teinte au bilan.
         "transition-colors duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2",
-        TONES[tone],
+        LIST_ITEM_TONES[tone],
         className,
       )}
     >
