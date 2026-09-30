@@ -3,9 +3,12 @@ import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { LocalePreferenceToggle } from "@/components/site/locale-preference";
 import { ThemePreferenceToggle } from "@/components/site/theme-preference";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { defaultLocale } from "@/i18n/config";
+import { isLocale } from "@/i18n/locale";
 import { parseThemePreference, THEME_COOKIE } from "@/lib/theme";
 
 import { fontVariables } from "./fonts";
@@ -32,7 +35,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col text-base">
         <NextIntlClientProvider>
           <TooltipProvider>{children}</TooltipProvider>
-          <footer className="mx-auto flex w-full max-w-5xl justify-end px-4 pb-4">
+          <footer className="mx-auto flex w-full max-w-5xl justify-end gap-2 px-4 pb-4">
+            <LocalePreferenceToggle initial={isLocale(locale) ? locale : defaultLocale} />
             <ThemePreferenceToggle initial={theme} />
           </footer>
           <Toaster theme={theme} richColors position="top-center" />

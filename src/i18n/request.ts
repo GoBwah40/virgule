@@ -1,15 +1,16 @@
+import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
 
-import { defaultLocale } from "@/i18n/config";
+import { LOCALE_COOKIE } from "@/i18n/config";
+import { resolveLocale } from "@/i18n/locale";
 
-// Application en français uniquement pour l'instant : pas de routage par langue.
-// Pour ajouter une langue : créer messages/<locale>.json, l'ajouter à `locales`,
-// puis déterminer la locale ici (cookie, en-tête Accept-Language…).
+// No per-language routing: the language picked in the footer (cookie) wins, otherwise the
+// device language (Accept-Language) if supported, otherwise English.
 export default getRequestConfig(async () => {
-  const locale = defaultLocale;
+  const locale = resolveLocale((await cookies()).get(LOCALE_COOKIE)?.value, (await headers()).get("accept-language"));
   return {
     locale,
-    // Fuseau fixe : évite les écarts d'affichage des dates entre serveur (UTC) et navigateur.
+    // Fixed time zone: avoids date differences between server (UTC) and browser.
     timeZone: "Europe/Paris",
     messages: (await import(`../../messages/${locale}.json`)).default,
   };

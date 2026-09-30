@@ -1,5 +1,5 @@
 import { ListChecks, Lightbulb, Tags } from "lucide-react";
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
 import { CreateRoomForm } from "@/components/home/create-room-form";
 import { IconList } from "@/components/icon-list";
@@ -8,6 +8,8 @@ import { Logo } from "@/components/logo";
 import { PhaseTransition } from "@/components/phase-transition";
 import { Rosette } from "@/components/rosette";
 import { ReleaseNotes } from "@/components/site/release-notes";
+import { defaultLocale } from "@/i18n/config";
+import { isLocale } from "@/i18n/locale";
 import { MAX_PARTICIPANTS, ROOM_TTL_DAYS } from "@/lib/config";
 import { APP_VERSION, getReleaseNotes } from "@/lib/release-notes-source";
 
@@ -15,8 +17,9 @@ export default async function HomePage() {
   const t = await getTranslations("home");
   const tApp = await getTranslations("app");
   const format = await getFormatter();
-  // Dates de mise en production (« AAAA-MM-JJ ») lues en UTC, comme les dates des idées.
-  const releases = (await getReleaseNotes()).map((release) => ({
+  const locale = await getLocale();
+  // Release dates ("YYYY-MM-DD") read in UTC, like idea dates.
+  const releases = (await getReleaseNotes(isLocale(locale) ? locale : defaultLocale)).map((release) => ({
     ...release,
     date: format.dateTime(new Date(`${release.date}T00:00:00Z`), { dateStyle: "long", timeZone: "UTC" }),
   }));

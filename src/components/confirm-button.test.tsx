@@ -31,7 +31,7 @@ describe("ConfirmButton", () => {
       </ConfirmButton>,
     );
     await userEvent.click(screen.getByRole("button", { name: "Terminer la séance" }));
-    await userEvent.click(await screen.findByRole("button", { name: "Annuler" }));
+    await userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     expect(onConfirm).not.toHaveBeenCalled();
   });
 });

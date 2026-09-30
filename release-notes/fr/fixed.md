@@ -1,6 +1,6 @@
 # Corrections
 
-Problèmes corrigés. Format et règles : [VERSIONS.md](../VERSIONS.md).
+Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
 ## 0.3.0 — 2026-09-30
 

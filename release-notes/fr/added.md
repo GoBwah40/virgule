@@ -1,6 +1,10 @@
 # Ajouts
 
-Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../VERSIONS.md).
+Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
+
+## 0.5.0 — 2026-09-30
+
+- Virgule est disponible en anglais, avec un choix de la langue dans le pied de page ; par défaut, l'app suit la langue de l'appareil.
 
 ## 0.4.0 — 2026-09-30
 
