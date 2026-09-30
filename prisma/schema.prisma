@@ -69,6 +69,8 @@ enum ThemeKind {
   DATE_RANGE // une période (du… au…)
   AMOUNT // un montant en euros
   AMOUNT_RANGE // une fourchette de montants en euros
+  PLACE // un lieu (texte, avec lien vers la carte)
+  CHOICE // une option parmi une liste fixée par l'animateur
 }
 
 model Theme {
@@ -81,6 +83,11 @@ model Theme {
   kind        ThemeKind @default(TEXT)
   position    Int
   createdAt   DateTime @default(now())
+  // Colonnes ajoutées après la création (en fin de liste : ALTER TABLE sans reconstruction).
+  /// Sujets CHOICE : options fixées par l'animateur (tableau JSON de chaînes).
+  options     String?
+  /// Sujets CHOICE : les participants peuvent-ils proposer d'autres idées ?
+  allowOtherIdeas Boolean @default(false)
   ideas       Idea[]
 
   @@index([roomId, position])
@@ -109,6 +116,9 @@ model Idea {
   /// Premier tour auquel l'idée ne participe plus (null = toujours en lice).
   eliminatedRound  Int?
   createdAt        DateTime    @default(now())
+  /// Option d'un sujet CHOICE (créée au lancement des idées) : n'appartient à personne en
+  /// particulier, donc votable par tous et retirable par la personne qui anime.
+  isOption         Boolean     @default(false)
   votes            Vote[]
 
   @@index([roomId])

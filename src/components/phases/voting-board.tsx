@@ -7,13 +7,16 @@ import { useOptimistic, useState } from "react";
 import { AmountField } from "@/components/amount-field";
 import { ConfirmButton } from "@/components/confirm-button";
 import { DateField } from "@/components/date-field";
+import { FormField } from "@/components/form-field";
 import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
+import { MapLink } from "@/components/map-link";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { VoteButtons } from "@/components/vote-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, stopTimer } from "@/lib/actions";
@@ -22,7 +25,17 @@ import type { IdeaInput, ThemeKind } from "@/lib/idea-value";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
-export function ThemeIdeas({ slug, theme, allowNewIdeas }: { slug: string; theme: VotingTheme; allowNewIdeas: boolean }) {
+export function ThemeIdeas({
+  slug,
+  theme,
+  allowNewIdeas,
+  hostName,
+}: {
+  slug: string;
+  theme: VotingTheme;
+  allowNewIdeas: boolean;
+  hostName: string;
+}) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");
 
@@ -46,13 +59,16 @@ export function ThemeIdeas({ slug, theme, allowNewIdeas }: { slug: string; theme
           </ul>
         )}
       </CardContent>
-      {/* Tour de départage : on revote sur les ex æquo, sans nouvelle idée. */}
-      {allowNewIdeas ? (
+      {/* Tour de départage : on revote sur les ex æquo, sans nouvelle idée.
+          Liste fermée : on vote seulement sur les options de la personne qui anime. */}
+      {allowNewIdeas && theme.acceptsIdeas ? (
         <CardFooter className="border-t bg-muted/50 py-3">
           <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
         </CardFooter>
       ) : (
-        <CardFooter className="border-t bg-muted/50 py-3 text-sm text-muted-foreground">{t("tiebreakNoComposer")}</CardFooter>
+        <CardFooter className="border-t bg-muted/50 py-3 text-sm text-muted-foreground">
+          {allowNewIdeas ? t("optionsBy", { host: hostName }) : t("tiebreakNoComposer")}
+        </CardFooter>
       )}
     </Card>
   );
@@ -73,6 +89,8 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
   const input: IdeaInput | null = (() => {
     switch (kind) {
       case "TEXT":
+      case "PLACE":
+      case "CHOICE":
         return content.trim() ? { content } : null;
       case "DATE":
         return dates.start ? { dateStart: dates.start } : null;
@@ -107,13 +125,28 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
 
   return (
     <form
-      className={cn("flex w-full gap-2", kind === "TEXT" ? "items-end" : "flex-col sm:flex-row sm:items-end")}
+      className={cn(
+        "flex w-full gap-2",
+        kind === "TEXT" || kind === "CHOICE" ? "items-end" : "flex-col sm:flex-row sm:items-end",
+      )}
       onSubmit={(e) => {
         e.preventDefault();
         submit();
       }}
     >
-      {kind === "TEXT" && (
+      {kind === "PLACE" && (
+        <FormField id={`idea-${themeId}-place`} label={t("place")} hint={t("placeHint")} className="min-w-0 flex-1">
+          <Input
+            id={`idea-${themeId}-place`}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={t("placePlaceholder")}
+            maxLength={LIMITS.idea}
+            autoComplete="off"
+          />
+        </FormField>
+      )}
+      {(kind === "TEXT" || kind === "CHOICE") && (
         <Textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
@@ -168,11 +201,12 @@ function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
     <ListItem
       className={pending ? "opacity-80" : undefined}
       meta={
-        (idea.isMine || !idea.isNew) && (
+        (idea.isMine || !idea.isNew || idea.canDelete || idea.mapQuery) && (
           <>
             {idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{t("mine")}</Badge>}
             {!idea.isNew && <Badge variant="outline">{t("carriedOver")}</Badge>}
-            {idea.isMine && idea.isNew && (
+            {idea.mapQuery && <MapLink query={idea.mapQuery} label={t("mapLink")} />}
+            {idea.canDelete && (
               <Button
                 variant="ghost"
                 size="icon-xs"

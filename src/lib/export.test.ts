@@ -29,9 +29,11 @@ const data: ExportData = {
           id: "t1",
           title: "Onboarding",
           description: null,
+          kind: "TEXT",
+          overview: null,
           ideas: [
-            { id: "i1", content: "Vidéo | tuto\nen 2 min", score: { up: 2, down: 0, net: 2 }, qualified: true, tied: false, isMine: false },
-            { id: "i2", content: '=HYPERLINK("x"); test', score: { up: 0, down: 1, net: -1 }, qualified: false, tied: false, isMine: false },
+            { id: "i1", content: "Vidéo | tuto\nen 2 min", score: { up: 2, down: 0, net: 2 }, qualified: true, tied: false, isMine: false, mapQuery: null },
+            { id: "i2", content: '=HYPERLINK("x"); test', score: { up: 0, down: 1, net: -1 }, qualified: false, tied: false, isMine: false, mapQuery: null },
           ],
         },
       ],

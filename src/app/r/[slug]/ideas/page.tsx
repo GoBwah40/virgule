@@ -5,7 +5,7 @@ import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
 import { BackToThemesButton, FinishVotingButton, ThemeIdeas, TimerControls } from "@/components/phases/voting-board";
-import { getVoteProgress, getVotingView, loadPhasePage } from "@/lib/room";
+import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
 
 export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">) {
   const { slug } = await params;
@@ -15,7 +15,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
   const t = await getTranslations("ideas");
   const { room, me } = page;
   const [themes, progress] = await Promise.all([
-    getVotingView(room.id, room.round, me.id, room.allowSelfVote),
+    getVotingView(room.id, room.round, me, room.allowSelfVote),
     // Réservé à l'animateur : savoir si tout le monde a voté avant de clore.
     me.isHost ? getVoteProgress(room.id, room.round, room.allowSelfVote) : null,
   ]);
@@ -75,7 +75,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
       </div>
       <div className="grid items-start gap-6 md:grid-cols-2">
         {themes.map((theme) => (
-          <ThemeIdeas key={theme.id} slug={slug} theme={theme} allowNewIdeas={!room.tiebreak} />
+          <ThemeIdeas key={theme.id} slug={slug} theme={theme} allowNewIdeas={!room.tiebreak} hostName={hostName(page.participants)} />
         ))}
       </div>
     </PhaseTransition>

@@ -8,7 +8,8 @@ import { db } from "@/lib/db";
 import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getIdeaFormat } from "@/lib/idea-format";
-import { describeIdea, type ThemeKind } from "@/lib/idea-value";
+import { describeIdea, readChoiceOptions, type ThemeKind } from "@/lib/idea-value";
+import { bestAmountOverlap, bestDateOverlap, type Overlap } from "@/lib/overview";
 import { getParticipantToken } from "@/lib/session";
 
 export type RoomContext =
@@ -80,9 +81,21 @@ export async function getThemes(roomId: string) {
   const themes = await db.theme.findMany({
     where: { roomId },
     orderBy: { position: "asc" },
-    select: { id: true, title: true, description: true, kind: true, _count: { select: { ideas: true } } },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      kind: true,
+      options: true,
+      allowOtherIdeas: true,
+      _count: { select: { ideas: true } },
+    },
   });
-  return themes.map(({ _count, ...theme }) => ({ ...theme, ideaCount: _count.ideas }));
+  return themes.map(({ _count, options, ...theme }) => ({
+    ...theme,
+    options: readChoiceOptions(options),
+    ideaCount: _count.ideas,
+  }));
 }
 
 // ─── Phase « idées & votes » ───────────────────────────────────────────────
@@ -95,6 +108,12 @@ export type VotingIdea = {
   isNew: boolean;
   myVote: boolean | null;
   canVote: boolean;
+  /** Retirable par le participant courant (sa propre idée du tour, ou une option s'il anime). */
+  canDelete: boolean;
+  /** Option d'une liste, fixée par la personne qui anime. */
+  isOption: boolean;
+  /** Sujets « Lieu » : texte à chercher sur la carte. */
+  mapQuery: string | null;
 };
 
 export type VotingTheme = {
@@ -102,6 +121,8 @@ export type VotingTheme = {
   title: string;
   description: string | null;
   kind: ThemeKind;
+  /** Faux pour une liste fermée : on vote seulement sur les options. */
+  acceptsIdeas: boolean;
   ideas: VotingIdea[];
 };
 
@@ -112,9 +133,10 @@ export type VotingTheme = {
 export async function getVotingView(
   roomId: string,
   round: number,
-  meId: string,
+  me: { id: string; isHost: boolean },
   allowSelfVote: boolean,
 ): Promise<VotingTheme[]> {
+  const meId = me.id;
   const themes = await db.theme.findMany({
     where: { roomId },
     orderBy: { position: "asc" },
@@ -132,18 +154,24 @@ export async function getVotingView(
     title: theme.title,
     description: theme.description,
     kind: theme.kind,
+    acceptsIdeas: theme.kind !== "CHOICE" || theme.allowOtherIdeas,
     ideas: theme.ideas
       .filter((idea) => isActiveInRound(idea, round))
       .map((idea) => {
-        const isMine = idea.authorId === meId;
+        // Une option de liste n'appartient à personne : votable par tous, même sans auto-vote.
+        const isMine = !idea.isOption && idea.authorId === meId;
+        const isNew = idea.createdRound === round;
         return {
           id: idea.id,
           // Sujets typés : texte mis en forme à partir des dates / montants.
           content: describeIdea(theme.kind, idea, format),
           isMine,
-          isNew: idea.createdRound === round,
+          isNew,
           myVote: idea.votes[0]?.positive ?? null,
           canVote: allowSelfVote || !isMine,
+          canDelete: isNew && (idea.isOption ? me.isHost : isMine),
+          isOption: idea.isOption,
+          mapQuery: theme.kind === "PLACE" ? idea.content : null,
         };
       }),
   }));
@@ -158,13 +186,14 @@ export async function getVoteProgress(roomId: string, round: number, allowSelfVo
     db.participant.findMany({ where: { roomId }, select: { id: true } }),
     db.idea.findMany({
       where: { roomId, createdRound: { lte: round }, OR: [{ eliminatedRound: null }, { eliminatedRound: { gt: round } }] },
-      select: { authorId: true },
+      select: { authorId: true, isOption: true },
     }),
     db.vote.findMany({ where: { round, idea: { roomId } }, select: { participantId: true }, distinct: ["participantId"] }),
   ]);
   return voteProgress({
     participantIds: participants.map((p) => p.id),
-    ideaAuthorIds: ideas.map((idea) => idea.authorId),
+    // Options d'une liste : aucun auteur, tout le monde peut voter dessus.
+    ideaAuthorIds: ideas.map((idea) => (idea.isOption ? "" : idea.authorId)),
     voterIds: new Set(votes.map((v) => v.participantId)),
     allowSelfVote,
   });
@@ -180,9 +209,22 @@ type RecapIdea = {
   /** À égalité en tête du sujet avec au moins une autre idée retenue. */
   tied: boolean;
   isMine: boolean;
+  mapQuery: string | null;
 };
 
-type RecapTheme = { id: string; title: string; description: string | null; ideas: RecapIdea[] };
+/** Synthèse d'un sujet « Période » ou « Fourchette » : où les idées retenues se recoupent. */
+export type RecapOverview =
+  | { type: "dates"; periods: { start: string; end: string }[]; best: Overlap<string> }
+  | { type: "amounts"; ranges: { min: number; max: number }[]; best: Overlap<number> };
+
+type RecapTheme = {
+  id: string;
+  title: string;
+  description: string | null;
+  kind: ThemeKind;
+  overview: RecapOverview | null;
+  ideas: RecapIdea[];
+};
 
 export type RecapRound = {
   round: number;
@@ -236,7 +278,9 @@ export async function getRecap(
             score,
             qualified,
             tied: false,
-            isMine: idea.authorId === meId,
+            isMine: !idea.isOption && idea.authorId === meId,
+            mapQuery: theme.kind === "PLACE" ? idea.content : null,
+            fields: idea,
           };
         })
         .sort((a, b) => compareByScore(a.score, b.score));
@@ -245,11 +289,35 @@ export async function getRecap(
         tiedThemeCount++;
         for (const idea of top) idea.tied = true;
       }
-      return { id: theme.id, title: theme.title, description: theme.description, ideas };
+      return {
+        id: theme.id,
+        title: theme.title,
+        description: theme.description,
+        kind: theme.kind,
+        overview: overviewOf(theme.kind, ideas.filter((idea) => idea.qualified).map((idea) => idea.fields)),
+        ideas: ideas.map(({ fields: _, ...idea }) => idea),
+      };
     });
     rounds.push({ round, themes: roundThemes, qualifiedCount, ideaCount, tiedThemeCount });
   }
   return rounds;
+}
+
+function overviewOf(
+  kind: ThemeKind,
+  retained: { dateStart: string | null; dateEnd: string | null; amountMin: number | null; amountMax: number | null }[],
+): RecapOverview | null {
+  if (kind === "DATE_RANGE") {
+    const periods = retained.flatMap((i) => (i.dateStart && i.dateEnd ? [{ start: i.dateStart, end: i.dateEnd }] : []));
+    const best = bestDateOverlap(periods);
+    return best && { type: "dates", periods, best };
+  }
+  if (kind === "AMOUNT_RANGE") {
+    const ranges = retained.flatMap((i) => (i.amountMin !== null && i.amountMax !== null ? [{ min: i.amountMin, max: i.amountMax }] : []));
+    const best = bestAmountOverlap(ranges);
+    return best && { type: "amounts", ranges, best };
+  }
+  return null;
 }
 
 /**

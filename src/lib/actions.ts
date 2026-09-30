@@ -11,7 +11,7 @@ import type { Phase } from "@/generated/prisma/enums";
 import { EXTEND_TIMER_MINUTES, IDEAS_TIMER_OPTIONS, LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/config";
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
-import { ideaKey, type IdeaInput, parseIdeaInput, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
+import { ideaKey, type IdeaInput, parseChoiceOptions, parseIdeaInput, readChoiceOptions, textKey, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getRoomContext } from "@/lib/room";
@@ -41,6 +41,8 @@ type ActionError =
   | "noTies"
   | "participantNotFound"
   | "cannotTargetSelf"
+  | "invalidOptions"
+  | "choiceClosed"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -157,9 +159,27 @@ const themeSchema = z.object({
   title: text(LIMITS.themeTitle),
   description: z.string().trim().max(LIMITS.themeDescription).optional(),
   kind: z.enum(THEME_KINDS).default("TEXT"),
+  options: z.array(z.string()).optional(),
+  allowOtherIdeas: z.boolean().optional(),
 });
 
-type ThemeInput = { title: string; description?: string; kind?: ThemeKind };
+type ThemeInput = {
+  title: string;
+  description?: string;
+  kind?: ThemeKind;
+  /** Sujets CHOICE : options fixées par l'animateur. */
+  options?: string[];
+  allowOtherIdeas?: boolean;
+};
+
+/** Champs d'un sujet à enregistrer ; les options n'existent que pour une liste. */
+function themeFields(data: z.infer<typeof themeSchema>) {
+  const base = { title: data.title, description: data.description || null, kind: data.kind };
+  if (data.kind !== "CHOICE") return { ...base, options: null, allowOtherIdeas: false };
+  const options = parseChoiceOptions(data.options);
+  if (!options) throw new ActionFailure("invalidOptions");
+  return { ...base, options: JSON.stringify(options), allowOtherIdeas: data.allowOtherIdeas ?? false };
+}
 
 export async function addTheme(slug: string, input: ThemeInput) {
   const parsed = themeSchema.safeParse(input);
@@ -170,13 +190,7 @@ export async function addTheme(slug: string, input: ThemeInput) {
     if (count >= MAX_THEMES) throw new ActionFailure("tooManyThemes");
     const last = await db.theme.findFirst({ where: { roomId: room.id }, orderBy: { position: "desc" } });
     await db.theme.create({
-      data: {
-        roomId: room.id,
-        title: parsed.data.title,
-        description: parsed.data.description || null,
-        kind: parsed.data.kind,
-        position: (last?.position ?? -1) + 1,
-      },
+      data: { roomId: room.id, ...themeFields(parsed.data), position: (last?.position ?? -1) + 1 },
     });
   });
 }
@@ -197,10 +211,7 @@ export async function updateTheme(
     if (!theme) throw new ActionFailure("invalidInput");
     // Changer le type rendrait illisibles les idées déjà proposées.
     if (theme.kind !== parsed.data.kind && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
-    await db.theme.update({
-      where: { id: themeId },
-      data: { title: parsed.data.title, description: parsed.data.description || null, kind: parsed.data.kind },
-    });
+    await db.theme.update({ where: { id: themeId }, data: themeFields(parsed.data) });
   });
 }
 
@@ -236,13 +247,35 @@ export async function setAllowSelfVote(slug: string, value: boolean) {
 
 export async function startIdeasPhase(slug: string) {
   return run(slug, async () => {
-    const { room } = await guard(slug, { host: true, phase: "THEMES" });
-    const count = await db.theme.count({ where: { roomId: room.id } });
-    if (count === 0) throw new ActionFailure("noThemes");
-    await db.room.update({
-      where: { id: room.id },
-      data: { phase: "IDEAS", phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
+    const { room, me } = await guard(slug, { host: true, phase: "THEMES" });
+    const themes = await db.theme.findMany({
+      where: { roomId: room.id },
+      include: { ideas: { select: { content: true, createdRound: true, eliminatedRound: true } } },
     });
+    if (themes.length === 0) throw new ActionFailure("noThemes");
+    // Listes : chaque option devient une idée à voter. Au retour depuis les idées, seules
+    // les options ajoutées entre-temps sont créées (celles retirées restent, supprimables).
+    const optionIdeas = themes.flatMap((theme) => {
+      if (theme.kind !== "CHOICE") return [];
+      const present = new Set(theme.ideas.filter((i) => isActiveInRound(i, room.round)).map((i) => textKey(i.content)));
+      return readChoiceOptions(theme.options)
+        .filter((content) => !present.has(textKey(content)))
+        .map((content) => ({
+          roomId: room.id,
+          themeId: theme.id,
+          authorId: me.id,
+          content,
+          createdRound: room.round,
+          isOption: true,
+        }));
+    });
+    await db.$transaction([
+      db.idea.createMany({ data: optionIdeas }),
+      db.room.update({
+        where: { id: room.id },
+        data: { phase: "IDEAS", phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
+      }),
+    ]);
   }, "IDEAS");
 }
 
@@ -274,6 +307,7 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
     if (room.tiebreak) throw new ActionFailure("tiebreakNoNewIdeas");
     const theme = await db.theme.findFirst({ where: { id: themeId, roomId: room.id } });
     if (!theme) throw new ActionFailure("invalidInput");
+    if (theme.kind === "CHOICE" && !theme.allowOtherIdeas) throw new ActionFailure("choiceClosed");
     const parsed = parseIdeaInput(theme.kind, raw.data);
     if (!parsed.ok) throw new ActionFailure(parsed.error);
     // Doublon : même valeur qu'une idée encore en lice dans ce sujet (visible de tous).
@@ -299,8 +333,10 @@ export async function deleteIdea(slug: string, ideaId: string) {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
     if (!idea) throw new ActionFailure("ideaNotFound");
-    // Une idée reprise d'un tour précédent ne peut plus être retirée par son auteur.
-    if (idea.authorId !== me.id || idea.createdRound !== room.round) throw new ActionFailure("notAuthor");
+    // Une idée reprise d'un tour précédent ne peut plus être retirée. Les options d'une
+    // liste appartiennent à la personne qui anime, quelle qu'elle soit.
+    const owner = idea.isOption ? me.isHost : idea.authorId === me.id;
+    if (!owner || idea.createdRound !== room.round) throw new ActionFailure("notAuthor");
     await db.idea.delete({ where: { id: idea.id } });
   });
 }
@@ -311,7 +347,7 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
     if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
-    if (!room.allowSelfVote && idea.authorId === me.id) throw new ActionFailure("selfVoteForbidden");
+    if (!room.allowSelfVote && idea.authorId === me.id && !idea.isOption) throw new ActionFailure("selfVoteForbidden");
 
     const where = { ideaId_participantId_round: { ideaId, participantId: me.id, round: room.round } };
     if (positive === null) {
@@ -477,6 +513,10 @@ export async function removeParticipant(slug: string, participantId: string) {
   return run(slug, async () => {
     const { room, me } = await guard(slug, { host: true });
     const target = await otherParticipant(room.id, me.id, participantId);
-    await db.participant.delete({ where: { id: target.id } });
+    await db.$transaction([
+      // Les options d'une liste créées par cette personne (quand elle animait) restent.
+      db.idea.updateMany({ where: { authorId: target.id, isOption: true }, data: { authorId: me.id } }),
+      db.participant.delete({ where: { id: target.id } }),
+    ]);
   });
 }

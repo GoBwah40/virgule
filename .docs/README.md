@@ -5,7 +5,7 @@ Maquettes et propositions produites pendant la conception de Virgule. Ce sont de
 | Fichier | Contenu | Décision prise |
 | --- | --- | --- |
 | [recap-variantes.html](recap-variantes.html) | Trois variantes de fond pour les idées retenues ou écartées au bilan, et votes en flèches avec score en infobulle. | Variante C (fond à 10 % + bordure teintée), score et détail des votes en infobulle, flèches aussi pour voter. Ensuite : score nul en neutre, votes visibles seulement au survol du statut. |
-| [sujets-types-etape-2.html](sujets-types-etape-2.html) | Propositions pour la suite des sujets typés : créneau commun des périodes (frise ou calendrier, trois formulations), budget compatible des fourchettes, types « Lieu » (lien vers la carte) et « Liste » (options fixées par la personne qui anime). | En attente. |
+| [sujets-types-etape-2.html](sujets-types-etape-2.html) | Propositions pour la suite des sujets typés : créneau commun des périodes (frise ou calendrier, trois formulations), budget compatible des fourchettes, types « Lieu » (lien vers la carte) et « Liste » (options fixées par la personne qui anime). | Formulation « Créneau commun : … » ; frise et calendrier avec bascule animée ; lien de carte vers l'app installée ; « Autoriser d'autres propositions » désactivé par défaut. Implémenté. |
 | [charte-graphique.html](charte-graphique.html) | Charte graphique : couleurs, typographies, rangée de sièges, composants, ton et vocabulaire, écrans mobiles. | Tutoiement, vocabulaire planification, rangée de places, sujets suggérés. |
 
 ## À savoir

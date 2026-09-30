@@ -4,7 +4,7 @@
 
 import { LIMITS } from "@/lib/config";
 
-export const THEME_KINDS = ["TEXT", "DATE", "DATE_RANGE", "AMOUNT", "AMOUNT_RANGE"] as const;
+export const THEME_KINDS = ["TEXT", "DATE", "DATE_RANGE", "AMOUNT", "AMOUNT_RANGE", "PLACE", "CHOICE"] as const;
 export type ThemeKind = (typeof THEME_KINDS)[number];
 
 /** Saisie brute envoyée par le formulaire d'idée. */
@@ -48,7 +48,10 @@ export function parseIdeaInput(
   input: IdeaInput,
 ): { ok: true; fields: IdeaFields } | { ok: false; error: IdeaValueError } {
   switch (kind) {
-    case "TEXT": {
+    // Lieu et proposition libre d'une liste : du texte, comme un sujet TEXT.
+    case "TEXT":
+    case "PLACE":
+    case "CHOICE": {
       const content = input.content?.trim() ?? "";
       if (!content || content.length > LIMITS.idea) return { ok: false, error: "invalidInput" };
       return { ok: true, fields: { ...EMPTY, content } };
@@ -88,6 +91,8 @@ export function rangeStartPrecision(startIso: string, endIso: string): "day" | "
 export function ideaKey(kind: ThemeKind, fields: IdeaFields): string {
   switch (kind) {
     case "TEXT":
+    case "PLACE":
+    case "CHOICE":
       return fields.content
         .normalize("NFD")
         .replace(/\p{M}/gu, "")
@@ -102,6 +107,9 @@ export function ideaKey(kind: ThemeKind, fields: IdeaFields): string {
       return `${fields.amountMin}/${fields.amountMax ?? fields.amountMin}`;
   }
 }
+
+/** Clé de comparaison d'un texte seul (options d'une liste). */
+export const textKey = (content: string) => ideaKey("TEXT", { ...EMPTY, content });
 
 /** En français, le premier du mois s'écrit « 1er » (« 1er octobre 2026 », « Du 1er au 30 »). */
 export const withFirstOrdinal = (formatted: string) => formatted.replace(/^1(?!\d)/, "1er");
@@ -131,6 +139,50 @@ export function describeIdea(kind: ThemeKind, fields: IdeaFields, format: IdeaFo
         ? format.amount(fields.amountMin)
         : format.amountRange(fields.amountMin, fields.amountMax);
     case "TEXT":
+    case "PLACE":
+    case "CHOICE":
       return fields.content;
   }
+}
+
+// ─── Sujets « Liste » ───────────────────────────────────────────────────────
+
+/** Nombre d'options d'une liste. */
+export const CHOICE_OPTIONS = { min: 2, max: 10 } as const;
+/** Longueur maximale d'une option. */
+export const MAX_OPTION_LENGTH = 60;
+
+/**
+ * Valide les options d'une liste : espaces retirés, 2 à 10 options non vides, sans doublon
+ * (même comparaison que pour les idées). Renvoie null si la liste n'est pas valide.
+ */
+export function parseChoiceOptions(raw: unknown): string[] | null {
+  if (!Array.isArray(raw)) return null;
+  const options = raw.map((o) => (typeof o === "string" ? o.trim() : ""));
+  if (options.length < CHOICE_OPTIONS.min || options.length > CHOICE_OPTIONS.max) return null;
+  if (options.some((o) => !o || o.length > MAX_OPTION_LENGTH)) return null;
+  const keys = options.map(textKey);
+  return new Set(keys).size === keys.length ? options : null;
+}
+
+/** Options enregistrées en base (JSON) ; une valeur illisible donne une liste vide. */
+export function readChoiceOptions(stored: string | null): string[] {
+  if (!stored) return [];
+  try {
+    const parsed: unknown = JSON.parse(stored);
+    return Array.isArray(parsed) ? parsed.filter((o): o is string => typeof o === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+// ─── Sujets « Lieu » ────────────────────────────────────────────────────────
+
+/**
+ * Lien de recherche qui ouvre l'app de cartes installée : Plans sur les appareils Apple,
+ * Google Maps ailleurs (l'app sur Android, le site sur ordinateur).
+ */
+export function mapSearchUrl(query: string, apple: boolean): string {
+  const q = encodeURIComponent(query);
+  return apple ? `https://maps.apple.com/?q=${q}` : `https://www.google.com/maps/search/?api=1&query=${q}`;
 }
