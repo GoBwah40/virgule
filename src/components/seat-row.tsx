@@ -70,7 +70,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
         ) : (
           <span
             className={cn(
-              "grid place-items-center rounded-t-[10px] rounded-b-md border-[1.5px] border-dashed border-border text-muted-foreground dark:border-muted-foreground/45",
+              "grid place-items-center rounded-t-[10px] rounded-b-md border-[1.5px] border-dashed border-muted-foreground/70 text-muted-foreground",
               box,
             )}
           >
@@ -98,9 +98,9 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
                 <TooltipTrigger
                   render={
                     !seat && onFreeSeatClick ? (
-                      <button type="button" onClick={onFreeSeatClick} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
+                      <button type="button" onClick={onFreeSeatClick} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
                     ) : (
-                      <span tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
+                      <span tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
                     )
                   }
                 >
@@ -129,7 +129,7 @@ function SeatMenuTrigger({ seat, menu, label, children }: { seat: Seat; menu: Se
             type="button"
             aria-label={menu.label(seat)}
             title={label}
-            className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
             // Right click (and long press on Android): same menu as a click.
             onContextMenu={(e) => {
               e.preventDefault();

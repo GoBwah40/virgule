@@ -55,7 +55,8 @@
 /* ─── Virgule brand ─────────────────────────────────────────────────────────
    Papaya (brand), burnt papaya (actions), mango (highlight), sand (background),
    fig ink (text), olive / pomegranate (vote results only).
-   AA contrasts checked: white on burnt papaya 5.2:1, ink on sand 15.6:1. */
+   AA contrasts checked: white on burnt papaya 5.2:1, ink on sand 15.6:1, field
+   borders 3.7:1 and focus ring (at 80%) 3.7:1 on the card (WCAG 1.4.11). */
 :root {
   --background: #fff7f0;
   --foreground: #2a1a24;
@@ -73,7 +74,7 @@
   --accent-foreground: #2a1a24;
   --destructive: #b8283f;
   --border: #eedccf;
-  --input: #eedccf;
+  --input: #948078;
   --ring: #c2410c;
   --brand: #f26a2e;
   --highlight: #ffc23d;
@@ -86,7 +87,9 @@
   color-scheme: light;
 }
 
-/* Same tokens in dark: `@variant dark` covers both cases of the variant above. */
+/* Same tokens in dark: `@variant dark` covers both cases of the variant above.
+   AA contrasts checked on the card: text 4.5:1 or more (muted text 7:1), field
+   borders 3.4:1 and focus ring (at 80%) 5.1:1 (WCAG 1.4.11). */
 :root {
   @variant dark {
     color-scheme: dark;
@@ -106,7 +109,7 @@
     --accent-foreground: #fbefe6;
     --destructive: #ff6b81;
     --border: #3d2c34;
-    --input: #3d2c34;
+    --input: #806b75;
     --ring: #ff8a55;
     --brand: #ff8a55;
     --highlight: #ffc23d;
@@ -119,7 +122,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/80;
   }
   body {
     @apply bg-background text-foreground;
