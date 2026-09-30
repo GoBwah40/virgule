@@ -29,8 +29,15 @@ type Props = {
 
 type View = "timeline" | "calendar";
 
-// Green intensity by the share of periods covering the day (static classes).
-const SHADES = ["bg-muted", "bg-success/20", "bg-success/40", "bg-success/60", "bg-success/85"];
+// Green intensity by the share of periods covering the day (static classes). Each shade
+// carries its text color: the day numbers keep an AA contrast in both themes.
+const SHADES = [
+  "bg-muted text-muted-foreground",
+  "bg-success/20",
+  "bg-success/35",
+  "bg-success/50",
+  "bg-success text-success-foreground",
+];
 const shade = (count: number, total: number) =>
   count === 0 ? SHADES[0] : SHADES[Math.max(1, Math.ceil((count / total) * (SHADES.length - 1)))];
 
@@ -76,7 +83,7 @@ export function DateOverview({ periods, best, locale, labels, className }: Props
           {labels.period}
         </li>
         <li className="flex items-center gap-1.5">
-          <span className="size-3 rounded bg-success/85" aria-hidden />
+          <span className="size-3 rounded bg-success" aria-hidden />
           {labels.overlap}
         </li>
         <li className="flex items-center gap-1.5">
@@ -186,8 +193,6 @@ function Calendar({
                     className={cn(
                       "grid aspect-square max-w-full place-items-center rounded-lg text-xs font-semibold",
                       shade(count, total),
-                      count / total > 0.6 && "text-success-foreground",
-                      count === 0 && "text-muted-foreground",
                       inBest(iso) && "ring-2 ring-foreground ring-inset",
                     )}
                   >

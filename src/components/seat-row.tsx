@@ -70,7 +70,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
         ) : (
           <span
             className={cn(
-              "grid place-items-center rounded-t-[10px] rounded-b-md border-[1.5px] border-dashed border-border text-muted-foreground dark:border-muted-foreground/45",
+              "grid place-items-center rounded-t-[10px] rounded-b-md border-[1.5px] border-dashed border-border text-muted-foreground dark:border-muted-foreground/60",
               box,
             )}
           >
