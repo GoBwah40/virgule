@@ -1,6 +1,6 @@
 // Mise en forme des exports du récapitulatif (fonctions pures, testées dans export.test.ts).
 
-import type { RecapRound } from "@/lib/room";
+import type { RecapOverview, RecapRound } from "@/lib/room";
 
 export type ExportLabels = {
   title: string;
@@ -13,6 +13,10 @@ export type ExportLabels = {
   empty: string;
   qualified: string;
   notQualified: string;
+  /** Sujets « Période » et « Fourchette » : synthèse du bilan (créneau commun, budget compatible). */
+  overview: (overview: RecapOverview) => { summary: string; detail: string };
+  /** Statut de la ligne de synthèse dans le CSV. */
+  overviewStatus: string;
   columns: { round: string; theme: string; idea: string; up: string; down: string; net: string; status: string };
 };
 
@@ -38,6 +42,10 @@ export function toMarkdown(data: ExportData, l: ExportLabels): string {
     for (const theme of round.themes) {
       lines.push(`### ${theme.title}`, "");
       if (theme.description) lines.push(`> ${theme.description.replace(/\r?\n/g, " ")}`, "");
+      if (theme.overview) {
+        const { summary, detail } = l.overview(theme.overview);
+        lines.push(`**${summary}**. ${detail}`, "");
+      }
       if (theme.ideas.length === 0) {
         lines.push(`_${l.empty}_`, "");
         continue;
@@ -70,6 +78,11 @@ export function toCsv(data: ExportData, l: ExportLabels): string {
   const rows: (string | number)[][] = [[c.round, c.theme, c.idea, c.up, c.down, c.net, c.status]];
   for (const round of data.rounds) {
     for (const theme of round.themes) {
+      // Synthèse en tête du sujet, sans score : une ligne lisible dans le tableur.
+      if (theme.overview) {
+        const { summary, detail } = l.overview(theme.overview);
+        rows.push([round.round, theme.title, `${summary}. ${detail}`, "", "", "", l.overviewStatus]);
+      }
       for (const idea of theme.ideas) {
         rows.push([
           round.round,

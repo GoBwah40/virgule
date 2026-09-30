@@ -13,6 +13,8 @@ const labels: ExportLabels = {
   empty: "Aucune idée",
   qualified: "Retenue",
   notQualified: "Écartée",
+  overview: (o) => ({ summary: `Créneau commun : ${o.best.start} → ${o.best.end}`, detail: `Commun aux ${o.best.total} périodes retenues.` }),
+  overviewStatus: "Synthèse",
   columns: { round: "Tour", theme: "Thème", idea: "Idée", up: "Pour", down: "Contre", net: "Score", status: "Statut" },
 };
 
@@ -63,6 +65,44 @@ describe("exportFileName", () => {
   it("produit un nom de fichier sans accents ni espaces", () => {
     expect(exportFileName("Offsite Produit — Q4 ", new Date("2026-09-28T10:00:00Z"))).toBe(
       "virgule-offsite-produit-q4-2026-09-28",
+    );
+  });
+});
+
+describe("synthèse des sujets Période et Fourchette", () => {
+  const withOverview: ExportData = {
+    participants: ["Camille"],
+    rounds: [
+      {
+        ...data.rounds[0],
+        themes: [
+          {
+            ...data.rounds[0].themes[0],
+            title: "Dates",
+            kind: "DATE_RANGE",
+            overview: {
+              type: "dates",
+              periods: [
+                { start: "2027-06-10", end: "2027-06-14" },
+                { start: "2027-06-12", end: "2027-06-16" },
+              ],
+              best: { start: "2027-06-12", end: "2027-06-14", count: 2, total: 2 },
+            },
+          },
+        ],
+      },
+    ],
+  };
+
+  it("l'ajoute sous le titre du sujet en Markdown", () => {
+    expect(toMarkdown(withOverview, labels)).toContain(
+      "### Dates\n\n**Créneau commun : 2027-06-12 → 2027-06-14**. Commun aux 2 périodes retenues.\n",
+    );
+  });
+
+  it("l'ajoute en première ligne du sujet dans le CSV, sans score", () => {
+    expect(toCsv(withOverview, labels)).toContain(
+      "1;Dates;Créneau commun : 2027-06-12 → 2027-06-14. Commun aux 2 périodes retenues.;;;;Synthèse\r\n1;Dates;",
     );
   });
 });
