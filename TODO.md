@@ -95,7 +95,7 @@ Each new migration applies to both databases: production (command in "Useful com
 - [ ] **Custom domain** if needed: Vercel, *Settings → Domains*.
 - [ ] **Rotate the Turso token** from time to time: `turso db tokens create virgule`, update `TURSO_AUTH_TOKEN` in Vercel and in `.env.production.local`, redeploy, then revoke the old one (`turso db tokens invalidate virgule` invalidates all existing tokens).
 - [ ] **Backups**: check the restore options of your Turso plan.
-- [ ] **Update the brand guidelines** in `.docs/brand-guidelines.html`: its examples still talk about travel.
+- [x] **Update the brand guidelines** in `.docs/brand-guidelines.html` (September 30): the examples follow a birthday instead of a trip, and typed topics list Place and List.
 
 ## Known limitations
 
