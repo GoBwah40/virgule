@@ -10,6 +10,6 @@ Mockups and proposals produced while designing Virgule. They are standalone HTML
 
 ## Good to know
 
-- The guidelines were rewritten on September 30, 2026 with the planning and brainstorming vocabulary (session, participants, "is hosting"). The reference copy lives in `messages/*.json`.
+- The guidelines were rewritten on September 30, 2026 with the planning and brainstorming vocabulary (session, participants, "is hosting"), and their examples now follow a birthday rather than a trip. The reference copy lives in `messages/*.json`.
 - The reference for the code remains `src/app/globals.css` (tokens), `src/app/fonts.ts` (typography) and the Storybook stories (`pnpm storybook`).
 - The mockups were originally written in French and translated to English; the product decisions they record were made on the French copy.
