@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { CopyButton } from "@/components/copy-button";
 import { PhaseStepper } from "@/components/phase-stepper";
+import { Logo } from "@/components/logo";
 import { InviteDialog } from "@/components/room/invite-dialog";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
@@ -29,8 +30,8 @@ export async function RoomHeader({ room, participants, meId }: Props) {
           Les étapes suivent directement le nom, sans attendre la hauteur des sièges. */}
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto] items-start gap-x-4 gap-y-3 px-4 py-4">
         <div className="min-w-0 space-y-0.5">
-          <Link href="/" className="text-xs font-bold tracking-widest text-primary uppercase">
-            {tApp("name")}
+          <Link href="/" className="inline-flex text-lg">
+            <Logo label={tApp("name")} />
           </Link>
           <h1 className="truncate text-2xl leading-tight font-extrabold">{room.name}</h1>
           <p className="text-xs text-muted-foreground">{t("expiresOn", { date: room.expiresAt })}</p>

@@ -24,7 +24,7 @@
     "digest": "Code d'erreur : {digest}"
   },
   "home": {
-    "title": "Toutes les idées, une décision commune.",
+    "title": "Toutes les idées, <hl>une décision commune.</hl>",
     "subtitle": "Jusqu'à {max} participants, un lien à partager, aucun compte à créer.",
     "formTitle": "Nouvelle séance",
     "formHint": "Tu animes : tu choisis les sujets et tu fais avancer la séance.",
@@ -37,6 +37,12 @@
       "themes": "Tu choisis les sujets à trancher : objectif, dates, budget…",
       "ideas": "Chacun propose ses idées et vote pour ou contre, sans que les autres sachent qui a voté quoi.",
       "recap": "Le bilan garde les idées qui convainquent le groupe, et on repart pour un tour si besoin."
+    },
+    "figures": {
+      "seats": "{count, plural, one {place} other {places}}",
+      "link": "lien à partager",
+      "days": "{count, plural, one {jour} other {jours}} en ligne",
+      "account": "compte à créer"
     }
   },
   "join": {
