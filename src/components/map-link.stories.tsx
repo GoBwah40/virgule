@@ -3,12 +3,12 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { MapLink } from "./map-link";
 
 const meta = {
-  title: "Composants/MapLink",
+  title: "Components/MapLink",
   component: MapLink,
-  args: { query: "Gîte des Trois Chênes, Vercors", label: "Voir sur la carte" },
+  args: { query: "Three Oaks Cottage, Vercors", label: "View on the map" },
 } satisfies Meta<typeof MapLink>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Lieu: Story = {};
+export const Place: Story = {};

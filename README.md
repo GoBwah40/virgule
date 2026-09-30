@@ -1,169 +1,173 @@
 # Virgule
 
-Application de brainstorming et de planification en petit groupe (6 personnes maximum), sans compte : on partage un lien, chacun donne son prénom, propose des idées et vote.
+Brainstorming and planning app for small groups (6 people maximum), with no account: you share a link, everyone gives their first name, suggests ideas and votes.
 
-## Déroulé d'une séance
+## How a session works
 
-1. **Thèmes** : le créateur de la room devient l'**animateur**. Il déclare les thèmes et choisit si l'on peut voter sur ses propres idées (activé par défaut).
-2. **Idées & votes** : chaque participant propose des idées dans chaque thème et vote **pour** ou **contre**. Les idées et les votes sont **anonymes**. Chacun peut changer son vote jusqu'à la clôture ; les scores ne sont pas visibles pendant le vote.
-3. **Récapitulatif** : les idées sont classées par score. L'animateur choisit la règle de qualification (par défaut, *score positif* : plus de « pour » que de « contre » ; sinon, un seul « pour » suffit). Il peut ensuite :
-   - **lancer un nouveau tour** : seules les idées retenues restent, les votes sont remis à zéro et on peut proposer de nouvelles idées ;
-   - **rouvrir les votes** du tour en cours ;
-   - **terminer la séance** : la room passe en lecture seule.
+1. **Topics**: the person who creates the room becomes the **host**. They declare the topics and choose whether people can vote on their own ideas (enabled by default).
+2. **Ideas & votes**: each participant suggests ideas in each topic and votes **for** or **against**. Ideas and votes are **anonymous**. Everyone can change their vote until voting closes; scores are not visible during the vote.
+3. **Recap**: ideas are ranked by score. The host chooses the qualification rule (by default, *positive score*: more "for" than "against"; otherwise, a single "for" is enough). They can then:
+   - **start a new round**: only the kept ideas remain, votes are reset and new ideas can be suggested;
+   - **reopen voting** for the current round;
+   - **end the session**: the room becomes read-only.
 
-L'animateur pilote les phases, et tous les participants suivent automatiquement. Le récapitulatif garde l'historique de chaque tour et peut être exporté en **Markdown**, en **CSV** (compatible Excel) ou en **PDF** (via l'impression du navigateur).
+The host drives the phases, and all participants follow automatically. The recap keeps the history of each round and can be exported as **Markdown**, **CSV** (Excel-compatible) or **PDF** (through the browser's print dialog).
 
-Une room expire **7 jours** après sa création ; une tâche planifiée quotidienne la supprime ensuite.
+A room expires **7 days** after it is created; a daily scheduled job then deletes it.
 
 ## Stack
 
-| Besoin | Choix |
+| Need | Choice |
 | --- | --- |
 | Framework | Next.js 16 (App Router, Server Actions, Turbopack) |
-| UI | shadcn/ui (base Base UI), Tailwind CSS v4, lucide-react |
-| Base de données | Prisma 7 + adapter libSQL : fichier SQLite en local, [Turso](https://turso.tech) en production |
-| Temps réel | [Pusher Channels](https://pusher.com/channels) (optionnel), avec repli automatique sur du polling |
-| i18n | next-intl (français uniquement pour l'instant) |
-| Qualité | Vitest + Testing Library, Storybook 10, ESLint, knip |
-| Hébergement | Vercel (+ Vercel Cron pour la purge) |
+| UI | shadcn/ui (on Base UI), Tailwind CSS v4, lucide-react |
+| Database | Prisma 7 + libSQL adapter: SQLite file locally, [Turso](https://turso.tech) in production |
+| Real time | [Pusher Channels](https://pusher.com/channels) (optional), with automatic fallback to polling |
+| i18n | next-intl: English and French |
+| Quality | Vitest + Testing Library, Storybook 10, ESLint, knip |
+| Hosting | Vercel (+ Vercel Cron for the purge) |
 
-## Démarrage en local
+## Running locally
 
-Prérequis : Node.js 20+ et pnpm.
+Requirements: Node.js 20+ and pnpm.
 
 ```bash
-pnpm install              # génère aussi le client Prisma
-cp .env.example .env      # la config par défaut suffit en local
-pnpm db:migrate           # crée dev.db et applique les migrations
+pnpm install              # also generates the Prisma client
+cp .env.example .env      # the default config is enough locally
+pnpm db:migrate           # creates dev.db and applies the migrations
 pnpm dev                  # http://localhost:3000
 ```
 
-Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `http://localhost:3000` **et** sur `http://127.0.0.1:3000` : ce sont deux origines distinctes, donc deux participants différents. Une fenêtre de navigation privée fonctionne aussi.
+To test with several people on the same machine, open the room link on `http://localhost:3000` **and** on `http://127.0.0.1:3000`: they are two distinct origins, so two different participants. A private browsing window works too.
 
 ### Scripts
 
-| Commande | Rôle |
+| Command | Purpose |
 | --- | --- |
-| `pnpm dev` | Serveur de développement |
-| `pnpm build` | `prisma generate` + build de production |
-| `pnpm preprod` | Préproduction locale : build de production sur http://localhost:3001, base de prévisualisation (voir plus bas) |
-| `pnpm check` | Lint, types, tests et knip : à lancer avant chaque commit (la CI GitHub Actions le relance à chaque push et pull request) |
+| `pnpm dev` | Development server |
+| `pnpm build` | `prisma generate` + production build |
+| `pnpm preprod` | Local preproduction: production build on http://localhost:3001, preview database (see below) |
+| `pnpm check` | Lint, types, tests and knip: run before every commit (GitHub Actions CI runs it again on every push and pull request) |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
-| `pnpm test` | Tests Vitest : logique (Node) et composants (jsdom) |
-| `pnpm knip` | Détecte fichiers, exports et dépendances inutilisés |
-| `pnpm storybook` | Catalogue des composants globaux sur http://localhost:6006 |
-| `pnpm db:migrate` | Crée ou applique une migration sur la base locale |
-| `pnpm db:migrate:prod` | Applique les migrations en attente sur Turso |
-| `pnpm db:migrate:preview` | Idem sur la base de prévisualisation `virgule-preview` (lit `.env.preview.local`) |
-| `pnpm db:studio` | Prisma Studio (base locale) |
+| `pnpm test` | Vitest tests: logic (Node) and components (jsdom) |
+| `pnpm knip` | Detects unused files, exports and dependencies |
+| `pnpm storybook` | Catalog of the global components on http://localhost:6006 |
+| `pnpm db:migrate` | Creates or applies a migration on the local database |
+| `pnpm db:migrate:prod` | Applies pending migrations on Turso |
+| `pnpm db:migrate:preview` | Same on the preview database `virgule-preview` (reads `.env.preview.local`) |
+| `pnpm db:studio` | Prisma Studio (local database) |
 
-### Préproduction locale
+### Local preproduction
 
-Avant de fusionner dans `main`, on vérifie la version telle qu'elle partira en ligne : même build de production, mais sur la base Turso de prévisualisation `virgule-preview`, jamais sur celle de production.
+Before merging into `main`, we check the version as it will go live: same production build, but on the Turso preview database `virgule-preview`, never on the production one.
 
 ```bash
-pnpm db:migrate:preview   # si la branche contient une migration
+pnpm db:migrate:preview   # if the branch contains a migration
 pnpm preprod              # http://localhost:3001
 ```
 
-Prérequis : `.env.preview.local` à la racine du projet (URL et jeton de `virgule-preview`, ignoré par git). Le script (`scripts/preprod.sh`) neutralise les variables de production que Next.js chargerait sinon depuis `.env.production.local` ou `.env.local` : sans valeurs Pusher dans `.env.preview.local`, la préproduction se synchronise par polling. Elle tourne à côté de `pnpm dev` sans le gêner.
+Requirement: `.env.preview.local` at the project root (URL and token of `virgule-preview`, ignored by git). The script (`scripts/preprod.sh`) neutralizes the production variables Next.js would otherwise load from `.env.production.local` or `.env.local`: without Pusher values in `.env.preview.local`, preproduction syncs by polling. It runs alongside `pnpm dev` without getting in its way.
 
-## Versions et notes de version
+## Versions and release notes
 
-La version de l'app est celle de `package.json` (versionnage sémantique, `0.x` pour l'instant) ; chaque mise en production visible en crée une nouvelle, avec un tag git `vX.Y.Z`. Les notes sont rédigées dans [`release-notes/`](release-notes), un fichier par catégorie (ajouts, améliorations, corrections), et s'affichent depuis le bouton « Nouveautés » de l'accueil.
+The app version is the one in `package.json` (semantic versioning, `0.x` for now); every visible production release creates a new one, with a git tag `vX.Y.Z`. Notes are written per language in [`release-notes/en/`](release-notes/en) and [`release-notes/fr/`](release-notes/fr), one file per category (`added.md`, `improved.md`, `fixed.md`), with the same versions and the same number of lines in each language. They are shown in the current language from the "What's new" button on the home page.
 
-Règles de numérotation, format des notes et étapes de livraison : **[VERSIONS.md](VERSIONS.md)**.
+Numbering rules, note format and release steps: **[VERSIONS.md](VERSIONS.md)**.
 
-## En production
+## In production
 
 **https://virgule.vercel.app**
 
 | | |
 | --- | --- |
-| Hébergement | Vercel, projet `gobwah40s-projects/virgule`, fonctions à Dublin (`dub1`) |
-| Base | Turso `virgule`, Irlande (`aws-eu-west-1`) |
-| Déploiement | Automatique à chaque push sur `main` |
-| Temps réel | Pusher Channels (cluster `eu`), avec rafraîchissement de secours toutes les 30 secondes |
+| Hosting | Vercel, project `gobwah40s-projects/virgule`, functions in Dublin (`dub1`) |
+| Database | Turso `virgule`, Ireland (`aws-eu-west-1`) |
+| Deployment | Automatic on every push to `main` |
+| Real time | Pusher Channels (cluster `eu`), with a fallback refresh every 30 seconds |
 
-Ce qu'il reste à faire (variables à nettoyer, base de prévisualisation, test sur téléphone…) est suivi dans **[A_FAIRE.md](A_FAIRE.md)**.
+What is left to do (variables to clean up, preview database, phone test…) is tracked in **[TODO.md](TODO.md)**.
 
-## Déploiement sur Vercel
+## Deploying on Vercel
 
-La production tourne sur Vercel, avec une base [Turso](https://turso.tech) (SQLite hébergé) : le disque de Vercel est éphémère, un fichier SQLite n'y survivrait pas. Pusher est optionnel.
+Production runs on Vercel, with a [Turso](https://turso.tech) database (hosted SQLite): Vercel's disk is ephemeral, a SQLite file would not survive there. Pusher is optional.
 
-Le pas-à-pas complet (création de la base, migrations, variables d'environnement, cron, vérifications, dépannage) est dans **[DEPLOIEMENT.md](DEPLOIEMENT.md)**.
+The full step-by-step guide (creating the database, migrations, environment variables, cron, checks, troubleshooting) is in **[DEPLOYMENT.md](DEPLOYMENT.md)**.
 
-Les valeurs de production sont gardées en local dans `.env.production.local` (ignoré par git). Pour appliquer une migration sur Turso :
+Production values are kept locally in `.env.production.local` (ignored by git). To apply a migration on Turso:
 
 ```bash
 (set -a; . ./.env.production.local; set +a; pnpm db:migrate:prod)
 ```
 
-## Charte graphique
+## Brand guidelines
 
-- **Couleurs** (tokens dans `src/app/globals.css`, mode sombre selon l'appareil ou le choix fait dans le pied de page) : papaye `#F26A2E` (marque), papaye brûlée `#C2410C` (actions), mangue `#FFC23D` (mise en avant), sable `#FFF7F0` (fond), encre figue `#2A1A24` (texte). Olivier `#1F7A4D` et grenade `#B8283F` sont réservés aux résultats des votes. Tous les couples texte/fond respectent le contraste AA.
-- **Typographies** (`src/app/fonts.ts`) : Bricolage Grotesque pour les titres, Figtree pour le texte, DM Mono pour les lettres de siège.
-- **Mobile d'abord** : cibles tactiles de 44 px, une colonne, actions principales en pleine largeur.
-- **Ton** : tutoiement, voix du groupe (« on »), prénoms plutôt que rôles, pas d'argot ni d'emoji. Vocabulaire : séance, participants, sujets, idées, bilan ; la personne qui crée la séance « l'anime ».
+- **Colors** (tokens in `src/app/globals.css`, dark mode following the device or the choice made in the footer): papaya `#F26A2E` (brand), burnt papaya `#C2410C` (actions), mango `#FFC23D` (highlight), sand `#FFF7F0` (background), fig ink `#2A1A24` (text). Olive `#1F7A4D` and pomegranate `#B8283F` are reserved for vote results. Every text/background pair meets AA contrast.
+- **Typefaces** (`src/app/fonts.ts`): Bricolage Grotesque for headings, Figtree for text, DM Mono for seat letters.
+- **Mobile first**: 44 px touch targets, one column, full-width primary actions.
+- **Tone**: in English, second person ("you"), the group's voice ("we"), first names rather than roles, no slang or emoji. In French, tutoiement, « on » for the group, same rules. Vocabulary: session, participants, topics, ideas, recap; the person who creates the session "hosts" it.
 
 ## Architecture
 
 ```
-.docs/                      Maquettes et charte graphique (HTML autonomes, voir .docs/README.md)
-A_FAIRE.md                  Suivi de ce qu'il reste à faire en production
-VERSIONS.md                 Numérotation des versions et rédaction des notes
-release-notes/              Notes de version : ajouts.md, ameliorations.md, corrections.md
-DEPLOIEMENT.md              Déploiement pas à pas sur Vercel + Turso
-messages/fr.json            Traductions (toutes les chaînes de l'UI)
-prisma/schema.prisma        Modèle : Room, Participant, Theme, Idea, Vote
-scripts/migrate-turso.mts   Application des migrations sur Turso
-scripts/preprod.sh          Préproduction locale (build de production + base de prévisualisation)
+.docs/                      Mockups and brand guidelines (standalone HTML, see .docs/README.md)
+TODO.md                     Tracking of what is left to do in production
+VERSIONS.md                 Version numbering and writing the notes
+release-notes/en/           Release notes in English: added.md, improved.md, fixed.md
+release-notes/fr/           Same notes in French (same versions and number of lines)
+DEPLOYMENT.md               Step-by-step deployment on Vercel + Turso
+messages/en.json            English UI copy (reference, typed keys)
+messages/fr.json            French UI copy (same keys)
+prisma/schema.prisma        Model: Room, Participant, Theme, Idea, Vote
+scripts/migrate-turso.mts   Applies migrations on Turso
+scripts/preprod.sh          Local preproduction (production build + preview database)
 src/
   app/
-    page.tsx                Accueil : création d'une room, notes de version
-    r/[slug]/layout.tsx     Garde d'accès (introuvable / expirée / rejoindre) + en-tête + synchro
-    r/[slug]/page.tsx       Lien de partage → redirige vers la phase en cours
-    r/[slug]/themes|ideas|recap/page.tsx   Une page par phase
-    r/[slug]/export/route.ts               Export Markdown / CSV
-    api/cron/purge/route.ts                Purge des rooms expirées
-  components/*.tsx          Composants globaux réutilisables (+ .stories.tsx et .test.tsx)
-  components/ui/            Primitives shadcn/ui (Base UI)
-  components/phases/        Assemblage des composants globaux pour chaque phase
-  components/room/          En-tête, invitation, formulaire d'accès, synchro temps réel
-  components/site/          Éléments communs à toutes les pages (choix du thème)
-  lib/actions.ts            Toutes les mutations (Server Actions) et leurs contrôles
-  lib/room.ts               Lectures : contexte de room, vue de vote, récapitulatif
-  lib/results.ts            Règles de score et de qualification (pures, testées)
-  lib/export.ts             Formats d'export (purs, testés)
-  lib/release-notes.ts      Lecture des notes de version (pure, testée) ; release-notes-source.ts les charge
-  lib/realtime/             Notification Pusher côté serveur
-  i18n/                     Configuration next-intl
+    page.tsx                Home: room creation, release notes
+    r/[slug]/layout.tsx     Access guard (not found / expired / join) + header + sync
+    r/[slug]/page.tsx       Share link → redirects to the current phase
+    r/[slug]/themes|ideas|recap/page.tsx   One page per phase
+    r/[slug]/export/route.ts               Markdown / CSV export
+    api/cron/purge/route.ts                Purge of expired rooms
+  components/*.tsx          Reusable global components (+ .stories.tsx and .test.tsx)
+  components/ui/            shadcn/ui primitives (Base UI)
+  components/phases/        Assembly of the global components for each phase
+  components/room/          Header, invitation, join form, real-time sync
+  components/site/          Elements shared by every page (theme and language pickers)
+  lib/actions.ts            All mutations (Server Actions) and their checks
+  lib/room.ts               Reads: room context, vote view, recap
+  lib/results.ts            Score and qualification rules (pure, tested)
+  lib/export.ts             Export formats (pure, tested)
+  lib/release-notes.ts      Parsing of the release notes (pure, tested); release-notes-source.ts loads them
+  lib/realtime/             Server-side Pusher notification
+  i18n/                     next-intl configuration, supported languages, language detection
 ```
 
-### Principes
+### Principles
 
-- **Identité sans compte** : rejoindre une room crée un `Participant` avec un token aléatoire, stocké dans un cookie httpOnly propre à la room (valable 7 jours). Revenir avec le même navigateur ne consomme donc pas de nouvelle place. Si l'animateur perd ce cookie (autre appareil, cookies effacés), il perd aussi son rôle.
-- **Le serveur fait autorité** : chaque action vérifie la participation, le rôle (animateur ou non) et la phase courante. Le client n'a aucune logique métier critique.
-- **Anonymat** : le client ne reçoit jamais l'auteur d'une idée ni les votes des autres, seulement ses propres votes et, au récapitulatif, les totaux.
-- **Synchronisation** : après chaque mutation, le serveur envoie via Pusher une notification sans contenu (ou, sans Pusher, les clients interrogent le serveur toutes les 3 secondes). Chaque client demande d'abord l'étape en cours (`/r/<slug>/phase`) : si elle a changé, il navigue directement vers la page de la nouvelle étape ; sinon il recharge l'état de la page actuelle (`router.refresh()`). Naviguer directement évite l'écran vide qu'une redirection serveur afficherait pendant la transition.
-- **Sujets typés** : l'animateur choisit le type de réponse de chaque sujet (texte, date, période, montant, fourchette, lieu, liste). La saisie s'adapte (sélecteur de dates du téléphone, clavier numérique) et les idées s'affichent proprement (« Du 1er au 14 juin 2027 », « De 300 € à 500 € »). Les suggestions « Dates », « Lieu » et « Budget » sont typées d'office.
-  - **Lieu** : l'idée porte un lien « Voir sur la carte » qui ouvre l'app installée (Plans sur Apple, Google Maps ailleurs), sans carte chargée dans Virgule.
-  - **Liste** : la personne qui anime fixe 2 à 10 options, qui deviennent des idées à voter au lancement ; d'autres propositions peuvent être autorisées (désactivé par défaut).
-  - **Au bilan**, un sujet « Période » affiche le créneau commun aux périodes retenues (« Créneau commun : du 12 au 14 juin 2027 », ou à défaut le plus partagé), en frise des jours ou en calendrier ; un sujet « Fourchette » affiche le budget compatible sur une même échelle.
-- **Doublons** : une idée identique à une autre encore en lice dans le même sujet est refusée (texte comparé sans casse, accents, ponctuation ni espaces ; valeurs identiques pour les sujets typés).
-- **Égalités** : au bilan, les idées retenues à égalité en tête d'un sujet portent un badge « Ex æquo ». La personne qui anime peut lancer un **tour de départage** : dans chaque sujet, seules les idées en tête restent (les ex æquo, ou la gagnante), les votes repartent de zéro et on ne peut pas ajouter d'idée.
-- **Minuteur** (facultatif, réglé avec les sujets : 3, 5, 10 ou 15 min) : il démarre au lancement des idées et à chaque nouveau tour. Tout le monde voit le temps restant ; la personne qui anime peut ajouter 2 minutes ou l'arrêter. À la fin, rien n'est bloqué.
-- **Gestion des places** : clic droit (ou clic) sur une place occupée, pour la personne qui anime : **confier l'animation** à quelqu'un d'autre, ou **retirer** une personne (place prise par erreur ; ses idées et ses votes partent avec elle).
-- **Relance douce** : pendant les votes, chacun voit combien d'idées il lui reste à voter ; la personne qui anime voit en plus combien de participants ont voté, sans savoir quoi.
-- **Invitation** : lien à copier, QR code à scanner pour un groupe réuni au même endroit, et partage natif du téléphone quand le navigateur le propose.
-- **Nouveautés** : un bouton de l'en-tête de l'accueil (numéro de version et pastille tant que la dernière version n'a pas été consultée sur ce navigateur) ouvre les notes de version dans un panneau qui monte du bas de l'écran.
-- **Thème** : clair ou sombre selon l'appareil, ou choisi dans le pied de page. Le choix est gardé dans un cookie (`virgule_theme`) lu par le layout racine, qui rend directement `data-theme` sur `<html>` : aucun flash au chargement.
-- **Chargement et erreurs** : squelettes aux dimensions du vrai contenu pendant le chargement d'une étape (`loading.tsx`), pages d'erreur avec « Réessayer » et retour à l'accueil, l'en-tête de séance restant visible quand l'erreur touche une étape.
-- **Transitions** : changement d'étape animé avec les View Transitions de React (`PhaseTransition`), l'en-tête restant fixe ; apparition douce des nouvelles lignes (idées, sujets, participants), rebond au vote, fondu des couleurs au bilan. Tout est désactivé si l'appareil demande de réduire les animations.
-- **Tours** : une idée porte son tour de création (`createdRound`) et, le cas échéant, le tour à partir duquel elle est écartée (`eliminatedRound`). Les votes sont enregistrés par tour, ce qui conserve l'historique complet.
+- **Identity without an account**: joining a room creates a `Participant` with a random token, stored in an httpOnly cookie specific to the room (valid 7 days). Coming back with the same browser therefore does not use up a new seat. If the host loses this cookie (other device, cookies cleared), they also lose their role.
+- **The server is authoritative**: every action checks participation, role (host or not) and the current phase. The client holds no critical business logic.
+- **Anonymity**: the client never receives the author of an idea or other people's votes, only its own votes and, in the recap, the totals.
+- **Synchronization**: after each mutation, the server sends a content-free notification through Pusher (or, without Pusher, clients poll the server every 3 seconds). Each client first asks for the current step (`/r/<slug>/phase`): if it changed, it navigates straight to the new step's page; otherwise it reloads the current page's state (`router.refresh()`). Navigating directly avoids the blank screen a server redirect would show during the transition.
+- **Typed topics**: the host chooses the answer type of each topic (text, date, period, amount, range, place, list). Input adapts (the phone's date picker, numeric keyboard) and ideas are displayed cleanly ("June 1 – 14, 2027", "From €300 to €500"; in French « Du 1er au 14 juin 2027 », « De 300 € à 500 € »). The "Dates", "Place" and "Budget" suggestions are typed from the start.
+  - **Place**: the idea carries a "View on the map" link that opens the installed app (Maps on Apple, Google Maps elsewhere), with no map loaded in Virgule.
+  - **List**: the person hosting sets 2 to 10 options, which become ideas to vote on at launch; other suggestions can be allowed (disabled by default).
+  - **In the recap**, a "Period" topic shows the slot shared by the kept periods ("Common slot: June 12 – 14, 2027", or failing that the most shared one), as a day strip or a calendar; a "Range" topic shows the compatible budget on a single scale.
+- **Duplicates**: an idea identical to another one still in the running in the same topic is refused (text compared ignoring case, accents, punctuation and spaces; identical values for typed topics).
+- **Ties**: in the recap, kept ideas tied for first in a topic carry a "Tied" badge. The person hosting can start a **tiebreak round**: in each topic, only the leading ideas remain (the tied ones, or the winner), votes start from zero and no idea can be added.
+- **Timer** (optional, set with the topics: 3, 5, 10 or 15 min): it starts when ideas open and at each new round. Everyone sees the remaining time; the person hosting can add 2 minutes or stop it. When it ends, nothing is blocked.
+- **Seat management**: right-click (or click) on an occupied seat, for the person hosting: **hand over hosting** to someone else, or **remove** a person (seat taken by mistake; their ideas and votes go with them).
+- **Gentle reminder**: during voting, everyone sees how many ideas they still have to vote on; the person hosting also sees how many participants have voted, without knowing what.
+- **Invitation**: link to copy, QR code to scan for a group gathered in the same place, and the phone's native sharing when the browser offers it.
+- **What's new**: a button in the home page header (version number, and a dot until the latest version has been viewed on this browser) opens the release notes in a panel that slides up from the bottom of the screen.
+- **Theme**: light or dark following the device, or chosen in the footer. The choice is kept in a cookie (`virgule_theme`) read by the root layout, which renders `data-theme` directly on `<html>`: no flash on load.
+- **Languages**: English and French. The language is, in order: the one picked in the footer (`LocaleToggle`, saved in the `virgule_locale` cookie), otherwise the first supported language of the device (`Accept-Language` header, `src/i18n/locale.ts`), otherwise English. There is no per-language URL. Exports, the root error page and the release notes follow the language.
+- **Loading and errors**: skeletons with the dimensions of the real content while a step loads (`loading.tsx`), error pages with "Try again" and a way back to the home page, the session header staying visible when the error concerns a step.
+- **Transitions**: step changes animated with React View Transitions (`PhaseTransition`), the header staying in place; soft appearance of new rows (ideas, topics, participants), a bounce on vote, a color fade in the recap. Everything is disabled when the device asks to reduce motion.
+- **Rounds**: an idea carries its creation round (`createdRound`) and, if applicable, the round from which it is set aside (`eliminatedRound`). Votes are recorded per round, which keeps the full history.
 
-### Ajouter une langue
+### Adding a language
 
-1. Créer `messages/<locale>.json` avec exactement les mêmes clés que `fr.json`. La règle est vérifiée par `src/i18n/messages.test.ts` : une clé présente dans une langue doit exister dans toutes les autres, et aucune traduction ne peut être vide.
-2. Ajouter la locale au type `Locale` dans `src/i18n/config.ts`.
-3. Déterminer la locale dans `src/i18n/request.ts` (cookie, en-tête `Accept-Language`, etc.) et ajouter éventuellement un sélecteur de langue dans l'UI.
+1. Create `messages/<locale>.json` with exactly the same keys as `en.json` (the reference, whose keys are typed in `src/i18n/global.d.ts`). The rule is checked by `src/i18n/messages.test.ts`: a key present in one language must exist in all the others, and no translation can be empty.
+2. Add the locale to `locales` and its own name to `localeNames` in `src/i18n/config.ts`. Detection (cookie, then `Accept-Language`) and the footer picker pick it up automatically.
+3. Add `release-notes/<locale>/` with `added.md`, `improved.md` and `fixed.md`: same versions, dates and number of lines per category as `release-notes/en/` (checked by `src/lib/release-notes.test.ts`).
+4. Check date and amount formatting in `src/lib/idea-format.ts`: French builds its date ranges by hand, other languages use the native `Intl` range format; adjust the `ideas.dateRange*` and `ideas.amountRange*` messages if needed.

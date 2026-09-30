@@ -19,7 +19,7 @@ type Props = {
   seats: number;
   full: boolean;
   closed: boolean;
-  /** Rangée de sièges, rendue par le layout. */
+  /** Row of seats, rendered by the layout. */
   seatRow: React.ReactNode;
 };
 

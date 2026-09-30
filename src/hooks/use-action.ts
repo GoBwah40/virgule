@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 import type { ActionResult } from "@/lib/actions";
 
-/** Exécute une server action dans une transition et affiche l'erreur éventuelle en toast. */
+/** Runs a server action in a transition and shows any error as a toast. */
 export function useAction() {
   const t = useTranslations("errors");
   const [pending, startTransition] = useTransition();
@@ -14,7 +14,7 @@ export function useAction() {
   const run = (action: () => Promise<ActionResult | void>, onSuccess?: () => void) =>
     startTransition(async () => {
       const result = await action();
-      // Les actions qui redirigent ne renvoient rien.
+      // Actions that redirect return nothing.
       if (result && !result.ok) toast.error(t(result.error));
       else onSuccess?.();
     });

@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type Props = {
-  /** Préfixe des `id` (unique dans la page). */
+  /** Prefix for the `id`s (unique in the page). */
   idPrefix: string;
   value: string[];
   onChange: (value: string[]) => void;
@@ -21,9 +21,9 @@ type Props = {
 const key = (s: string) => s.trim().toLowerCase();
 
 /**
- * Liste d'options saisies une à une : pastilles retirables et champ d'ajout (Entrée pour
- * ajouter). Les doublons évidents (même texte, casse comprise) sont ignorés à la saisie ;
- * le serveur fait la vérification complète.
+ * List of options entered one by one: removable chips and an add field (Enter to add).
+ * Obvious duplicates (same text, ignoring case) are ignored on input; the server does
+ * the full check.
  */
 export function OptionListField({ idPrefix, value, onChange, labels, max, maxLength, disabled }: Props) {
   const [draft, setDraft] = useState("");
@@ -70,7 +70,7 @@ export function OptionListField({ idPrefix, value, onChange, labels, max, maxLen
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
-            // Entrée ajoute l'option au lieu d'envoyer tout le formulaire.
+            // Enter adds the option instead of submitting the whole form.
             if (e.key === "Enter") {
               e.preventDefault();
               add();

@@ -7,13 +7,13 @@ import { renderUi } from "@/test/render";
 import { DateOverview } from "./date-overview";
 
 const labels = {
-  view: "Affichage des périodes",
-  timeline: "Frise",
-  calendar: "Calendrier",
-  period: "Une période retenue",
-  overlap: "Recoupement",
-  best: "Créneau affiché",
-  days: "Jours couverts",
+  view: "Period view",
+  timeline: "Timeline",
+  calendar: "Calendar",
+  period: "A period kept",
+  overlap: "Overlap",
+  best: "Slot shown",
+  days: "Days covered",
 };
 const props = {
   periods: [
@@ -21,23 +21,23 @@ const props = {
     { start: "2027-06-11", end: "2027-06-13" },
   ],
   best: { start: "2027-06-11", end: "2027-06-12" },
-  locale: "fr",
+  locale: "en",
   labels,
 };
 
 describe("DateOverview", () => {
-  it("montre d'abord la frise, un jour par colonne", () => {
+  it("shows the timeline first, one day per column", () => {
     renderUi(<DateOverview {...props} />);
-    expect(screen.getByRole("radio", { name: "Frise" })).toBeChecked();
-    const frise = screen.getByRole("img", { name: "Jours couverts" });
-    expect(frise).toHaveTextContent("10111213");
+    expect(screen.getByRole("radio", { name: "Timeline" })).toBeChecked();
+    const timeline = screen.getByRole("img", { name: "Days covered" });
+    expect(timeline).toHaveTextContent("10111213");
   });
 
-  it("bascule sur le calendrier du mois", async () => {
+  it("switches to the month calendar", async () => {
     renderUi(<DateOverview {...props} />);
-    await userEvent.click(screen.getByRole("radio", { name: "Calendrier" }));
-    expect(screen.getByText("juin 2027")).toBeInTheDocument();
-    // Tous les jours du mois sont affichés.
-    expect(screen.getByRole("img", { name: "Jours couverts" })).toHaveTextContent("30");
+    await userEvent.click(screen.getByRole("radio", { name: "Calendar" }));
+    expect(screen.getByText("June 2027")).toBeInTheDocument();
+    // Every day of the month is shown.
+    expect(screen.getByRole("img", { name: "Days covered" })).toHaveTextContent("30");
   });
 });

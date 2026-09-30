@@ -1,9 +1,9 @@
 import { getRoomContext } from "@/lib/room";
 
 /**
- * Étape en cours de la séance, interrogée par la synchro côté client (RoomLive) :
- * si elle a changé, le client navigue directement vers la bonne page au lieu de
- * rafraîchir l'ancienne (qui redirigerait avec un rendu vide intermédiaire).
+ * Current session step, polled by the client-side sync (RoomLive): if it has changed,
+ * the client navigates straight to the right page instead of refreshing the old one
+ * (which would redirect with an empty intermediate render).
  */
 export async function GET(_request: Request, { params }: RouteContext<"/r/[slug]/phase">) {
   const ctx = await getRoomContext((await params).slug);

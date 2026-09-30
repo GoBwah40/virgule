@@ -6,9 +6,9 @@ import { renderUi } from "@/test/render";
 import { OverviewSummary } from "./overview-summary";
 
 describe("OverviewSummary", () => {
-  it("affiche la synthèse et sa précision", () => {
-    renderUi(<OverviewSummary summary="Budget compatible : de 300 € à 400 €" detail="Commun aux 3 fourchettes retenues." common />);
-    expect(screen.getByText("Budget compatible : de 300 € à 400 €")).toBeInTheDocument();
-    expect(screen.getByText("Commun aux 3 fourchettes retenues.")).toBeInTheDocument();
+  it("shows the summary and its detail", () => {
+    renderUi(<OverviewSummary summary="Compatible budget: €300 to €400" detail="Shared by all 3 ranges kept." common />);
+    expect(screen.getByText("Compatible budget: €300 to €400")).toBeInTheDocument();
+    expect(screen.getByText("Shared by all 3 ranges kept.")).toBeInTheDocument();
   });
 });

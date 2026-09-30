@@ -7,11 +7,11 @@ import { renderUi } from "@/test/render";
 import { SuggestionChips } from "./suggestion-chips";
 
 describe("SuggestionChips", () => {
-  it("transmet l'identifiant de la suggestion choisie", async () => {
+  it("passes on the id of the chosen suggestion", async () => {
     const onSelect = vi.fn();
     renderUi(
       <SuggestionChips
-        label="Idées de sujets"
+        label="Topic ideas"
         items={[
           { id: "dates", label: "Dates" },
           { id: "budget", label: "Budget" },
@@ -23,8 +23,8 @@ describe("SuggestionChips", () => {
     expect(onSelect).toHaveBeenCalledWith("budget");
   });
 
-  it("ne rend rien quand il n'y a plus de suggestion", () => {
-    renderUi(<SuggestionChips label="Idées de sujets" items={[]} onSelect={() => {}} />);
+  it("renders nothing when there are no suggestions left", () => {
+    renderUi(<SuggestionChips label="Topic ideas" items={[]} onSelect={() => {}} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 });

@@ -6,13 +6,13 @@ import { useSyncExternalStore } from "react";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  /** Fin du compte à rebours (ISO 8601). */
+  /** End of the countdown (ISO 8601). */
   endsAt: string;
   labels: { running: string; expired: string };
   className?: string;
 };
 
-// Horloge partagée : un seul intervalle, quel que soit le nombre de comptes à rebours.
+// Shared clock: a single interval, however many countdowns there are.
 const listeners = new Set<() => void>();
 let timer: ReturnType<typeof setInterval> | undefined;
 function subscribe(listener: () => void) {
@@ -26,10 +26,10 @@ function subscribe(listener: () => void) {
     }
   };
 }
-// Arrondi à la seconde : l'instantané ne change qu'une fois par seconde.
+// Rounded to the second: the snapshot only changes once per second.
 const nowSeconds = () => Math.floor(Date.now() / 1000);
 
-/** « 4:05 » ; au-delà d'une heure, « 1:02:05 ». */
+/** "4:05"; beyond an hour, "1:02:05". */
 export function formatRemaining(seconds: number) {
   const s = Math.max(0, seconds);
   const h = Math.floor(s / 3600);
@@ -39,8 +39,8 @@ export function formatRemaining(seconds: number) {
 }
 
 /**
- * Compte à rebours discret : neutre, puis mangue pendant la dernière minute, puis
- * « Temps écoulé ». Lu une fois par minute seulement par les lecteurs d'écran.
+ * Discreet countdown: neutral, then mango during the last minute, then the
+ * expired label. Screen readers only read it once a minute.
  */
 export function Countdown({ endsAt, labels, className }: Props) {
   const now = useSyncExternalStore(subscribe, nowSeconds, nowSeconds);
@@ -69,7 +69,7 @@ export function Countdown({ endsAt, labels, className }: Props) {
       ) : (
         <>
           <span className="sr-only sm:not-sr-only sm:text-muted-foreground">{labels.running}</span>
-          {/* Heure du serveur et du navigateur légèrement différentes : pas d'alerte d'hydratation. */}
+          {/* Server and browser clocks differ slightly: no hydration warning. */}
           <span className="font-mono tabular-nums" suppressHydrationWarning>
             {formatRemaining(remaining)}
           </span>

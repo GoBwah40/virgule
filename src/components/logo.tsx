@@ -1,18 +1,18 @@
 import { cn } from "@/lib/utils";
 
-/** Tracé de la virgule (grille 64) : une tête ronde de rayon 14 posée sur la ligne de base,
-    prolongée d'une queue qui s'effile vers la gauche. Partagé avec la rosace et les icônes. */
+/** Comma path (64 grid): a round head of radius 14 sitting on the baseline,
+    extended by a tail tapering to the left. Shared with the rosette and the icons. */
 export const COMMA_PATH = "M46 28C46 44 37 54 21 59L19 54C25 51 28.5 47 29.6 41.8A14 14 0 1 1 46 28Z";
 
 type Props = {
-  /** Nom de l'app, affiché en minuscules et lu tel quel par les lecteurs d'écran. */
+  /** App name, shown in lowercase and read as-is by screen readers. */
   label: string;
-  /** `wordmark` : le mot suivi de la virgule ; `mark` : la virgule seule. */
+  /** `wordmark`: the word followed by the comma; `mark`: the comma alone. */
   variant?: "wordmark" | "mark";
   className?: string;
 };
 
-/** Logo Virgule : le mot en Bricolage extra-gras, fermé par une virgule papaye. La taille suit `font-size`. */
+/** Virgule logo: the word in extra-bold Bricolage, closed by a papaya comma. Size follows `font-size`. */
 export function Logo({ label, variant = "wordmark", className }: Props) {
   const comma = (
     <svg viewBox="18 12 30 48" className="h-[0.72em] w-[0.45em] shrink-0 translate-y-[0.26em] fill-brand" aria-hidden>

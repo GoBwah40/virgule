@@ -5,16 +5,16 @@ import { fn } from "storybook/test";
 import { VoteButtons } from "./vote-buttons";
 
 const meta = {
-  title: "Composants/VoteButtons",
+  title: "Components/VoteButtons",
   component: VoteButtons,
-  args: { value: null, onChange: fn(), labels: { up: "Pour", down: "Contre" } },
+  args: { value: null, onChange: fn(), labels: { up: "For", down: "Against" } },
 } satisfies Meta<typeof VoteButtons>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Interactif : un tap vote, un second tap sur le même bouton retire le vote. */
-export const Interactif: Story = {
+/** Interactive: one tap votes, a second tap on the same button removes the vote. */
+export const Interactive: Story = {
   render: (args) => {
     const [value, setValue] = useState<boolean | null>(null);
     return (
@@ -30,6 +30,6 @@ export const Interactif: Story = {
   },
 };
 
-export const Pour: Story = { args: { value: true } };
-export const Contre: Story = { args: { value: false } };
-export const Desactive: Story = { args: { disabledReason: "Le vote sur tes propres idées est désactivé." } };
+export const For: Story = { args: { value: true } };
+export const Against: Story = { args: { value: false } };
+export const Disabled: Story = { args: { disabledReason: "Voting on your own ideas is turned off." } };

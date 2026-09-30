@@ -24,8 +24,8 @@ type Props = {
 };
 
 /**
- * Demande de confirmation pilotée par son parent (ouverte depuis un menu, par exemple).
- * Pour un simple bouton qui confirme, utiliser `ConfirmButton`.
+ * Confirmation prompt controlled by its parent (opened from a menu, for example).
+ * For a plain button that confirms, use `ConfirmButton`.
  */
 export function ConfirmDialog({ open, onOpenChange, title, description, confirmLabel, destructive, onConfirm }: Props) {
   const t = useTranslations("common");

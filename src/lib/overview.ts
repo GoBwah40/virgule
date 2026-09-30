@@ -1,14 +1,14 @@
-// Synthèse du bilan pour les sujets « Période » et « Fourchette » (fonctions pures,
-// testées dans overview.test.ts) : où les propositions retenues se recoupent-elles ?
+// Recap overview for "Period" and "Range" topics (pure functions, tested in
+// overview.test.ts): where do the kept suggestions overlap?
 
-/** Zone partagée par le plus de propositions : commune à toutes si `count === total`. */
+/** Zone shared by the most suggestions: common to all if `count === total`. */
 export type Overlap<T> = { start: T; end: T; count: number; total: number };
 
 const DAY = 86_400_000;
 const toTime = (iso: string) => Date.parse(`${iso}T00:00:00Z`);
 const toIso = (time: number) => new Date(time).toISOString().slice(0, 10);
 
-/** Nombre de périodes couvrant chaque jour, du premier au dernier jour concerné. */
+/** Number of periods covering each day, from the first to the last day involved. */
 export function dayCoverage(periods: { start: string; end: string }[]): { date: string; count: number }[] {
   if (periods.length === 0) return [];
   const spans = periods.map((p) => [toTime(p.start), toTime(p.end)] as const);
@@ -22,8 +22,8 @@ export function dayCoverage(periods: { start: string; end: string }[]): { date: 
 }
 
 /**
- * Créneau partagé par le plus de périodes. À égalité, le plus long, puis le plus tôt.
- * Moins de deux périodes : pas de synthèse (null).
+ * Slot shared by the most periods. On a tie, the longest, then the earliest.
+ * Fewer than two periods: no overview (null).
  */
 export function bestDateOverlap(periods: { start: string; end: string }[]): Overlap<string> | null {
   if (periods.length < 2) return null;
@@ -40,8 +40,8 @@ export function bestDateOverlap(periods: { start: string; end: string }[]): Over
 }
 
 /**
- * Fourchette partagée par le plus de fourchettes. À égalité, la plus large, puis la plus basse.
- * Moins de deux fourchettes : pas de synthèse (null).
+ * Range shared by the most ranges. On a tie, the widest, then the lowest.
+ * Fewer than two ranges: no overview (null).
  */
 export function bestAmountOverlap(ranges: { min: number; max: number }[]): Overlap<number> | null {
   if (ranges.length < 2) return null;

@@ -1,11 +1,11 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Props = {
-  /** Nombre de boutons d'action à simuler (comme les actions de PageHeader). */
+  /** Number of action buttons to mimic (like PageHeader's actions). */
   actions?: number;
 };
 
-/** Squelette de PageHeader : mêmes marges et mêmes proportions que le vrai titre. */
+/** PageHeader skeleton: same margins and proportions as the real title. */
 export function PageHeaderSkeleton({ actions = 0 }: Props) {
   return (
     <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between">

@@ -6,13 +6,13 @@ import { renderUi } from "@/test/render";
 import { PhaseTransition } from "./phase-transition";
 
 describe("PhaseTransition", () => {
-  it("rend son contenu même sans ViewTransition (React stable)", () => {
+  it("renders its content even without ViewTransition (stable React)", () => {
     renderUi(
       <PhaseTransition className="flex">
-        <h2>Les idées</h2>
+        <h2>The ideas</h2>
       </PhaseTransition>,
     );
-    const heading = screen.getByRole("heading", { name: "Les idées" });
+    const heading = screen.getByRole("heading", { name: "The ideas" });
     expect(heading.parentElement).toHaveClass("flex");
   });
 });

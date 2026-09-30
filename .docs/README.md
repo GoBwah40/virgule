@@ -1,14 +1,15 @@
-# Documents de conception
+# Design documents
 
-Maquettes et propositions produites pendant la conception de Virgule. Ce sont des pages HTML autonomes : ouvrez-les directement dans un navigateur.
+Mockups and proposals produced while designing Virgule. They are standalone HTML pages: open them directly in a browser.
 
-| Fichier | Contenu | Décision prise |
+| File | Content | Decision made |
 | --- | --- | --- |
-| [recap-variantes.html](recap-variantes.html) | Trois variantes de fond pour les idées retenues ou écartées au bilan, et votes en flèches avec score en infobulle. | Variante C (fond à 10 % + bordure teintée), score et détail des votes en infobulle, flèches aussi pour voter. Ensuite : score nul en neutre, votes visibles seulement au survol du statut. |
-| [sujets-types-etape-2.html](sujets-types-etape-2.html) | Propositions pour la suite des sujets typés : créneau commun des périodes (frise ou calendrier, trois formulations), budget compatible des fourchettes, types « Lieu » (lien vers la carte) et « Liste » (options fixées par la personne qui anime). | Formulation « Créneau commun : … » ; frise et calendrier avec bascule animée ; lien de carte vers l'app installée ; « Autoriser d'autres propositions » désactivé par défaut. Implémenté. |
-| [charte-graphique.html](charte-graphique.html) | Charte graphique : couleurs, typographies, rangée de sièges, composants, ton et vocabulaire, écrans mobiles. | Tutoiement, vocabulaire planification, rangée de places, sujets suggérés. |
+| [recap-variants.html](recap-variants.html) | Three background variants for kept or dropped ideas in the recap, and arrow votes with the score in a tooltip. | Variant C (10% background + tinted border), score and vote details in a tooltip, arrows for voting too. Then: zero score shown as neutral, votes visible only when hovering the status. |
+| [typed-topics-step-2.html](typed-topics-step-2.html) | Proposals for the next step of typed topics: common slot of the periods (timeline or calendar, three wordings), compatible budget of the ranges, "Place" (link to the map) and "List" (options set by the host) types. | "Common slot: …" wording; timeline and calendar with an animated switch; map link opens the installed app; "Allow other suggestions" off by default. Implemented. |
+| [brand-guidelines.html](brand-guidelines.html) | Brand guidelines: colors, typography, row of seats, components, tone and vocabulary, mobile screens. | Informal "you", planning vocabulary, row of seats, suggested topics. |
 
-## À savoir
+## Good to know
 
-- La charte a été réécrite le 30 septembre 2026 avec le vocabulaire de planification et de brainstorm (séance, participants, « anime la séance »). Les textes de référence restent dans `messages/fr.json`.
-- La référence pour le code reste `src/app/globals.css` (tokens), `src/app/fonts.ts` (typographies) et les stories Storybook (`pnpm storybook`).
+- The guidelines were rewritten on September 30, 2026 with the planning and brainstorming vocabulary (session, participants, "is hosting"). The reference copy lives in `messages/*.json`.
+- The reference for the code remains `src/app/globals.css` (tokens), `src/app/fonts.ts` (typography) and the Storybook stories (`pnpm storybook`).
+- The mockups were originally written in French and translated to English; the product decisions they record were made on the French copy.

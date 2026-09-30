@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type Props = Omit<React.ComponentProps<typeof Button>, "onClick" | "children" | "value"> & {
-  /** Texte copié. */
+  /** Copied text. */
   value: string;
-  /** Préfixe `value` par l'origine du site (pour copier une URL absolue à partir d'un chemin). */
+  /** Prefixes `value` with the site origin (to copy an absolute URL from a path). */
   absolute?: boolean;
   label: string;
   successMessage: string;
-  /** Sur mobile, n'affiche que l'icône (le libellé reste lu par les lecteurs d'écran). */
+  /** On mobile, shows only the icon (screen readers still read the label). */
   hideLabelOnMobile?: boolean;
 };
 
@@ -31,7 +31,7 @@ export function CopyButton({
     <Button
       variant={variant}
       aria-label={hideLabelOnMobile ? label : undefined}
-      // Espace icône/libellé garanti, y compris avec la taille « icon » élargie sur desktop.
+      // Guaranteed icon/label gap, including with the "icon" size widened on desktop.
       className={cn("gap-2", className)}
       {...props}
       onClick={async () => {

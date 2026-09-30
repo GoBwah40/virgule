@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="fr">
+<html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Charte Virgule</title>
+<title>Virgule brand guidelines</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap">
@@ -102,7 +102,7 @@
   .pitch { padding: 0; margin: 0; }
   .tag { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 999px; background: var(--carte); border: 1px solid var(--ligne); font-size: 14px; font-weight: 600; }
 
-  /* ── Téléphone ── */
+  /* ── Phone ── */
   .phone {
     width: 100%; max-width: 340px; margin-inline: auto;
     background: var(--sable); border: 1px solid var(--ligne); border-radius: 36px;
@@ -113,7 +113,7 @@
   .phone-notch { width: 90px; height: 22px; border-radius: 999px; background: var(--encre); opacity: .9; }
   .phone-caption { text-align: center; font-size: 13px; color: var(--encre-douce); margin-top: 10px; }
 
-  /* ── Composants de l'app (maquettes) ── */
+  /* ── App components (mockups) ── */
   .app-head { display: grid; gap: 10px; padding: 4px 6px 0; }
   .app-title { font-family: var(--display); font-weight: 700; font-size: 22px; line-height: 1.1; }
   .app-sub { font-size: 14px; color: var(--encre-douce); }
@@ -219,7 +219,7 @@
 
   .code { font-family: var(--mono); font-size: 14px; letter-spacing: .04em; }
 
-  /* ── Grilles de la charte ── */
+  /* ── Guideline grids ── */
   .grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
   .principle { background: var(--carte); border: 1px solid var(--ligne); border-radius: 20px; padding: 20px; display: grid; gap: 8px; align-content: start; }
   .principle-icon { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--mangue-pale); color: var(--action); }
@@ -257,7 +257,7 @@
   .seat-row .seat-box { width: 46px; height: 50px; font-size: 15px; }
   .row-label { font-family: var(--mono); font-size: 12px; color: var(--encre-douce); }
 
-  /* Ton */
+  /* Tone */
   .tone-rules { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
   .rule { border-radius: 18px; padding: 16px 18px; background: var(--carte); border: 1px solid var(--ligne); display: grid; gap: 6px; }
   .rule-title { font-weight: 700; }
@@ -291,337 +291,337 @@
   <!-- Hero -->
   <header class="hero">
     <div class="hero-text">
-      <span class="eyebrow">Charte graphique · version intégrée</span>
-      <h1>Toutes les idées<span>,</span> une décision commune.</h1>
-      <p class="lede">Virgule aide un petit groupe à décider ensemble : un anniversaire, un week-end, un projet, une sortie. Chacun propose, tout le monde vote, et on garde les idées qui convainquent le groupe. La charte vise une app chaleureuse et lisible, pensée pour le téléphone qu'on a en main autour de la table.</p>
+      <span class="eyebrow">Brand guidelines · implemented version</span>
+      <h1>Every idea<span>,</span> one shared decision.</h1>
+      <p class="lede">Virgule helps a small group decide together: a birthday, a weekend, a project, an outing. Everyone suggests, everyone votes, and we keep the ideas that win the group over. The guidelines aim for a warm, readable app, designed for the phone you hold around the table.</p>
       <ul class="pitch">
-        <li><span class="tag">Petits groupes, 6 personnes</span></li>
-        <li><span class="tag">Mobile d'abord</span></li>
-        <li><span class="tag">Couleurs chaudes, contraste AA</span></li>
+        <li><span class="tag">Small groups, 6 people</span></li>
+        <li><span class="tag">Mobile first</span></li>
+        <li><span class="tag">Warm colors, AA contrast</span></li>
       </ul>
     </div>
     <div>
-      <div class="phone" aria-label="Aperçu de l'écran de vote">
-        <div class="phone-bar"><span>20:41</span><span class="phone-notch"></span><span>87 %</span></div>
+      <div class="phone" aria-label="Preview of the voting screen">
+        <div class="phone-bar"><span>20:41</span><span class="phone-notch"></span><span>87%</span></div>
         <div class="app-head">
-          <div class="steps"><span class="step">Sujets</span><span class="step on">Idées</span><span class="step">Bilan</span></div>
-          <div class="app-title">Week-end de juin</div>
+          <div class="steps"><span class="step">Topics</span><span class="step on">Ideas</span><span class="step">Recap</span></div>
+          <div class="app-title">Weekend in June</div>
           <div class="seats" data-seats="3"></div>
         </div>
         <div class="card">
-          <div class="card-title">Lieu</div>
-          <div class="card-desc">Où est-ce que ça se passe ?</div>
-          <div class="idea"><div><div class="idea-text">Gîte dans le Vercors</div><span class="badge badge-mine" style="margin-top:4px">Ton idée</span></div><div class="votes" data-vote="up"></div></div>
-          <div class="idea"><div><div class="idea-text">Chez les parents de Sacha</div></div><div class="votes" data-vote=""></div></div>
-          <div class="composer"><input class="field" id="hero-idea" placeholder="Ton idée…" aria-label="Ton idée"><button class="btn btn-primary" type="button">Ajouter</button></div>
+          <div class="card-title">Place</div>
+          <div class="card-desc">Where does it happen?</div>
+          <div class="idea"><div><div class="idea-text">Cottage in the Vercors</div><span class="badge badge-mine" style="margin-top:4px">Your idea</span></div><div class="votes" data-vote="up"></div></div>
+          <div class="idea"><div><div class="idea-text">At Sacha's parents' place</div></div><div class="votes" data-vote=""></div></div>
+          <div class="composer"><input class="field" id="hero-idea" placeholder="Your idea…" aria-label="Your idea"><button class="btn btn-primary" type="button">Add</button></div>
         </div>
-        <div class="meter" role="progressbar" aria-label="Idées sur lesquelles tu as voté" aria-valuemin="0" aria-valuemax="5" aria-valuenow="3" style="justify-self:start"><span class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>Il te reste 2 idées sans vote</div>
+        <div class="meter" role="progressbar" aria-label="Ideas you voted on" aria-valuemin="0" aria-valuemax="5" aria-valuenow="3" style="justify-self:start"><span class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>2 ideas left without your vote</div>
       </div>
-      <p class="phone-caption">Écran « Idées », 360 px de large. Les flèches sont cliquables.</p>
+      <p class="phone-caption">"Ideas" screen, 360 px wide. The arrows are clickable.</p>
     </div>
   </header>
 
-  <!-- Principes -->
+  <!-- Principles -->
   <section>
     <div class="sec-head">
-      <h2>Trois principes</h2>
-      <p>Ils servent à trancher quand une décision de design hésite.</p>
+      <h2>Three principles</h2>
+      <p>They settle things when a design decision is unclear.</p>
     </div>
     <div class="grid-3">
       <div class="principle">
         <div class="principle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></div>
-        <h3>Lisible avant tout</h3>
-        <p class="muted">Texte de 16 px minimum, contraste AA partout, une seule action principale par écran. Les couleurs chaudes habillent, elles ne remplacent jamais un libellé.</p>
+        <h3>Readable above all</h3>
+        <p class="muted">Text at 16 px minimum, AA contrast everywhere, a single primary action per screen. Warm colors dress things up; they never replace a label.</p>
       </div>
       <div class="principle">
         <div class="principle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="3"/><path d="M11 18h2"/></svg></div>
-        <h3>Pensé pour le pouce</h3>
-        <p class="muted">Cibles tactiles de 44 px, actions importantes en bas d'écran, une colonne sur mobile. Le bureau reçoit la même interface, simplement plus aérée.</p>
+        <h3>Made for the thumb</h3>
+        <p class="muted">44 px touch targets, important actions at the bottom of the screen, one column on mobile. Desktop gets the same interface, just roomier.</p>
       </div>
       <div class="principle">
         <div class="principle-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20a6 6 0 0 1 12 0"/><path d="M15 20a4.5 4.5 0 0 1 6-4.2"/></svg></div>
-        <h3>Le groupe d'abord</h3>
-        <p class="muted">L'app parle au collectif (« on »), montre qui est là, et garde les votes anonymes. Personne ne doit se sentir jugé pour une idée.</p>
+        <h3>The group first</h3>
+        <p class="muted">The app speaks to the group ("we"), shows who is there, and keeps votes anonymous. Nobody should feel judged for an idea.</p>
       </div>
     </div>
   </section>
 
-  <!-- Couleurs -->
+  <!-- Colors -->
   <section>
     <div class="sec-head">
-      <h2>Couleurs</h2>
-      <p>Une palette de fin de journée en terrasse : papaye, mangue, sable. Le vert olive et le rouge grenade restent réservés au résultat des votes, pour qu'ils ne se confondent jamais avec l'orange de marque.</p>
+      <h2>Colors</h2>
+      <p>An end-of-day-on-the-terrace palette: papaya, mango, sand. Olive green and pomegranate red are reserved for vote results, so they are never confused with the brand orange.</p>
     </div>
-    <span class="sub-h">Marque et interface</span>
+    <span class="sub-h">Brand and interface</span>
     <div class="swatches">
-      <div class="swatch"><div class="swatch-chip" style="background:#F26A2E;color:#2A1A24">Aa</div><div class="swatch-info"><b>Papaye</b><span class="code">#F26A2E · sombre #FF8A55</span><span>Marque, illustrations, virgule du logo. Jamais en fond de texte blanc.</span></div></div>
-      <div class="swatch"><div class="swatch-chip" style="background:#C2410C;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Papaye brûlée</b><span class="code">#C2410C</span><span>Boutons principaux, liens, focus des champs.</span><span class="aa">Blanc dessus : 5,2:1</span></div></div>
-      <div class="swatch"><div class="swatch-chip" style="background:#FFC23D;color:#2A1A24">Aa</div><div class="swatch-info"><b>Mangue</b><span class="code">#FFC23D · pâle #FFF0C7</span><span>Participant courant, « Ton idée », pastilles d'avancement, mises en avant.</span><span class="aa">Encre dessus : 10,3:1</span></div></div>
-      <div class="swatch"><div class="swatch-chip" style="background:#FFF7F0;color:#2A1A24;border-bottom:1px solid #EEDCCF">Aa</div><div class="swatch-info"><b>Sable</b><span class="code">#FFF7F0 · sombre #1C1216</span><span>Fond de page. Les cartes sont blanches par-dessus.</span></div></div>
-      <div class="swatch"><div class="swatch-chip" style="background:#2A1A24;color:#FFF7F0">Aa</div><div class="swatch-info"><b>Encre figue</b><span class="code">#2A1A24</span><span>Texte principal : un noir chaud plutôt qu'un gris neutre.</span><span class="aa">Sur sable : 15,6:1</span></div></div>
-      <div class="swatch"><div class="swatch-chip" style="background:#6F5A62;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Encre douce</b><span class="code">#6F5A62</span><span>Textes secondaires, aides, métadonnées.</span><span class="aa">Sur sable : 6,0:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#F26A2E;color:#2A1A24">Aa</div><div class="swatch-info"><b>Papaya</b><span class="code">#F26A2E · dark #FF8A55</span><span>Brand, illustrations, the comma in the logo. Never behind white text.</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#C2410C;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Burnt papaya</b><span class="code">#C2410C</span><span>Primary buttons, links, field focus.</span><span class="aa">White on top: 5.2:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#FFC23D;color:#2A1A24">Aa</div><div class="swatch-info"><b>Mango</b><span class="code">#FFC23D · pale #FFF0C7</span><span>Current participant, "Your idea", progress dots, highlights.</span><span class="aa">Ink on top: 10.3:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#FFF7F0;color:#2A1A24;border-bottom:1px solid #EEDCCF">Aa</div><div class="swatch-info"><b>Sand</b><span class="code">#FFF7F0 · dark #1C1216</span><span>Page background. Cards are white on top.</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#2A1A24;color:#FFF7F0">Aa</div><div class="swatch-info"><b>Fig ink</b><span class="code">#2A1A24</span><span>Main text: a warm black rather than a neutral gray.</span><span class="aa">On sand: 15.6:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#6F5A62;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Soft ink</b><span class="code">#6F5A62</span><span>Secondary text, hints, metadata.</span><span class="aa">On sand: 6.0:1</span></div></div>
     </div>
-    <span class="sub-h">Résultats des votes</span>
+    <span class="sub-h">Vote results</span>
     <div class="swatches">
-      <div class="swatch"><div class="swatch-chip" style="background:#1F7A4D;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Olivier</b><span class="code">#1F7A4D · sombre #5CC98E</span><span>Vote « pour », idée retenue.</span><span class="aa">Blanc dessus : 5,3:1</span></div></div>
-      <div class="swatch"><div class="swatch-chip" style="background:#B8283F;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Grenade</b><span class="code">#B8283F · sombre #FF6B81</span><span>Vote « contre », idée écartée, actions destructives.</span><span class="aa">Blanc dessus : 6,2:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#1F7A4D;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Olive</b><span class="code">#1F7A4D · dark #5CC98E</span><span>"For" vote, kept idea.</span><span class="aa">White on top: 5.3:1</span></div></div>
+      <div class="swatch"><div class="swatch-chip" style="background:#B8283F;color:#FFFFFF">Aa</div><div class="swatch-info"><b>Pomegranate</b><span class="code">#B8283F · dark #FF6B81</span><span>"Against" vote, dropped idea, destructive actions.</span><span class="aa">White on top: 6.2:1</span></div></div>
     </div>
   </section>
 
-  <!-- Thème sombre -->
+  <!-- Dark theme -->
   <section>
     <div class="sec-head">
-      <h2>Thème sombre</h2>
-      <p>Chaque jeton a sa valeur sombre (indiquée « sombre » dans la palette) : fond aubergine profond, textes crème, papaye et vote éclaircis pour garder le contraste AA. Par défaut, l'app suit le réglage de l'appareil.</p>
+      <h2>Dark theme</h2>
+      <p>Each token has a dark value (marked "dark" in the palette): deep eggplant background, cream text, papaya and vote colors lightened to keep AA contrast. By default, the app follows the device setting.</p>
     </div>
     <div class="themes-demo">
       <div class="comp">
-        <span class="sub-h">Sélecteur, en pied de page</span>
-        <div class="seg" role="group" aria-label="Thème">
-          <button type="button" data-theme-choice="system" aria-pressed="true">Comme l'appareil</button>
-          <button type="button" data-theme-choice="light" aria-pressed="false">Clair</button>
-          <button type="button" data-theme-choice="dark" aria-pressed="false">Sombre</button>
+        <span class="sub-h">Picker, in the footer</span>
+        <div class="seg" role="group" aria-label="Theme">
+          <button type="button" data-theme-choice="system" aria-pressed="true">Same as device</button>
+          <button type="button" data-theme-choice="light" aria-pressed="false">Light</button>
+          <button type="button" data-theme-choice="dark" aria-pressed="false">Dark</button>
         </div>
-        <ul class="spec-list"><li>Trois choix : Comme l'appareil (par défaut), Clair, Sombre. Le choix est mémorisé sur l'appareil.</li><li>Essaie-le ici : la charte entière bascule.</li></ul>
+        <ul class="spec-list"><li>Three choices: Same as device (default), Light, Dark. The choice is remembered on the device.</li><li>Try it here: the whole page switches.</li></ul>
       </div>
       <div class="comp">
-        <span class="sub-h">Exception : le QR code</span>
-        <ul class="spec-list"><li>Le QR code d'invitation reste <b>encre sur blanc</b>, même en sombre : un QR code clair sur fond foncé se scanne mal sur beaucoup de téléphones.</li><li>Le cadre blanc autour sert de marge de silence au scan.</li></ul>
+        <span class="sub-h">Exception: the QR code</span>
+        <ul class="spec-list"><li>The invite QR code stays <b>ink on white</b>, even in dark mode: a light QR code on a dark background scans poorly on many phones.</li><li>The white frame around it acts as the quiet zone for scanning.</li></ul>
       </div>
     </div>
   </section>
 
-  <!-- Typographie -->
+  <!-- Typography -->
   <section>
     <div class="sec-head">
-      <h2>Typographie</h2>
-      <p>Deux familles gratuites (Google Fonts), bien dessinées pour l'écran et complètes pour le français.</p>
+      <h2>Typography</h2>
+      <p>Two free families (Google Fonts), well drawn for screens and with full French character coverage.</p>
     </div>
     <div class="type-specimen">
       <div class="spec">
-        <span class="sub-h">Titres · Bricolage Grotesque</span>
-        <div class="spec-big" style="font-family:var(--display);font-weight:800">Quel lieu ?</div>
-        <p class="muted">Une grotesque aux formes un peu irrégulières, chaleureuse sans être enfantine. Réservée aux titres de page, noms de séance et de sujets. Graisses 700 et 800.</p>
+        <span class="sub-h">Headings · Bricolage Grotesque</span>
+        <div class="spec-big" style="font-family:var(--display);font-weight:800">Which place?</div>
+        <p class="muted">A grotesque with slightly irregular shapes, warm without being childish. Reserved for page titles, session names and topic names. Weights 700 and 800.</p>
       </div>
       <div class="spec">
-        <span class="sub-h">Texte et interface · Figtree</span>
-        <div class="spec-big" style="font-family:var(--texte);font-weight:600">Gîte à Autrans</div>
-        <p class="muted">Ronde et très lisible en petit. Idées, boutons, formulaires, aides. Graisses 400 à 700. Chiffres alignés (<span class="code">tabular-nums</span>) pour les compteurs.</p>
+        <span class="sub-h">Text and interface · Figtree</span>
+        <div class="spec-big" style="font-family:var(--texte);font-weight:600">Cottage in Autrans</div>
+        <p class="muted">Rounded and very readable at small sizes. Ideas, buttons, forms, hints. Weights 400 to 700. Aligned figures (<span class="code">tabular-nums</span>) for counters.</p>
       </div>
     </div>
-    <div class="scale" role="table" aria-label="Échelle typographique mobile">
-      <div class="scale-row"><span class="code">Titre 1 · 28</span><div style="font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1">Week-end de juin</div></div>
-      <div class="scale-row"><span class="code">Titre 2 · 22</span><div style="font-family:var(--display);font-weight:700;font-size:22px;line-height:1.15">Sur quoi faut-il trancher ?</div></div>
-      <div class="scale-row"><span class="code">Titre 3 · 18</span><div style="font-family:var(--display);font-weight:700;font-size:18px">Budget</div></div>
-      <div class="scale-row"><span class="code">Texte · 16</span><div>Propose tes idées et vote pour celles des autres. Personne ne sait qui a voté quoi, et tu peux changer d'avis jusqu'au bilan.</div></div>
-      <div class="scale-row"><span class="code">Petit · 14</span><div class="muted">3 idées sur 5 retenues pour le tour 2.</div></div>
-      <div class="scale-row"><span class="code">Étiquette · 12</span><div style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase" class="muted">Tour 2 · Bilan</div></div>
+    <div class="scale" role="table" aria-label="Mobile type scale">
+      <div class="scale-row"><span class="code">Heading 1 · 28</span><div style="font-family:var(--display);font-weight:800;font-size:28px;line-height:1.1">Weekend in June</div></div>
+      <div class="scale-row"><span class="code">Heading 2 · 22</span><div style="font-family:var(--display);font-weight:700;font-size:22px;line-height:1.15">What do we need to decide?</div></div>
+      <div class="scale-row"><span class="code">Heading 3 · 18</span><div style="font-family:var(--display);font-weight:700;font-size:18px">Budget</div></div>
+      <div class="scale-row"><span class="code">Text · 16</span><div>Suggest your ideas and vote on everyone else's. Nobody knows who voted what, and you can change your mind until the recap.</div></div>
+      <div class="scale-row"><span class="code">Small · 14</span><div class="muted">3 of 5 ideas kept for round 2.</div></div>
+      <div class="scale-row"><span class="code">Label · 12</span><div style="font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase" class="muted">Round 2 · Recap</div></div>
     </div>
   </section>
 
   <!-- Signature -->
   <section>
     <div class="sec-head">
-      <h2>Le détail signature : une rangée de places</h2>
-      <p>Une séance accueille 6 personnes : une rangée de six places autour de la table, de A à F. Chaque participant occupe une place : on voit d'un coup d'œil qui est là et combien de places restent.</p>
+      <h2>The signature detail: a row of seats</h2>
+      <p>A session hosts 6 people: a row of six seats around the table, from A to F. Each participant takes a seat: you see at a glance who is there and how many seats are left.</p>
     </div>
     <div class="signature">
-      <div class="seat-row" aria-label="4 participants sur 6">
+      <div class="seat-row" aria-label="4 participants out of 6">
         <div class="seats" data-seats="4" data-big="1"></div>
-        <span class="row-label">4 PARTICIPANTS SUR 6 · 2 PLACES LIBRES</span>
+        <span class="row-label">4 PARTICIPANTS OUT OF 6 · 2 FREE SEATS</span>
       </div>
       <ul class="spec-list">
-        <li><b>Place occupée</b> : initiale du prénom sur fond mangue pâle, prénom complet au survol ou à l'appui long.</li>
-        <li><b>Toi</b> : fond mangue plein.</li>
-        <li><b>Place libre</b> : contour pointillé ; on la touche pour copier le lien d'invitation.</li>
-        <li><b>La personne qui anime</b> : petite couronne au-dessus de sa place (« Camille anime la séance »).</li>
-        <li>Allée entre C et D, lettres des places en DM Mono : un repère discret pour compter, sans autre décor.</li>
+        <li><b>Taken seat</b>: first-name initial on pale mango, full first name on hover or long press.</li>
+        <li><b>You</b>: solid mango background.</li>
+        <li><b>Free seat</b>: dashed outline; tap it to copy the invite link.</li>
+        <li><b>The host</b>: small crown above their seat ("Camille is hosting").</li>
+        <li>Aisle between C and D, seat letters in DM Mono: a discreet marker for counting, with no other decoration.</li>
       </ul>
     </div>
   </section>
 
-  <!-- Composants -->
+  <!-- Components -->
   <section>
     <div class="sec-head">
-      <h2>Formes et composants</h2>
-      <p>Des coins généreux (14 px pour les contrôles, 18 à 20 px pour les cartes, pilule pour les états) et des contours plutôt que des ombres. L'espacement suit une grille de 4 px.</p>
+      <h2>Shapes and components</h2>
+      <p>Generous corners (14 px for controls, 18 to 20 px for cards, pill for states) and outlines rather than shadows. Spacing follows a 4 px grid.</p>
     </div>
     <div class="components">
       <div class="comp">
-        <span class="sub-h">Boutons</span>
+        <span class="sub-h">Buttons</span>
         <div class="stack">
-          <button class="btn btn-primary btn-block" type="button">Lancer les idées</button>
-          <button class="btn btn-secondary btn-block" type="button">Copier le lien d'invitation</button>
-          <div class="demo"><button class="btn btn-ghost" type="button">Annuler</button><button class="btn btn-danger" type="button">Terminer la séance</button></div>
+          <button class="btn btn-primary btn-block" type="button">Start the ideas</button>
+          <button class="btn btn-secondary btn-block" type="button">Copy the invite link</button>
+          <div class="demo"><button class="btn btn-ghost" type="button">Cancel</button><button class="btn btn-danger" type="button">End the session</button></div>
         </div>
-        <ul class="spec-list"><li><b>46 px</b> de haut, texte en 15 px gras.</li><li>Un seul bouton principal par écran, en pleine largeur sur mobile.</li></ul>
+        <ul class="spec-list"><li><b>46 px</b> tall, 15 px bold text.</li><li>A single primary button per screen, full width on mobile.</li></ul>
       </div>
       <div class="comp">
-        <span class="sub-h">Invitation</span>
-        <button class="btn btn-secondary" type="button" style="justify-self:start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>Inviter avec un QR code</button>
-        <div class="dialog" role="group" aria-label="Exemple de dialogue d'invitation">
-          <div class="card-title">Invite le groupe</div>
-          <p class="muted" style="font-size:14px">Il reste 2 places. Scanne le QR code ou envoie le lien.</p>
-          <div class="qr" role="img" aria-label="QR code du lien d'invitation">
+        <span class="sub-h">Invite</span>
+        <button class="btn btn-secondary" type="button" style="justify-self:start"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/></svg>Invite with a QR code</button>
+        <div class="dialog" role="group" aria-label="Example invite dialog">
+          <div class="card-title">Invite the group</div>
+          <p class="muted" style="font-size:14px">2 seats left. Scan the QR code or send the link.</p>
+          <div class="qr" role="img" aria-label="QR code for the invite link">
             <svg viewBox="0 0 21 21" shape-rendering="crispEdges" fill="currentColor" aria-hidden="true">
               <path d="M0 0h7v7H0zM1 1v5h5V1zM2 2h3v3H2zM14 0h7v7h-7zM15 1v5h5V1zM16 2h3v3h-3zM0 14h7v7H0zM1 15v5h5v-5zM2 16h3v3H2z" fill-rule="evenodd"/>
               <path d="M8 0h1v2H8zM10 1h2v1h-2zM9 3h2v2H9zM12 4h1v3h-1zM8 6h1v2H8zM10 7h2v1h-2zM0 8h2v1H0zM3 8h3v1H3zM4 10h2v2H4zM1 11h2v1H1zM7 9h2v2H7zM10 9h1v3h-1zM12 10h3v1h-3zM16 8h2v2h-2zM19 8h2v1h-2zM17 11h3v1h-3zM14 12h2v2h-2zM8 13h2v1H8zM11 13h2v2h-2zM18 13h1v3h-1zM9 16h3v1H9zM14 15h3v1h-3zM8 18h2v3H8zM11 18h1v2h-1zM13 17h2v2h-2zM16 17h1v4h-1zM18 18h3v1h-3zM19 20h2v1h-2z"/>
             </svg>
           </div>
           <div class="demo" style="justify-content:center">
-            <button class="btn btn-primary" type="button">Partager</button>
-            <button class="btn btn-secondary" type="button">Copier le lien d'invitation</button>
+            <button class="btn btn-primary" type="button">Share</button>
+            <button class="btn btn-secondary" type="button">Copy the invite link</button>
           </div>
         </div>
-        <ul class="spec-list"><li>Le bouton QR code, dans l'en-tête de séance, ouvre un dialogue : QR code, partage natif du téléphone (« Rejoins la séance « Week-end de juin » sur Virgule ») et copie du lien.</li><li>Séance complète : « Toutes les places sont prises : plus personne ne peut rejoindre la séance. »</li><li>Le QR code reste encre sur blanc, même en thème sombre.</li></ul>
+        <ul class="spec-list"><li>The QR code button, in the session header, opens a dialog: QR code, the phone's native share sheet ("Join the session “Weekend in June” on Virgule") and link copy.</li><li>Full session: "All seats are taken: nobody else can join the session."</li><li>The QR code stays ink on white, even in the dark theme.</li></ul>
       </div>
       <div class="comp">
-        <span class="sub-h">Avancement des votes</span>
+        <span class="sub-h">Vote progress</span>
         <div class="stack" style="justify-items:start">
-          <div class="meter" role="progressbar" aria-label="Idées sur lesquelles tu as voté" aria-valuemin="0" aria-valuemax="6" aria-valuenow="4"><span class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>Il te reste 2 idées sans vote</div>
-          <div class="meter" role="progressbar" aria-label="Idées sur lesquelles tu as voté" aria-valuemin="0" aria-valuemax="14" aria-valuenow="9"><span class="meter-bar" aria-hidden="true"><span style="width:64%"></span></span>Il te reste 5 idées sans vote</div>
-          <div class="meter done" role="progressbar" aria-label="Idées sur lesquelles tu as voté" aria-valuemin="0" aria-valuemax="4" aria-valuenow="4"><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>Tu as voté sur toutes les idées</div>
+          <div class="meter" role="progressbar" aria-label="Ideas you voted on" aria-valuemin="0" aria-valuemax="6" aria-valuenow="4"><span class="dots" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span>2 ideas left without your vote</div>
+          <div class="meter" role="progressbar" aria-label="Ideas you voted on" aria-valuemin="0" aria-valuemax="14" aria-valuenow="9"><span class="meter-bar" aria-hidden="true"><span style="width:64%"></span></span>5 ideas left without your vote</div>
+          <div class="meter done" role="progressbar" aria-label="Ideas you voted on" aria-valuemin="0" aria-valuemax="4" aria-valuenow="4"><span class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>You voted on every idea</div>
         </div>
-        <ul class="spec-list"><li>Une pastille par idée, remplie en mangue ; au-delà de 10 idées, une barre.</li><li>Tout passe en vert olive quand c'est complet. Même composant pour « 3 personnes sur 5 ont voté », côté animation.</li></ul>
+        <ul class="spec-list"><li>One dot per idea, filled in mango; beyond 10 ideas, a bar.</li><li>Everything turns olive green when complete. Same component for "3 people out of 5 have voted", on the host side.</li></ul>
       </div>
       <div class="comp">
         <span class="sub-h">Votes</span>
         <div class="demo"><div class="votes" data-vote="up"></div><div class="votes" data-vote="down"></div><div class="votes" data-vote=""></div></div>
-        <ul class="spec-list"><li><b>44 × 44 px</b>, flèches épaisses de 20 px.</li><li>Olivier plein pour « pour », grenade plein pour « contre », contour neutre sans vote.</li><li>Léger enfoncement au tap ; un second tap retire le vote.</li></ul>
+        <ul class="spec-list"><li><b>44 × 44 px</b>, thick 20 px arrows.</li><li>Solid olive for "for", solid pomegranate for "against", neutral outline with no vote.</li><li>Slight press-in on tap; a second tap removes the vote.</li></ul>
       </div>
       <div class="comp">
-        <span class="sub-h">Résultats (bilan)</span>
+        <span class="sub-h">Results (recap)</span>
         <div class="stack">
-          <div class="row ok" data-up="4" data-down="1" data-open="1">Gîte dans le Vercors</div>
-          <div class="row nul" data-up="2" data-down="2" data-status="ok">Chez les parents de Sacha</div>
-          <div class="row ko" data-up="1" data-down="4">Camping au bord du lac</div>
+          <div class="row ok" data-up="4" data-down="1" data-open="1">Cottage in the Vercors</div>
+          <div class="row nul" data-up="2" data-down="2" data-status="ok">At Sacha's parents' place</div>
+          <div class="row ko" data-up="1" data-down="4">Camping by the lake</div>
         </div>
-        <ul class="spec-list"><li>On touche la ligne pour la déplier : « ↑ N pour » en vert olive à gauche, « ↓ N contre » en grenade à droite, au-dessus d'une barre bicolore proportionnelle. Aucun score net affiché.</li><li>Fond à 10 % et bordure teintée ; neutre, sans bordure, quand il y a autant de « pour » que de « contre ».</li><li>Un chevron signale le détail ; toute la ligne est une cible tactile.</li></ul>
+        <ul class="spec-list"><li>Tap the row to expand it: "↑ N for" in olive green on the left, "↓ N against" in pomegranate on the right, above a proportional two-color bar. No net score shown.</li><li>10% background and tinted border; neutral, with no border, when there are as many "for" as "against" votes.</li><li>A chevron signals the details; the whole row is a touch target.</li></ul>
       </div>
       <div class="comp">
-        <span class="sub-h">Badges et suggestions</span>
-        <div class="demo"><span class="badge badge-mine">Ton idée</span><span class="badge badge-round">Tour 2</span><span class="badge badge-round">Retenue au tour précédent</span></div>
-        <div class="chips" aria-label="Idées de sujets">
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Objectif</span>
+        <span class="sub-h">Badges and suggestions</span>
+        <div class="demo"><span class="badge badge-mine">Your idea</span><span class="badge badge-round">Round 2</span><span class="badge badge-round">Kept from the previous round</span></div>
+        <div class="chips" aria-label="Topic ideas">
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Goal</span>
           <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Dates</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Lieu</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Place</span>
           <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Budget</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Priorités</span>
-          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Qui fait quoi</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Priorities</span>
+          <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Who does what</span>
         </div>
-        <ul class="spec-list"><li>« Idées de sujets » : la personne qui anime ajoute ces sujets en un tap, avec leur question (« Quand est-ce que tout le monde est dispo ? »).</li><li><b>Sujets typés</b> : Texte, Date, Période, Montant, Fourchette. Affichage à la française : « Du 12 au 14 juin 2027 », « De 300 € à 500 € », « 1er juin 2027 ».</li></ul>
+        <ul class="spec-list"><li>"Topic ideas": the host adds these topics in one tap, with their question ("When is everyone available?").</li><li><b>Typed topics</b>: Text, Date, Period, Amount, Range. Displayed in the reader's locale: "June 12–14, 2027", "From €300 to €500", "June 1, 2027".</li></ul>
       </div>
     </div>
   </section>
 
-  <!-- Ton -->
+  <!-- Tone -->
   <section>
     <div class="sec-head">
-      <h2>Ton et vocabulaire</h2>
-      <p>Proche sans être familier : on parle comme l'ami organisé du groupe, celui qui fait avancer sans prendre de haut. Phrases courtes, verbes d'action, aucun jargon technique.</p>
+      <h2>Tone and vocabulary</h2>
+      <p>Friendly without being overfamiliar: we talk like the group's organized friend, the one who moves things forward without talking down. Short sentences, action verbs, no technical jargon.</p>
     </div>
     <div class="tone-rules">
-      <div class="rule"><span class="rule-title">« On » pour le groupe, « tu » pour chacun</span><span class="muted">« On repart pour un tour. » Le « on » crée la complicité ; quand l'app s'adresse à une seule personne, elle la tutoie : « Propose tes idées », « Touche pour copier le lien ».</span></div>
-      <div class="rule"><span class="rule-title">Chaleureux, pas copain</span><span class="muted">Pas d'argot ni d'emoji dans l'interface, un point d'exclamation au maximum par écran. L'enthousiasme vient des couleurs, pas des mots.</span></div>
-      <div class="rule"><span class="rule-title">Dire quoi faire ensuite</span><span class="muted">Chaque message d'erreur ou d'attente dit ce qui se passe et ce qu'on peut faire. « Ce prénom est déjà pris dans le groupe. Ajoute une initiale. »</span></div>
-      <div class="rule"><span class="rule-title">Les prénoms plutôt que les rôles</span><span class="muted">« Camille prépare les sujets » plutôt que « L'animateur prépare les thèmes ». On évite aussi les accords genrés : « la personne qui anime ».</span></div>
+      <div class="rule"><span class="rule-title">"We" for the group, "you" for each person</span><span class="muted">"Go for another round." "We" builds a sense of togetherness; when the app talks to one person, it addresses them directly and informally: "Suggest your ideas", "Tap to copy the link".</span></div>
+      <div class="rule"><span class="rule-title">Warm, not chummy</span><span class="muted">No slang or emoji in the interface, at most one exclamation mark per screen. The enthusiasm comes from the colors, not the words.</span></div>
+      <div class="rule"><span class="rule-title">Say what to do next</span><span class="muted">Every error or waiting message says what is happening and what you can do. "This first name is already taken in the group. Add an initial."</span></div>
+      <div class="rule"><span class="rule-title">First names rather than roles</span><span class="muted">"Camille is preparing the topics" rather than "The facilitator is preparing the themes". We also avoid gendered wording: "the person hosting".</span></div>
     </div>
 
-    <span class="sub-h">Vocabulaire</span>
+    <span class="sub-h">Vocabulary</span>
     <div class="glossary">
-      <div class="term"><s>Room</s><b>Séance</b><span class="muted">« Créer la séance »</span></div>
-      <div class="term"><s>Animateur</s><b>Personne qui anime</b><span class="muted">affichée par son prénom</span></div>
-      <div class="term"><s>Membres</s><b>Participants</b><span class="muted">« 4 participants sur 6 »</span></div>
-      <div class="term"><s>Thèmes</s><b>Sujets</b><span class="muted">Objectif, Dates, Lieu…</span></div>
-      <div class="term"><s>Propositions</s><b>Idées</b><span class="muted">« Ton idée »</span></div>
-      <div class="term"><s>Récapitulatif</s><b>Bilan</b><span class="muted">« Voir le bilan »</span></div>
-      <div class="term"><s>Itération</s><b>Tour</b><span class="muted">« On repart pour un tour »</span></div>
-      <div class="term"><s>Pseudo</s><b>Prénom</b><span class="muted">« ou surnom »</span></div>
+      <div class="term"><s>Room</s><b>Session</b><span class="muted">"Create the session"</span></div>
+      <div class="term"><s>Facilitator</s><b>Host</b><span class="muted">shown by first name</span></div>
+      <div class="term"><s>Members</s><b>Participants</b><span class="muted">"4 participants out of 6"</span></div>
+      <div class="term"><s>Themes</s><b>Topics</b><span class="muted">Goal, Dates, Place…</span></div>
+      <div class="term"><s>Proposals</s><b>Ideas</b><span class="muted">"Your idea"</span></div>
+      <div class="term"><s>Summary</s><b>Recap</b><span class="muted">"See the recap"</span></div>
+      <div class="term"><s>Iteration</s><b>Round</b><span class="muted">"Go for another round"</span></div>
+      <div class="term"><s>Nickname</s><b>First name</b><span class="muted">"or nickname"</span></div>
     </div>
 
-    <span class="sub-h">Exemples de textes</span>
+    <span class="sub-h">Copy examples</span>
     <div class="copy-table-wrap">
       <table>
-        <thead><tr><th>Où</th><th>Avant</th><th>Dans l'app</th></tr></thead>
+        <thead><tr><th>Where</th><th>Before</th><th>In the app</th></tr></thead>
         <tbody id="copy-rows"></tbody>
       </table>
     </div>
   </section>
 
-  <!-- Écrans -->
+  <!-- Screens -->
   <section>
     <div class="sec-head">
-      <h2>Trois écrans mobiles</h2>
-      <p>La charte appliquée aux étapes clés, à 360 px de large.</p>
+      <h2>Three mobile screens</h2>
+      <p>The guidelines applied to the key steps, at 360 px wide.</p>
     </div>
     <div class="screens">
       <div>
         <div class="phone">
-          <div class="phone-bar"><span>18:02</span><span class="phone-notch"></span><span>92 %</span></div>
+          <div class="phone-bar"><span>18:02</span><span class="phone-notch"></span><span>92%</span></div>
           <div class="app-head" style="gap:14px;padding-top:12px">
             <span class="eyebrow" style="font-size:12px">Virgule</span>
-            <div class="app-title" style="font-size:28px">Toutes les idées, une décision commune.</div>
-            <div class="app-sub">Jusqu'à 6 participants, un lien à partager, aucun compte à créer.</div>
+            <div class="app-title" style="font-size:28px">Every idea, one shared decision.</div>
+            <div class="app-sub">Up to 6 participants, one link to share, no account to create.</div>
           </div>
           <div class="card" style="gap:12px">
-            <div class="card-title">Nouvelle séance</div>
-            <div class="card-desc" style="margin-top:-4px">Tu animes : tu choisis les sujets et tu fais avancer la séance.</div>
-            <label class="idea-meta" for="s1-name" style="font-weight:700;color:var(--encre)">Nom de la séance</label>
-            <input class="field" id="s1-name" value="Week-end de juin">
-            <label class="idea-meta" for="s1-me" style="font-weight:700;color:var(--encre)">Ton prénom</label>
-            <input class="field" id="s1-me" placeholder="Ex. : Camille">
-            <button class="btn btn-primary btn-block" type="button">Créer la séance</button>
+            <div class="card-title">New session</div>
+            <div class="card-desc" style="margin-top:-4px">You're hosting: you pick the topics and move the session forward.</div>
+            <label class="idea-meta" for="s1-name" style="font-weight:700;color:var(--encre)">Session name</label>
+            <input class="field" id="s1-name" value="Weekend in June">
+            <label class="idea-meta" for="s1-me" style="font-weight:700;color:var(--encre)">Your first name</label>
+            <input class="field" id="s1-me" placeholder="E.g. Camille">
+            <button class="btn btn-primary btn-block" type="button">Create the session</button>
           </div>
         </div>
-        <p class="phone-caption">Accueil</p>
+        <p class="phone-caption">Home</p>
       </div>
       <div>
         <div class="phone">
-          <div class="phone-bar"><span>18:10</span><span class="phone-notch"></span><span>90 %</span></div>
+          <div class="phone-bar"><span>18:10</span><span class="phone-notch"></span><span>90%</span></div>
           <div class="app-head">
-            <div class="steps"><span class="step on">Sujets</span><span class="step">Idées</span><span class="step">Bilan</span></div>
-            <div class="app-title">Week-end de juin</div>
-            <div class="app-sub">2 participants sur 6</div>
+            <div class="steps"><span class="step on">Topics</span><span class="step">Ideas</span><span class="step">Recap</span></div>
+            <div class="app-title">Weekend in June</div>
+            <div class="app-sub">2 participants out of 6</div>
             <div class="seats" data-seats="2"></div>
           </div>
           <div class="card">
-            <div class="card-title">Sur quoi faut-il trancher ?</div>
-            <div class="card-desc" style="margin-top:0">Camille prépare les sujets. La suite s'affichera ici automatiquement.</div>
-            <div class="idea"><div><div class="idea-text">Lieu</div><div class="idea-meta">Texte</div></div></div>
-            <div class="idea"><div><div class="idea-text">Dates</div><div class="idea-meta">Période</div></div></div>
-            <div class="idea"><div><div class="idea-text">Budget</div><div class="idea-meta">Fourchette</div></div></div>
+            <div class="card-title">What do we need to decide?</div>
+            <div class="card-desc" style="margin-top:0">Camille is preparing the topics. What comes next will show up here automatically.</div>
+            <div class="idea"><div><div class="idea-text">Place</div><div class="idea-meta">Text</div></div></div>
+            <div class="idea"><div><div class="idea-text">Dates</div><div class="idea-meta">Period</div></div></div>
+            <div class="idea"><div><div class="idea-text">Budget</div><div class="idea-meta">Range</div></div></div>
           </div>
-          <button class="btn btn-secondary btn-block" type="button">Copier le lien d'invitation</button>
+          <button class="btn btn-secondary btn-block" type="button">Copy the invite link</button>
         </div>
-        <p class="phone-caption">Sujets, vus par un participant</p>
+        <p class="phone-caption">Topics, as seen by a participant</p>
       </div>
       <div>
         <div class="phone">
-          <div class="phone-bar"><span>21:37</span><span class="phone-notch"></span><span>64 %</span></div>
+          <div class="phone-bar"><span>21:37</span><span class="phone-notch"></span><span>64%</span></div>
           <div class="app-head">
-            <div class="steps"><span class="step">Sujets</span><span class="step">Idées</span><span class="step on">Bilan</span></div>
-            <div class="app-title">Le bilan</div>
-            <div class="app-sub">Tour 1 · 4 idée(s) retenue(s) sur 7</div>
+            <div class="steps"><span class="step">Topics</span><span class="step">Ideas</span><span class="step on">Recap</span></div>
+            <div class="app-title">The recap</div>
+            <div class="app-sub">Round 1 · 4 of 7 ideas kept</div>
           </div>
           <div class="card">
             <div class="card-title">Dates</div>
-            <div class="row ok" data-up="5" data-down="0">Du 12 au 14 juin 2027</div>
-            <div class="row ko" data-up="1" data-down="4" data-open="1">Du 26 au 28 juin 2027</div>
+            <div class="row ok" data-up="5" data-down="0">June 12–14, 2027</div>
+            <div class="row ko" data-up="1" data-down="4" data-open="1">June 26–28, 2027</div>
           </div>
-          <button class="btn btn-primary btn-block" type="button">On repart pour un tour</button>
+          <button class="btn btn-primary btn-block" type="button">Go for another round</button>
         </div>
-        <p class="phone-caption">Bilan, vu par Camille, qui anime. Touche une ligne pour voir les votes.</p>
+        <p class="phone-caption">Recap, as seen by Camille, who is hosting. Tap a row to see the votes.</p>
       </div>
     </div>
   </section>
 
   <section class="decisions">
-    <h2>Décisions prises</h2>
+    <h2>Decisions made</h2>
     <ol>
-      <li><b>Tutoiement</b> partout où le « on » ne suffit pas : « Ton idée », « Propose », « Touche… ».</li>
-      <li><b>Vocabulaire de planification</b> : séance, sujets, idées, tour, bilan ; l'app sert à décider de tout, pas d'un seul type de projet.</li>
-      <li><b>La rangée de places</b> est conservée pour afficher les participants.</li>
-      <li><b>Les sujets suggérés</b> sont conservés : Objectif, Dates, Lieu, Budget, Priorités, Qui fait quoi.</li>
+      <li><b>Informal "you"</b> (French <i>tu</i>) wherever "we" is not enough: "Your idea", "Suggest", "Tap…".</li>
+      <li><b>Planning vocabulary</b>: session, topics, ideas, round, recap; the app is for deciding anything, not a single kind of project.</li>
+      <li><b>The row of seats</b> is kept to show participants.</li>
+      <li><b>The suggested topics</b> are kept: Goal, Dates, Place, Budget, Priorities, Who does what.</li>
     </ol>
   </section>
 </div>
@@ -633,11 +633,11 @@
     crown: '<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M3 7l4.5 4L12 5l4.5 6L21 7l-2 11H5z"/></svg>'
   };
 
-  // Boutons de vote interactifs
+  // Interactive vote buttons
   document.querySelectorAll(".votes").forEach((group) => {
     group.innerHTML =
-      `<button type="button" class="vbtn up" aria-label="Pour" title="Pour">${ICON.up}</button>` +
-      `<button type="button" class="vbtn down" aria-label="Contre" title="Contre">${ICON.down}</button>`;
+      `<button type="button" class="vbtn up" aria-label="For" title="For">${ICON.up}</button>` +
+      `<button type="button" class="vbtn down" aria-label="Against" title="Against">${ICON.down}</button>`;
     const [up, down] = group.querySelectorAll("button");
     const render = () => {
       up.setAttribute("aria-pressed", String(group.dataset.vote === "up"));
@@ -648,7 +648,7 @@
     render();
   });
 
-  // Rangées de places : 6 places, allée entre C et D
+  // Seat rows: 6 seats, aisle between C and D
   const PEOPLE = ["Camille", "Sacha", "Inès", "Noah"];
   document.querySelectorAll(".seats").forEach((row) => {
     const filled = Number(row.dataset.seats);
@@ -657,9 +657,9 @@
       if (i === 3) html += '<span class="seat-aisle" aria-hidden="true"></span>';
       const name = PEOPLE[i];
       const taken = i < filled;
-      // Place A : la personne qui anime (couronne) ; place B : toi.
+      // Seat A: the host (crown); seat B: you.
       const cls = !taken ? "libre" : i === 1 ? "moi" : "";
-      const label = !taken ? "Place libre : touche pour copier le lien d'invitation" : i === 0 ? `${name} anime la séance` : i === 1 ? `${name} (toi)` : name;
+      const label = !taken ? "Free seat: tap to copy the invite link" : i === 0 ? `${name} is hosting` : i === 1 ? `${name} (you)` : name;
       html += `<span class="seat" title="${label}">
         <span style="height:12px;color:var(--action)">${i === 0 && taken ? ICON.crown : ""}</span>
         <span class="seat-box ${cls}" aria-label="${label}">${taken ? name[0] : "+"}</span>
@@ -669,25 +669,25 @@
     row.innerHTML = html;
   });
 
-  // Exemples de textes : ancienne formulation, puis libellé de l'app (messages/fr.json)
+  // Copy examples: old wording, then the app's label (messages/en.json)
   const COPY = [
-    ["Accueil, titre", "Séance de brainstorming", "Toutes les idées, une décision commune."],
-    ["Accueil, bouton", "Créer la room", "Créer la séance"],
-    ["Rejoindre", "Rejoindre « Week-end de juin » · Pseudo", "Camille t'invite à « Week-end de juin ». C'est quoi ton prénom ?"],
-    ["Prénom déjà pris", "Ce pseudo est déjà utilisé dans la room.", "Ce prénom est déjà pris dans le groupe. Ajoute une initiale, par exemple « Léa M. »."],
-    ["Séance complète", "Cette room est complète (6 participants maximum).", "Les 6 places sont prises. Demande à Camille si quelqu'un peut te céder la sienne."],
-    ["Lien copié", "Lien copié dans le presse-papiers.", "Lien copié, tu peux le partager au groupe"],
-    ["Attente des sujets", "L'animateur prépare les thèmes. La séance démarrera automatiquement.", "Camille prépare les sujets. La suite s'affichera ici automatiquement."],
-    ["Sujet sans idée", "Aucune idée pour ce thème.", "Pas encore d'idée ici. Qui commence ?"],
-    ["Nouveau tour", "Lancer le tour 2 ? Les idées écartées seront retirées et les votes remis à zéro.", "On lance le tour 2 ? Les idées écartées sortent de la course et les votes repartent de zéro."],
-    ["Fin de séance", "Terminer la séance ? Plus personne ne pourra proposer ni voter.", "C'est décidé ? Une fois la séance terminée, plus personne ne pourra proposer ni voter."]
+    ["Home, title", "Brainstorming session", "Every idea, one shared decision."],
+    ["Home, button", "Create the room", "Create the session"],
+    ["Join", "Join “Weekend in June” · Nickname", "Camille invites you to “Weekend in June”. What's your first name?"],
+    ["First name taken", "This nickname is already used in the room.", "This first name is already taken in the group. Add an initial, for example “Lea M.”."],
+    ["Full session", "This room is full (6 participants maximum).", "All 6 seats are taken. Ask Camille whether someone can give you theirs."],
+    ["Link copied", "Link copied to the clipboard.", "Link copied, you can share it with the group"],
+    ["Waiting for topics", "The facilitator is preparing the themes. The session will start automatically.", "Camille is preparing the topics. What comes next will show up here automatically."],
+    ["Topic with no ideas", "No ideas for this theme.", "No ideas here yet. Who goes first?"],
+    ["New round", "Start round 2? Dropped ideas will be removed and votes reset.", "Start round 2? Dropped ideas leave the race and votes start from zero."],
+    ["End of session", "End the session? Nobody will be able to suggest or vote anymore.", "Is it decided? Once the session is over, nobody can suggest or vote anymore."]
   ];
   const esc = (s) => s.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
   document.getElementById("copy-rows").innerHTML = COPY.map(([where, before, after]) =>
     `<tr><td class="where">${esc(where)}</td><td class="before">${esc(before)}</td><td class="after">${esc(after)}</td></tr>`
   ).join("");
 
-  // Bilan : la ligne se déplie au toucher pour montrer le détail des votes
+  // Recap: the row expands on tap to show the vote details
   const CHEVRON = '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
   document.querySelectorAll(".row[data-up]").forEach((row, n) => {
     const up = Number(row.dataset.up);
@@ -701,10 +701,10 @@
     row.innerHTML =
       `<button type="button" class="row-toggle" aria-expanded="${open}" aria-controls="${id}">` +
         `<span class="idea-text">${text}</span>` +
-        `<span class="row-aside"><span class="status ${ok ? "ok" : "ko"}">${ok ? "✓ Retenue" : "✕ Écartée"}</span>${CHEVRON}</span>` +
+        `<span class="row-aside"><span class="status ${ok ? "ok" : "ko"}">${ok ? "✓ Kept" : "✕ Dropped"}</span>${CHEVRON}</span>` +
       `</button>` +
       `<div class="row-details" id="${id}"${open ? "" : " hidden"}>` +
-        `<div class="vote-line"><span class="vote-up">↑ ${up} pour</span><span class="vote-down">↓ ${down} contre</span></div>` +
+        `<div class="vote-line"><span class="vote-up">↑ ${up} for</span><span class="vote-down">↓ ${down} against</span></div>` +
         `<div class="vote-bar" aria-hidden="true">${total ? `<span class="up" style="width:${share}%"></span><span class="down" style="width:${100 - share}%"></span>` : ""}</div>` +
       `</div>`;
     const toggle = row.querySelector(".row-toggle");
@@ -716,7 +716,7 @@
     });
   });
 
-  // Thème : comme l'appareil, clair ou sombre (data-theme sur la racine)
+  // Theme: same as device, light or dark (data-theme on the root)
   const themeButtons = document.querySelectorAll("[data-theme-choice]");
   themeButtons.forEach((b) => b.addEventListener("click", () => {
     themeButtons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));

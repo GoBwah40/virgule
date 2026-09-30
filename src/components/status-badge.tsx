@@ -9,7 +9,7 @@ type Props = {
   className?: string;
 };
 
-/** Statut d'une idée au bilan : vert plein si retenue, contour rouge si écartée. */
+/** Status of an idea in the recap: solid green if kept, red outline if dropped. */
 export function StatusBadge({ status, label, className }: Props) {
   return (
     <Badge

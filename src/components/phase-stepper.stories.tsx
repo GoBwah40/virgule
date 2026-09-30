@@ -4,14 +4,14 @@ import { PhaseStepper } from "./phase-stepper";
 import { Badge } from "./ui/badge";
 
 const meta = {
-  title: "Composants/PhaseStepper",
+  title: "Components/PhaseStepper",
   component: PhaseStepper,
   args: {
-    label: "Étapes de la séance",
+    label: "Session steps",
     steps: [
-      { id: "THEMES", label: "Sujets" },
-      { id: "IDEAS", label: "Idées" },
-      { id: "RECAP", label: "Bilan" },
+      { id: "THEMES", label: "Topics" },
+      { id: "IDEAS", label: "Ideas" },
+      { id: "RECAP", label: "Recap" },
     ],
     current: 1,
   },
@@ -20,15 +20,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Idees: Story = {};
-export const AvecTour: Story = {
+export const Ideas: Story = {};
+export const WithRound: Story = {
   args: {
     current: 2,
     extra: (
       <li>
-        <Badge variant="outline">Tour 2</Badge>
+        <Badge variant="outline">Round 2</Badge>
       </li>
     ),
   },
 };
-export const Termine: Story = { args: { current: 3 } };
+export const Done: Story = { args: { current: 3 } };

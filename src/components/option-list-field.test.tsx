@@ -8,33 +8,33 @@ import { OptionListField } from "./option-list-field";
 
 const labels = {
   label: "Options",
-  hint: "Entre 2 et 10 options.",
-  placeholder: "Ex. : Mer",
-  add: "Ajouter l'option",
-  remove: (option: string) => `Retirer l'option « ${option} »`,
+  hint: "Between 2 and 10 options.",
+  placeholder: "E.g. Seaside",
+  add: "Add the option",
+  remove: (option: string) => `Remove the option “${option}”`,
 };
 
 describe("OptionListField", () => {
-  it("ajoute une option avec Entrée et ignore un doublon", async () => {
+  it("adds an option with Enter and ignores a duplicate", async () => {
     const onChange = vi.fn();
-    renderUi(<OptionListField idPrefix="t" value={["Mer"]} onChange={onChange} labels={labels} max={10} maxLength={60} />);
+    renderUi(<OptionListField idPrefix="t" value={["Seaside"]} onChange={onChange} labels={labels} max={10} maxLength={60} />);
     const input = screen.getByLabelText("Options");
-    await userEvent.type(input, "mer");
-    expect(screen.getByRole("button", { name: "Ajouter l'option" })).toBeDisabled();
+    await userEvent.type(input, "seaside");
+    expect(screen.getByRole("button", { name: "Add the option" })).toBeDisabled();
     await userEvent.clear(input);
-    await userEvent.type(input, " Montagne {Enter}");
-    expect(onChange).toHaveBeenCalledWith(["Mer", "Montagne"]);
+    await userEvent.type(input, " Mountains {Enter}");
+    expect(onChange).toHaveBeenCalledWith(["Seaside", "Mountains"]);
   });
 
-  it("retire une option", async () => {
+  it("removes an option", async () => {
     const onChange = vi.fn();
-    renderUi(<OptionListField idPrefix="t" value={["Mer", "Ville"]} onChange={onChange} labels={labels} max={10} maxLength={60} />);
-    await userEvent.click(screen.getByRole("button", { name: "Retirer l'option « Mer »" }));
-    expect(onChange).toHaveBeenCalledWith(["Ville"]);
+    renderUi(<OptionListField idPrefix="t" value={["Seaside", "City"]} onChange={onChange} labels={labels} max={10} maxLength={60} />);
+    await userEvent.click(screen.getByRole("button", { name: "Remove the option “Seaside”" }));
+    expect(onChange).toHaveBeenCalledWith(["City"]);
   });
 
-  it("bloque la saisie une fois le maximum atteint", () => {
-    renderUi(<OptionListField idPrefix="t" value={["Mer", "Ville"]} onChange={() => {}} labels={labels} max={2} maxLength={60} />);
+  it("blocks input once the maximum is reached", () => {
+    renderUi(<OptionListField idPrefix="t" value={["Seaside", "City"]} onChange={() => {}} labels={labels} max={2} maxLength={60} />);
     expect(screen.getByLabelText("Options")).toBeDisabled();
   });
 });

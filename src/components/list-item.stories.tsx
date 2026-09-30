@@ -5,40 +5,40 @@ import { StatusBadge } from "./status-badge";
 import { Badge } from "./ui/badge";
 
 const meta = {
-  title: "Composants/ListItem",
+  title: "Components/ListItem",
   component: ListItem,
   decorators: [(Story) => <ul className="max-w-md space-y-2"><Story /></ul>],
-  args: { children: "Salle des fêtes du quartier" },
+  args: { children: "Neighbourhood community hall" },
 } satisfies Meta<typeof ListItem>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Neutre: Story = {};
-export const Carte: Story = { args: { tone: "plain" } };
+export const Neutral: Story = {};
+export const Plain: Story = { args: { tone: "plain" } };
 
-export const AvecMeta: Story = {
-  args: { meta: <Badge className="bg-highlight-soft text-highlight-foreground">Ton idée</Badge> },
+export const WithMeta: Story = {
+  args: { meta: <Badge className="bg-highlight-soft text-highlight-foreground">Your idea</Badge> },
 };
 
-export const Retenue: Story = {
+export const Kept: Story = {
   args: {
     tone: "positive",
-    actions: <StatusBadge status="retained" label="Retenue" />,
+    actions: <StatusBadge status="retained" label="Kept" />,
   },
 };
 
-export const Ecartee: Story = {
+export const Dropped: Story = {
   args: {
     tone: "negative",
-    children: "Soirée karaoké",
-    actions: <StatusBadge status="rejected" label="Écartée" />,
+    children: "Karaoke night",
+    actions: <StatusBadge status="rejected" label="Dropped" />,
   },
 };
 
-export const TexteLong: Story = {
+export const LongText: Story = {
   args: {
     children:
-      "Organiser une chasse au trésor dans le parc avec des énigmes sur les souvenirs de Léa, puis finir par un pique-nique et un blind test",
+      "Set up a treasure hunt in the park with riddles about Lea's memories, then finish with a picnic and a music quiz",
   },
 };

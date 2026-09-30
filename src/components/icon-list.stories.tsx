@@ -4,13 +4,13 @@ import { ListChecks, Lightbulb, Tags } from "lucide-react";
 import { IconList } from "./icon-list";
 
 const meta = {
-  title: "Composants/IconList",
+  title: "Components/IconList",
   component: IconList,
   args: {
     items: [
-      { icon: Tags, text: "Tu choisis les sujets : objectif, dates, budget…" },
-      { icon: Lightbulb, text: "Chacun propose ses idées et vote pour ou contre." },
-      { icon: ListChecks, text: "Le bilan garde ce qui fait envie." },
+      { icon: Tags, text: "You pick the topics to settle: goal, dates, budget…" },
+      { icon: Lightbulb, text: "Everyone suggests ideas and votes for or against." },
+      { icon: ListChecks, text: "The recap keeps the ideas the group agrees on." },
     ],
   },
 } satisfies Meta<typeof IconList>;

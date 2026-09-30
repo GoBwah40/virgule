@@ -1,6 +1,6 @@
 import type { Phase } from "@/generated/prisma/enums";
 
-/** Page correspondant à une étape de la séance (utilisable côté serveur et client). */
+/** Page matching a session step (usable on both server and client). */
 export const phasePath = (slug: string, phase: Phase) => {
   switch (phase) {
     case "THEMES":

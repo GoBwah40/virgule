@@ -4,18 +4,18 @@ import { fn } from "storybook/test";
 import { ThemeToggle } from "./theme-toggle";
 
 const meta = {
-  title: "Composants/ThemeToggle",
+  title: "Components/ThemeToggle",
   component: ThemeToggle,
   args: {
     value: "system",
     onChange: fn(),
-    labels: { group: "Thème", system: "Comme l'appareil", light: "Clair", dark: "Sombre" },
+    labels: { group: "Theme", system: "Same as device", light: "Light", dark: "Dark" },
   },
 } satisfies Meta<typeof ThemeToggle>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Systeme: Story = {};
-export const Clair: Story = { args: { value: "light" } };
-export const Sombre: Story = { args: { value: "dark" } };
+export const System: Story = {};
+export const Light: Story = { args: { value: "light" } };
+export const Dark: Story = { args: { value: "dark" } };

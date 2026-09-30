@@ -12,7 +12,7 @@ type Props = {
   disabled?: boolean;
 };
 
-/** Réglage on/off avec libellé et explication. */
+/** On/off setting with a label and explanation. */
 export function SettingSwitch({ id, label, hint, checked, onCheckedChange, disabled }: Props) {
   return (
     <div className="flex items-start justify-between gap-4">

@@ -4,12 +4,12 @@ import { FormField } from "./form-field";
 import { Input } from "./ui/input";
 
 const meta = {
-  title: "Composants/FormField",
+  title: "Components/FormField",
   component: FormField,
   args: {
     id: "session-name",
-    label: "Nom de la séance",
-    children: <Input id="session-name" placeholder="Ex. : Anniversaire de Léa" />,
+    label: "Session name",
+    children: <Input id="session-name" placeholder="E.g. Lea's birthday" />,
   },
 } satisfies Meta<typeof FormField>;
 
@@ -17,4 +17,4 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-export const AvecAide: Story = { args: { hint: "Visible par tous les participants." } };
+export const WithHint: Story = { args: { hint: "Visible to all participants." } };

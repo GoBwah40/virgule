@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 type Props = { icon: LucideIcon; label: string; className?: string };
 
-/** Badge discret avec icône (ex. type de réponse d'un sujet : « Période », « Fourchette »). */
+/** Discreet badge with an icon (e.g. a topic's answer type: "Period", "Range"). */
 export function IconBadge({ icon: Icon, label, className }: Props) {
   return (
     <Badge variant="outline" className={cn("gap-1 text-muted-foreground", className)}>

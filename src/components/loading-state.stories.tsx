@@ -4,12 +4,12 @@ import { CardSkeleton } from "./card-skeleton";
 import { LoadingState } from "./loading-state";
 import { PageHeaderSkeleton } from "./page-header-skeleton";
 
-/** Composition d'un écran de chargement complet, comme app/r/[slug]/ideas/loading.tsx. */
+/** A full loading screen composition, like app/r/[slug]/ideas/loading.tsx. */
 const meta = {
-  title: "Chargement/LoadingState",
+  title: "Loading/LoadingState",
   component: LoadingState,
   args: {
-    label: "Chargement des idées…",
+    label: "Loading ideas…",
     children: (
       <>
         <PageHeaderSkeleton />
@@ -25,4 +25,4 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const PageDesIdees: Story = {};
+export const IdeasPage: Story = {};

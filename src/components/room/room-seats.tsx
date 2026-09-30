@@ -17,7 +17,7 @@ type Props = {
   invitePath: string;
   labels: React.ComponentProps<typeof SeatRow>["labels"];
   successMessage: string;
-  /** La personne qui anime peut confier l'animation ou retirer quelqu'un (menu des places). */
+  /** The host can hand over hosting or remove someone (seat menu). */
   canManage: boolean;
   className?: string;
 };
@@ -25,8 +25,8 @@ type Props = {
 type Pending = { seat: Seat; action: "host" | "remove" } | null;
 
 /**
- * Rangée de places de la séance : toucher une place libre copie le lien d'invitation ;
- * pour la personne qui anime, clic droit ou clic sur une place occupée ouvre ses options.
+ * Row of session seats: tapping a free seat copies the invite link; for the host,
+ * right-clicking or clicking a taken seat opens its options.
  */
 export function RoomSeats({ slug, seats, invitePath, labels, successMessage, canManage, className }: Props) {
   const t = useTranslations("room.seats");

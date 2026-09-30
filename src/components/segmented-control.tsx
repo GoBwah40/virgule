@@ -7,12 +7,12 @@ import { cn } from "@/lib/utils";
 type Option<T extends string> = { value: T; label: string; icon?: LucideIcon };
 
 type Props<T extends string> = {
-  /** Nom du groupe de boutons radio (unique dans la page). */
+  /** Radio group name (unique in the page). */
   name: string;
-  /** Libellé du groupe (affiché au-dessus, sauf si `labelHidden`). */
+  /** Group label (shown above, unless `labelHidden`). */
   label: string;
   labelHidden?: boolean;
-  /** Explication sous les options (ex. ce qu'implique le choix courant). */
+  /** Explanation below the options (e.g. what the current choice implies). */
   hint?: string;
   options: Option<T>[];
   value: T;
@@ -22,8 +22,8 @@ type Props<T extends string> = {
 };
 
 /**
- * Choix d'une option parmi plusieurs, en pastilles. Repose sur de vrais boutons radio :
- * navigation aux flèches et lecture par les lecteurs d'écran fournies par le navigateur.
+ * Single choice among several options, as pills. Built on real radio buttons: arrow-key
+ * navigation and screen reader support come from the browser.
  */
 export function SegmentedControl<T extends string>({
   name,

@@ -6,8 +6,8 @@ import { useEffect } from "react";
 import { ErrorFallback } from "@/components/error-fallback";
 
 /**
- * Erreur dans une étape de la séance. Ce fichier ne couvre pas le layout du même segment :
- * l'en-tête (nom, étapes, sièges) reste affiché au-dessus du message.
+ * Error in a session step. This file does not cover the layout of the same segment:
+ * the header (name, steps, seats) stays displayed above the message.
  */
 export default function RoomError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   const t = useTranslations("errorPage");

@@ -6,9 +6,9 @@ import { useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
 
 type Props = Omit<React.ComponentProps<typeof Button>, "onClick" | "children"> & {
-  /** Chemin partagé, complété par l'origine du site. */
+  /** Shared path, prefixed with the site origin. */
   path: string;
-  /** Titre et message proposés à l'application choisie. */
+  /** Title and message offered to the chosen app. */
   title: string;
   text: string;
   label: string;
@@ -17,8 +17,8 @@ type Props = Omit<React.ComponentProps<typeof Button>, "onClick" | "children"> &
 const noop = () => () => {};
 
 /**
- * Ouvre le partage natif du téléphone (messagerie, e-mail…). N'apparaît que si le
- * navigateur le propose : ailleurs, le bouton « Copier le lien » suffit.
+ * Opens the phone's native share sheet (messaging, email…). Only shows up if the
+ * browser offers it: elsewhere, the "Copy link" button is enough.
  */
 export function ShareButton({ path, title, text, label, variant = "outline", ...props }: Props) {
   const supported = useSyncExternalStore(
@@ -36,7 +36,7 @@ export function ShareButton({ path, title, text, label, variant = "outline", ...
         try {
           await navigator.share({ title, text, url: `${window.location.origin}${path}` });
         } catch {
-          // Partage annulé par la personne : rien à signaler.
+          // Share cancelled by the person: nothing to report.
         }
       }}
     >

@@ -31,7 +31,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
         actions={
           <>
             {closed && (
-              // Séance terminée : retour à l'accueil pour en créer une autre.
+              // Session over: back to the home page to create another one.
               <Button nativeButton={false} render={<Link href="/" />} className="print:hidden">
                 <Plus data-icon="inline-start" />
                 {t("newSession")}

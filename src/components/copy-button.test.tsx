@@ -7,16 +7,16 @@ import { renderUi } from "@/test/render";
 import { CopyButton } from "./copy-button";
 
 describe("CopyButton", () => {
-  it("copie l'URL absolue quand `absolute` est demandé", async () => {
+  it("copies the absolute URL when `absolute` is set", async () => {
     const user = userEvent.setup();
     const writeText = vi.spyOn(navigator.clipboard, "writeText").mockResolvedValue();
-    renderUi(<CopyButton value="/r/abc" absolute label="Copier le lien" successMessage="Lien copié" />);
-    await user.click(screen.getByRole("button", { name: "Copier le lien" }));
+    renderUi(<CopyButton value="/r/abc" absolute label="Copy the link" successMessage="Link copied" />);
+    await user.click(screen.getByRole("button", { name: "Copy the link" }));
     expect(writeText).toHaveBeenCalledWith(`${window.location.origin}/r/abc`);
   });
 
-  it("garde un nom accessible quand le libellé est masqué sur mobile", () => {
-    renderUi(<CopyButton value="x" label="Copier le lien" successMessage="ok" hideLabelOnMobile />);
-    expect(screen.getByRole("button", { name: "Copier le lien" })).toBeInTheDocument();
+  it("keeps an accessible name when the label is hidden on mobile", () => {
+    renderUi(<CopyButton value="x" label="Copy the link" successMessage="ok" hideLabelOnMobile />);
+    expect(screen.getByRole("button", { name: "Copy the link" })).toBeInTheDocument();
   });
 });

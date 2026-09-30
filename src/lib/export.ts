@@ -1,8 +1,10 @@
-// Mise en forme des exports du récapitulatif (fonctions pures, testées dans export.test.ts).
+// Formatting of the recap exports (pure functions, tested in export.test.ts).
 
 import type { RecapOverview, RecapRound } from "@/lib/room";
 
 export type ExportLabels = {
+  /** CSV column separator expected by Excel in the reader's language. */
+  csvSeparator: ";" | ",";
   title: string;
   generatedOn: string;
   participants: string;
@@ -13,16 +15,16 @@ export type ExportLabels = {
   empty: string;
   qualified: string;
   notQualified: string;
-  /** Sujets « Période » et « Fourchette » : synthèse du bilan (créneau commun, budget compatible). */
+  /** "Period" and "Range" topics: recap overview (common slot, compatible budget). */
   overview: (overview: RecapOverview) => { summary: string; detail: string };
-  /** Statut de la ligne de synthèse dans le CSV. */
+  /** Status of the overview row in the CSV. */
   overviewStatus: string;
   columns: { round: string; theme: string; idea: string; up: string; down: string; net: string; status: string };
 };
 
 export type ExportData = { participants: string[]; rounds: RecapRound[] };
 
-/** Échappe les caractères qui casseraient un tableau Markdown. */
+/** Escapes characters that would break a Markdown table. */
 const mdCell = (value: string) => value.replace(/\|/g, "\\|").replace(/\r?\n/g, "<br>");
 
 export function toMarkdown(data: ExportData, l: ExportLabels): string {
@@ -36,7 +38,7 @@ export function toMarkdown(data: ExportData, l: ExportLabels): string {
     "",
   ];
 
-  // Tour le plus récent en premier : c'est le résultat final.
+  // Most recent round first: it is the final result.
   for (const round of [...data.rounds].reverse()) {
     lines.push(`## ${l.roundTitle(round.round)}`, "", l.summary(round.qualifiedCount, round.ideaCount), "");
     for (const theme of round.themes) {
@@ -62,23 +64,23 @@ export function toMarkdown(data: ExportData, l: ExportLabels): string {
   return lines.join("\n");
 }
 
-/** Cellule CSV (RFC 4180) + neutralisation des formules pour Excel. */
+/** CSV cell (RFC 4180) + formula neutralisation for Excel. */
 function csvCell(value: string | number): string {
   let s = String(value);
   if (typeof value === "string" && /^[=+\-@\t\r]/.test(s)) s = `'${s}`;
-  return /[";\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+  return /[",;\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
 /**
- * CSV séparé par « ; » (convention Excel en français) avec BOM UTF-8,
- * pour que les accents s'affichent correctement à l'ouverture.
+ * CSV with the separator Excel expects in the reader's language (";" in French, "," in English)
+ * and a UTF-8 BOM, so that accents display correctly when opened.
  */
 export function toCsv(data: ExportData, l: ExportLabels): string {
   const c = l.columns;
   const rows: (string | number)[][] = [[c.round, c.theme, c.idea, c.up, c.down, c.net, c.status]];
   for (const round of data.rounds) {
     for (const theme of round.themes) {
-      // Synthèse en tête du sujet, sans score : une ligne lisible dans le tableur.
+      // Overview at the top of the topic, without a score: one readable row in the spreadsheet.
       if (theme.overview) {
         const { summary, detail } = l.overview(theme.overview);
         rows.push([round.round, theme.title, `${summary}. ${detail}`, "", "", "", l.overviewStatus]);
@@ -96,10 +98,10 @@ export function toCsv(data: ExportData, l: ExportLabels): string {
       }
     }
   }
-  return "﻿" + rows.map((r) => r.map(csvCell).join(";")).join("\r\n") + "\r\n";
+  return "﻿" + rows.map((r) => r.map(csvCell).join(l.csvSeparator)).join("\r\n") + "\r\n";
 }
 
-/** Nom de fichier sûr : « virgule-offsite-produit-q4-2026-09-28 ». */
+/** Safe file name: "virgule-product-offsite-q4-2026-09-28". */
 export function exportFileName(roomName: string, date: Date): string {
   const slug = roomName
     .normalize("NFD")

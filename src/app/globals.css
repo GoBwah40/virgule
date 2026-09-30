@@ -2,8 +2,8 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Sombre si la personne l'a choisi (data-theme="dark" sur <html>, cf. layout), ou si
-   l'appareil est en sombre et qu'elle n'a pas forcé le clair. */
+/* Dark if the person chose it (data-theme="dark" on <html>, see layout), or if the
+   device is in dark mode and they have not forced light. */
 @custom-variant dark {
   &:where([data-theme="dark"], [data-theme="dark"] *) {
     @slot;
@@ -52,10 +52,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* ─── Charte Virgule ────────────────────────────────────────────────────────
-   Papaye (marque), papaye brûlée (actions), mangue (mise en avant), sable (fond),
-   encre figue (texte), olivier / grenade (résultats des votes uniquement).
-   Contrastes AA vérifiés : blanc sur papaye brûlée 5,2:1, encre sur sable 15,6:1. */
+/* ─── Virgule brand ─────────────────────────────────────────────────────────
+   Papaya (brand), burnt papaya (actions), mango (highlight), sand (background),
+   fig ink (text), olive / pomegranate (vote results only).
+   AA contrasts checked: white on burnt papaya 5.2:1, ink on sand 15.6:1. */
 :root {
   --background: #fff7f0;
   --foreground: #2a1a24;
@@ -82,11 +82,11 @@
   --success: #1f7a4d;
   --success-foreground: #ffffff;
   --radius: 0.875rem;
-  /* Champs natifs (sélecteur de date…) accordés au thème. */
+  /* Native fields (date picker…) matched to the theme. */
   color-scheme: light;
 }
 
-/* Mêmes jetons en sombre : `@variant dark` reprend les deux cas de la variante ci-dessus. */
+/* Same tokens in dark: `@variant dark` covers both cases of the variant above. */
 :root {
   @variant dark {
     color-scheme: dark;
@@ -135,12 +135,12 @@
     text-wrap: balance;
   }
 }
-/* ─── Mouvements ───────────────────────────────────────────────────────────
-   Principe : courts (≤ 300 ms), discrets, et seulement là où ils aident à
-   comprendre ce qui change. Tous désactivés si l'utilisateur réduit les animations. */
+/* ─── Motion ────────────────────────────────────────────────────────────────
+   Principle: short (≤ 300 ms), subtle, and only where they help understand
+   what changes. All disabled if the user reduces motion. */
 
 @theme {
-  /* Petit rebond quand on vote : confirme le geste sans attirer l'œil. */
+  /* Small bounce on vote: confirms the gesture without drawing the eye. */
   --animate-pop: pop 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   @keyframes pop {
@@ -150,8 +150,8 @@
   }
 }
 
-/* Changement d'étape (Sujets → Idées → Bilan) : l'ancienne étape s'efface vite en
-   remontant, la nouvelle arrive un peu après depuis le bas. L'en-tête reste fixe. */
+/* Step change (Topics → Ideas → Recap): the old step fades out quickly while rising,
+   the new one arrives shortly after from below. The header stays put. */
 ::view-transition-old(.phase-exit) {
   animation: 160ms ease-in both vt-fade reverse, 160ms ease-in both vt-rise reverse;
 }
@@ -167,7 +167,7 @@
   to { translate: 0 0; }
 }
 
-/* En-tête de la séance : point d'ancrage, il ne bouge pas pendant la transition. */
+/* Session header: anchor point, it does not move during the transition. */
 ::view-transition-group(room-header) {
   animation: none;
   z-index: 10;
@@ -179,7 +179,7 @@
   animation: none;
 }
 
-/* Les clics pendant une transition atteignent la page au lieu d'être perdus. */
+/* Clicks during a transition reach the page instead of being lost. */
 ::view-transition {
   pointer-events: none;
 }
@@ -193,7 +193,7 @@
   }
 }
 
-/* Squelette de chargement : il s'efface vite pour laisser entrer le vrai contenu. */
+/* Loading skeleton: fades out quickly to let the real content in. */
 ::view-transition-old(.loading-exit) {
   animation: 120ms ease-in both vt-fade reverse;
 }

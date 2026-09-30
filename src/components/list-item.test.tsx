@@ -6,17 +6,17 @@ import { renderUi } from "@/test/render";
 import { ListItem } from "./list-item";
 
 describe("ListItem", () => {
-  it("affiche contenu, métadonnées et actions", () => {
+  it("shows content, metadata and actions", () => {
     renderUi(
       <ul>
-        <ListItem meta={<span>Ton idée</span>} actions={<button type="button">Pour</button>}>
-          Salle des fêtes du quartier
+        <ListItem meta={<span>Your idea</span>} actions={<button type="button">For</button>}>
+          Neighbourhood community hall
         </ListItem>
       </ul>,
     );
     const item = screen.getByRole("listitem");
-    expect(item).toHaveTextContent("Salle des fêtes du quartier");
-    expect(item).toHaveTextContent("Ton idée");
-    expect(screen.getByRole("button", { name: "Pour" })).toBeInTheDocument();
+    expect(item).toHaveTextContent("Neighbourhood community hall");
+    expect(item).toHaveTextContent("Your idea");
+    expect(screen.getByRole("button", { name: "For" })).toBeInTheDocument();
   });
 });

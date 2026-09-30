@@ -34,7 +34,7 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
                 {theme.ideas.map((idea) => (
                   <ExpandableListItem
                     key={idea.id}
-                    // Score nul : ligne neutre, quel que soit le statut.
+                    // Zero score: neutral row, whatever the status.
                     tone={idea.score.net === 0 ? "neutral" : idea.qualified ? "positive" : "negative"}
                     meta={
                       (idea.isMine || idea.tied) && (
@@ -55,7 +55,7 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
                         label={idea.qualified ? t("qualified") : t("notQualified")}
                       />
                     }
-                    // Les votes restent discrets : ils se déplient au toucher (ou au clic, au clavier).
+                    // Votes stay discreet: they expand on tap (or click, or keyboard).
                     details={
                       <div className="space-y-2">
                         {idea.mapQuery && <MapLink query={idea.mapQuery} label={tIdeas("mapLink")} />}
@@ -82,7 +82,7 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
   );
 }
 
-/** Synthèse « créneau commun » ou « budget compatible » au-dessus des idées du sujet. */
+/** "Common slot" or "compatible budget" overview above the topic's ideas. */
 async function ThemeOverview({ overview }: { overview: RecapOverview }) {
   const t = await getTranslations("recap");
   const locale = await getLocale();

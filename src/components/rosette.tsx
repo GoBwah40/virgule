@@ -1,10 +1,10 @@
 import { COMMA_PATH } from "@/components/logo";
 import { cn } from "@/lib/utils";
 
-// Six virgules, une par place d'une séance, aux couleurs de la marque (jamais celles des votes).
+// Six commas, one per session seat, in brand colors (never the vote colors).
 const FILLS = ["fill-brand", "fill-highlight", "fill-primary"] as const;
 
-/** Décor de la page d'accueil : six virgules tournées de 60° autour d'un centre. */
+/** Home page decoration: six commas rotated 60° around a center. */
 export function Rosette({ count = 6, className }: { count?: number; className?: string }) {
   return (
     <svg viewBox="-50 -50 100 100" className={cn("pointer-events-none", className)} aria-hidden>

@@ -46,7 +46,7 @@ export default async function RoomLayout({ children, params }: LayoutProps<"/r/[
             />
           }
         />
-        {/* Met à jour le nombre de places pendant qu'on hésite sur son pseudo. */}
+        {/* Updates the seat count while the person is choosing a nickname. */}
         <RoomLive slug={slug} followPhase={false} />
       </main>
     );

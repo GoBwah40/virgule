@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AmountOverview } from "./amount-overview";
 
 const meta = {
-  title: "Composants/AmountOverview",
+  title: "Components/AmountOverview",
   component: AmountOverview,
   args: {
     ranges: [
@@ -12,16 +12,16 @@ const meta = {
       { min: 250, max: 450 },
     ],
     best: { start: 300, end: 400 },
-    locale: "fr",
-    labels: { range: "Une fourchette retenue", zone: "Zone compatible", amounts: "Fourchettes retenues sur une même échelle" },
+    locale: "en",
+    labels: { range: "A range kept", zone: "Compatible zone", amounts: "Ranges kept on the same scale" },
   },
 } satisfies Meta<typeof AmountOverview>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Commun: Story = {};
-export const Partiel: Story = {
+export const Common: Story = {};
+export const Partial: Story = {
   args: {
     ranges: [
       { min: 100, max: 200 },

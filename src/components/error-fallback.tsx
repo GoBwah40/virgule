@@ -9,14 +9,14 @@ type Props = {
   title: string;
   body: string;
   labels: { retry: string; home: string };
-  /** Recharge les données et réaffiche la partie en erreur (`retry` de Next). */
+  /** Reloads the data and re-renders the failed part (Next's `retry`). */
   onRetry: () => void;
-  /** Code à communiquer pour retrouver l'erreur dans les logs serveur. */
+  /** Code to share so the error can be found in the server logs. */
   details?: string;
   size?: React.ComponentProps<typeof StatusPage>["size"];
 };
 
-/** Contenu des pages d'erreur : explication, bouton « Réessayer » et retour à l'accueil. */
+/** Error page content: explanation, retry button and link back home. */
 export function ErrorFallback({ title, body, labels, onRetry, details, size }: Props) {
   return (
     <StatusPage title={title} body={body} icon={TriangleAlert} details={details} size={size}>
@@ -24,8 +24,8 @@ export function ErrorFallback({ title, body, labels, onRetry, details, size }: P
         <RotateCcw data-icon="inline-start" />
         {labels.retry}
       </Button>
-      {/* Vrai lien <a> (pas <Link>) : après une erreur, un rechargement complet repart d'un état sain. */}
-      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- rechargement complet voulu */}
+      {/* Real <a> link (not <Link>): after an error, a full reload starts from a clean state. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- full reload intended */}
       <Button variant="outline" nativeButton={false} render={<a href="/" />}>
         {labels.home}
       </Button>

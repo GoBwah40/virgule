@@ -6,10 +6,10 @@ import { renderUi } from "@/test/render";
 import { PageHeader } from "./page-header";
 
 describe("PageHeader", () => {
-  it("affiche le titre, le sous-titre et les actions", () => {
-    renderUi(<PageHeader title="Le bilan" subtitle="2 idées retenues" actions={<button type="button">Exporter</button>} />);
-    expect(screen.getByRole("heading", { name: "Le bilan" })).toBeInTheDocument();
-    expect(screen.getByText("2 idées retenues")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Exporter" })).toBeInTheDocument();
+  it("shows the title, subtitle and actions", () => {
+    renderUi(<PageHeader title="The recap" subtitle="2 ideas kept" actions={<button type="button">Export</button>} />);
+    expect(screen.getByRole("heading", { name: "The recap" })).toBeInTheDocument();
+    expect(screen.getByText("2 ideas kept")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Export" })).toBeInTheDocument();
   });
 });

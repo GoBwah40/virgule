@@ -6,12 +6,12 @@ import { renderUi } from "@/test/render";
 import { Logo } from "./logo";
 
 describe("Logo", () => {
-  it("se lit comme une seule image nommée", () => {
+  it("reads as a single named image", () => {
     renderUi(<Logo label="Virgule" />);
     expect(screen.getByRole("img", { name: "Virgule" })).toHaveTextContent("Virgule");
   });
 
-  it("n'affiche que la virgule en variante symbole", () => {
+  it("shows only the comma in the mark variant", () => {
     renderUi(<Logo label="Virgule" variant="mark" />);
     expect(screen.getByRole("img", { name: "Virgule" })).toHaveTextContent("");
   });

@@ -5,7 +5,7 @@ import { ListItemSkeleton } from "@/components/list-item-skeleton";
 import { LoadingState } from "@/components/loading-state";
 import { PageHeaderSkeleton } from "@/components/page-header-skeleton";
 
-/** Chargement de l'étape « Sujets » : même mise en page que la page de l'animateur. */
+/** Loading of the "Topics" step: same layout as the host's page. */
 export default async function ThemesLoading() {
   const t = await getTranslations("loading");
   return (

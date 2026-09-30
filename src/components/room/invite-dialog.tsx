@@ -19,7 +19,7 @@ import {
 
 type Props = { invitePath: string; roomName: string; freeSeats: number };
 
-/** Invitation pour un groupe réuni au même endroit : QR code à scanner, partage natif, copie du lien. */
+/** Invitation for a group gathered in one place: QR code to scan, native share, link copy. */
 export function InviteDialog({ invitePath, roomName, freeSeats }: Props) {
   const t = useTranslations("room");
   return (
@@ -44,7 +44,7 @@ export function InviteDialog({ invitePath, roomName, freeSeats }: Props) {
   );
 }
 
-// Monté seulement à l'ouverture du dialogue, donc toujours côté navigateur : l'origine est connue.
+// Mounted only when the dialog opens, so always in the browser: the origin is known.
 function InviteCode({ invitePath, label }: { invitePath: string; label: string }) {
   return <QrCode value={`${window.location.origin}${invitePath}`} label={label} className="mx-auto w-full max-w-60" />;
 }

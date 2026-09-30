@@ -31,11 +31,11 @@ export type RoomContext =
         tiebreak: boolean;
       };
       participants: { id: string; pseudo: string; isHost: boolean }[];
-      /** Participant courant (null s'il n'a pas encore rejoint la room). */
+      /** Current participant (null if they have not joined the room yet). */
       me: { id: string; pseudo: string; isHost: boolean } | null;
     };
 
-/** Room + participant courant, mis en cache pour la durée d'une requête (layout + page). */
+/** Room + current participant, cached for the duration of a request (layout + page). */
 export const getRoomContext = cache(async (slug: string): Promise<RoomContext> => {
   const room = await db.room.findUnique({
     where: { slug },
@@ -67,13 +67,13 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       phaseEndsAt: room.phaseEndsAt,
       tiebreak: room.tiebreak,
     },
-    // On ne renvoie jamais les tokens au-delà de ce module.
+    // Tokens never leave this module.
     participants: room.participants.map(({ id, pseudo, isHost }) => ({ id, pseudo, isHost })),
     me: meRow ? { id: meRow.id, pseudo: meRow.pseudo, isHost: meRow.isHost } : null,
   };
 });
 
-/** Prénom de la personne qui organise, pour les textes (« Camille prépare les sujets »). */
+/** First name of the host, for texts ("Camille is preparing the topics"). */
 export const hostName = (participants: { pseudo: string; isHost: boolean }[]) =>
   participants.find((p) => p.isHost)?.pseudo ?? "";
 
@@ -98,21 +98,21 @@ export async function getThemes(roomId: string) {
   }));
 }
 
-// ─── Phase « idées & votes » ───────────────────────────────────────────────
+// ─── "Ideas & votes" phase ─────────────────────────────────────────────────
 
 export type VotingIdea = {
   id: string;
   content: string;
   isMine: boolean;
-  /** Proposée pendant le tour courant (sinon : reprise d'un tour précédent). */
+  /** Submitted during the current round (otherwise: carried over from a previous round). */
   isNew: boolean;
   myVote: boolean | null;
   canVote: boolean;
-  /** Retirable par le participant courant (sa propre idée du tour, ou une option s'il anime). */
+  /** Removable by the current participant (their own idea this round, or an option if hosting). */
   canDelete: boolean;
-  /** Option d'une liste, fixée par la personne qui anime. */
+  /** List option, set by the host. */
   isOption: boolean;
-  /** Sujets « Lieu » : texte à chercher sur la carte. */
+  /** "Place" topics: text to search on the map. */
   mapQuery: string | null;
 };
 
@@ -121,14 +121,14 @@ export type VotingTheme = {
   title: string;
   description: string | null;
   kind: ThemeKind;
-  /** Faux pour une liste fermée : on vote seulement sur les options. */
+  /** False for a closed list: only the options can be voted on. */
   acceptsIdeas: boolean;
   ideas: VotingIdea[];
 };
 
 /**
- * Vue de vote : seul le vote du participant courant est exposé.
- * Ni l'auteur, ni les votes des autres ne sont transmis au client (anonymat, pas de biais).
+ * Voting view: only the current participant's vote is exposed.
+ * Neither the author nor the others' votes are sent to the client (anonymity, no bias).
  */
 export async function getVotingView(
   roomId: string,
@@ -158,12 +158,12 @@ export async function getVotingView(
     ideas: theme.ideas
       .filter((idea) => isActiveInRound(idea, round))
       .map((idea) => {
-        // Une option de liste n'appartient à personne : votable par tous, même sans auto-vote.
+        // A list option belongs to nobody: anyone can vote on it, even without self-voting.
         const isMine = !idea.isOption && idea.authorId === meId;
         const isNew = idea.createdRound === round;
         return {
           id: idea.id,
-          // Sujets typés : texte mis en forme à partir des dates / montants.
+          // Typed topics: text formatted from the dates / amounts.
           content: describeIdea(theme.kind, idea, format),
           isMine,
           isNew,
@@ -178,8 +178,8 @@ export async function getVotingView(
 }
 
 /**
- * Avancement des votes du tour, pour l'animateur (règle : `voteProgress`).
- * Seul un total est calculé, jamais qui a voté quoi.
+ * Vote progress for the round, for the host (rule: `voteProgress`).
+ * Only a total is computed, never who voted for what.
  */
 export async function getVoteProgress(roomId: string, round: number, allowSelfVote: boolean) {
   const [participants, ideas, votes] = await Promise.all([
@@ -192,27 +192,27 @@ export async function getVoteProgress(roomId: string, round: number, allowSelfVo
   ]);
   return voteProgress({
     participantIds: participants.map((p) => p.id),
-    // Options d'une liste : aucun auteur, tout le monde peut voter dessus.
+    // List options: no author, everyone can vote on them.
     ideaAuthorIds: ideas.map((idea) => (idea.isOption ? "" : idea.authorId)),
     voterIds: new Set(votes.map((v) => v.participantId)),
     allowSelfVote,
   });
 }
 
-// ─── Récapitulatif (tous les tours) ────────────────────────────────────────
+// ─── Recap (all rounds) ────────────────────────────────────────────────────
 
 type RecapIdea = {
   id: string;
   content: string;
   score: Score;
   qualified: boolean;
-  /** À égalité en tête du sujet avec au moins une autre idée retenue. */
+  /** Tied for the lead of the topic with at least one other kept idea. */
   tied: boolean;
   isMine: boolean;
   mapQuery: string | null;
 };
 
-/** Synthèse d'un sujet « Période » ou « Fourchette » : où les idées retenues se recoupent. */
+/** Overview of a "Period" or "Range" topic: where the kept ideas overlap. */
 export type RecapOverview =
   | { type: "dates"; periods: { start: string; end: string }[]; best: Overlap<string> }
   | { type: "amounts"; ranges: { min: number; max: number }[]; best: Overlap<number> };
@@ -231,14 +231,14 @@ export type RecapRound = {
   themes: RecapTheme[];
   qualifiedCount: number;
   ideaCount: number;
-  /** Nombre de sujets dont les idées en tête sont ex æquo. */
+  /** Number of topics whose leading ideas are tied. */
   tiedThemeCount: number;
 };
 
 /**
- * Résultats de chaque tour, du plus ancien au plus récent.
- * - Tours passés : une idée était retenue si elle a participé au tour suivant.
- * - Tour courant : la règle de qualification courante de la room s'applique.
+ * Results of each round, oldest first.
+ * - Past rounds: an idea was kept if it took part in the next round.
+ * - Current round: the room's current qualification rule applies.
  */
 export async function getRecap(
   room: { id: string; round: number; requireNetPositive: boolean },
@@ -321,8 +321,8 @@ function overviewOf(
 }
 
 /**
- * Chargement commun des pages de phase : renvoie null si le layout affiche autre chose
- * (room introuvable, expirée, pas encore rejointe) et redirige si la phase a changé.
+ * Shared loading for phase pages: returns null if the layout shows something else
+ * (room not found, expired, not joined yet) and redirects if the phase has changed.
  */
 export async function loadPhasePage(slug: string, allowed: Phase[]) {
   const ctx = await getRoomContext(slug);

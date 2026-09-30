@@ -9,33 +9,33 @@ import { ExpandableListItem } from "./expandable-list-item";
 const renderItem = () =>
   renderUi(
     <ul>
-      <ExpandableListItem aside={<span>Retenue</span>} details={<p>4 pour · 1 contre</p>}>
-        Salle des fêtes
+      <ExpandableListItem aside={<span>Kept</span>} details={<p>4 for · 1 against</p>}>
+        Community hall
       </ExpandableListItem>
     </ul>,
   );
 
 describe("ExpandableListItem", () => {
-  it("est repliée par défaut : le détail n'est pas visible", () => {
+  it("is collapsed by default: the details are not visible", () => {
     renderItem();
-    expect(screen.getByRole("button", { name: /Salle des fêtes/ })).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByText("4 pour · 1 contre")).not.toBeVisible();
+    expect(screen.getByRole("button", { name: /Community hall/ })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByText("4 for · 1 against")).not.toBeVisible();
   });
 
-  it("se déplie et se replie au toucher", async () => {
+  it("expands and collapses on tap", async () => {
     renderItem();
-    const row = screen.getByRole("button", { name: /Salle des fêtes/ });
+    const row = screen.getByRole("button", { name: /Community hall/ });
     await userEvent.click(row);
     expect(row).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText("4 pour · 1 contre")).toBeVisible();
+    expect(screen.getByText("4 for · 1 against")).toBeVisible();
     await userEvent.click(row);
     expect(row).toHaveAttribute("aria-expanded", "false");
   });
 
-  it("se déplie au clavier", async () => {
+  it("expands with the keyboard", async () => {
     renderItem();
     await userEvent.tab();
     await userEvent.keyboard("{Enter}");
-    expect(screen.getByText("4 pour · 1 contre")).toBeVisible();
+    expect(screen.getByText("4 for · 1 against")).toBeVisible();
   });
 });

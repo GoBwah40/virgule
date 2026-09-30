@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 type Props = {
   items: { id: string; label: string }[];
   onSelect: (id: string) => void;
-  /** Libellé du groupe, lu par les lecteurs d'écran. */
+  /** Group label, read by screen readers. */
   label: string;
   disabled?: boolean;
   className?: string;
 };
 
-/** Suggestions ajoutables en un tap (pilules en pointillés). */
+/** Suggestions added in one tap (dashed pills). */
 export function SuggestionChips({ items, onSelect, label, disabled, className }: Props) {
   if (items.length === 0) return null;
   return (

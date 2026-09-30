@@ -6,7 +6,7 @@ import { renderUi } from "@/test/render";
 import { AmountOverview } from "./amount-overview";
 
 describe("AmountOverview", () => {
-  it("place les fourchettes sur une échelle graduée en euros", () => {
+  it("places the ranges on a scale graduated in euros", () => {
     const { container } = renderUi(
       <AmountOverview
         ranges={[
@@ -14,13 +14,13 @@ describe("AmountOverview", () => {
           { min: 300, max: 500 },
         ]}
         best={{ start: 300, end: 400 }}
-        locale="fr"
-        labels={{ range: "Une fourchette", zone: "Zone compatible", amounts: "Fourchettes" }}
+        locale="en"
+        labels={{ range: "A range", zone: "Compatible zone", amounts: "Ranges" }}
       />,
     );
-    expect(screen.getByRole("img", { name: "Fourchettes" })).toBeInTheDocument();
-    // Graduations tous les 200 €, échelle de 0 à 600 € : la zone commence à mi-chemin.
+    expect(screen.getByRole("img", { name: "Ranges" })).toBeInTheDocument();
+    // Ticks every €200, scale from €0 to €600: the zone starts halfway.
     expect(container.querySelector('[style*="left: 50%"]')).not.toBeNull();
-    expect(container).toHaveTextContent(/600\s€/);
+    expect(container).toHaveTextContent("€600");
   });
 });

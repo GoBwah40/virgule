@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
 
 /**
- * Supprime les rooms expirées (et, en cascade, participants, thèmes, idées, votes).
- * Appelée chaque jour par Vercel Cron (cf. vercel.json), authentifiée par CRON_SECRET.
+ * Deletes expired rooms (and, by cascade, participants, themes, ideas, votes).
+ * Called daily by Vercel Cron (see vercel.json), authenticated with CRON_SECRET.
  */
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;

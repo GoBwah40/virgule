@@ -6,20 +6,20 @@ import { renderUi } from "@/test/render";
 import { PhaseStepper } from "./phase-stepper";
 
 const steps = [
-  { id: "THEMES", label: "Sujets" },
-  { id: "IDEAS", label: "Idées" },
-  { id: "RECAP", label: "Bilan" },
+  { id: "THEMES", label: "Topics" },
+  { id: "IDEAS", label: "Ideas" },
+  { id: "RECAP", label: "Recap" },
 ];
 
 describe("PhaseStepper", () => {
-  it("marque l'étape en cours", () => {
-    renderUi(<PhaseStepper label="Étapes" steps={steps} current={1} />);
-    expect(screen.getByText("Idées")).toHaveAttribute("aria-current", "step");
-    expect(screen.getByText("Sujets")).not.toHaveAttribute("aria-current");
+  it("marks the current step", () => {
+    renderUi(<PhaseStepper label="Steps" steps={steps} current={1} />);
+    expect(screen.getByText("Ideas")).toHaveAttribute("aria-current", "step");
+    expect(screen.getByText("Topics")).not.toHaveAttribute("aria-current");
   });
 
-  it("aucune étape en cours une fois la séance terminée", () => {
-    renderUi(<PhaseStepper label="Étapes" steps={steps} current={3} />);
-    expect(screen.getByRole("list", { name: "Étapes" }).querySelector("[aria-current]")).toBeNull();
+  it("has no current step once the session is over", () => {
+    renderUi(<PhaseStepper label="Steps" steps={steps} current={3} />);
+    expect(screen.getByRole("list", { name: "Steps" }).querySelector("[aria-current]")).toBeNull();
   });
 });

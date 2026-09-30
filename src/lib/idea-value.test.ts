@@ -4,9 +4,9 @@ import { describeIdea, ideaKey, mapSearchUrl, parseChoiceOptions, readChoiceOpti
 
 const format = {
   date: (iso: string) => `date(${iso})`,
-  dateRange: (a: string, b: string) => `Du ${a} au ${b}`,
-  amount: (n: number) => `${n} €`,
-  amountRange: (a: number, b: number) => `De ${a} € à ${b} €`,
+  dateRange: (a: string, b: string) => `From ${a} to ${b}`,
+  amount: (n: number) => `€${n}`,
+  amountRange: (a: number, b: number) => `€${a} to €${b}`,
 };
 
 const fields = (partial: Partial<IdeaFields>): IdeaFields => ({
@@ -19,12 +19,12 @@ const fields = (partial: Partial<IdeaFields>): IdeaFields => ({
 });
 
 describe("isIsoDate", () => {
-  it("accepte une vraie date AAAA-MM-JJ", () => {
+  it("accepts a real YYYY-MM-DD date", () => {
     expect(isIsoDate("2027-06-12")).toBe(true);
     expect(isIsoDate("2028-02-29")).toBe(true);
   });
 
-  it("refuse les formats et les dates impossibles", () => {
+  it("rejects other formats and impossible dates", () => {
     expect(isIsoDate("2027-02-31")).toBe(false);
     expect(isIsoDate("12/06/2027")).toBe(false);
     expect(isIsoDate("")).toBe(false);
@@ -33,12 +33,12 @@ describe("isIsoDate", () => {
 });
 
 describe("parseIdeaInput", () => {
-  it("texte : exige un contenu non vide", () => {
-    expect(parseIdeaInput("TEXT", { content: "  Pique-nique  " })).toEqual({ ok: true, fields: fields({ content: "Pique-nique" }) });
+  it("text: requires non-empty content", () => {
+    expect(parseIdeaInput("TEXT", { content: "  Picnic  " })).toEqual({ ok: true, fields: fields({ content: "Picnic" }) });
     expect(parseIdeaInput("TEXT", { content: "   " })).toEqual({ ok: false, error: "invalidInput" });
   });
 
-  it("période : la fin ne peut pas précéder le début", () => {
+  it("period: the end cannot come before the start", () => {
     expect(parseIdeaInput("DATE_RANGE", { dateStart: "2027-06-12", dateEnd: "2027-06-14" })).toEqual({
       ok: true,
       fields: fields({ dateStart: "2027-06-12", dateEnd: "2027-06-14" }),
@@ -49,75 +49,75 @@ describe("parseIdeaInput", () => {
     });
   });
 
-  it("montant : entier positif, borné", () => {
+  it("amount: positive integer, bounded", () => {
     expect(parseIdeaInput("AMOUNT", { amountMin: 250 })).toEqual({ ok: true, fields: fields({ amountMin: 250 }) });
     expect(parseIdeaInput("AMOUNT", { amountMin: -5 })).toEqual({ ok: false, error: "invalidInput" });
     expect(parseIdeaInput("AMOUNT", { amountMin: 12.5 })).toEqual({ ok: false, error: "invalidInput" });
     expect(parseIdeaInput("AMOUNT", { amountMin: MAX_AMOUNT + 1 })).toEqual({ ok: false, error: "invalidInput" });
   });
 
-  it("fourchette : le maximum ne peut pas être sous le minimum", () => {
+  it("range: the maximum cannot be below the minimum", () => {
     expect(parseIdeaInput("AMOUNT_RANGE", { amountMin: 300, amountMax: 500 }).ok).toBe(true);
     expect(parseIdeaInput("AMOUNT_RANGE", { amountMin: 500, amountMax: 300 })).toEqual({ ok: false, error: "invalidAmountRange" });
   });
 
-  it("ignore les champs qui ne correspondent pas au type", () => {
-    const res = parseIdeaInput("DATE", { dateStart: "2027-06-12", content: "texte", amountMin: 3 });
+  it("ignores fields that do not match the kind", () => {
+    const res = parseIdeaInput("DATE", { dateStart: "2027-06-12", content: "text", amountMin: 3 });
     expect(res).toEqual({ ok: true, fields: fields({ dateStart: "2027-06-12" }) });
   });
 });
 
 describe("describeIdea", () => {
-  it("met en forme selon le type", () => {
-    expect(describeIdea("TEXT", fields({ content: "Pique-nique" }), format)).toBe("Pique-nique");
+  it("formats according to the kind", () => {
+    expect(describeIdea("TEXT", fields({ content: "Picnic" }), format)).toBe("Picnic");
     expect(describeIdea("DATE", fields({ dateStart: "2027-06-12" }), format)).toBe("date(2027-06-12)");
     expect(describeIdea("DATE_RANGE", fields({ dateStart: "2027-06-12", dateEnd: "2027-06-14" }), format)).toBe(
-      "Du 2027-06-12 au 2027-06-14",
+      "From 2027-06-12 to 2027-06-14",
     );
-    expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 300, amountMax: 500 }), format)).toBe("De 300 € à 500 €");
+    expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 300, amountMax: 500 }), format)).toBe("€300 to €500");
   });
 
-  it("une période d'un jour ou une fourchette égale s'affiche comme une valeur simple", () => {
+  it("shows a one-day period or an equal range as a single value", () => {
     expect(describeIdea("DATE_RANGE", fields({ dateStart: "2027-06-12", dateEnd: "2027-06-12" }), format)).toBe(
       "date(2027-06-12)",
     );
-    expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 400, amountMax: 400 }), format)).toBe("400 €");
+    expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 400, amountMax: 400 }), format)).toBe("€400");
   });
 });
 
 describe("rangeStartPrecision", () => {
-  it("n'affiche que le jour de début dans le même mois", () => {
+  it("shows only the start day within the same month", () => {
     expect(rangeStartPrecision("2027-06-12", "2027-06-14")).toBe("day");
   });
-  it("ajoute le mois quand il change dans la même année", () => {
+  it("adds the month when it changes within the same year", () => {
     expect(rangeStartPrecision("2027-06-28", "2027-07-02")).toBe("dayMonth");
   });
-  it("donne la date complète quand l'année change", () => {
+  it("gives the full date when the year changes", () => {
     expect(rangeStartPrecision("2027-12-30", "2028-01-02")).toBe("full");
   });
 });
 
 describe("withFirstOrdinal", () => {
-  it("écrit le premier du mois « 1er »", () => {
+  it("writes the first of the month \"1er\" in French", () => {
     expect(withFirstOrdinal("1 octobre 2026")).toBe("1er octobre 2026");
     expect(withFirstOrdinal("1")).toBe("1er");
   });
-  it("laisse les autres jours intacts", () => {
+  it("leaves other French days untouched", () => {
     expect(withFirstOrdinal("10 octobre 2026")).toBe("10 octobre 2026");
     expect(withFirstOrdinal("21 octobre 2026")).toBe("21 octobre 2026");
   });
 });
 
 describe("ideaKey", () => {
-  it("ignore casse, accents, ponctuation et espaces pour le texte", () => {
+  it("ignores case, accents, punctuation and spaces in text (French sample)", () => {
     expect(ideaKey("TEXT", fields({ content: "Pique-nique à l'Étang !" }))).toBe(
       ideaKey("TEXT", fields({ content: "  pique nique a l etang" })),
     );
   });
-  it("distingue deux textes différents", () => {
+  it("tells two different texts apart", () => {
     expect(ideaKey("TEXT", fields({ content: "Lyon" }))).not.toBe(ideaKey("TEXT", fields({ content: "Lille" })));
   });
-  it("compare les valeurs des sujets typés", () => {
+  it("compares the values of typed topics", () => {
     const a = fields({ dateStart: "2027-06-12", dateEnd: "2027-06-14" });
     expect(ideaKey("DATE_RANGE", a)).toBe(ideaKey("DATE_RANGE", { ...a }));
     expect(ideaKey("DATE_RANGE", a)).not.toBe(ideaKey("DATE_RANGE", { ...a, dateEnd: "2027-06-15" }));
@@ -125,31 +125,31 @@ describe("ideaKey", () => {
   });
 });
 
-describe("sujets Lieu et Liste", () => {
-  it("valident une proposition comme du texte", () => {
-    expect(parseIdeaInput("PLACE", { content: "  Gîte du Vercors " })).toEqual({
+describe("Place and List topics", () => {
+  it("validate a suggestion as text", () => {
+    expect(parseIdeaInput("PLACE", { content: "  Lake District cottage " })).toEqual({
       ok: true,
-      fields: fields({ content: "Gîte du Vercors" }),
+      fields: fields({ content: "Lake District cottage" }),
     });
     expect(parseIdeaInput("CHOICE", { content: "" })).toEqual({ ok: false, error: "invalidInput" });
   });
 
-  it("parseChoiceOptions accepte 2 à 10 options distinctes", () => {
-    expect(parseChoiceOptions([" Mer ", "Montagne", "Ville"])).toEqual(["Mer", "Montagne", "Ville"]);
-    expect(parseChoiceOptions(["Mer"])).toBeNull();
-    expect(parseChoiceOptions(["Mer", "mer !"])).toBeNull();
-    expect(parseChoiceOptions(["Mer", ""])).toBeNull();
+  it("parseChoiceOptions accepts 2 to 10 distinct options", () => {
+    expect(parseChoiceOptions([" Sea ", "Mountains", "City"])).toEqual(["Sea", "Mountains", "City"]);
+    expect(parseChoiceOptions(["Sea"])).toBeNull();
+    expect(parseChoiceOptions(["Sea", "sea !"])).toBeNull();
+    expect(parseChoiceOptions(["Sea", ""])).toBeNull();
     expect(parseChoiceOptions(Array.from({ length: 11 }, (_, i) => `Option ${i}`))).toBeNull();
-    expect(parseChoiceOptions("Mer")).toBeNull();
+    expect(parseChoiceOptions("Sea")).toBeNull();
   });
 
-  it("readChoiceOptions tolère une valeur absente ou illisible", () => {
-    expect(readChoiceOptions('["Mer","Ville"]')).toEqual(["Mer", "Ville"]);
+  it("readChoiceOptions tolerates a missing or unreadable value", () => {
+    expect(readChoiceOptions('["Sea","City"]')).toEqual(["Sea", "City"]);
     expect(readChoiceOptions(null)).toEqual([]);
-    expect(readChoiceOptions("pas du json")).toEqual([]);
+    expect(readChoiceOptions("not json")).toEqual([]);
   });
 
-  it("mapSearchUrl vise Plans sur Apple, Google Maps ailleurs", () => {
+  it("mapSearchUrl targets Apple Maps on Apple, Google Maps elsewhere", () => {
     expect(mapSearchUrl("Gîte, Vercors", true)).toBe("https://maps.apple.com/?q=G%C3%AEte%2C%20Vercors");
     expect(mapSearchUrl("Gîte, Vercors", false)).toBe(
       "https://www.google.com/maps/search/?api=1&query=G%C3%AEte%2C%20Vercors",

@@ -9,14 +9,14 @@ const eslintConfig = defineConfig([
   ...storybook.configs["flat/recommended"],
   {
     rules: {
-      // Code propre : pas de variable ni d'import inutilisés, pas de console.log oublié.
+      // Clean code: no unused variables or imports, no forgotten console.log.
       "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
       "no-console": ["error", { allow: ["warn", "error"] }],
       "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
     },
   },
   {
-    // Scripts en ligne de commande : les sorties console sont voulues.
+    // Command-line scripts: console output is intended.
     files: ["scripts/**"],
     rules: { "no-console": "off" },
   },

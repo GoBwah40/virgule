@@ -8,27 +8,27 @@ const votes = (up: number, down: number) => [
 ];
 
 describe("scoreVotes", () => {
-  it("compte pour, contre et score net", () => {
+  it("counts for, against and net score", () => {
     expect(scoreVotes(votes(3, 1))).toEqual({ up: 3, down: 1, net: 2 });
     expect(scoreVotes([])).toEqual({ up: 0, down: 0, net: 0 });
   });
 });
 
 describe("isQualified", () => {
-  it("score positif exigé : pour > contre", () => {
+  it("positive score required: for > against", () => {
     expect(isQualified(scoreVotes(votes(2, 1)), true)).toBe(true);
     expect(isQualified(scoreVotes(votes(1, 1)), true)).toBe(false);
     expect(isQualified(scoreVotes(votes(1, 4)), true)).toBe(false);
   });
 
-  it("règle souple : un seul « pour » suffit", () => {
+  it("lenient rule: a single \"for\" is enough", () => {
     expect(isQualified(scoreVotes(votes(1, 4)), false)).toBe(true);
     expect(isQualified(scoreVotes(votes(0, 0)), false)).toBe(false);
   });
 });
 
 describe("isActiveInRound", () => {
-  it("prend en compte le tour de création et d'élimination", () => {
+  it("accounts for the creation and elimination rounds", () => {
     const idea = { createdRound: 1, eliminatedRound: 3 };
     expect(isActiveInRound(idea, 1)).toBe(true);
     expect(isActiveInRound(idea, 2)).toBe(true);
@@ -39,7 +39,7 @@ describe("isActiveInRound", () => {
 });
 
 describe("compareByScore", () => {
-  it("classe par score net puis par nombre de « pour »", () => {
+  it("sorts by net score, then by number of \"for\"", () => {
     const scores = [scoreVotes(votes(1, 0)), scoreVotes(votes(3, 2)), scoreVotes(votes(4, 1))];
     expect(scores.sort(compareByScore).map((s) => s.up)).toEqual([4, 3, 1]);
   });
@@ -48,17 +48,17 @@ describe("compareByScore", () => {
 describe("voteProgress", () => {
   const participantIds = ["camille", "sacha", "ines"];
 
-  it("compte les participants ayant voté au moins une fois", () => {
+  it("counts participants who voted at least once", () => {
     const res = voteProgress({ participantIds, ideaAuthorIds: ["camille"], voterIds: new Set(["sacha"]), allowSelfVote: true });
     expect(res).toEqual({ done: 1, total: 3 });
   });
 
-  it("exclut ceux qui n'ont que leurs propres idées quand l'auto-vote est désactivé", () => {
+  it("excludes those with only their own ideas when self-voting is disabled", () => {
     const res = voteProgress({ participantIds, ideaAuthorIds: ["camille"], voterIds: new Set(["sacha", "ines"]), allowSelfVote: false });
     expect(res).toEqual({ done: 2, total: 2 });
   });
 
-  it("total nul quand il n'y a aucune idée", () => {
+  it("zero total when there are no ideas", () => {
     expect(voteProgress({ participantIds, ideaAuthorIds: [], voterIds: new Set(), allowSelfVote: true })).toEqual({ done: 0, total: 0 });
   });
 });
@@ -70,16 +70,16 @@ describe("topQualified", () => {
     qualified,
   });
 
-  it("repère les ex æquo en tête", () => {
+  it("spots ties for the lead", () => {
     const top = topQualified([idea("a", 3, 1), idea("b", 3, 1), idea("c", 2, 1)]);
     expect(top.map((i) => i.id)).toEqual(["a", "b"]);
   });
 
-  it("départage d'abord au nombre de « pour » à score net égal", () => {
+  it("breaks equal net scores by number of \"for\" first", () => {
     expect(topQualified([idea("a", 4, 2), idea("b", 2, 0)]).map((i) => i.id)).toEqual(["a"]);
   });
 
-  it("ignore les idées écartées", () => {
+  it("ignores dropped ideas", () => {
     expect(topQualified([idea("a", 1, 1, false), idea("b", 1, 1, false)])).toEqual([]);
     expect(topQualified([idea("a", 2, 0), idea("b", 5, 0, false)]).map((i) => i.id)).toEqual(["a"]);
   });

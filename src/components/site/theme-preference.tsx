@@ -9,7 +9,7 @@ import { THEME_COOKIE, type ThemePreference } from "@/lib/theme";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
-/** Applique le thème choisi tout de suite et le mémorise pour les prochains rendus serveur. */
+/** Applies the chosen theme right away and remembers it for the next server renders. */
 export function ThemePreferenceToggle({ initial }: { initial: ThemePreference }) {
   const t = useTranslations("theme");
   const router = useRouter();
@@ -25,7 +25,7 @@ export function ThemePreferenceToggle({ initial }: { initial: ThemePreference })
       root.dataset.theme = next;
       document.cookie = `${THEME_COOKIE}=${next}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
     }
-    // Le reste (notifications…) suit au prochain rendu serveur.
+    // The rest (notifications…) follows on the next server render.
     router.refresh();
   };
 

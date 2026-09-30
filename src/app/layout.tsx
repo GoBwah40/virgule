@@ -24,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
-  // Thème choisi par la personne ; sans choix, on suit le réglage de l'appareil (CSS).
+  // Theme chosen by the person; without a choice, the device setting applies (CSS).
   const theme = parseThemePreference((await cookies()).get(THEME_COOKIE)?.value);
   return (
     <html

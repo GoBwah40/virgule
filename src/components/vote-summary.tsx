@@ -5,19 +5,19 @@ import { cn } from "@/lib/utils";
 type Props = {
   up: number;
   down: number;
-  /** Libellés déjà formatés (ex. « 4 pour », « 1 contre »). */
+  /** Already formatted labels (e.g. "4 for", "1 against"). */
   labels: { up: string; down: string };
   className?: string;
 };
 
-/** Détail d'un vote : « pour » à gauche, « contre » à droite, au-dessus d'une barre proportionnelle. */
+/** Vote breakdown: "for" on the left, "against" on the right, above a proportional bar. */
 export function VoteSummary({ up, down, labels, className }: Props) {
   const total = up + down;
   const upShare = total === 0 ? 0 : (up / total) * 100;
 
   return (
     <div className={cn("space-y-2", className)}>
-      {/* Chaque libellé est au-dessus de sa couleur dans la barre : pour à gauche, contre à droite. */}
+      {/* Each label sits above its color in the bar: for on the left, against on the right. */}
       <div className="flex items-center justify-between gap-4 text-sm font-semibold tabular-nums">
         <span className="inline-flex items-center gap-1 text-success">
           <ArrowUp className="size-4" aria-hidden />
@@ -28,7 +28,7 @@ export function VoteSummary({ up, down, labels, className }: Props) {
           {labels.down}
         </span>
       </div>
-      {/* Barre décorative : l'information est déjà donnée par le texte ci-dessus. */}
+      {/* Decorative bar: the text above already carries the information. */}
       <div className="flex h-2 overflow-hidden rounded-full bg-border" aria-hidden>
         {total > 0 && (
           <>

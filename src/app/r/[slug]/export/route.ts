@@ -1,4 +1,4 @@
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
 import { exportFileName, toCsv, toMarkdown, type ExportLabels } from "@/lib/export";
 import { getOverviewText } from "@/lib/overview-format";
@@ -17,7 +17,7 @@ export async function GET(request: Request, { params }: RouteContext<"/r/[slug]/
   const ctx = await getRoomContext(slug);
   if (ctx.status !== "ok") return new Response("Not found", { status: 404 });
   if (!ctx.me) return new Response("Forbidden", { status: 403 });
-  // Pendant les votes, les scores ne sont pas publics : l'export n'est disponible qu'au récap.
+  // During voting, scores are not public: export is only available at the recap.
   if (ctx.room.phase !== "RECAP" && ctx.room.phase !== "CLOSED") {
     return new Response("Export available from the recap phase", { status: 409 });
   }
@@ -30,6 +30,7 @@ export async function GET(request: Request, { params }: RouteContext<"/r/[slug]/
   const overviewText = await getOverviewText();
 
   const labels: ExportLabels = {
+    csvSeparator: (await getLocale()) === "fr" ? ";" : ",",
     title: t("fileTitle", { name: ctx.room.name }),
     generatedOn: t("generatedOn", { date: format_.dateTime(now, { dateStyle: "long", timeStyle: "short" }) }),
     participants: t("participants"),

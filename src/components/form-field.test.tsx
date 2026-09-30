@@ -6,13 +6,13 @@ import { renderUi } from "@/test/render";
 import { FormField } from "./form-field";
 
 describe("FormField", () => {
-  it("relie le libellé au contrôle et affiche l'aide", () => {
+  it("links the label to the control and shows the hint", () => {
     renderUi(
-      <FormField id="session" label="Nom de la séance" hint="Visible par tous">
+      <FormField id="session" label="Session name" hint="Visible to everyone">
         <input id="session" />
       </FormField>,
     );
-    expect(screen.getByLabelText("Nom de la séance")).toHaveAttribute("id", "session");
-    expect(screen.getByText("Visible par tous")).toBeInTheDocument();
+    expect(screen.getByLabelText("Session name")).toHaveAttribute("id", "session");
+    expect(screen.getByText("Visible to everyone")).toBeInTheDocument();
   });
 });

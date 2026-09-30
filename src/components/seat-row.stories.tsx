@@ -4,18 +4,18 @@ import { fn } from "storybook/test";
 
 import { SeatRow } from "./seat-row";
 
-const labels = { row: "4 participants sur 6", free: "Place libre", you: "toi", host: "anime la séance" };
+const labels = { row: "4 participants out of 6", free: "Free seat", you: "you", host: "is hosting" };
 
 const meta = {
-  title: "Composants/SeatRow",
+  title: "Components/SeatRow",
   component: SeatRow,
   args: {
     capacity: 6,
     labels,
     seats: [
       { id: "1", name: "Camille", isHost: true },
-      { id: "2", name: "Sacha", isMe: true },
-      { id: "3", name: "Inès" },
+      { id: "2", name: "Sasha", isMe: true },
+      { id: "3", name: "Ines" },
       { id: "4", name: "Noah" },
     ],
   },
@@ -26,28 +26,28 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-export const Complet: Story = {
+export const Full: Story = {
   args: {
-    seats: ["Camille", "Sacha", "Inès", "Noah", "Lou", "Eden"].map((name, i) => ({ id: String(i), name, isHost: i === 0 })),
+    seats: ["Camille", "Sasha", "Ines", "Noah", "Lou", "Eden"].map((name, i) => ({ id: String(i), name, isHost: i === 0 })),
   },
 };
 
-export const PlacesCliquables: Story = {
-  args: { onFreeSeatClick: fn(), labels: { ...labels, free: "Place libre : touche pour copier le lien d'invitation" } },
+export const ClickableSeats: Story = {
+  args: { onFreeSeatClick: fn(), labels: { ...labels, free: "Free seat: tap to copy the invite link" } },
 };
 
-export const Grand: Story = { args: { size: "md" } };
+export const Large: Story = { args: { size: "md" } };
 
-export const MenuDesPlaces: Story = {
+export const SeatMenu: Story = {
   args: {
     menu: {
-      label: (seat) => `Place de ${seat.name} : options`,
+      label: (seat) => `${seat.name}'s seat: options`,
       actions: (seat) =>
         seat.isMe
           ? []
           : [
-              { id: "host", label: "Confier l'animation", icon: Crown },
-              { id: "remove", label: "Retirer de la séance", icon: UserMinus, destructive: true },
+              { id: "host", label: "Hand over hosting", icon: Crown },
+              { id: "remove", label: "Remove from the session", icon: UserMinus, destructive: true },
             ],
       onSelect: fn(),
     },

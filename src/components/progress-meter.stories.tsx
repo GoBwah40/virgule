@@ -3,23 +3,23 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ProgressMeter } from "./progress-meter";
 
 const meta = {
-  title: "Composants/ProgressMeter",
+  title: "Components/ProgressMeter",
   component: ProgressMeter,
   args: {
     value: 3,
     max: 5,
-    label: "3 personnes sur 5 ont voté",
-    completeLabel: "Tout le monde a voté",
-    ariaLabel: "Participants ayant voté",
+    label: "3 people out of 5 have voted",
+    completeLabel: "Everyone has voted",
+    ariaLabel: "Participants who voted",
   },
 } satisfies Meta<typeof ProgressMeter>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const EnCours: Story = {};
-export const Personne: Story = { args: { value: 0, label: "Personne n'a encore voté" } };
-export const Complet: Story = { args: { value: 5 } };
-export const Barre: Story = {
-  args: { value: 7, max: 18, label: "Il te reste 11 idées sans vote", ariaLabel: "Idées sur lesquelles tu as voté" },
+export const InProgress: Story = {};
+export const Nobody: Story = { args: { value: 0, label: "Nobody has voted yet" } };
+export const Complete: Story = { args: { value: 5 } };
+export const Bar: Story = {
+  args: { value: 7, max: 18, label: "11 ideas left without your vote", ariaLabel: "Ideas you voted on" },
 };
