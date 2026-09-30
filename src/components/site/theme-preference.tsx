@@ -1,11 +1,12 @@
 "use client";
 
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { ThemeToggle } from "@/components/theme-toggle";
-import { THEME_COOKIE, type ThemePreference } from "@/lib/theme";
+import { PreferenceMenu } from "@/components/preference-menu";
+import { parseThemePreference, THEME_COOKIE, type ThemePreference } from "@/lib/theme";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
 
@@ -30,10 +31,15 @@ export function ThemePreferenceToggle({ initial }: { initial: ThemePreference })
   };
 
   return (
-    <ThemeToggle
+    <PreferenceMenu
       value={value}
-      onChange={change}
-      labels={{ group: t("label"), system: t("system"), light: t("light"), dark: t("dark") }}
+      onChange={(next) => change(parseThemePreference(next))}
+      label={t("label")}
+      options={[
+        { value: "system", label: t("system"), icon: Monitor },
+        { value: "light", label: t("light"), icon: Sun },
+        { value: "dark", label: t("dark"), icon: Moon },
+      ]}
     />
   );
 }
