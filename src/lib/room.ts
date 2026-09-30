@@ -5,7 +5,7 @@ import { cache } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
 import { db } from "@/lib/db";
-import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, voteProgress } from "@/lib/results";
+import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getIdeaFormat } from "@/lib/idea-format";
 import { describeIdea, type ThemeKind } from "@/lib/idea-value";
@@ -25,6 +25,9 @@ export type RoomContext =
         allowSelfVote: boolean;
         requireNetPositive: boolean;
         expiresAt: Date;
+        ideasTimerMinutes: number | null;
+        phaseEndsAt: Date | null;
+        tiebreak: boolean;
       };
       participants: { id: string; pseudo: string; isHost: boolean }[];
       /** Participant courant (null s'il n'a pas encore rejoint la room). */
@@ -59,6 +62,9 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       allowSelfVote: room.allowSelfVote,
       requireNetPositive: room.requireNetPositive,
       expiresAt: room.expiresAt,
+      ideasTimerMinutes: room.ideasTimerMinutes,
+      phaseEndsAt: room.phaseEndsAt,
+      tiebreak: room.tiebreak,
     },
     // On ne renvoie jamais les tokens au-delà de ce module.
     participants: room.participants.map(({ id, pseudo, isHost }) => ({ id, pseudo, isHost })),
@@ -171,12 +177,21 @@ type RecapIdea = {
   content: string;
   score: Score;
   qualified: boolean;
+  /** À égalité en tête du sujet avec au moins une autre idée retenue. */
+  tied: boolean;
   isMine: boolean;
 };
 
 type RecapTheme = { id: string; title: string; description: string | null; ideas: RecapIdea[] };
 
-export type RecapRound = { round: number; themes: RecapTheme[]; qualifiedCount: number; ideaCount: number };
+export type RecapRound = {
+  round: number;
+  themes: RecapTheme[];
+  qualifiedCount: number;
+  ideaCount: number;
+  /** Nombre de sujets dont les idées en tête sont ex æquo. */
+  tiedThemeCount: number;
+};
 
 /**
  * Résultats de chaque tour, du plus ancien au plus récent.
@@ -203,6 +218,7 @@ export async function getRecap(
   for (let round = 1; round <= room.round; round++) {
     let qualifiedCount = 0;
     let ideaCount = 0;
+    let tiedThemeCount = 0;
     const roundThemes = themes.map((theme) => {
       const ideas = theme.ideas
         .filter((idea) => isActiveInRound(idea, round))
@@ -214,12 +230,24 @@ export async function getRecap(
               : isQualified(score, room.requireNetPositive);
           ideaCount++;
           if (qualified) qualifiedCount++;
-          return { id: idea.id, content: describeIdea(theme.kind, idea, format), score, qualified, isMine: idea.authorId === meId };
+          return {
+            id: idea.id,
+            content: describeIdea(theme.kind, idea, format),
+            score,
+            qualified,
+            tied: false,
+            isMine: idea.authorId === meId,
+          };
         })
         .sort((a, b) => compareByScore(a.score, b.score));
+      const top = topQualified(ideas);
+      if (top.length > 1) {
+        tiedThemeCount++;
+        for (const idea of top) idea.tied = true;
+      }
       return { id: theme.id, title: theme.title, description: theme.description, ideas };
     });
-    rounds.push({ round, themes: roundThemes, qualifiedCount, ideaCount });
+    rounds.push({ round, themes: roundThemes, qualifiedCount, ideaCount, tiedThemeCount });
   }
   return rounds;
 }

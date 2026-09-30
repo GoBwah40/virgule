@@ -1,9 +1,10 @@
 import { getTranslations } from "next-intl/server";
 
+import { Countdown } from "@/components/countdown";
 import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
-import { BackToThemesButton, FinishVotingButton, ThemeIdeas } from "@/components/phases/voting-board";
+import { BackToThemesButton, FinishVotingButton, ThemeIdeas, TimerControls } from "@/components/phases/voting-board";
 import { getVoteProgress, getVotingView, loadPhasePage } from "@/lib/room";
 
 export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">) {
@@ -26,7 +27,13 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
     <PhaseTransition>
       <PageHeader
         title={t("title")}
-        subtitle={room.round > 1 ? t("roundSubtitle", { round: room.round }) : t("subtitle")}
+        subtitle={
+          room.tiebreak
+            ? t("tiebreakSubtitle", { round: room.round })
+            : room.round > 1
+              ? t("roundSubtitle", { round: room.round })
+              : t("subtitle")
+        }
         actions={
           me.isHost && (
             <>
@@ -37,6 +44,15 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
         }
       />
       <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+        {room.phaseEndsAt && (
+          <div className="flex flex-wrap items-center gap-2">
+            <Countdown
+              endsAt={room.phaseEndsAt.toISOString()}
+              labels={{ running: t("timerLabel"), expired: t("timerExpired") }}
+            />
+            {me.isHost && <TimerControls slug={slug} />}
+          </div>
+        )}
         {progress && progress.total > 0 && (
           <ProgressMeter
             value={progress.done}
@@ -59,7 +75,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
       </div>
       <div className="grid items-start gap-6 md:grid-cols-2">
         {themes.map((theme) => (
-          <ThemeIdeas key={theme.id} slug={slug} theme={theme} />
+          <ThemeIdeas key={theme.id} slug={slug} theme={theme} allowNewIdeas={!room.tiebreak} />
         ))}
       </div>
     </PhaseTransition>

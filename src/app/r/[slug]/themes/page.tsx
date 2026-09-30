@@ -20,7 +20,12 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
     return (
       <PhaseTransition>
         <PageHeader title={t("title")} subtitle={t("hostSubtitle")} />
-        <ThemeEditor slug={slug} themes={themes} allowSelfVote={page.room.allowSelfVote} />
+        <ThemeEditor
+          slug={slug}
+          themes={themes}
+          allowSelfVote={page.room.allowSelfVote}
+          ideasTimerMinutes={page.room.ideasTimerMinutes}
+        />
       </PhaseTransition>
     );
   }

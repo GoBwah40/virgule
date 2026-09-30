@@ -1,3 +1,4 @@
+import { Equal } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { ExpandableListItem } from "@/components/expandable-list-item";
@@ -29,7 +30,19 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
                     key={idea.id}
                     // Score nul : ligne neutre, quel que soit le statut.
                     tone={idea.score.net === 0 ? "neutral" : idea.qualified ? "positive" : "negative"}
-                    meta={idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{tIdeas("mine")}</Badge>}
+                    meta={
+                      (idea.isMine || idea.tied) && (
+                        <>
+                          {idea.tied && (
+                            <Badge variant="outline" className="border-highlight text-foreground">
+                              <Equal data-icon="inline-start" />
+                              {t("tied")}
+                            </Badge>
+                          )}
+                          {idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{tIdeas("mine")}</Badge>}
+                        </>
+                      )
+                    }
                     aside={
                       <StatusBadge
                         status={idea.qualified ? "retained" : "rejected"}

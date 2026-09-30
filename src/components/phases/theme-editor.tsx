@@ -17,8 +17,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, startIdeasPhase, updateTheme } from "@/lib/actions";
-import { LIMITS } from "@/lib/config";
+import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, startIdeasPhase, updateTheme } from "@/lib/actions";
+import { IDEAS_TIMER_OPTIONS, LIMITS } from "@/lib/config";
 import { THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 
 type Theme = { id: string; title: string; description: string | null; kind: ThemeKind; ideaCount: number };
@@ -34,7 +34,17 @@ const SUGGESTIONS = {
 } as const satisfies Record<string, ThemeKind>;
 type SuggestionKey = keyof typeof SUGGESTIONS;
 
-export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; themes: Theme[]; allowSelfVote: boolean }) {
+export function ThemeEditor({
+  slug,
+  themes,
+  allowSelfVote,
+  ideasTimerMinutes,
+}: {
+  slug: string;
+  themes: Theme[];
+  allowSelfVote: boolean;
+  ideasTimerMinutes: number | null;
+}) {
   const t = useTranslations("themes");
   const [pending, run] = useAction();
   // Retour depuis la phase d'idées : on reprend plutôt qu'on ne lance.
@@ -84,7 +94,7 @@ export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; the
           <CardHeader>
             <CardTitle className="font-heading text-lg font-bold">{t("settings")}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-5">
             <SettingSwitch
               id="self-vote"
               label={t("allowSelfVote")}
@@ -92,6 +102,18 @@ export function ThemeEditor({ slug, themes, allowSelfVote }: { slug: string; the
               checked={allowSelfVote}
               disabled={pending}
               onCheckedChange={(checked) => run(() => setAllowSelfVote(slug, checked))}
+            />
+            <SegmentedControl
+              name="ideas-timer"
+              label={t("timerLabel")}
+              hint={t("timerHint")}
+              options={[
+                { value: "off", label: t("timerOff") },
+                ...IDEAS_TIMER_OPTIONS.map((m) => ({ value: String(m), label: t("timerMinutes", { count: m }) })),
+              ]}
+              value={ideasTimerMinutes ? String(ideasTimerMinutes) : "off"}
+              disabled={pending}
+              onChange={(value) => run(() => setIdeasTimer(slug, value === "off" ? null : Number(value)))}
             />
           </CardContent>
         </Card>

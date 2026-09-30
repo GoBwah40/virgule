@@ -1,5 +1,6 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { UserMinus } from "lucide-react";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderUi } from "@/test/render";
@@ -30,5 +31,22 @@ describe("SeatRow", () => {
     renderUi(<SeatRow seats={seats} capacity={6} labels={labels} onFreeSeatClick={onFreeSeatClick} />);
     await userEvent.click(screen.getAllByRole("button", { name: "Place libre" })[0]);
     expect(onFreeSeatClick).toHaveBeenCalledOnce();
+  });
+
+  it("ouvre le menu d'une place occupée au clic droit et transmet l'action choisie", async () => {
+    const onSelect = vi.fn();
+    const menu = {
+      label: (seat: { name: string }) => `Place de ${seat.name} : options`,
+      actions: (seat: { isMe?: boolean }) =>
+        seat.isMe ? [] : [{ id: "remove", label: "Retirer de la séance", icon: UserMinus, destructive: true }],
+      onSelect,
+    };
+    renderUi(<SeatRow seats={seats} capacity={6} labels={labels} menu={menu} />);
+    // Pas de menu sur sa propre place.
+    expect(screen.queryByRole("button", { name: "Place de sacha : options" })).toBeNull();
+
+    await userEvent.pointer({ keys: "[MouseRight]", target: screen.getByRole("button", { name: "Place de Camille : options" }) });
+    await userEvent.click(await screen.findByRole("menuitem", { name: "Retirer de la séance" }));
+    expect(onSelect).toHaveBeenCalledWith(seats[0], "remove");
   });
 });

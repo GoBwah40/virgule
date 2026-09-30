@@ -1,30 +1,79 @@
 "use client";
 
+import { Crown, UserMinus } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { toast } from "sonner";
 
+import { ConfirmDialog } from "@/components/confirm-dialog";
 import { type Seat, SeatRow } from "@/components/seat-row";
+import { useAction } from "@/hooks/use-action";
+import { removeParticipant, transferHost } from "@/lib/actions";
 import { MAX_PARTICIPANTS } from "@/lib/config";
 
 type Props = {
+  slug: string;
   seats: Seat[];
   invitePath: string;
   labels: React.ComponentProps<typeof SeatRow>["labels"];
   successMessage: string;
+  /** La personne qui anime peut confier l'animation ou retirer quelqu'un (menu des places). */
+  canManage: boolean;
   className?: string;
 };
 
-/** Rangée de sièges de la room : toucher une place libre copie le lien d'invitation. */
-export function RoomSeats({ seats, invitePath, labels, successMessage, className }: Props) {
+type Pending = { seat: Seat; action: "host" | "remove" } | null;
+
+/**
+ * Rangée de places de la séance : toucher une place libre copie le lien d'invitation ;
+ * pour la personne qui anime, clic droit ou clic sur une place occupée ouvre ses options.
+ */
+export function RoomSeats({ slug, seats, invitePath, labels, successMessage, canManage, className }: Props) {
+  const t = useTranslations("room.seats");
+  const [, run] = useAction();
+  const [pending, setPending] = useState<Pending>(null);
+
   return (
-    <SeatRow
-      seats={seats}
-      capacity={MAX_PARTICIPANTS}
-      labels={labels}
-      className={className}
-      onFreeSeatClick={async () => {
-        await navigator.clipboard.writeText(`${window.location.origin}${invitePath}`);
-        toast.success(successMessage);
-      }}
-    />
+    <>
+      <SeatRow
+        seats={seats}
+        capacity={MAX_PARTICIPANTS}
+        labels={labels}
+        className={className}
+        onFreeSeatClick={async () => {
+          await navigator.clipboard.writeText(`${window.location.origin}${invitePath}`);
+          toast.success(successMessage);
+        }}
+        menu={
+          canManage
+            ? {
+                label: (seat) => t("manage", { name: seat.name }),
+                actions: (seat) =>
+                  seat.isMe
+                    ? []
+                    : [
+                        { id: "host", label: t("makeHost"), icon: Crown },
+                        { id: "remove", label: t("remove"), icon: UserMinus, destructive: true },
+                      ],
+                onSelect: (seat, action) => setPending({ seat, action: action as "host" | "remove" }),
+              }
+            : undefined
+        }
+      />
+      {pending && (
+        <ConfirmDialog
+          open
+          onOpenChange={(open) => !open && setPending(null)}
+          title={t(pending.action === "host" ? "makeHostConfirm" : "removeConfirm", { name: pending.seat.name })}
+          description={t(pending.action === "host" ? "makeHostConfirmHint" : "removeConfirmHint", { name: pending.seat.name })}
+          confirmLabel={t(pending.action === "host" ? "makeHost" : "remove")}
+          destructive={pending.action === "remove"}
+          onConfirm={() => {
+            const { seat, action } = pending;
+            run(() => (action === "host" ? transferHost(slug, seat.id) : removeParticipant(slug, seat.id)));
+          }}
+        />
+      )}
+    </>
   );
 }

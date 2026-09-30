@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareByScore, isActiveInRound, isQualified, scoreVotes, voteProgress } from "@/lib/results";
+import { compareByScore, isActiveInRound, isQualified, scoreVotes, topQualified, voteProgress } from "@/lib/results";
 
 const votes = (up: number, down: number) => [
   ...Array.from({ length: up }, () => ({ positive: true })),
@@ -60,5 +60,27 @@ describe("voteProgress", () => {
 
   it("total nul quand il n'y a aucune idée", () => {
     expect(voteProgress({ participantIds, ideaAuthorIds: [], voterIds: new Set(), allowSelfVote: true })).toEqual({ done: 0, total: 0 });
+  });
+});
+
+describe("topQualified", () => {
+  const idea = (id: string, up: number, down: number, qualified = true) => ({
+    id,
+    score: { up, down, net: up - down },
+    qualified,
+  });
+
+  it("repère les ex æquo en tête", () => {
+    const top = topQualified([idea("a", 3, 1), idea("b", 3, 1), idea("c", 2, 1)]);
+    expect(top.map((i) => i.id)).toEqual(["a", "b"]);
+  });
+
+  it("départage d'abord au nombre de « pour » à score net égal", () => {
+    expect(topQualified([idea("a", 4, 2), idea("b", 2, 0)]).map((i) => i.id)).toEqual(["a"]);
+  });
+
+  it("ignore les idées écartées", () => {
+    expect(topQualified([idea("a", 1, 1, false), idea("b", 1, 1, false)])).toEqual([]);
+    expect(topQualified([idea("a", 2, 0), idea("b", 5, 0, false)]).map((i) => i.id)).toEqual(["a"]);
   });
 });

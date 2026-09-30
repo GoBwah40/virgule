@@ -1,0 +1,459 @@
+<title>Sujets typés, étape 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap">
+<style>
+/* Mise en page : chaque proposition = texte à gauche, écran de téléphone à droite ; une colonne sur mobile.
+   Jetons repris de src/app/globals.css (charte Virgule). */
+:root {
+  --sable: #fff7f0;
+  --carte: #ffffff;
+  --encre: #2a1a24;
+  --encre-douce: #6f5a62;
+  --trait: #eedccf;
+  --creme: #f7ebe1;
+  --papaye: #f26a2e;
+  --papaye-brulee: #c2410c;
+  --mangue: #ffc23d;
+  --mangue-pale: #fff0c7;
+  --olivier: #1f7a4d;
+  --grenade: #b8283f;
+  --sur-action: #ffffff;
+  --f-titre: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-texte: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sable: #1c1216; --carte: #261a1f; --encre: #fbefe6; --encre-douce: #b7a3aa; --trait: #3d2c34;
+    --creme: #30222a; --papaye: #ff8a55; --papaye-brulee: #ff8a55; --mangue: #ffc23d; --mangue-pale: #4a3717;
+    --olivier: #5cc98e; --grenade: #ff6b81; --sur-action: #1c1216; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --sable: #1c1216; --carte: #261a1f; --encre: #fbefe6; --encre-douce: #b7a3aa; --trait: #3d2c34;
+  --creme: #30222a; --papaye: #ff8a55; --papaye-brulee: #ff8a55; --mangue: #ffc23d; --mangue-pale: #4a3717;
+  --olivier: #5cc98e; --grenade: #ff6b81; --sur-action: #1c1216; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--sable); color: var(--encre);
+  font: 16px/1.55 var(--f-texte);
+  padding-inline: 16px; padding-block: 40px 64px;
+}
+.page { max-width: 1080px; margin: 0 auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--f-titre); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(34px, 6vw, 52px); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 800; }
+h3 { font-size: 18px; font-weight: 600; }
+p { margin: 0; }
+.eyebrow { font: 700 12px/1 var(--f-texte); letter-spacing: 0.14em; text-transform: uppercase; color: var(--papaye-brulee); }
+.intro { display: grid; gap: 14px; max-width: 68ch; }
+.intro p { color: var(--encre-douce); font-size: 18px; }
+.virgule { color: var(--papaye); }
+
+section.prop { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr) minmax(0, 380px); align-items: start;
+  border-top: 1.5px solid var(--trait); padding-top: 40px; }
+@media (max-width: 820px) { section.prop { grid-template-columns: minmax(0, 1fr); } }
+.texte { display: grid; gap: 16px; min-width: 0; }
+.texte > p { max-width: 62ch; }
+.regle { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.regle li { display: grid; grid-template-columns: 18px 1fr; gap: 10px; color: var(--encre-douce); font-size: 15px; }
+.regle li::before { content: ""; width: 8px; height: 8px; margin-top: 9px; border-radius: 50%; background: var(--mangue); }
+.regle strong { color: var(--encre); font-weight: 600; }
+
+/* Choix de formulation */
+.formulations { display: grid; gap: 8px; border: 0; padding: 0; margin: 0; }
+.formulations legend { font-weight: 700; font-size: 14px; margin-bottom: 8px; }
+.formulations label { display: grid; grid-template-columns: 20px 1fr; gap: 10px; align-items: start; padding: 12px 14px;
+  border: 1.5px solid var(--trait); border-radius: 14px; background: var(--carte); cursor: pointer; font-size: 15px; }
+.formulations label:has(input:checked) { border-color: var(--encre); }
+.formulations input { accent-color: var(--papaye-brulee); margin: 3px 0 0; width: 18px; height: 18px; }
+.formulations label:has(input:focus-visible) { outline: 3px solid color-mix(in oklab, var(--papaye-brulee) 45%, transparent); outline-offset: 2px; }
+.formulations small { display: block; color: var(--encre-douce); font-size: 13px; }
+.bascule { display: inline-flex; border: 1.5px solid var(--trait); border-radius: 999px; padding: 3px; background: var(--carte); width: fit-content; flex-wrap: wrap; }
+.bascule button { font: 600 14px var(--f-texte); border: 0; background: none; color: var(--encre-douce); border-radius: 999px;
+  padding: 0 16px; min-height: 40px; cursor: pointer; }
+.bascule button[aria-pressed="true"] { background: var(--encre); color: var(--sable); }
+.bascule button:focus-visible { outline: 3px solid color-mix(in oklab, var(--papaye-brulee) 45%, transparent); }
+
+/* Écran de téléphone */
+.tel { background: var(--creme); border: 1.5px solid var(--trait); border-radius: 34px; padding: 14px; min-width: 0; }
+.ecran { background: var(--sable); border-radius: 24px; padding: 18px 14px 20px; display: grid; gap: 12px; min-height: 100%; }
+.ecran-titre { font: 800 22px/1.1 var(--f-titre); }
+.legende { font-size: 13px; color: var(--encre-douce); text-align: center; margin-top: 10px; }
+.carte { background: var(--carte); border: 1.5px solid var(--trait); border-radius: 20px; padding: 16px; display: grid; gap: 12px; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; border: 1.5px solid var(--trait);
+  border-radius: 999px; padding: 2px 10px; width: fit-content; color: var(--encre-douce); }
+.badge svg { width: 13px; height: 13px; }
+
+/* Synthèse (la nouveauté) */
+.synthese { border-radius: 16px; padding: 12px 14px; display: grid; gap: 4px; font-size: 15px;
+  background: color-mix(in oklab, var(--olivier) 10%, var(--carte)); border: 1.5px solid color-mix(in oklab, var(--olivier) 40%, transparent); }
+.synthese.partiel { background: var(--mangue-pale); border-color: color-mix(in oklab, var(--mangue) 60%, transparent); }
+.synthese b { font-weight: 700; }
+.synthese .sous { font-size: 13px; color: var(--encre-douce); }
+
+/* Frise de dates */
+.frise { display: grid; gap: 6px; font-variant-numeric: tabular-nums; }
+.frise-jours { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; font: 500 10px/1 var(--f-mono); color: var(--encre-douce); text-align: center; }
+.frise-jours .fds { color: var(--papaye-brulee); }
+.frise-ligne { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; height: 22px; }
+.frise-ligne span { border-radius: 6px; background: color-mix(in oklab, var(--olivier) 55%, var(--carte)); display: block; }
+.frise-ligne .etiq { font-size: 11px; color: var(--sur-action); background: transparent; }
+.frise-cumul { display: grid; grid-template-columns: repeat(var(--n), minmax(0, 1fr)); gap: 2px; height: 28px; margin-top: 4px; }
+.frise-cumul span { border-radius: 6px; display: block; }
+.frise-cumul .meilleur { outline: 2px solid var(--encre); outline-offset: -2px; }
+.cle { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--encre-douce); }
+.cle i { display: inline-block; width: 12px; height: 12px; border-radius: 4px; vertical-align: -2px; margin-right: 5px; }
+
+/* Calendrier mensuel */
+.mois { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; font-variant-numeric: tabular-nums; }
+.mois .jsem { font: 500 10px/1 var(--f-mono); color: var(--encre-douce); text-align: center; padding-bottom: 4px; }
+.mois .j { aspect-ratio: 1; max-width: 100%; border-radius: 10px; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+.mois .j.vide { background: transparent; }
+.mois .j.meilleur { outline: 2px solid var(--encre); outline-offset: -2px; }
+
+/* Barre de montants */
+.echelle { position: relative; display: grid; gap: 8px; }
+.piste { position: relative; height: 22px; }
+.piste span { position: absolute; top: 0; bottom: 0; border-radius: 6px; background: color-mix(in oklab, var(--olivier) 55%, var(--carte)); }
+.zone { position: absolute; top: -6px; bottom: -6px; border-radius: 8px; background: color-mix(in oklab, var(--mangue) 45%, transparent);
+  border: 2px solid var(--encre); pointer-events: none; }
+.graduations { position: relative; height: 16px; font: 500 10px/1 var(--f-mono); color: var(--encre-douce); }
+.graduations span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
+.pistes { position: relative; display: grid; gap: 6px; padding-block: 6px; }
+
+/* Lignes d'idées */
+.idee { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; background: var(--creme); border-radius: 14px; padding: 12px; }
+.idee p { font-weight: 500; min-width: 0; overflow-wrap: anywhere; }
+.votes { display: flex; gap: 6px; }
+.vote { width: 40px; height: 40px; border-radius: 12px; border: 1.5px solid var(--trait); background: var(--carte); display: grid; place-items: center; color: var(--encre); }
+.vote svg { width: 18px; height: 18px; }
+.vote.pour { background: var(--olivier); border-color: var(--olivier); color: var(--sur-action); }
+.lien-carte { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; color: var(--papaye-brulee); text-decoration: none; margin-top: 4px; min-height: 28px; }
+.lien-carte:hover { text-decoration: underline; }
+.lien-carte svg { width: 14px; height: 14px; }
+.champ { display: grid; gap: 6px; }
+.champ label, .champ .lab { font-size: 13px; font-weight: 700; }
+.input { border: 1.5px solid var(--trait); border-radius: 12px; background: var(--carte); min-height: 44px; padding: 10px 12px; font-size: 15px; color: var(--encre-douce); }
+.aide { font-size: 12px; color: var(--encre-douce); }
+.options { display: flex; flex-wrap: wrap; gap: 6px; }
+.option { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; background: var(--creme); padding: 6px 8px 6px 12px; font-size: 14px; font-weight: 600; }
+.option .x { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; color: var(--encre-douce); }
+.option.ajout { background: transparent; border: 1.5px dashed var(--encre-douce); padding-inline: 12px; color: var(--encre-douce); }
+.interrupteur { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; font-size: 14px; }
+.interrupteur .pastille { width: 40px; height: 24px; border-radius: 999px; background: var(--trait); position: relative; }
+.interrupteur .pastille::after { content: ""; position: absolute; width: 18px; height: 18px; top: 3px; left: 3px; border-radius: 50%; background: var(--carte); }
+.segments { display: flex; flex-wrap: wrap; gap: 6px; }
+.segments span { border: 1.5px solid var(--trait); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; background: var(--carte); }
+.segments .actif { background: var(--encre); color: var(--sable); border-color: var(--encre); }
+.note { font-size: 13px; color: var(--encre-douce); display: flex; gap: 6px; align-items: center; }
+
+.duo { display: grid; gap: 16px; }
+.decisions { background: var(--carte); border: 1.5px solid var(--trait); border-radius: 20px; padding: 24px; display: grid; gap: 14px; }
+.decisions ol { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+.decisions li::marker { font-family: var(--f-mono); color: var(--papaye-brulee); }
+@media (prefers-reduced-motion: no-preference) {
+  .synthese, .zone, .frise-cumul span, .mois .j { transition: background-color 200ms ease, left 250ms ease, width 250ms ease; }
+}
+</style>
+
+<main class="page">
+  <header class="intro">
+    <p class="eyebrow">Virgule · proposition</p>
+    <h1>Sujets typés, étape 2<span class="virgule">.</span></h1>
+    <p>Trois ajouts pour que le bilan donne directement la réponse que le groupe cherche : le créneau commun des périodes, le budget compatible des fourchettes, et deux nouveaux types de sujets, le lieu et la liste de choix. Les maquettes utilisent les couleurs et les textes de l'app ; les exemples sont fictifs.</p>
+  </header>
+
+  <!-- 1. Périodes -->
+  <section class="prop" aria-labelledby="t-periode">
+    <div class="texte">
+      <p class="eyebrow">Période · au bilan</p>
+      <h2 id="t-periode">Le créneau commun aux périodes retenues</h2>
+      <p>Au-dessus des idées d'un sujet « Période », le bilan ajoute une synthèse et une frise des jours. On ne compte que les périodes retenues : ce sont celles que le groupe a validées par ses votes.</p>
+      <ul class="regle">
+        <li><span><strong>Toutes les périodes se recoupent</strong> : la synthèse donne ce créneau, encadré sur la frise.</span></li>
+        <li><span><strong>Pas de créneau commun à toutes</strong> : on affiche le créneau partagé par le plus grand nombre de périodes retenues, et combien.</span></li>
+        <li><span><strong>Une seule période retenue</strong> ou aucune : pas de synthèse, la liste suffit.</span></li>
+        <li><span>On parle de <strong>périodes</strong> et non de personnes : l'app ne sait pas qui est libre, seulement quelles propositions le groupe a gardées.</span></li>
+      </ul>
+      <fieldset class="formulations" id="f-periode">
+        <legend>Formulation de la synthèse (le cas choisi s'affiche à droite)</legend>
+        <label><input type="radio" name="fp" value="a" checked><span>« Créneau commun : du 12 au 14 juin 2027 »<small>Court, se lit d'un coup d'œil. Sans créneau commun : « Créneau le plus partagé : … (2 périodes sur 3) ».</small></span></label>
+        <label><input type="radio" name="fp" value="b"><span>« Les périodes retenues se recoupent du 12 au 14 juin 2027 »<small>Une phrase complète, qui dit d'où vient le résultat.</small></span></label>
+        <label><input type="radio" name="fp" value="c"><span>« Le groupe peut se retrouver du 12 au 14 juin 2027 »<small>Le plus parlant, mais promet un peu plus que ce que l'app sait.</small></span></label>
+      </fieldset>
+      <div class="bascule" role="group" aria-label="Exemple affiché">
+        <button type="button" data-cas="p" data-val="commun" aria-pressed="true">Toutes se recoupent</button>
+        <button type="button" data-cas="p" data-val="partiel" aria-pressed="false">Recoupement partiel</button>
+      </div>
+      <div class="bascule" role="group" aria-label="Représentation">
+        <button type="button" data-vue="frise" aria-pressed="true">Frise des jours</button>
+        <button type="button" data-vue="mois" aria-pressed="false">Calendrier du mois</button>
+      </div>
+    </div>
+    <div>
+      <div class="tel"><div class="ecran">
+        <p class="ecran-titre">Le bilan du tour 1</p>
+        <div class="carte">
+          <h3>Dates du week-end</h3>
+          <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none"/><path d="M3 10h18M8 3v4M16 3v4" fill="none"/></svg>Période</span>
+          <div class="synthese" id="p-synthese"></div>
+          <div id="p-vue"></div>
+          <div class="cle" id="p-cle"></div>
+        </div>
+      </div></div>
+      <p class="legende">Carte de sujet au bilan, 360 px. Les lignes d'idées (dépliables) suivent en dessous, sans changement.</p>
+    </div>
+  </section>
+
+  <!-- 2. Fourchettes -->
+  <section class="prop" aria-labelledby="t-budget">
+    <div class="texte">
+      <p class="eyebrow">Fourchette · au bilan</p>
+      <h2 id="t-budget">Le budget compatible avec toutes les fourchettes</h2>
+      <p>Même principe pour un sujet « Fourchette » : chaque fourchette retenue devient une barre sur une même échelle, et la zone où elles se recoupent est encadrée.</p>
+      <ul class="regle">
+        <li><span><strong>Zone commune</strong> : « Budget compatible : de 300 € à 400 € ». Si elle se réduit à un montant, « Budget compatible : 350 € ».</span></li>
+        <li><span><strong>Pas de zone commune à toutes</strong> : la zone partagée par le plus de fourchettes retenues, avec leur nombre.</span></li>
+        <li><span><strong>Sujet « Montant »</strong> (une seule valeur) : pas de zone ; on peut afficher l'écart, « Entre 250 € et 480 € », si c'est utile.</span></li>
+      </ul>
+      <div class="bascule" role="group" aria-label="Exemple affiché">
+        <button type="button" data-cas="b" data-val="commun" aria-pressed="true">Zone commune</button>
+        <button type="button" data-cas="b" data-val="partiel" aria-pressed="false">Recoupement partiel</button>
+      </div>
+    </div>
+    <div>
+      <div class="tel"><div class="ecran">
+        <p class="ecran-titre">Le bilan du tour 1</p>
+        <div class="carte">
+          <h3>Budget par personne</h3>
+          <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4" fill="none"/></svg>Fourchette</span>
+          <div class="synthese" id="b-synthese"></div>
+          <div class="echelle">
+            <div class="pistes" id="b-pistes"></div>
+            <div class="graduations" id="b-grad"></div>
+          </div>
+          <div class="cle"><span><i style="background: color-mix(in oklab, var(--olivier) 55%, var(--carte))"></i>Fourchette retenue</span><span><i style="background: color-mix(in oklab, var(--mangue) 45%, transparent); outline: 2px solid var(--encre); outline-offset: -2px"></i>Zone compatible</span></div>
+        </div>
+      </div></div>
+      <p class="legende">Les montants sont arrondis à l'euro, comme à la saisie.</p>
+    </div>
+  </section>
+
+  <!-- 3. Lieu et liste -->
+  <section class="prop" aria-labelledby="t-lieu">
+    <div class="texte">
+      <p class="eyebrow">Nouveau type · Lieu</p>
+      <h2 id="t-lieu">Un lieu, avec son lien vers la carte</h2>
+      <p>Le participant écrit une adresse ou un nom de lieu, comme aujourd'hui. L'app ajoute sous l'idée un lien « Voir sur la carte » qui ouvre une recherche dans l'application de cartes du téléphone. Aucune carte n'est chargée dans Virgule : pas de service tiers, pas de clé d'API, rien de plus à maintenir.</p>
+      <ul class="regle">
+        <li><span>Lien de recherche Google Maps (<code>maps/search/?api=1&amp;query=…</code>) : il ouvre l'app Plans ou Google Maps sur mobile et le site ailleurs. OpenStreetMap est possible à la place.</span></li>
+        <li><span>Les doublons sont repérés comme pour le texte.</span></li>
+      </ul>
+
+      <p class="eyebrow" style="margin-top: 20px">Nouveau type · Liste</p>
+      <h2>Un choix dans une liste fixée par la personne qui anime</h2>
+      <p>À la création du sujet, Camille saisit les options (« Mer », « Montagne », « Ville »). Au lancement des idées, chaque option devient une idée prête à voter : pas de champ de saisie, tout le monde vote sur les mêmes options. Un réglage permet d'autoriser d'autres propositions en plus.</p>
+      <ul class="regle">
+        <li><span><strong>2 à 10 options</strong>, sans doublon ; modifiables tant que les idées ne sont pas lancées.</span></li>
+        <li><span>Les options appartiennent à la personne qui anime : personne ne peut les retirer pendant les votes.</span></li>
+        <li><span>Le bilan, les tours et le départage fonctionnent comme pour les autres idées.</span></li>
+      </ul>
+    </div>
+    <div class="duo">
+      <div>
+        <div class="tel"><div class="ecran">
+          <p class="ecran-titre">Les idées</p>
+          <div class="carte">
+            <h3>Où est-ce que ça se passe ?</h3>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="none"/><circle cx="12" cy="10" r="2.5" fill="none"/></svg>Lieu</span>
+            <div class="idee">
+              <div><p>Gîte des Trois Chênes, Vercors</p>
+                <a class="lien-carte" href="https://www.google.com/maps/search/?api=1&amp;query=G%C3%AEte%20des%20Trois%20Ch%C3%AAnes%2C%20Vercors" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" fill="none"/></svg>Voir sur la carte</a></div>
+              <div class="votes"><span class="vote pour" aria-label="Pour, sélectionné"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none"/></svg></span><span class="vote" aria-label="Contre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7" fill="none"/></svg></span></div>
+            </div>
+            <div class="champ"><span class="lab">Lieu</span><span class="input">Une adresse ou un nom de lieu…</span><span class="aide">On ajoute le lien vers la carte.</span></div>
+          </div>
+        </div></div>
+        <p class="legende">Page des idées, sujet « Lieu ». Le lien de l'exemple fonctionne.</p>
+      </div>
+      <div>
+        <div class="tel"><div class="ecran">
+          <p class="ecran-titre">Sur quoi faut-il trancher ?</p>
+          <div class="carte">
+            <div class="champ"><span class="lab">Sujet</span><span class="input" style="color: var(--encre)">Quel type de séjour ?</span></div>
+            <div class="champ"><span class="lab">Type de réponse</span>
+              <div class="segments"><span>Texte</span><span>Date</span><span>Période</span><span>Montant</span><span>Fourchette</span><span>Lieu</span><span class="actif">Liste</span></div>
+            </div>
+            <div class="champ"><span class="lab">Options</span>
+              <div class="options"><span class="option">Mer <span class="x" aria-hidden="true">×</span></span><span class="option">Montagne <span class="x" aria-hidden="true">×</span></span><span class="option">Ville <span class="x" aria-hidden="true">×</span></span><span class="option ajout">+ Ajouter une option</span></div>
+            </div>
+            <div class="interrupteur"><span>Autoriser d'autres propositions</span><span class="pastille" aria-hidden="true"></span></div>
+          </div>
+        </div></div>
+        <p class="legende">Création d'un sujet « Liste » par la personne qui anime.</p>
+      </div>
+      <div>
+        <div class="tel"><div class="ecran">
+          <p class="ecran-titre">Les idées</p>
+          <div class="carte">
+            <h3>Quel type de séjour ?</h3>
+            <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01" fill="none"/></svg>Liste</span>
+            <div class="idee"><p>Mer</p><div class="votes"><span class="vote pour" aria-label="Pour, sélectionné"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none"/></svg></span><span class="vote" aria-label="Contre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7" fill="none"/></svg></span></div></div>
+            <div class="idee"><p>Montagne</p><div class="votes"><span class="vote" aria-label="Pour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none"/></svg></span><span class="vote" aria-label="Contre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7" fill="none"/></svg></span></div></div>
+            <div class="idee"><p>Ville</p><div class="votes"><span class="vote" aria-label="Pour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" fill="none"/></svg></span><span class="vote" aria-label="Contre"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="M12 5v14M19 12l-7 7-7-7" fill="none"/></svg></span></div></div>
+            <p class="note">Options proposées par Camille.</p>
+          </div>
+        </div></div>
+        <p class="legende">Page des idées : on vote directement, sans champ de saisie.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="decisions" aria-labelledby="t-dec">
+    <h2 id="t-dec">À décider</h2>
+    <ol>
+      <li>Formulation de la synthèse des périodes : a, b ou c (ci-dessus).</li>
+      <li>Frise des jours ou calendrier du mois. La frise montre chaque période ; le calendrier est plus familier mais cache qui recoupe quoi.</li>
+      <li>Lien de carte : Google Maps (ouvre l'app installée) ou OpenStreetMap.</li>
+      <li>Sujet « Liste » : autoriser d'autres propositions désactivé par défaut ?</li>
+    </ol>
+  </section>
+</main>
+
+<script>
+// Données fictives : périodes et fourchettes retenues d'un bilan.
+const CAS = {
+  p: {
+    commun: [["2027-06-10", "2027-06-14"], ["2027-06-12", "2027-06-16"], ["2027-06-11", "2027-06-15"]],
+    partiel: [["2027-06-05", "2027-06-07"], ["2027-06-12", "2027-06-14"], ["2027-06-13", "2027-06-16"]],
+  },
+  b: {
+    commun: [[200, 400], [300, 500], [250, 450]],
+    partiel: [[100, 200], [300, 500], [350, 600]],
+  },
+};
+const etat = { p: "commun", b: "commun", vue: "frise", fp: "a" };
+const MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août", "septembre", "octobre", "novembre", "décembre"];
+const jour = (iso) => new Date(iso + "T00:00:00Z");
+const ajoute = (d, n) => new Date(d.getTime() + n * 864e5);
+const nom = (d) => (d.getUTCDate() === 1 ? "1er" : d.getUTCDate());
+const euro = (n) => n.toLocaleString("fr-FR") + " €";
+
+// Créneau partagé par le plus de périodes (le plus long en cas d'égalité).
+function meilleurCreneau(periodes) {
+  const debut = new Date(Math.min(...periodes.map((p) => jour(p[0]))));
+  const fin = new Date(Math.max(...periodes.map((p) => jour(p[1]))));
+  const jours = [];
+  for (let d = debut; d <= fin; d = ajoute(d, 1)) {
+    jours.push({ d, n: periodes.filter((p) => jour(p[0]) <= d && d <= jour(p[1])).length });
+  }
+  const max = Math.max(...jours.map((j) => j.n));
+  let best = null, cur = null;
+  for (const j of jours) {
+    if (j.n === max) { cur = cur ? { ...cur, fin: j.d } : { debut: j.d, fin: j.d }; }
+    else cur = null;
+    if (cur && (!best || cur.fin - cur.debut > best.fin - best.debut)) best = cur;
+  }
+  return { jours, max, ...best, total: periodes.length };
+}
+function texteCreneau(a, b) {
+  if (a.getTime() === b.getTime()) return `le ${nom(a)} ${MOIS[a.getUTCMonth()]} ${a.getUTCFullYear()}`;
+  const memeMois = a.getUTCMonth() === b.getUTCMonth();
+  return `du ${nom(a)}${memeMois ? "" : " " + MOIS[a.getUTCMonth()]} au ${nom(b)} ${MOIS[b.getUTCMonth()]} ${b.getUTCFullYear()}`;
+}
+const cap = (s) => s[0].toUpperCase() + s.slice(1);
+const intensite = (n, max) => n === 0 ? "var(--creme)" : `color-mix(in oklab, var(--olivier) ${Math.round(20 + 60 * (n / max))}%, var(--carte))`;
+
+function rendrePeriodes() {
+  const periodes = CAS.p[etat.p];
+  const r = meilleurCreneau(periodes);
+  const creneau = texteCreneau(r.debut, r.fin);
+  const commun = r.max === r.total;
+  const syn = document.getElementById("p-synthese");
+  syn.className = "synthese" + (commun ? "" : " partiel");
+  const phrases = {
+    a: commun ? `<b>Créneau commun : ${creneau}</b>` : `<b>Créneau le plus partagé : ${creneau}</b>`,
+    b: commun ? `<b>Les périodes retenues se recoupent ${creneau}</b>` : `<b>Les périodes retenues se recoupent au mieux ${creneau}</b>`,
+    c: commun ? `<b>Le groupe peut se retrouver ${creneau}</b>` : `<b>Le groupe se retrouve au mieux ${creneau}</b>`,
+  };
+  syn.innerHTML = phrases[etat.fp] + `<span class="sous">${commun ? `Commun aux ${r.total} périodes retenues.` : `Commun à ${r.max} périodes retenues sur ${r.total}. Aucun jour ne convient aux ${r.total}.`}</span>`;
+
+  const vue = document.getElementById("p-vue");
+  const estMeilleur = (d) => d >= r.debut && d <= r.fin;
+  if (etat.vue === "frise") {
+    const n = r.jours.length;
+    const entetes = r.jours.map((j) => { const w = j.d.getUTCDay(); return `<span class="${w === 0 || w === 6 ? "fds" : ""}">${j.d.getUTCDate()}</span>`; }).join("");
+    const lignes = periodes.map((p) => {
+      const a = Math.round((jour(p[0]) - r.jours[0].d) / 864e5), b = Math.round((jour(p[1]) - r.jours[0].d) / 864e5);
+      return `<div class="frise-ligne" style="--n:${n}" aria-hidden="true"><span style="grid-column:${a + 1} / ${b + 2}"></span></div>`;
+    }).join("");
+    const cumul = r.jours.map((j) => `<span class="${estMeilleur(j.d) ? "meilleur" : ""}" style="background:${intensite(j.n, r.total)}" title="${j.n} période(s)"></span>`).join("");
+    vue.innerHTML = `<div class="frise" role="img" aria-label="Frise des périodes retenues, juin 2027"><div class="frise-jours" style="--n:${n}">${entetes}</div>${lignes}<div class="frise-cumul" style="--n:${n}">${cumul}</div></div>`;
+    document.getElementById("p-cle").innerHTML = `<span><i style="background: color-mix(in oklab, var(--olivier) 55%, var(--carte))"></i>Une période retenue</span><span><i style="background:${intensite(r.total, r.total)}"></i>Recoupement</span><span><i style="outline: 2px solid var(--encre); outline-offset: -2px; background: var(--carte)"></i>Créneau affiché</span><span>Week-end en orange</span>`;
+  } else {
+    const premier = new Date(Date.UTC(2027, 5, 1));
+    const decal = (premier.getUTCDay() + 6) % 7;
+    let html = ["L", "M", "M", "J", "V", "S", "D"].map((l) => `<span class="jsem">${l}</span>`).join("");
+    html += Array.from({ length: decal }, () => `<span class="j vide"></span>`).join("");
+    for (let i = 1; i <= 30; i++) {
+      const d = new Date(Date.UTC(2027, 5, i));
+      const n = periodes.filter((p) => jour(p[0]) <= d && d <= jour(p[1])).length;
+      html += `<span class="j ${estMeilleur(d) ? "meilleur" : ""}" style="background:${intensite(n, r.total)}; color:${n / r.total > 0.6 ? "var(--sur-action)" : "var(--encre)"}">${i}</span>`;
+    }
+    vue.innerHTML = `<p class="lab" style="font-weight:700;font-size:13px">Juin 2027</p><div class="mois" role="img" aria-label="Calendrier de juin 2027">${html}</div>`;
+    document.getElementById("p-cle").innerHTML = `<span><i style="background:${intensite(1, 3)}"></i>1 période</span><span><i style="background:${intensite(3, 3)}"></i>Toutes</span><span><i style="outline: 2px solid var(--encre); outline-offset: -2px; background: var(--carte)"></i>Créneau affiché</span>`;
+  }
+}
+
+// Zone couverte par le plus de fourchettes (la plus large en cas d'égalité).
+function meilleureZone(f) {
+  const bornes = [...new Set(f.flat())].sort((a, b) => a - b);
+  let best = null;
+  for (let i = 0; i < bornes.length; i++) for (let j = i; j < bornes.length; j++) {
+    const a = bornes[i], b = bornes[j];
+    const n = f.filter(([lo, hi]) => lo <= a && b <= hi).length;
+    if (!best || n > best.n || (n === best.n && b - a > best.b - best.a)) best = { a, b, n };
+  }
+  return { ...best, total: f.length };
+}
+function rendreBudget() {
+  const f = CAS.b[etat.b];
+  const z = meilleureZone(f);
+  const min = 0, max = Math.ceil(Math.max(...f.flat()) / 100) * 100 + 100;
+  const pc = (v) => ((v - min) / (max - min)) * 100;
+  const commun = z.n === z.total;
+  const syn = document.getElementById("b-synthese");
+  syn.className = "synthese" + (commun ? "" : " partiel");
+  const zone = z.a === z.b ? euro(z.a) : `de ${euro(z.a)} à ${euro(z.b)}`;
+  syn.innerHTML = commun
+    ? `<b>Budget compatible : ${zone}</b><span class="sous">Commun aux ${z.total} fourchettes retenues.</span>`
+    : `<b>Budget le plus partagé : ${zone}</b><span class="sous">Commun à ${z.n} fourchettes retenues sur ${z.total}.</span>`;
+  const pistes = f.map(([lo, hi]) => `<div class="piste" aria-hidden="true"><span style="left:${pc(lo)}%;width:${pc(hi) - pc(lo)}%"></span></div>`).join("");
+  document.getElementById("b-pistes").innerHTML = pistes + `<div class="zone" style="left:${pc(z.a)}%;width:max(4px, ${pc(z.b) - pc(z.a)}%)"></div>`;
+  const pas = max <= 700 ? 100 : 200;
+  let g = "";
+  for (let v = min; v <= max; v += pas) g += `<span style="left:${pc(v)}%">${v === min ? "0" : v} €</span>`;
+  const grad = document.getElementById("b-grad");
+  grad.innerHTML = g;
+  grad.querySelector("span").style.transform = "none";
+  grad.lastElementChild.style.transform = "translateX(-100%)";
+}
+
+document.querySelectorAll("[data-cas]").forEach((b) => b.addEventListener("click", () => {
+  etat[b.dataset.cas] = b.dataset.val;
+  document.querySelectorAll(`[data-cas="${b.dataset.cas}"]`).forEach((x) => x.setAttribute("aria-pressed", x === b));
+  b.dataset.cas === "p" ? rendrePeriodes() : rendreBudget();
+}));
+document.querySelectorAll("[data-vue]").forEach((b) => b.addEventListener("click", () => {
+  etat.vue = b.dataset.vue;
+  document.querySelectorAll("[data-vue]").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  rendrePeriodes();
+}));
+document.getElementById("f-periode").addEventListener("change", (e) => { etat.fp = e.target.value; rendrePeriodes(); });
+rendrePeriodes();
+rendreBudget();
+</script>

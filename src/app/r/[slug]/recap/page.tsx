@@ -82,6 +82,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
                 requireNetPositive={room.requireNetPositive}
                 nextRound={room.round + 1}
                 qualifiedCount={current.qualifiedCount}
+                tiedThemeCount={current.tiedThemeCount}
               />
             ) : (
               <p className="text-muted-foreground">{t("waitingHost", { host: hostName(page.participants) })}</p>

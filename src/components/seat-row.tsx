@@ -1,11 +1,32 @@
 "use client";
 
-import { Crown, Plus } from "lucide-react";
+import { Crown, type LucideIcon, Plus } from "lucide-react";
+import { useState } from "react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 export type Seat = { id: string; name: string; isMe?: boolean; isHost?: boolean };
+
+type SeatAction = { id: string; label: string; icon: LucideIcon; destructive?: boolean };
+
+/** Menu d'une place occupée, ouvert au clic droit, au clic ou au clavier. */
+type SeatMenu = {
+  /** Nom accessible du bouton de la place (ex. « Place de Léo : options »). */
+  label: (seat: Seat) => string;
+  /** Actions proposées pour cette place ; aucune = pas de menu. */
+  actions: (seat: Seat) => SeatAction[];
+  onSelect: (seat: Seat, actionId: string) => void;
+};
 
 type Props = {
   seats: Seat[];
@@ -14,6 +35,7 @@ type Props = {
   labels: { free: string; you: string; host: string; row: string };
   /** Action sur une place libre, par exemple copier le lien d'invitation. */
   onFreeSeatClick?: () => void;
+  menu?: SeatMenu;
   size?: "sm" | "md";
   className?: string;
 };
@@ -21,7 +43,7 @@ type Props = {
 const LETTERS = "ABCDEFGHIJ";
 
 /** Participants affichés comme une rangée de sièges : qui est à bord, combien de places restent. */
-export function SeatRow({ seats, capacity, labels, onFreeSeatClick, size = "sm", className }: Props) {
+export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size = "sm", className }: Props) {
   const aisle = Math.ceil(capacity / 2);
   const box = size === "md" ? "h-12 w-11 text-base" : "h-10 w-9 text-sm";
 
@@ -67,20 +89,26 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, size = "sm",
                 <Crown className="size-3" />
               </span>
             )}
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  !seat && onFreeSeatClick ? (
-                    <button type="button" onClick={onFreeSeatClick} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
-                  ) : (
-                    <span tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
-                  )
-                }
-              >
+            {seat && menu && menu.actions(seat).length > 0 ? (
+              <SeatMenuTrigger seat={seat} menu={menu} label={label}>
                 {body}
-              </TooltipTrigger>
-              <TooltipContent>{label}</TooltipContent>
-            </Tooltip>
+              </SeatMenuTrigger>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    !seat && onFreeSeatClick ? (
+                      <button type="button" onClick={onFreeSeatClick} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
+                    ) : (
+                      <span tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50" />
+                    )
+                  }
+                >
+                  {body}
+                </TooltipTrigger>
+                <TooltipContent>{label}</TooltipContent>
+              </Tooltip>
+            )}
             <span className="font-mono text-[10px] leading-none text-muted-foreground" aria-hidden>
               {letter}
             </span>
@@ -88,5 +116,46 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, size = "sm",
         );
       })}
     </ul>
+  );
+}
+
+function SeatMenuTrigger({ seat, menu, label, children }: { seat: Seat; menu: SeatMenu; label: string; children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <DropdownMenu open={open} onOpenChange={setOpen}>
+      <DropdownMenuTrigger
+        render={
+          <button
+            type="button"
+            aria-label={menu.label(seat)}
+            title={label}
+            className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            // Clic droit (et appui long sur Android) : même menu qu'au clic.
+            onContextMenu={(e) => {
+              e.preventDefault();
+              setOpen(true);
+            }}
+          />
+        }
+      >
+        {children}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="min-w-56">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>{label}</DropdownMenuLabel>
+          {menu.actions(seat).map(({ id, label: actionLabel, icon: Icon, destructive }) => (
+            <DropdownMenuItem
+              key={id}
+              variant={destructive ? "destructive" : "default"}
+              className="min-h-11"
+              onClick={() => menu.onSelect(seat, id)}
+            >
+              <Icon />
+              {actionLabel}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
