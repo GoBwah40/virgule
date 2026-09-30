@@ -2,7 +2,18 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* Sombre si la personne l'a choisi (data-theme="dark" sur <html>, cf. layout), ou si
+   l'appareil est en sombre et qu'elle n'a pas forcé le clair. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -71,10 +82,14 @@
   --success: #1f7a4d;
   --success-foreground: #ffffff;
   --radius: 0.875rem;
+  /* Champs natifs (sélecteur de date…) accordés au thème. */
+  color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
+/* Mêmes jetons en sombre : `@variant dark` reprend les deux cas de la variante ci-dessus. */
+:root {
+  @variant dark {
+    color-scheme: dark;
     --background: #1c1216;
     --foreground: #fbefe6;
     --card: #261a1f;

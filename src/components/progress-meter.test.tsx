@@ -20,4 +20,9 @@ describe("ProgressMeter", () => {
     renderUi(<ProgressMeter value={4} max={4} {...props} />);
     expect(screen.getByRole("progressbar")).toHaveTextContent("Tout le monde a voté");
   });
+
+  it("remplace les pastilles par une barre au-delà de 10", () => {
+    const { container } = renderUi(<ProgressMeter value={5} max={20} {...props} />);
+    expect(container.querySelector('[style*="width: 25%"]')).not.toBeNull();
+  });
 });

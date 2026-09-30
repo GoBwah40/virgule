@@ -20,3 +20,6 @@ type Story = StoryObj<typeof meta>;
 export const EnCours: Story = {};
 export const Personne: Story = { args: { value: 0, label: "Personne n'a encore voté" } };
 export const Complet: Story = { args: { value: 5 } };
+export const Barre: Story = {
+  args: { value: 7, max: 18, label: "Il te reste 11 idées sans vote", ariaLabel: "Idées sur lesquelles tu as voté" },
+};

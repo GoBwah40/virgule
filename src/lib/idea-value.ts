@@ -80,6 +80,29 @@ export function rangeStartPrecision(startIso: string, endIso: string): "day" | "
   return startIso.slice(0, 7) === endIso.slice(0, 7) ? "day" : "dayMonth";
 }
 
+/**
+ * Clé de comparaison pour repérer les doublons au sein d'un sujet. Pour le texte, on ignore
+ * la casse, les accents, la ponctuation et les espaces : « Pique-nique ! » = « pique nique ».
+ * Pour les sujets typés, deux idées sont identiques si leurs valeurs le sont.
+ */
+export function ideaKey(kind: ThemeKind, fields: IdeaFields): string {
+  switch (kind) {
+    case "TEXT":
+      return fields.content
+        .normalize("NFD")
+        .replace(/\p{M}/gu, "")
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, " ")
+        .trim();
+    case "DATE":
+    case "DATE_RANGE":
+      return `${fields.dateStart}/${fields.dateEnd ?? fields.dateStart}`;
+    case "AMOUNT":
+    case "AMOUNT_RANGE":
+      return `${fields.amountMin}/${fields.amountMax ?? fields.amountMin}`;
+  }
+}
+
 /** En français, le premier du mois s'écrit « 1er » (« 1er octobre 2026 », « Du 1er au 30 »). */
 export const withFirstOrdinal = (formatted: string) => formatted.replace(/^1(?!\d)/, "1er");
 

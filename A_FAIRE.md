@@ -1,6 +1,6 @@
 # Ce qu'il reste à faire
 
-État au 28 septembre 2026, après la première mise en ligne.
+État au 30 septembre 2026.
 
 ## État de la production
 
@@ -20,8 +20,8 @@ Les valeurs sont masquées dans Vercel ; ce tableau indique où chaque variable 
 
 | Variable | Production | Preview | État | Action |
 | --- | --- | --- | --- | --- |
-| `TURSO_DATABASE_URL` | ✅ | ⚠️ | Production : base `virgule`. Preview : créée avant la mise en ligne, valeur inconnue. | Vérifier la valeur Preview (voir « Base de prévisualisation »). |
-| `TURSO_AUTH_TOKEN` | ✅ | ⚠️ | Idem. | Idem. |
+| `TURSO_DATABASE_URL` | ✅ | ⚠️ | Production : base `virgule`. Preview : ancienne valeur inconnue ; la base `virgule-preview` est prête (voir « Base de prévisualisation »). | Remplacer la valeur Preview. |
+| `TURSO_AUTH_TOKEN` | ✅ | ⚠️ | Idem. | Remplacer la valeur Preview. |
 | `CRON_SECRET` | ✅ | ⚠️ | Le cron ne tourne qu'en production. | Supprimer la valeur Preview, inutile. |
 | `DATABASE_URL` | ⚠️ | ⚠️ | Créée avant la mise en ligne. Ignorée en production (`TURSO_DATABASE_URL` est prioritaire), elle ne sert qu'en local. | Supprimer des deux environnements pour éviter la confusion. |
 | `PUSHER_APP_ID` | ⏳ | ⏳ | Existe mais n'est pas utilisée pour l'instant. | À renseigner avec Pusher (voir plus bas). |
@@ -31,12 +31,35 @@ Les valeurs sont masquées dans Vercel ; ce tableau indique où chaque variable 
 
 Légende : ✅ en place · ⚠️ à vérifier ou nettoyer · ⏳ à renseigner plus tard.
 
-En local, les valeurs de production sont dans `.env.production.local` (ignoré par git, lisible par toi seul). Ne le partage pas et ne le committe jamais.
+En local, les valeurs de production sont dans `.env.production.local` et celles de prévisualisation dans `.env.preview.local` (ignorés par git, lisibles par toi seul). Ne les partage pas et ne les committe jamais.
+
+### Nettoyer et compléter les variables
+
+À lancer depuis la racine du projet. Les valeurs passent par l'entrée standard : elles ne s'affichent pas et ne restent pas dans l'historique du terminal.
+
+```bash
+(set -a; . ./.env.preview.local; set +a; printf %s "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL preview --force --sensitive; printf %s "$TURSO_AUTH_TOKEN" | vercel env add TURSO_AUTH_TOKEN preview --force --sensitive)
+```
+
+```bash
+vercel env rm CRON_SECRET preview -y
+```
+
+```bash
+vercel env rm DATABASE_URL preview -y
+```
+
+```bash
+vercel env rm DATABASE_URL production -y
+```
+
+Puis `vercel env ls` pour vérifier : Preview ne doit plus contenir que `TURSO_*` et `PUSHER_*`.
 
 ## Avant d'inviter du monde
 
-- [ ] **Tester à deux** : ouvrir une séance sur l'ordinateur, la rejoindre depuis un téléphone, vérifier que les idées, les votes et les changements de phase apparaissent des deux côtés en moins de 3 secondes.
-- [ ] **Nettoyer les variables** signalées ⚠️ ci-dessus : dans Vercel, *Settings → Environment Variables*.
+- [x] **Tester à deux, en local** (30 septembre) : deux navigateurs séparés (`localhost` et `127.0.0.1`, cookies distincts). Arrivée du second participant, passage aux idées suivi automatiquement, idée et vote visibles des deux côtés, doublon refusé, indicateurs de votes à jour.
+- [ ] **Tester à deux, depuis un téléphone** : ouvrir une séance en production sur l'ordinateur, la rejoindre depuis un téléphone (scanner le QR code d'invitation), vérifier que tout apparaît des deux côtés en moins de 3 secondes, et essayer le bouton « Partager ».
+- [ ] **Nettoyer les variables** signalées ⚠️ ci-dessus : commandes dans « Nettoyer et compléter les variables ».
 - [ ] **Vérifier le premier passage du cron** le lendemain : Vercel, *Settings → Cron Jobs*, ou les logs du projet.
 
 ## Plus tard
@@ -44,7 +67,7 @@ En local, les valeurs de production sont dans `.env.production.local` (ignoré p
 ### Activer Pusher (temps réel instantané)
 
 1. Créer une app *Channels* sur [pusher.com](https://pusher.com) (offre Sandbox gratuite), cluster `eu`.
-2. Dans Vercel, renseigner les 4 variables `PUSHER_*` et `NEXT_PUBLIC_PUSHER_*` (Production, et Preview si besoin).
+2. Dans *App Keys*, relever `app_id`, `key`, `secret` et `cluster`, puis les ajouter dans Vercel (Production, et Preview si besoin), par exemple : `vercel env add PUSHER_SECRET production --force --sensitive` (la valeur est demandée sans s'afficher). Les 4 variables : `PUSHER_APP_ID`, `PUSHER_SECRET`, `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`. Les copier aussi dans `.env.local` pour tester en local.
 3. Redéployer : *Deployments → ⋯ → Redeploy*. Les variables `NEXT_PUBLIC_*` sont intégrées au moment du build, un simple enregistrement ne suffit pas.
 4. Vérifier : les mises à jour deviennent instantanées ; en cas d'échec, les logs affichent `[realtime] échec de notification` et l'app revient au rafraîchissement toutes les 30 secondes.
 
@@ -54,13 +77,18 @@ Aucun changement de code n'est nécessaire.
 
 Aujourd'hui, les déploiements de prévisualisation (branches, pull requests) utiliseraient les variables Preview dont la valeur est inconnue. Deux options :
 
-- **Base séparée (conseillé)** : `turso db create virgule-preview --location aws-eu-west-1`, lui appliquer les migrations, puis mettre son URL et un jeton dans les variables Preview.
-- **Même base que la production** : copier les valeurs de production dans Preview. Plus simple, mais les tests écrivent dans les vraies données.
+La base séparée `virgule-preview` (Irlande, `aws-eu-west-1`) est créée et toutes les migrations y sont appliquées (30 septembre). Son URL et un jeton sont dans `.env.preview.local`. Il reste à les copier dans les variables Preview de Vercel (voir « Nettoyer et compléter les variables »).
+
+Chaque nouvelle migration s'applique aux deux bases : la production (commande dans « Commandes utiles ») et la prévisualisation :
+
+```bash
+(set -a; . ./.env.preview.local; set +a; pnpm db:migrate:prod)
+```
 
 ### Qualité et exploitation
 
 - [x] **Intégration continue** : `.github/workflows/ci.yml` lance `pnpm check` et le build Storybook à chaque push sur `main` et sur chaque pull request.
-- [ ] **Rendre la CI obligatoire** : sur GitHub, *Settings → Branches → Add rule* pour `main`, cocher « Require status checks to pass » et choisir « Lint, types, tests, knip ». Sans cette règle, la CI signale un problème mais n'empêche pas de fusionner.
+- [ ] **Rendre la CI obligatoire** : sur GitHub, *Settings → Rules → Rulesets → New branch ruleset*, cible `main`, cocher « Require status checks to pass » et choisir « Lint, types, tests, knip ». Sans cette règle, la CI signale un problème mais n'empêche pas de fusionner. Attention : sur un dépôt **privé**, ces règles demandent GitHub Pro (ou Team) ; avec l'offre gratuite, il faut soit rendre le dépôt public, soit continuer à vérifier la CI à la main avant de fusionner.
 - [ ] **Domaine personnalisé** si besoin : Vercel, *Settings → Domains*.
 - [ ] **Rotation du jeton Turso** de temps en temps : `turso db tokens create virgule`, mettre à jour `TURSO_AUTH_TOKEN` dans Vercel et dans `.env.production.local`, redéployer, puis révoquer l'ancien (`turso db tokens invalidate virgule` invalide tous les jetons existants).
 - [ ] **Sauvegardes** : vérifier les options de restauration de ton offre Turso.

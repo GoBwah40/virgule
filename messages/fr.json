@@ -64,6 +64,13 @@
     "you": "toi",
     "copyLink": "Copier le lien d'invitation",
     "linkCopied": "Lien copié, tu peux le partager au groupe",
+    "invite": "Inviter avec un QR code",
+    "inviteTitle": "Invite le groupe",
+    "inviteDescription": "{count, plural, one {Il reste # place. Scanne le QR code ou envoie le lien.} other {Il reste # places. Scanne le QR code ou envoie le lien.}}",
+    "inviteFull": "Toutes les places sont prises : plus personne ne peut rejoindre la séance.",
+    "qrLabel": "QR code du lien d'invitation",
+    "share": "Partager",
+    "shareText": "Rejoins la séance « {name} » sur Virgule",
     "expiresOn": "En ligne jusqu'au {date, date, long}",
     "phasesLabel": "Étapes de la séance",
     "phases": {
@@ -168,7 +175,9 @@
     "voteDown": "Contre",
     "delete": "Retirer mon idée",
     "selfVoteDisabled": "Le vote sur tes propres idées est désactivé.",
-    "myVotes": "Tu as voté sur {voted} idée(s) sur {total}.",
+    "myVotesLeft": "{count, plural, one {Il te reste # idée sans vote} other {Il te reste # idées sans vote}}",
+    "myVotesComplete": "Tu as voté sur toutes les idées",
+    "myVotesLabel": "Idées sur lesquelles tu as voté",
     "voteProgress": "{done, plural, =0 {Personne n'a encore voté} one {# personne sur {total} a voté} other {# personnes sur {total} ont voté}}",
     "voteProgressComplete": "Tout le monde a voté",
     "voteProgressLabel": "Participants ayant voté",
@@ -245,6 +254,13 @@
     "unknown": "Quelque chose n'a pas marché. Réessaie dans un instant.",
     "invalidDateRange": "La date de fin doit être le même jour ou après la date de début.",
     "invalidAmountRange": "Le second montant doit être supérieur ou égal au premier.",
-    "themeKindLocked": "Des idées ont déjà été proposées sur ce sujet : son type de réponse ne peut plus changer."
+    "themeKindLocked": "Des idées ont déjà été proposées sur ce sujet : son type de réponse ne peut plus changer.",
+    "duplicateIdea": "Cette idée est déjà proposée dans ce sujet : tu peux voter pour elle."
+  },
+  "theme": {
+    "label": "Thème",
+    "system": "Comme l'appareil",
+    "light": "Clair",
+    "dark": "Sombre"
   }
 }

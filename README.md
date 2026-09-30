@@ -82,7 +82,7 @@ Les valeurs de production sont gardées en local dans `.env.production.local` (i
 
 ## Charte graphique
 
-- **Couleurs** (tokens dans `src/app/globals.css`, mode sombre selon le réglage du système) : papaye `#F26A2E` (marque), papaye brûlée `#C2410C` (actions), mangue `#FFC23D` (mise en avant), sable `#FFF7F0` (fond), encre figue `#2A1A24` (texte). Olivier `#1F7A4D` et grenade `#B8283F` sont réservés aux résultats des votes. Tous les couples texte/fond respectent le contraste AA.
+- **Couleurs** (tokens dans `src/app/globals.css`, mode sombre selon l'appareil ou le choix fait dans le pied de page) : papaye `#F26A2E` (marque), papaye brûlée `#C2410C` (actions), mangue `#FFC23D` (mise en avant), sable `#FFF7F0` (fond), encre figue `#2A1A24` (texte). Olivier `#1F7A4D` et grenade `#B8283F` sont réservés aux résultats des votes. Tous les couples texte/fond respectent le contraste AA.
 - **Typographies** (`src/app/fonts.ts`) : Bricolage Grotesque pour les titres, Figtree pour le texte, DM Mono pour les lettres de siège.
 - **Mobile d'abord** : cibles tactiles de 44 px, une colonne, actions principales en pleine largeur.
 - **Ton** : tutoiement, voix du groupe (« on »), prénoms plutôt que rôles, pas d'argot ni d'emoji. Vocabulaire : séance, participants, sujets, idées, bilan ; la personne qui crée la séance « l'anime ».
@@ -107,7 +107,8 @@ src/
   components/*.tsx          Composants globaux réutilisables (+ .stories.tsx et .test.tsx)
   components/ui/            Primitives shadcn/ui (Base UI)
   components/phases/        Assemblage des composants globaux pour chaque phase
-  components/room/          En-tête, formulaire d'accès, synchro temps réel
+  components/room/          En-tête, invitation, formulaire d'accès, synchro temps réel
+  components/site/          Éléments communs à toutes les pages (choix du thème)
   lib/actions.ts            Toutes les mutations (Server Actions) et leurs contrôles
   lib/room.ts               Lectures : contexte de room, vue de vote, récapitulatif
   lib/results.ts            Règles de score et de qualification (pures, testées)
@@ -122,7 +123,11 @@ src/
 - **Le serveur fait autorité** : chaque action vérifie la participation, le rôle (animateur ou non) et la phase courante. Le client n'a aucune logique métier critique.
 - **Anonymat** : le client ne reçoit jamais l'auteur d'une idée ni les votes des autres, seulement ses propres votes et, au récapitulatif, les totaux.
 - **Synchronisation** : après chaque mutation, le serveur envoie via Pusher une notification sans contenu (ou, sans Pusher, les clients interrogent le serveur toutes les 3 secondes). Chaque client demande d'abord l'étape en cours (`/r/<slug>/phase`) : si elle a changé, il navigue directement vers la page de la nouvelle étape ; sinon il recharge l'état de la page actuelle (`router.refresh()`). Naviguer directement évite l'écran vide qu'une redirection serveur afficherait pendant la transition.
-- **Sujets typés** : l'animateur choisit le type de réponse de chaque sujet (texte, date, période, montant, fourchette). La saisie s'adapte (sélecteur de dates du téléphone, clavier numérique) et les idées s'affichent proprement (« 12–14 juin 2027 », « 300 € à 500 € »). Les suggestions « Dates » et « Budget » sont typées d'office.
+- **Sujets typés** : l'animateur choisit le type de réponse de chaque sujet (texte, date, période, montant, fourchette). La saisie s'adapte (sélecteur de dates du téléphone, clavier numérique) et les idées s'affichent proprement (« Du 1er au 14 juin 2027 », « De 300 € à 500 € »). Les suggestions « Dates » et « Budget » sont typées d'office.
+- **Doublons** : une idée identique à une autre encore en lice dans le même sujet est refusée (texte comparé sans casse, accents, ponctuation ni espaces ; valeurs identiques pour les sujets typés).
+- **Relance douce** : pendant les votes, chacun voit combien d'idées il lui reste à voter ; la personne qui anime voit en plus combien de participants ont voté, sans savoir quoi.
+- **Invitation** : lien à copier, QR code à scanner pour un groupe réuni au même endroit, et partage natif du téléphone quand le navigateur le propose.
+- **Thème** : clair ou sombre selon l'appareil, ou choisi dans le pied de page. Le choix est gardé dans un cookie (`virgule_theme`) lu par le layout racine, qui rend directement `data-theme` sur `<html>` : aucun flash au chargement.
 - **Chargement et erreurs** : squelettes aux dimensions du vrai contenu pendant le chargement d'une étape (`loading.tsx`), pages d'erreur avec « Réessayer » et retour à l'accueil, l'en-tête de séance restant visible quand l'erreur touche une étape.
 - **Transitions** : changement d'étape animé avec les View Transitions de React (`PhaseTransition`), l'en-tête restant fixe ; apparition douce des nouvelles lignes (idées, sujets, participants), rebond au vote, fondu des couleurs au bilan. Tout est désactivé si l'appareil demande de réduire les animations.
 - **Tours** : une idée porte son tour de création (`createdRound`) et, le cas échéant, le tour à partir duquel elle est écartée (`eliminatedRound`). Les votes sont enregistrés par tour, ce qui conserve l'historique complet.
