@@ -7,7 +7,7 @@ Status as of September 30, 2026.
 | Item | Value |
 | --- | --- |
 | URL | https://virgule.vercel.app |
-| Vercel project | `gobwah40s-projects/virgule`, linked to the GitHub repo (every push to `main` deploys) |
+| Vercel project | `gobwah40s-projects/virgule`, linked to the GitHub repo (every version tag deploys production, see DEPLOYMENT.md step 7) |
 | Server functions | Dublin (`dub1`, see `vercel.json`) |
 | Database | Turso `virgule`, Ireland (`aws-eu-west-1`), migration `20260928074451_init` applied |
 | Purge of expired sessions | Vercel Cron, every day at 3 AM UTC (`/api/cron/purge`), tested: answers `401` without the secret, `{"deleted":0}` with it |
