@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { describeIdea, isIsoDate, MAX_AMOUNT, parseIdeaInput, type IdeaFields } from "@/lib/idea-value";
+import { describeIdea, isIsoDate, MAX_AMOUNT, parseIdeaInput, rangeStartPrecision, withFirstOrdinal, type IdeaFields } from "@/lib/idea-value";
 
 const format = {
   date: (iso: string) => `date(${iso})`,
-  dateRange: (a: string, b: string) => `du ${a} au ${b}`,
+  dateRange: (a: string, b: string) => `Du ${a} au ${b}`,
   amount: (n: number) => `${n} €`,
-  amountRange: (a: number, b: number) => `${a} € à ${b} €`,
+  amountRange: (a: number, b: number) => `De ${a} € à ${b} €`,
 };
 
 const fields = (partial: Partial<IdeaFields>): IdeaFields => ({
@@ -72,9 +72,9 @@ describe("describeIdea", () => {
     expect(describeIdea("TEXT", fields({ content: "Pique-nique" }), format)).toBe("Pique-nique");
     expect(describeIdea("DATE", fields({ dateStart: "2027-06-12" }), format)).toBe("date(2027-06-12)");
     expect(describeIdea("DATE_RANGE", fields({ dateStart: "2027-06-12", dateEnd: "2027-06-14" }), format)).toBe(
-      "du 2027-06-12 au 2027-06-14",
+      "Du 2027-06-12 au 2027-06-14",
     );
-    expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 300, amountMax: 500 }), format)).toBe("300 € à 500 €");
+    expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 300, amountMax: 500 }), format)).toBe("De 300 € à 500 €");
   });
 
   it("une période d'un jour ou une fourchette égale s'affiche comme une valeur simple", () => {
@@ -82,5 +82,28 @@ describe("describeIdea", () => {
       "date(2027-06-12)",
     );
     expect(describeIdea("AMOUNT_RANGE", fields({ amountMin: 400, amountMax: 400 }), format)).toBe("400 €");
+  });
+});
+
+describe("rangeStartPrecision", () => {
+  it("n'affiche que le jour de début dans le même mois", () => {
+    expect(rangeStartPrecision("2027-06-12", "2027-06-14")).toBe("day");
+  });
+  it("ajoute le mois quand il change dans la même année", () => {
+    expect(rangeStartPrecision("2027-06-28", "2027-07-02")).toBe("dayMonth");
+  });
+  it("donne la date complète quand l'année change", () => {
+    expect(rangeStartPrecision("2027-12-30", "2028-01-02")).toBe("full");
+  });
+});
+
+describe("withFirstOrdinal", () => {
+  it("écrit le premier du mois « 1er »", () => {
+    expect(withFirstOrdinal("1 octobre 2026")).toBe("1er octobre 2026");
+    expect(withFirstOrdinal("1")).toBe("1er");
+  });
+  it("laisse les autres jours intacts", () => {
+    expect(withFirstOrdinal("10 octobre 2026")).toBe("10 octobre 2026");
+    expect(withFirstOrdinal("21 octobre 2026")).toBe("21 octobre 2026");
   });
 });

@@ -71,6 +71,18 @@ export function parseIdeaInput(
   }
 }
 
+/**
+ * Précision à donner à la date de début d'une période, pour ne pas répéter ce que
+ * porte déjà la date de fin : « Du 12 au 14 juin 2027 », « Du 28 juin au 2 juillet 2027 ».
+ */
+export function rangeStartPrecision(startIso: string, endIso: string): "day" | "dayMonth" | "full" {
+  if (startIso.slice(0, 4) !== endIso.slice(0, 4)) return "full";
+  return startIso.slice(0, 7) === endIso.slice(0, 7) ? "day" : "dayMonth";
+}
+
+/** En français, le premier du mois s'écrit « 1er » (« 1er octobre 2026 », « Du 1er au 30 »). */
+export const withFirstOrdinal = (formatted: string) => formatted.replace(/^1(?!\d)/, "1er");
+
 export type IdeaFormat = {
   date: (iso: string) => string;
   dateRange: (startIso: string, endIso: string) => string;
