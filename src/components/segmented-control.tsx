@@ -45,7 +45,7 @@ export function SegmentedControl<T extends string>({
             key={optionValue}
             className={cn(
               "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] px-3.5 text-sm font-semibold transition-colors",
-              "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/50",
+              "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/80",
               "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
               optionValue === value
                 ? "border-foreground bg-foreground text-background"

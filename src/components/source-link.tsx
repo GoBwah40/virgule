@@ -10,7 +10,7 @@ export function SourceLink({ href, label, className }: Props) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50",
+        "inline-flex min-h-11 items-center gap-2 rounded-full px-3 text-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/80",
         className,
       )}
     >
