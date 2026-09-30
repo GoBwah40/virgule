@@ -95,7 +95,9 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
       case "DATE":
         return dates.start ? { dateStart: dates.start } : null;
       case "DATE_RANGE":
-        return dates.start && dates.end && dates.end >= dates.start ? { dateStart: dates.start, dateEnd: dates.end } : null;
+        return dates.start && dates.end && dates.end >= dates.start
+          ? { dateStart: dates.start, dateEnd: dates.end }
+          : null;
       case "AMOUNT":
         return amounts.min ? { amountMin: Number(amounts.min) } : null;
       case "AMOUNT_RANGE":
@@ -127,7 +129,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
     <form
       className={cn(
         "flex w-full gap-2",
-        kind === "TEXT" || kind === "CHOICE" ? "items-end" : "flex-col sm:flex-row sm:items-end",
+        kind === "TEXT" || kind === "CHOICE" ? "items-end" : kind !== "PLACE" && "flex-col sm:flex-row sm:items-end",
       )}
       onSubmit={(e) => {
         e.preventDefault();
@@ -135,7 +137,13 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
       }}
     >
       {kind === "PLACE" && (
-        <FormField id={`idea-${themeId}-place`} label={t("place")} hint={t("placeHint")} className="min-w-0 flex-1">
+        <FormField
+          id={`idea-${themeId}-place`}
+          label={t("place")}
+          hint={t("placeHint")}
+          action={button}
+          className="min-w-0 flex-1"
+        >
           <Input
             id={`idea-${themeId}-place`}
             value={content}
@@ -186,7 +194,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
           />
         </div>
       )}
-      {button}
+      {kind !== "PLACE" && button}
     </form>
   );
 }

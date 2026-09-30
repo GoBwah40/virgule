@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
 import { FormField } from "./form-field";
+import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 const meta = {
@@ -18,3 +19,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const WithHint: Story = { args: { hint: "Visible to all participants." } };
+export const WithAction: Story = {
+  args: { hint: "Visible to all participants.", action: <Button>Add</Button> },
+};
