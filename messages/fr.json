@@ -88,6 +88,22 @@
     "titlePlaceholder": "Ex. : Quel lieu choisir ?",
     "descriptionLabel": "Précisions (facultatif)",
     "descriptionPlaceholder": "Contexte, contraintes, envies…",
+    "kindLabel": "Type de réponse",
+    "kinds": {
+      "TEXT": "Texte",
+      "DATE": "Date",
+      "DATE_RANGE": "Période",
+      "AMOUNT": "Montant",
+      "AMOUNT_RANGE": "Fourchette"
+    },
+    "kindHints": {
+      "TEXT": "Chacun propose une idée en quelques mots.",
+      "DATE": "Chacun propose une date.",
+      "DATE_RANGE": "Chacun propose une période : du… au…",
+      "AMOUNT": "Chacun propose un montant en euros.",
+      "AMOUNT_RANGE": "Chacun propose une fourchette en euros : entre… et…"
+    },
+    "kindLocked": "Des idées ont déjà été proposées : le type de réponse ne peut plus changer.",
     "suggestionsLabel": "Idées de sujets",
     "suggestions": {
       "goal": {
@@ -136,6 +152,14 @@
     "roundSubtitle": "Tour {round} : on revote sur les idées retenues, et tu peux en proposer de nouvelles.",
     "empty": "Pas encore d'idée ici. Qui commence ?",
     "placeholder": "Ton idée…",
+    "date": "Date",
+    "dateFrom": "Du",
+    "dateTo": "Au",
+    "amount": "Montant",
+    "amountMin": "Entre",
+    "amountMax": "Et",
+    "currency": "€",
+    "amountRange": "{min} à {max}",
     "add": "Ajouter",
     "mine": "Ton idée",
     "carriedOver": "Retenue au tour précédent",
@@ -217,6 +241,9 @@
     "ideaNotFound": "Cette idée n'est plus disponible.",
     "notAuthor": "Tu ne peux retirer que tes propres idées du tour en cours.",
     "selfVoteForbidden": "Le vote sur tes propres idées est désactivé.",
-    "unknown": "Quelque chose n'a pas marché. Réessaie dans un instant."
+    "unknown": "Quelque chose n'a pas marché. Réessaie dans un instant.",
+    "invalidDateRange": "La date de fin doit être le même jour ou après la date de début.",
+    "invalidAmountRange": "Le second montant doit être supérieur ou égal au premier.",
+    "themeKindLocked": "Des idées ont déjà été proposées sur ce sujet : son type de réponse ne peut plus changer."
   }
 }

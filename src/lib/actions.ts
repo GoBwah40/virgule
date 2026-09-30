@@ -11,6 +11,7 @@ import type { Phase } from "@/generated/prisma/enums";
 import { LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/config";
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
+import { type IdeaInput, parseIdeaInput, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { isActiveInRound, isQualified, scoreVotes } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getRoomContext } from "@/lib/room";
@@ -32,6 +33,9 @@ type ActionError =
   | "ideaNotFound"
   | "notAuthor"
   | "selfVoteForbidden"
+  | "invalidDateRange"
+  | "invalidAmountRange"
+  | "themeKindLocked"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -144,9 +148,12 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
 const themeSchema = z.object({
   title: text(LIMITS.themeTitle),
   description: z.string().trim().max(LIMITS.themeDescription).optional(),
+  kind: z.enum(THEME_KINDS).default("TEXT"),
 });
 
-export async function addTheme(slug: string, input: { title: string; description?: string }) {
+type ThemeInput = { title: string; description?: string; kind?: ThemeKind };
+
+export async function addTheme(slug: string, input: ThemeInput) {
   const parsed = themeSchema.safeParse(input);
   if (!parsed.success) return fail("invalidInput");
   return run(slug, async () => {
@@ -159,6 +166,7 @@ export async function addTheme(slug: string, input: { title: string; description
         roomId: room.id,
         title: parsed.data.title,
         description: parsed.data.description || null,
+        kind: parsed.data.kind,
         position: (last?.position ?? -1) + 1,
       },
     });
@@ -168,15 +176,22 @@ export async function addTheme(slug: string, input: { title: string; description
 export async function updateTheme(
   slug: string,
   themeId: string,
-  input: { title: string; description?: string },
+  input: ThemeInput,
 ) {
   const parsed = themeSchema.safeParse(input);
   if (!parsed.success) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
-    await db.theme.updateMany({
+    const theme = await db.theme.findFirst({
       where: { id: themeId, roomId: room.id },
-      data: { title: parsed.data.title, description: parsed.data.description || null },
+      select: { kind: true, _count: { select: { ideas: true } } },
+    });
+    if (!theme) throw new ActionFailure("invalidInput");
+    // Changer le type rendrait illisibles les idées déjà proposées.
+    if (theme.kind !== parsed.data.kind && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
+    await db.theme.update({
+      where: { id: themeId },
+      data: { title: parsed.data.title, description: parsed.data.description || null, kind: parsed.data.kind },
     });
   });
 }
@@ -222,19 +237,30 @@ export async function startIdeasPhase(slug: string) {
 
 // ─── Phase 2 : idées & votes ───────────────────────────────────────────────
 
-export async function addIdea(slug: string, themeId: string, input: { content: string }) {
-  const parsed = z.object({ content: text(LIMITS.idea) }).safeParse(input);
-  if (!parsed.success) return fail("invalidInput");
+const ideaInputSchema = z.object({
+  content: z.string().optional(),
+  dateStart: z.string().optional(),
+  dateEnd: z.string().optional(),
+  amountMin: z.number().optional(),
+  amountMax: z.number().optional(),
+});
+
+/** Idée texte (`content`) ou typée (dates / montants), validée selon le type du sujet. */
+export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
+  const raw = ideaInputSchema.safeParse(input);
+  if (!raw.success) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const theme = await db.theme.findFirst({ where: { id: themeId, roomId: room.id } });
     if (!theme) throw new ActionFailure("invalidInput");
+    const parsed = parseIdeaInput(theme.kind, raw.data);
+    if (!parsed.ok) throw new ActionFailure(parsed.error);
     await db.idea.create({
       data: {
         roomId: room.id,
         themeId,
         authorId: me.id,
-        content: parsed.data.content,
+        ...parsed.fields,
         createdRound: room.round,
       },
     });
