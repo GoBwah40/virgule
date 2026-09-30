@@ -21,8 +21,8 @@ Values are masked in Vercel; this table shows where each variable exists and wha
 
 | Variable | Production | Preview | Status | Action |
 | --- | --- | --- | --- | --- |
-| `TURSO_DATABASE_URL` | ✅ | ⚠️ | Production: `virgule` database. Preview: unknown old value; the `virgule-preview` database is ready (see "Preview database"). | Replace the Preview value. |
-| `TURSO_AUTH_TOKEN` | ✅ | ⚠️ | Same. | Replace the Preview value. |
+| `TURSO_DATABASE_URL` | ✅ | ✅ | Production: `virgule` database. Preview: `virgule-preview` database (September 30). | — |
+| `TURSO_AUTH_TOKEN` | ✅ | ✅ | Same. | — |
 | `CRON_SECRET` | ✅ | — | The cron only runs in production. | Done: no Preview value. |
 | `DATABASE_URL` | — | — | Only used locally. | Done: removed from both environments. |
 | `PUSHER_APP_ID` | ✅ | — | Production: Pusher app `eu`. Preview: removed on September 30, preview deployments sync by polling. | Preview: fill in if needed. |
@@ -34,21 +34,21 @@ Legend: ✅ in place · ⚠️ to check or clean up · ⏳ to fill in later · �
 
 Locally, production values are in `.env.production.local` and preview values in `.env.preview.local` (ignored by git, readable only by you). Do not share them and never commit them.
 
-### Clean up and complete the variables
+### Update the Preview Turso variables
 
-Run from the project root. Values go through standard input: they are not displayed and do not stay in the terminal history.
+Done on September 30. To repeat after rotating the `virgule-preview` token, from the project root (`.env.preview.local` is not copied into worktrees). Values go through standard input: they are not displayed and do not stay in the terminal history. The checks stop before sending anything if a value is missing, and `--yes` targets every Preview branch instead of asking for one.
 
 ```bash
-(set -a; . ./.env.preview.local; set +a; printf %s "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL preview --force --sensitive; printf %s "$TURSO_AUTH_TOKEN" | vercel env add TURSO_AUTH_TOKEN preview --force --sensitive)
+(set -a && . ./.env.preview.local && set +a && test -n "$TURSO_DATABASE_URL" && test -n "$TURSO_AUTH_TOKEN" && printf %s "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL preview --force --sensitive --yes && printf %s "$TURSO_AUTH_TOKEN" | vercel env add TURSO_AUTH_TOKEN preview --force --sensitive --yes)
 ```
 
-Then `vercel env ls` to check: Preview should only contain `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`, with a recent creation date. `CRON_SECRET`, `DATABASE_URL` and the Preview Pusher values were removed on September 30.
+Each line should end with "Overrode": the creation date shown by `vercel env ls` does not change on an overwrite. Existing preview deployments keep the old values until they are redeployed.
 
 ## Before inviting people
 
 - [x] **Test with two people, locally** (September 30): two separate browsers (`localhost` and `127.0.0.1`, distinct cookies). Second participant arriving, move to ideas followed automatically, idea and vote visible on both sides, duplicate refused, vote indicators up to date.
 - [ ] **Test with two people, from a phone**: open a session in production on the computer, join it from a phone (scan the invitation QR code), check that everything shows up on both sides in less than 3 seconds, and try the "Share" button.
-- [ ] **Replace the Preview variables** flagged ⚠️ above: commands in "Clean up and complete the variables".
+- [x] **Clean up the Vercel variables** (September 30): Preview now points to `virgule-preview`, old values removed.
 - [ ] **Check the first cron run** the next day: Vercel, *Settings → Cron Jobs*, or the project logs.
 
 ## Later
@@ -66,9 +66,7 @@ No code change is needed.
 
 ### Preview database
 
-Today, preview deployments (branches, pull requests) would use the Preview variables, whose value is unknown.
-
-The separate `virgule-preview` database (Ireland, `aws-eu-west-1`) is created and all migrations are applied to it (September 30). Its URL and a token are in `.env.preview.local`. They still have to be copied into the Vercel Preview variables (see "Clean up and complete the variables").
+The separate `virgule-preview` database (Ireland, `aws-eu-west-1`) is created and all migrations are applied to it (September 30). Its URL and a token are in `.env.preview.local` and, since September 30, in the Vercel Preview variables: preview deployments (branches, pull requests) use it.
 
 Each new migration applies to both databases: production (command in "Useful commands") and preview:
 
