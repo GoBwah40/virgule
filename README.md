@@ -85,8 +85,6 @@ Numbering rules, note format and release steps: **[VERSIONS.md](VERSIONS.md)**.
 | Deployment | Automatic on every version tag `vX.Y.Z` pushed (the highest one only), from GitHub Actions |
 | Real time | Pusher Channels (cluster `eu`), with a fallback refresh every 30 seconds |
 
-What is left to do (variables to clean up, preview database, phone test…) is tracked in **[TODO.md](TODO.md)**.
-
 ## Deploying on Vercel
 
 Production runs on Vercel, with a [Turso](https://turso.tech) database (hosted SQLite): Vercel's disk is ephemeral, a SQLite file would not survive there. Pusher is optional.
@@ -97,6 +95,12 @@ Production values are kept locally in `.env.production.local` (ignored by git). 
 
 ```bash
 (set -a; . ./.env.production.local; set +a; pnpm db:migrate:prod)
+```
+
+Preview deployments use a separate `virgule-preview` database: apply each migration to it as well, with the values from `.env.preview.local`:
+
+```bash
+(set -a; . ./.env.preview.local; set +a; pnpm db:migrate:prod)
 ```
 
 ## Brand guidelines
@@ -110,7 +114,6 @@ Production values are kept locally in `.env.production.local` (ignored by git). 
 
 ```
 .docs/                      Mockups and brand guidelines (standalone HTML, see .docs/README.md)
-TODO.md                     Tracking of what is left to do in production
 VERSIONS.md                 Version numbering and writing the notes
 release-notes/en/           Release notes in English: added.md, improved.md, fixed.md
 release-notes/fr/           Same notes in French (same versions and number of lines)
