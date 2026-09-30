@@ -23,12 +23,12 @@ Values are masked in Vercel; this table shows where each variable exists and wha
 | --- | --- | --- | --- | --- |
 | `TURSO_DATABASE_URL` | ✅ | ⚠️ | Production: `virgule` database. Preview: unknown old value; the `virgule-preview` database is ready (see "Preview database"). | Replace the Preview value. |
 | `TURSO_AUTH_TOKEN` | ✅ | ⚠️ | Same. | Replace the Preview value. |
-| `CRON_SECRET` | ✅ | ⚠️ | The cron only runs in production. | Delete the Preview value, not needed. |
-| `DATABASE_URL` | ⚠️ | ⚠️ | Created before going live. Ignored in production (`TURSO_DATABASE_URL` takes precedence), it is only used locally. | Delete from both environments to avoid confusion. |
-| `PUSHER_APP_ID` | ✅ | ⏳ | Production: Pusher app `eu`. | Preview: fill in if needed. |
+| `CRON_SECRET` | ✅ | — | The cron only runs in production. | Done: no Preview value. |
+| `DATABASE_URL` | — | — | Only used locally. | Done: removed from both environments. |
+| `PUSHER_APP_ID` | ✅ | ⚠️ | Production: Pusher app `eu`. Preview: old value from September 28, unknown. | Preview: replace, or delete to sync by polling. |
 | `PUSHER_SECRET` | ✅ | ⏳ | Same. | Same. |
-| `NEXT_PUBLIC_PUSHER_KEY` | ✅ | ⏳ | Public by nature (read by the browser): *Config* type, not *Secret*. | Same. |
-| `NEXT_PUBLIC_PUSHER_CLUSTER` | ✅ | ⏳ | `eu`, *Config* type. | Same. |
+| `NEXT_PUBLIC_PUSHER_KEY` | ✅ | ⚠️ | Public by nature (read by the browser): *Config* type, not *Secret*. The Preview value is still a *Secret*. | Same. |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | ✅ | ⚠️ | `eu`, *Config* type. The Preview value is still a *Secret*. | Same. |
 
 Legend: ✅ in place · ⚠️ to check or clean up · ⏳ to fill in later.
 
@@ -42,25 +42,17 @@ Run from the project root. Values go through standard input: they are not displa
 (set -a; . ./.env.preview.local; set +a; printf %s "$TURSO_DATABASE_URL" | vercel env add TURSO_DATABASE_URL preview --force --sensitive; printf %s "$TURSO_AUTH_TOKEN" | vercel env add TURSO_AUTH_TOKEN preview --force --sensitive)
 ```
 
-```bash
-vercel env rm CRON_SECRET preview -y
-```
+Then `vercel env ls` to check (as of September 30, `CRON_SECRET` and `DATABASE_URL` are already gone from Preview). Without Pusher values for Preview, preview deployments sync by polling; to remove the old ones:
 
 ```bash
-vercel env rm DATABASE_URL preview -y
+for v in PUSHER_APP_ID PUSHER_SECRET NEXT_PUBLIC_PUSHER_KEY NEXT_PUBLIC_PUSHER_CLUSTER; do vercel env rm $v preview -y; done
 ```
-
-```bash
-vercel env rm DATABASE_URL production -y
-```
-
-Then `vercel env ls` to check: Preview should only contain `TURSO_*` and `PUSHER_*`.
 
 ## Before inviting people
 
 - [x] **Test with two people, locally** (September 30): two separate browsers (`localhost` and `127.0.0.1`, distinct cookies). Second participant arriving, move to ideas followed automatically, idea and vote visible on both sides, duplicate refused, vote indicators up to date.
 - [ ] **Test with two people, from a phone**: open a session in production on the computer, join it from a phone (scan the invitation QR code), check that everything shows up on both sides in less than 3 seconds, and try the "Share" button.
-- [ ] **Clean up the variables** flagged ⚠️ above: commands in "Clean up and complete the variables".
+- [ ] **Replace the Preview variables** flagged ⚠️ above: commands in "Clean up and complete the variables".
 - [ ] **Check the first cron run** the next day: Vercel, *Settings → Cron Jobs*, or the project logs.
 
 ## Later
