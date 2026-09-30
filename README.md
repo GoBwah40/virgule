@@ -46,6 +46,7 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | --- | --- |
 | `pnpm dev` | Serveur de développement |
 | `pnpm build` | `prisma generate` + build de production |
+| `pnpm preprod` | Préproduction locale : build de production sur http://localhost:3001, base de prévisualisation (voir plus bas) |
 | `pnpm check` | Lint, types, tests et knip : à lancer avant chaque commit (la CI GitHub Actions le relance à chaque push et pull request) |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
 | `pnpm test` | Tests Vitest : logique (Node) et composants (jsdom) |
@@ -53,7 +54,25 @@ Pour tester à plusieurs sur la même machine, ouvrez le lien de la room sur `ht
 | `pnpm storybook` | Catalogue des composants globaux sur http://localhost:6006 |
 | `pnpm db:migrate` | Crée ou applique une migration sur la base locale |
 | `pnpm db:migrate:prod` | Applique les migrations en attente sur Turso |
+| `pnpm db:migrate:preview` | Idem sur la base de prévisualisation `virgule-preview` (lit `.env.preview.local`) |
 | `pnpm db:studio` | Prisma Studio (base locale) |
+
+### Préproduction locale
+
+Avant de fusionner dans `main`, on vérifie la version telle qu'elle partira en ligne : même build de production, mais sur la base Turso de prévisualisation `virgule-preview`, jamais sur celle de production.
+
+```bash
+pnpm db:migrate:preview   # si la branche contient une migration
+pnpm preprod              # http://localhost:3001
+```
+
+Prérequis : `.env.preview.local` à la racine du projet (URL et jeton de `virgule-preview`, ignoré par git). Le script (`scripts/preprod.sh`) neutralise les variables de production que Next.js chargerait sinon depuis `.env.production.local` ou `.env.local` : sans valeurs Pusher dans `.env.preview.local`, la préproduction se synchronise par polling. Elle tourne à côté de `pnpm dev` sans le gêner.
+
+## Versions et notes de version
+
+La version de l'app est celle de `package.json` (versionnage sémantique, `0.x` pour l'instant) ; chaque mise en production visible en crée une nouvelle, avec un tag git `vX.Y.Z`. Les notes sont rédigées dans [`release-notes/`](release-notes), un fichier par catégorie (ajouts, améliorations, corrections), et s'affichent depuis le bouton « Nouveautés » de l'accueil.
+
+Règles de numérotation, format des notes et étapes de livraison : **[VERSIONS.md](VERSIONS.md)**.
 
 ## En production
 
@@ -92,13 +111,16 @@ Les valeurs de production sont gardées en local dans `.env.production.local` (i
 ```
 .docs/                      Maquettes et charte graphique (HTML autonomes, voir .docs/README.md)
 A_FAIRE.md                  Suivi de ce qu'il reste à faire en production
+VERSIONS.md                 Numérotation des versions et rédaction des notes
+release-notes/              Notes de version : ajouts.md, ameliorations.md, corrections.md
 DEPLOIEMENT.md              Déploiement pas à pas sur Vercel + Turso
 messages/fr.json            Traductions (toutes les chaînes de l'UI)
 prisma/schema.prisma        Modèle : Room, Participant, Theme, Idea, Vote
 scripts/migrate-turso.mts   Application des migrations sur Turso
+scripts/preprod.sh          Préproduction locale (build de production + base de prévisualisation)
 src/
   app/
-    page.tsx                Accueil : création d'une room
+    page.tsx                Accueil : création d'une room, notes de version
     r/[slug]/layout.tsx     Garde d'accès (introuvable / expirée / rejoindre) + en-tête + synchro
     r/[slug]/page.tsx       Lien de partage → redirige vers la phase en cours
     r/[slug]/themes|ideas|recap/page.tsx   Une page par phase
@@ -113,6 +135,7 @@ src/
   lib/room.ts               Lectures : contexte de room, vue de vote, récapitulatif
   lib/results.ts            Règles de score et de qualification (pures, testées)
   lib/export.ts             Formats d'export (purs, testés)
+  lib/release-notes.ts      Lecture des notes de version (pure, testée) ; release-notes-source.ts les charge
   lib/realtime/             Notification Pusher côté serveur
   i18n/                     Configuration next-intl
 ```
@@ -133,6 +156,7 @@ src/
 - **Gestion des places** : clic droit (ou clic) sur une place occupée, pour la personne qui anime : **confier l'animation** à quelqu'un d'autre, ou **retirer** une personne (place prise par erreur ; ses idées et ses votes partent avec elle).
 - **Relance douce** : pendant les votes, chacun voit combien d'idées il lui reste à voter ; la personne qui anime voit en plus combien de participants ont voté, sans savoir quoi.
 - **Invitation** : lien à copier, QR code à scanner pour un groupe réuni au même endroit, et partage natif du téléphone quand le navigateur le propose.
+- **Nouveautés** : un bouton de l'en-tête de l'accueil (numéro de version et pastille tant que la dernière version n'a pas été consultée sur ce navigateur) ouvre les notes de version dans un panneau qui monte du bas de l'écran.
 - **Thème** : clair ou sombre selon l'appareil, ou choisi dans le pied de page. Le choix est gardé dans un cookie (`virgule_theme`) lu par le layout racine, qui rend directement `data-theme` sur `<html>` : aucun flash au chargement.
 - **Chargement et erreurs** : squelettes aux dimensions du vrai contenu pendant le chargement d'une étape (`loading.tsx`), pages d'erreur avec « Réessayer » et retour à l'accueil, l'en-tête de séance restant visible quand l'erreur touche une étape.
 - **Transitions** : changement d'étape animé avec les View Transitions de React (`PhaseTransition`), l'en-tête restant fixe ; apparition douce des nouvelles lignes (idées, sujets, participants), rebond au vote, fondu des couleurs au bilan. Tout est désactivé si l'appareil demande de réduire les animations.

@@ -334,5 +334,18 @@
     "system": "Comme l'appareil",
     "light": "Clair",
     "dark": "Sombre"
+  },
+  "releaseNotes": {
+    "trigger": "Nouveautés",
+    "unread": "Nouvelle version",
+    "title": "Nouveautés",
+    "description": "Ce qui a changé dans Virgule, version par version.",
+    "close": "Fermer",
+    "latest": "Dernière",
+    "categories": {
+      "added": "Ajouts",
+      "improved": "Améliorations",
+      "fixed": "Corrections"
+    }
   }
 }
