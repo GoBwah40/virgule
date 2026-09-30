@@ -1,14 +1,13 @@
 import "server-only";
 
-import { getFormatter, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 
 import { type IdeaFormat, rangeStartPrecision, withFirstOrdinal } from "@/lib/idea-value";
 
-/** Formats des synthèses du bilan (créneau commun, budget compatible). */
+/** Formats of the recap summaries (common slot, compatible budget). */
 type OverlapFormat = { dateSpan: (start: string, end: string) => string; amountSpan: (min: number, max: number) => string };
 
-// Les dates des idées sont des jours calendaires : on les lit et les affiche en UTC
-// pour qu'aucun fuseau ne les décale d'un jour.
+// Idea dates are calendar days: read and displayed in UTC so that no time zone shifts them by a day.
 const toDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
 const DAY = { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" } as const;
 const START = {
@@ -17,18 +16,27 @@ const START = {
   full: DAY,
 } as const;
 
-/** Formateurs français pour `describeIdea` (« Du … au … », « De … € à … € », euros sans centimes). */
+/**
+ * Formatters for `describeIdea`, in the current language, euros without cents.
+ * French builds « Du 1er au 14 juin 2027 » by hand; other languages use the native
+ * date range format ("June 1 – 14, 2027").
+ */
 export async function getIdeaFormat(): Promise<IdeaFormat & OverlapFormat> {
   const format = await getFormatter();
   const t = await getTranslations("ideas");
-  const day = (iso: string, options: (typeof START)[keyof typeof START]) =>
-    withFirstOrdinal(format.dateTime(toDate(iso), options));
+  const french = (await getLocale()) === "fr";
+  const day = (iso: string, options: (typeof START)[keyof typeof START]) => {
+    const formatted = format.dateTime(toDate(iso), options);
+    return french ? withFirstOrdinal(formatted) : formatted;
+  };
   const amount = (value: number) =>
     format.number(value, { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 
+  // Each message picks what it needs: French uses start and end, English the whole range.
   const dateParts = (start: string, end: string) => ({
     start: day(start, START[rangeStartPrecision(start, end)]),
     end: day(end, DAY),
+    range: format.dateTimeRange(toDate(start), toDate(end), DAY),
   });
 
   return {
@@ -36,7 +44,7 @@ export async function getIdeaFormat(): Promise<IdeaFormat & OverlapFormat> {
     dateRange: (start, end) => t("dateRange", dateParts(start, end)),
     amount,
     amountRange: (min, max) => t("amountRange", { min: amount(min), max: amount(max) }),
-    // En milieu de phrase (« Créneau commun : du 12 au 14 juin 2027 »).
+    // Mid-sentence (« Créneau commun : du 12 au 14 juin 2027 », "Common slot: June 12 – 14, 2027").
     dateSpan: (start, end) => (start === end ? day(start, DAY) : t("dateRangeInline", dateParts(start, end))),
     amountSpan: (min, max) => (min === max ? amount(min) : t("amountRangeInline", { min: amount(min), max: amount(max) })),
   };

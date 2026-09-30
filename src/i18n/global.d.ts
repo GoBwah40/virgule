@@ -1,4 +1,4 @@
-import type messages from "../../messages/fr.json";
+import type messages from "../../messages/en.json";
 
 // Typage des clés de traduction : une clé manquante ou mal orthographiée est une erreur TS.
 declare module "next-intl" {

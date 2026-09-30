@@ -1,6 +1,5 @@
 import { getFormatter, getTranslations } from "next-intl/server";
 
-import { defaultLocale } from "@/i18n/config";
 import { exportFileName, toCsv, toMarkdown, type ExportLabels } from "@/lib/export";
 import { getOverviewText } from "@/lib/overview-format";
 import { getRecap, getRoomContext } from "@/lib/room";
@@ -25,9 +24,9 @@ export async function GET(request: Request, { params }: RouteContext<"/r/[slug]/
 
   const rounds = await getRecap(ctx.room, null);
   const now = new Date();
-  const t = await getTranslations({ locale: defaultLocale, namespace: "export" });
-  const tRecap = await getTranslations({ locale: defaultLocale, namespace: "recap" });
-  const format_ = await getFormatter({ locale: defaultLocale });
+  const t = await getTranslations("export");
+  const tRecap = await getTranslations("recap");
+  const format_ = await getFormatter();
   const overviewText = await getOverviewText();
 
   const labels: ExportLabels = {
