@@ -4,7 +4,7 @@ Virgule follows [semantic versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
 
 ## Numbering a version
 
-Every push to `main` goes to production: **one visible production release = one version**.
+Production is deployed from version tags only (the highest `vX.Y.Z` pushed, see DEPLOYMENT.md step 7): **one visible production release = one version**.
 
 | What the version contains | We increment | Example |
 | --- | --- | --- |
@@ -53,7 +53,7 @@ The home page reads the files of the current language (`src/lib/release-notes-so
 2. If the version contains a migration: apply it on the preview database (`pnpm db:migrate:preview`).
 3. `pnpm check`, then check in local preproduction: `pnpm preprod` (see the README).
 4. Apply the migration, if any, in production (see the README), then merge the pull request into `main`.
-5. Tag the `main` commit that goes to production:
+5. Tag the `main` commit that goes to production. Pushing the tag deploys it (GitHub Actions, `.github/workflows/deploy.yml`):
 
    ```bash
    git tag -a v0.5.0 -m "Virgule 0.5.0" && git push origin v0.5.0

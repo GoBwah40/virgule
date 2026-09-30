@@ -82,7 +82,7 @@ Numbering rules, note format and release steps: **[VERSIONS.md](VERSIONS.md)**.
 | --- | --- |
 | Hosting | Vercel, project `gobwah40s-projects/virgule`, functions in Dublin (`dub1`) |
 | Database | Turso `virgule`, Ireland (`aws-eu-west-1`) |
-| Deployment | Automatic on every push to `main` |
+| Deployment | Automatic on every version tag `vX.Y.Z` pushed (the highest one only), from GitHub Actions |
 | Real time | Pusher Channels (cluster `eu`), with a fallback refresh every 30 seconds |
 
 What is left to do (variables to clean up, preview database, phone test…) is tracked in **[TODO.md](TODO.md)**.

@@ -128,9 +128,60 @@ Do not set `DATABASE_URL` on Vercel: it is only used locally.
 
 Vercel adds the `Authorization: Bearer $CRON_SECRET` header itself when it calls the scheduled job. On the Hobby plan, a job can run once a day, at any moment within the scheduled hour, which is enough here.
 
+## 7. Deploy production from version tags
+
+Production is not deployed on every push to `main`, only when a version tag (`vX.Y.Z`) is pushed. Two pieces make this work:
+
+- `vercel.json` turns off Vercel's automatic deployments of `main` (`"git": { "deploymentEnabled": { "main": false } }`). Other branches and pull requests still get their preview deployment.
+- The GitHub Actions workflow `.github/workflows/deploy.yml` runs on every `v*` tag and deploys it with the Vercel CLI (`vercel deploy --prod`). Vercel builds the sources itself, with the project's environment variables, as for a Git deployment.
+
+The workflow only deploys when the tag is **the highest version**: pushing an older tag (for example to backfill the history) does nothing. It fails, without deploying, if the tag does not point to a commit of `main` or does not match the `version` of `package.json`. If two tags are pushed close together, the newer one cancels the deployment still in progress.
+
+### One-time setup
+
+1. **Create a Vercel token.** On [vercel.com/account/tokens](https://vercel.com/account/tokens), click **Create**, name it `github-actions-virgule`, scope it to the team that owns the project, and pick an expiry date (write it down: deployments stop when it expires). Copy the value, it is shown only once.
+2. **Get the project identifiers.** From the project root:
+
+   ```bash
+   npx --yes vercel@latest link --yes --scope gobwah40s-projects --project virgule
+   ```
+
+   ```bash
+   cat .vercel/project.json
+   ```
+
+   The file contains `orgId` and `projectId`. The `.vercel` folder is not versioned. Both values are also shown in Vercel: **Team Settings → General → Team ID** and **Project Settings → General → Project ID**.
+3. **Add the secrets to GitHub.** In the repository, **Settings → Secrets and variables → Actions → New repository secret**, create:
+
+   | Secret | Value |
+   | --- | --- |
+   | `VERCEL_TOKEN` | token from step 1 |
+   | `VERCEL_ORG_ID` | `orgId` |
+   | `VERCEL_PROJECT_ID` | `projectId` |
+
+4. **Check Vercel's Git settings.** In **Project Settings → Git**, the production branch stays `main`. Nothing else to change: `vercel.json` already turns off its automatic deployments.
+
+### Shipping
+
+Once the pull request is merged into `main` (and the migration applied, if any), tag the merge commit and push the tag:
+
+```bash
+git switch main && git pull
+```
+
+```bash
+git tag -a v0.6.0 -m "Virgule 0.6.0" && git push origin v0.6.0
+```
+
+Follow the run in the repository's **Actions** tab (**Deploy to production** workflow), then in Vercel under **Deployments**: the deployment appears with the *Production* label.
+
+### Rolling back
+
+Push no new tag for an old version: it would not be the highest one and the workflow would skip it. In Vercel, open the previous production deployment and use **Instant Rollback**, then fix forward with a new version.
+
 ## Routine updates
 
-Every `git push` to `main` triggers a production deployment. Every branch or pull request gets a preview deployment.
+Every version tag pushed to GitHub triggers a production deployment (see step 7). Every branch or pull request gets a preview deployment.
 
 ### When the database schema changes
 
@@ -141,7 +192,7 @@ Order matters: the database must be migrated **before** the new code runs.
    ```bash
    TURSO_DATABASE_URL="libsql://…" TURSO_AUTH_TOKEN="…" pnpm db:migrate:prod
    ```
-3. Commit and push. Vercel deploys the new code.
+3. Merge into `main`, then push the version tag. Vercel deploys the new code.
 
 Prefer migrations compatible with the old code: add an optional column rather than rename or delete. That way, nothing breaks between steps 2 and 3.
 
@@ -160,6 +211,8 @@ By default, Turso variables apply to every Vercel environment: preview deploymen
 | The app tries to open `file:./dev.db` in production | `TURSO_DATABASE_URL` missing from the environment concerned | Check the variable for *Production* (and *Preview*) |
 | No instant update, but a refresh every ~30 s | Pusher OK in the browser, server-side sending fails | Check `PUSHER_APP_ID` and `PUSHER_SECRET`; logs show `[realtime] notification failed` |
 | Updates every 3 s despite Pusher | `NEXT_PUBLIC_PUSHER_*` added after the build | Redeploy |
+| A tag was pushed, nothing is deployed | The tag is not the highest version, or the secrets are missing | Read the **Deploy to production** run in the **Actions** tab |
+| `Error: The specified token is not valid` in the workflow | `VERCEL_TOKEN` expired or revoked | Create a new token, update the GitHub secret, re-run the workflow |
 | The cron deletes nothing | No room older than 7 days, or `CRON_SECRET` missing | Test with the `curl` command from step 6 |
 
 Runtime logs are in Vercel, under **Deployments → (deployment) → Logs** or in the project's **Logs** tab.
