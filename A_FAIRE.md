@@ -11,7 +11,8 @@
 | Fonctions serveur | Dublin (`dub1`, voir `vercel.json`) |
 | Base de données | Turso `virgule`, Irlande (`aws-eu-west-1`), migration `20260928074451_init` appliquée |
 | Purge des séances expirées | Vercel Cron, chaque jour à 3 h UTC (`/api/cron/purge`), testée : répond `401` sans secret, `{"deleted":0}` avec |
-| Temps réel | Pas de Pusher : les navigateurs se resynchronisent toutes les 3 secondes (vérifié en production) |
+| Temps réel | Pusher Channels, cluster `eu` : notification reçue en direct, vérifiée en production le 30 septembre. Repli automatique sur un rafraîchissement toutes les 30 secondes |
+| Protection de `main` | Ruleset « main » actif : pull request obligatoire, CI « Lint, types, tests, knip » verte avant fusion, ni suppression ni force-push. Dépôt public |
 | Séance de test | « Test de mise en ligne », créée en production pendant la vérification, supprimée automatiquement après 7 jours |
 
 ## Variables d'environnement Vercel
@@ -24,10 +25,10 @@ Les valeurs sont masquées dans Vercel ; ce tableau indique où chaque variable 
 | `TURSO_AUTH_TOKEN` | ✅ | ⚠️ | Idem. | Remplacer la valeur Preview. |
 | `CRON_SECRET` | ✅ | ⚠️ | Le cron ne tourne qu'en production. | Supprimer la valeur Preview, inutile. |
 | `DATABASE_URL` | ⚠️ | ⚠️ | Créée avant la mise en ligne. Ignorée en production (`TURSO_DATABASE_URL` est prioritaire), elle ne sert qu'en local. | Supprimer des deux environnements pour éviter la confusion. |
-| `PUSHER_APP_ID` | ⏳ | ⏳ | Existe mais n'est pas utilisée pour l'instant. | À renseigner avec Pusher (voir plus bas). |
-| `PUSHER_SECRET` | ⏳ | ⏳ | Idem. | Idem. |
-| `NEXT_PUBLIC_PUSHER_KEY` | ⏳ | ⏳ | Vide en production (vérifié : le client Pusher ne se charge pas). | Idem. |
-| `NEXT_PUBLIC_PUSHER_CLUSTER` | ⏳ | ⏳ | Existe mais n'est pas utilisée pour l'instant. | Idem, par exemple `eu`. |
+| `PUSHER_APP_ID` | ✅ | ⏳ | Production : app Pusher `eu`. | Preview : à renseigner si besoin. |
+| `PUSHER_SECRET` | ✅ | ⏳ | Idem. | Idem. |
+| `NEXT_PUBLIC_PUSHER_KEY` | ✅ | ⏳ | Publique par nature (lue par le navigateur) : type *Config*, pas *Secret*. | Idem. |
+| `NEXT_PUBLIC_PUSHER_CLUSTER` | ✅ | ⏳ | `eu`, type *Config*. | Idem. |
 
 Légende : ✅ en place · ⚠️ à vérifier ou nettoyer · ⏳ à renseigner plus tard.
 
@@ -64,10 +65,12 @@ Puis `vercel env ls` pour vérifier : Preview ne doit plus contenir que `TURSO_*
 
 ## Plus tard
 
-### Activer Pusher (temps réel instantané)
+### Pusher (activé le 30 septembre)
+
+Procédure suivie, à refaire pour Preview ou en cas de changement d'app :
 
 1. Créer une app *Channels* sur [pusher.com](https://pusher.com) (offre Sandbox gratuite), cluster `eu`.
-2. Dans *App Keys*, relever `app_id`, `key`, `secret` et `cluster`, puis les ajouter dans Vercel (Production, et Preview si besoin), par exemple : `vercel env add PUSHER_SECRET production --force --sensitive` (la valeur est demandée sans s'afficher). Les 4 variables : `PUSHER_APP_ID`, `PUSHER_SECRET`, `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`. Les copier aussi dans `.env.local` pour tester en local.
+2. Dans *App Keys*, relever `app_id`, `key`, `secret` et `cluster`, puis les ajouter dans Vercel (Production, et Preview si besoin), par exemple : `vercel env add PUSHER_SECRET production --force --sensitive` (la valeur est demandée sans s'afficher). Les deux variables `NEXT_PUBLIC_*` sont publiques : Vercel refuse `--sensitive`, utiliser `--no-sensitive`. Les 4 variables : `PUSHER_APP_ID`, `PUSHER_SECRET`, `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER`. Les copier aussi dans `.env.local` pour tester en local.
 3. Redéployer : *Deployments → ⋯ → Redeploy*. Les variables `NEXT_PUBLIC_*` sont intégrées au moment du build, un simple enregistrement ne suffit pas.
 4. Vérifier : les mises à jour deviennent instantanées ; en cas d'échec, les logs affichent `[realtime] échec de notification` et l'app revient au rafraîchissement toutes les 30 secondes.
 
@@ -88,7 +91,7 @@ Chaque nouvelle migration s'applique aux deux bases : la production (commande da
 ### Qualité et exploitation
 
 - [x] **Intégration continue** : `.github/workflows/ci.yml` lance `pnpm check` et le build Storybook à chaque push sur `main` et sur chaque pull request.
-- [ ] **Rendre la CI obligatoire** : sur GitHub, *Settings → Rules → Rulesets → New branch ruleset*, cible `main`, cocher « Require status checks to pass » et choisir « Lint, types, tests, knip ». Sans cette règle, la CI signale un problème mais n'empêche pas de fusionner. Attention : sur un dépôt **privé**, ces règles demandent GitHub Pro (ou Team) ; avec l'offre gratuite, il faut soit rendre le dépôt public, soit continuer à vérifier la CI à la main avant de fusionner.
+- [x] **Rendre la CI obligatoire** (30 septembre, dépôt passé en public) : sur GitHub, *Settings → Rules → Rulesets → New branch ruleset*, cible `main`, cocher « Require status checks to pass » et choisir « Lint, types, tests, knip ». Sans cette règle, la CI signale un problème mais n'empêche pas de fusionner. Attention : sur un dépôt **privé**, ces règles demandent GitHub Pro (ou Team) ; avec l'offre gratuite, il faut soit rendre le dépôt public, soit continuer à vérifier la CI à la main avant de fusionner.
 - [ ] **Domaine personnalisé** si besoin : Vercel, *Settings → Domains*.
 - [ ] **Rotation du jeton Turso** de temps en temps : `turso db tokens create virgule`, mettre à jour `TURSO_AUTH_TOKEN` dans Vercel et dans `.env.production.local`, redéployer, puis révoquer l'ancien (`turso db tokens invalidate virgule` invalide tous les jetons existants).
 - [ ] **Sauvegardes** : vérifier les options de restauration de ton offre Turso.
