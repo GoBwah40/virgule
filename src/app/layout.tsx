@@ -40,7 +40,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider>{children}</TooltipProvider>
           <footer className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pb-4">
             <SourceLink href={REPO_URL} label={tFooter("source")} className="-ml-3" />
-            <div className="flex gap-2">
+            <div className="-mr-3 flex">
               <LocalePreferenceToggle initial={isLocale(locale) ? locale : defaultLocale} />
               <ThemePreferenceToggle initial={theme} />
             </div>

@@ -1,14 +1,15 @@
 "use client";
 
+import { Globe } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
-import { LocaleToggle } from "@/components/locale-toggle";
+import { PreferenceMenu } from "@/components/preference-menu";
 import { LOCALE_COOKIE, type Locale, localeNames, locales } from "@/i18n/config";
 
 const ONE_YEAR = 60 * 60 * 24 * 365;
-const OPTIONS = locales.map((locale) => ({ value: locale, short: locale.toUpperCase(), name: localeNames[locale] }));
+const OPTIONS = locales.map((locale) => ({ value: locale, label: localeNames[locale], lang: locale }));
 
 /** Saves the chosen language for the next server renders, then re-renders the page in it. */
 export function LocalePreferenceToggle({ initial }: { initial: Locale }) {
@@ -23,5 +24,5 @@ export function LocalePreferenceToggle({ initial }: { initial: Locale }) {
     router.refresh();
   };
 
-  return <LocaleToggle value={value} options={OPTIONS} onChange={change} labels={{ group: t("label") }} />;
+  return <PreferenceMenu value={value} options={OPTIONS} onChange={change} label={t("label")} icon={Globe} showValue />;
 }
