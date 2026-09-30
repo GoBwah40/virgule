@@ -2,6 +2,11 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.5.1 — 2026-09-30
+
+- What's new now slides up from the bottom, and takes more room on a computer.
+- A link to Virgule's source code at the bottom of the page.
+
 ## 0.4.0 — 2026-09-30
 
 - New home page.

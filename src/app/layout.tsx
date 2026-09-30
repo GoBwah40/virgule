@@ -5,10 +5,12 @@ import { getLocale, getTranslations } from "next-intl/server";
 
 import { LocalePreferenceToggle } from "@/components/site/locale-preference";
 import { ThemePreferenceToggle } from "@/components/site/theme-preference";
+import { SourceLink } from "@/components/source-link";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { defaultLocale } from "@/i18n/config";
 import { isLocale } from "@/i18n/locale";
+import { REPO_URL } from "@/lib/config";
 import { parseThemePreference, THEME_COOKIE } from "@/lib/theme";
 
 import { fontVariables } from "./fonts";
@@ -25,6 +27,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
   // Theme chosen by the person; without a choice, the device setting applies (CSS).
+  const tFooter = await getTranslations("footer");
   const theme = parseThemePreference((await cookies()).get(THEME_COOKIE)?.value);
   return (
     <html
@@ -35,9 +38,12 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col text-base">
         <NextIntlClientProvider>
           <TooltipProvider>{children}</TooltipProvider>
-          <footer className="mx-auto flex w-full max-w-5xl justify-end gap-2 px-4 pb-4">
-            <LocalePreferenceToggle initial={isLocale(locale) ? locale : defaultLocale} />
-            <ThemePreferenceToggle initial={theme} />
+          <footer className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pb-4">
+            <SourceLink href={REPO_URL} label={tFooter("source")} className="-ml-3" />
+            <div className="flex gap-2">
+              <LocalePreferenceToggle initial={isLocale(locale) ? locale : defaultLocale} />
+              <ThemePreferenceToggle initial={theme} />
+            </div>
           </footer>
           <Toaster theme={theme} richColors position="top-center" />
         </NextIntlClientProvider>
