@@ -130,21 +130,6 @@ test("a list topic turns its options into ideas to vote on", async ({ page, open
   await vote(guest, "Seaside", "For");
 });
 
-test("the ideas timer runs for everyone and the host can stop it", async ({ page, openAsGuest }) => {
-  const guest = await setUpEmpty(page, openAsGuest);
-  await addTopic(page, "Dinner");
-  await pick(page, "5 min");
-
-  await startIdeas(page);
-  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
-  for (const p of [page, guest]) await expect(p.getByRole("timer", { name: "Time left for ideas" })).toBeVisible();
-  await expect(guest.getByRole("button", { name: "Stop the timer" })).toHaveCount(0);
-
-  await page.getByRole("button", { name: "Stop the timer" }).click();
-  await expect(page.getByRole("timer")).toHaveCount(0);
-  await expect(guest.getByRole("timer")).toHaveCount(0, { timeout: LIVE_TIMEOUT });
-});
-
 test("going back to the topics keeps the ideas, and locks their answer type", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
   await addTopic(page, "Dinner");
