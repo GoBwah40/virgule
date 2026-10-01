@@ -7,6 +7,9 @@ import { choose, expect, join, LIVE_TIMEOUT, setUpSession, test } from "./helper
 async function scanQrCode(page: Page) {
   const svg = page.getByRole("dialog").getByRole("img", { name: "QR code for the invite link" });
   await expect(svg).toBeVisible();
+  // The guests opened after the host take the front: Chromium can hold image loading in a page
+  // left behind, so the host's page comes back to the front before drawing.
+  await page.bringToFront();
   const image = await svg.evaluate(async (element) => {
     const size = 400;
     const source = new Image();
