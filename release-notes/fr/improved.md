@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.2 — 2026-10-01
+
+- Les menus, infobulles et fenêtres apparaissent sans mouvement quand ton appareil demande de réduire les animations.
+
 ## 0.6.1 — 2026-10-01
 
 - L'animation du vote est plus douce, et les écrans d'erreur ou de page introuvable sont plus sobres.

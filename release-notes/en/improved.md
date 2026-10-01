@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.2 — 2026-10-01
+
+- Menus, tooltips and dialogs appear without moving when your device asks to reduce motion.
+
 ## 0.6.1 — 2026-10-01
 
 - The vote animation is smoother, and the not-found and error screens are more understated.
