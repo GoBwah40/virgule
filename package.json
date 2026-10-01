@@ -13,6 +13,7 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm knip",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "postinstall": "prisma generate",
@@ -48,6 +49,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@storybook/addon-a11y": "10.6.0",
     "@storybook/addon-docs": "10.6.0",
     "@storybook/nextjs-vite": "10.6.0",
