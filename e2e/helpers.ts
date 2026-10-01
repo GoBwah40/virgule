@@ -3,7 +3,7 @@ import path from "node:path";
 import { createClient } from "@libsql/client";
 import { type BrowserContext, test as base, expect, type Page } from "@playwright/test";
 
-// Server action then redirect: slower than a plain render under `next dev` with several workers.
+// Server action then redirect: leaves room for a busy CI runner.
 const REDIRECT_TIMEOUT = 15_000;
 
 /** Changes made by someone else reach a page by polling (every 3 s, no Pusher in tests). */
@@ -25,7 +25,7 @@ export async function createRoom(page: Page, { name, host }: { name: string; hos
 export { expect };
 
 /** Opens the share link as a new person (fresh browser context, so no participation cookie). */
-type OpenAsGuest = (link: string) => Promise<Page>;
+type OpenAsGuest = (link: string, options?: { locale?: string }) => Promise<Page>;
 
 export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
   // Closed at the end of each test: an open session page keeps polling the server every 3 s,
@@ -33,8 +33,8 @@ export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
   // `provide` rather than `use`: the React Hooks lint rule would take it for `React.use`.
   openAsGuest: async ({ browser }, provide) => {
     const contexts: BrowserContext[] = [];
-    await provide(async (link) => {
-      const context = await browser.newContext({ locale: "en-US" });
+    await provide(async (link, { locale = "en-US" } = {}) => {
+      const context = await browser.newContext({ locale });
       contexts.push(context);
       const page = await context.newPage();
       await page.goto(link);
@@ -56,6 +56,13 @@ export async function addTopic(page: Page, title: string) {
   await page.getByLabel("Topic", { exact: true }).fill(title);
   await page.getByRole("button", { name: "Add the topic" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: title })).toBeVisible();
+}
+
+/** Picks an option of a segmented control: the radio itself is visually hidden, people tap its pill. */
+export async function pick(page: Page, name: string) {
+  const radio = page.getByRole("radio", { name, exact: true });
+  await page.locator("label", { has: radio }).click();
+  await expect(radio).toBeChecked();
 }
 
 /** Host: starts the ideas phase; the guests' pages follow by themselves. */
