@@ -1,6 +1,10 @@
+import type { Phase } from "@/generated/prisma/enums";
+
 export const MAX_PARTICIPANTS = 6;
 export const ROOM_TTL_DAYS = 7;
 export const MAX_THEMES = 20;
+/** Steps during which the host can remove someone: from the recap on, it would change the results. */
+export const REMOVE_PARTICIPANT_PHASES: readonly Phase[] = ["THEMES", "IDEAS"];
 
 export const LIMITS = {
   roomName: 80,
