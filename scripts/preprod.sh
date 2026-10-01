@@ -17,7 +17,8 @@ set +a
 
 # `next build` and `next start` also load .env.production.local (production values), but
 # never override a variable that is already set, even if empty: so we set here every one that
-# could point to production. Without Pusher, the app syncs by polling.
+# could point to production. Without Pusher, the app syncs by polling; without Upstash,
+# nothing is rate limited.
 export TURSO_AUTH_TOKEN="${TURSO_AUTH_TOKEN:-}"
 export DATABASE_URL="${DATABASE_URL:-}"
 export CRON_SECRET="${CRON_SECRET:-}"
@@ -25,6 +26,8 @@ export PUSHER_APP_ID="${PUSHER_APP_ID:-}"
 export PUSHER_SECRET="${PUSHER_SECRET:-}"
 export NEXT_PUBLIC_PUSHER_KEY="${NEXT_PUBLIC_PUSHER_KEY:-}"
 export NEXT_PUBLIC_PUSHER_CLUSTER="${NEXT_PUBLIC_PUSHER_CLUSTER:-eu}"
+export UPSTASH_REDIS_REST_URL="${UPSTASH_REDIS_REST_URL:-}"
+export UPSTASH_REDIS_REST_TOKEN="${UPSTASH_REDIS_REST_TOKEN:-}"
 
 echo "preprod: database $TURSO_DATABASE_URL"
 pnpm build

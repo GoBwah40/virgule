@@ -23,6 +23,7 @@ A room expires **7 days** after it is created; a daily scheduled job then delete
 | UI | shadcn/ui (on Base UI), Tailwind CSS v4, lucide-react |
 | Database | Prisma 7 + libSQL adapter: SQLite file locally, [Turso](https://turso.tech) in production |
 | Real time | [Pusher Channels](https://pusher.com/channels) (optional), with automatic fallback to polling |
+| Rate limiting | [Upstash Redis](https://upstash.com) (optional), per IP and per participant |
 | i18n | next-intl: English and French |
 | Quality | Vitest + Testing Library, Storybook 10, ESLint, knip |
 | Hosting | Vercel (+ Vercel Cron for the purge) |
@@ -66,7 +67,7 @@ pnpm db:migrate:preview   # if the branch contains a migration
 pnpm preprod              # http://localhost:3001
 ```
 
-Requirement: `.env.preview.local` at the project root (URL and token of `virgule-preview`, ignored by git). The script (`scripts/preprod.sh`) neutralizes the production variables Next.js would otherwise load from `.env.production.local` or `.env.local`: without Pusher values in `.env.preview.local`, preproduction syncs by polling. It runs alongside `pnpm dev` without getting in its way.
+Requirement: `.env.preview.local` at the project root (URL and token of `virgule-preview`, ignored by git). The script (`scripts/preprod.sh`) neutralizes the production variables Next.js would otherwise load from `.env.production.local` or `.env.local`: without Pusher values in `.env.preview.local`, preproduction syncs by polling, and without Upstash values, nothing is rate limited. It runs alongside `pnpm dev` without getting in its way.
 
 ## Versions and release notes
 
@@ -142,6 +143,7 @@ src/
   lib/export.ts             Export formats (pure, tested)
   lib/release-notes.ts      Parsing of the release notes (pure, tested); release-notes-source.ts loads them
   lib/realtime/             Server-side Pusher notification
+  lib/rate-limit.ts         Rate limiting (Upstash, optional)
   i18n/                     next-intl configuration, supported languages, language detection
 ```
 

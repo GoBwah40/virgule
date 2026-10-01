@@ -22,6 +22,7 @@ import { notifyRoom } from "@/lib/realtime/server";
 import { ideaKey, type IdeaInput, parseChoiceOptions, parseIdeaInput, readChoiceOptions, textKey, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
+import { isRateLimited } from "@/lib/rate-limit";
 import { getRoomContext } from "@/lib/room";
 import { setParticipantToken } from "@/lib/session";
 
@@ -51,6 +52,7 @@ type ActionError =
   | "cannotTargetSelf"
   | "invalidOptions"
   | "choiceClosed"
+  | "tooManyRequests"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -86,6 +88,7 @@ async function guard(slug: string, opts: { host?: boolean; phase?: Phase } = {})
   if (ctx.status === "not_found") throw new ActionFailure("roomNotFound");
   if (ctx.status === "expired") throw new ActionFailure("roomExpired");
   if (!ctx.me) throw new ActionFailure("notJoined");
+  if (await isRateLimited("participant", ctx.me.id)) throw new ActionFailure("tooManyRequests");
   if (opts.host && !ctx.me.isHost) throw new ActionFailure("notHost");
   if (opts.phase && ctx.room.phase !== opts.phase) throw new ActionFailure("wrongPhase");
   return { room: ctx.room, me: ctx.me };
@@ -119,6 +122,7 @@ const createSchema = z.object({ name: text(LIMITS.roomName), pseudo: text(LIMITS
 export async function createRoom(input: { name: string; pseudo: string }): Promise<ActionResult> {
   const parsed = createSchema.safeParse(input);
   if (!parsed.success) return fail("invalidInput");
+  if (await isRateLimited("createRoom")) return fail("tooManyRequests");
 
   const slug = newSlug();
   const token = newToken();
@@ -146,6 +150,7 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
   if (ctx.me) redirect(phasePath(slug, ctx.room.phase));
   if (ctx.room.phase === "CLOSED") return fail("roomClosed");
   if (ctx.participants.length >= MAX_PARTICIPANTS) return fail("roomFull");
+  if (await isRateLimited("joinRoom")) return fail("tooManyRequests");
   if (ctx.participants.some((p) => p.pseudo.toLowerCase() === pseudo.toLowerCase())) {
     return fail("pseudoTaken");
   }
