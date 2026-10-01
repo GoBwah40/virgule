@@ -1,7 +1,8 @@
+import { readFile } from "node:fs/promises";
 import path from "node:path";
 
 import { createClient } from "@libsql/client";
-import { type BrowserContext, test as base, expect, type Page } from "@playwright/test";
+import { type BrowserContext, test as base, expect, type Locator, type Page } from "@playwright/test";
 
 // Server action then redirect: leaves room for a busy CI runner.
 const REDIRECT_TIMEOUT = 15_000;
@@ -19,12 +20,29 @@ async function write(sql: string, args: string[]) {
   await db.execute({ sql, args });
 }
 
+/**
+ * Fills in a form, then submits it. Typed before React has hydrated the page, a value shows in
+ * the field but not in the component state, and the button stays disabled: type it again until
+ * the button is enabled. A person cannot type that fast after the page loads; Playwright can.
+ */
+async function fillAndSubmit(fields: [Locator, string][], submit: Locator) {
+  await expect(async () => {
+    for (const [field, value] of fields) await field.fill(value);
+    await expect(submit).toBeEnabled({ timeout: 1_000 });
+  }).toPass({ timeout: REDIRECT_TIMEOUT });
+  await submit.click();
+}
+
 /** Creates a session from the home page and returns its share link. */
 export async function createRoom(page: Page, { name, host }: { name: string; host: string }) {
   await page.goto("/");
-  await page.getByLabel("Session name").fill(name);
-  await page.getByLabel("Your first name").fill(host);
-  await page.getByRole("button", { name: "Create the session" }).click();
+  await fillAndSubmit(
+    [
+      [page.getByLabel("Session name"), name],
+      [page.getByLabel("Your first name"), host],
+    ],
+    page.getByRole("button", { name: "Create the session" }),
+  );
   await expect(page).toHaveURL(/\/r\/[^/]+\/themes$/, { timeout: REDIRECT_TIMEOUT });
   return page.url().replace(/\/themes$/, "");
 }
@@ -53,15 +71,13 @@ export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
 
 /** Fills in the join form and waits for the current step of the session. */
 export async function join(page: Page, pseudo: string) {
-  await page.getByLabel("What's your first name?").fill(pseudo);
-  await page.getByRole("button", { name: "Join the session" }).click();
+  await fillAndSubmit([[page.getByLabel("What's your first name?"), pseudo]], page.getByRole("button", { name: "Join the session" }));
   await expect(page).toHaveURL(/\/r\/[^/]+\/(themes|ideas|recap)$/, { timeout: REDIRECT_TIMEOUT });
 }
 
 /** Host: adds a free-text topic from the topics page. */
 export async function addTopic(page: Page, title: string) {
-  await page.getByLabel("Topic", { exact: true }).fill(title);
-  await page.getByRole("button", { name: "Add the topic" }).click();
+  await fillAndSubmit([[page.getByLabel("Topic", { exact: true }), title]], page.getByRole("button", { name: "Add the topic" }));
   await expect(page.getByRole("listitem").filter({ hasText: title })).toBeVisible();
 }
 
@@ -80,8 +96,7 @@ export async function startIdeas(page: Page) {
 
 /** Suggests a text idea in the only topic of the page. */
 export async function suggestIdea(page: Page, content: string) {
-  await page.getByLabel("Your idea…").fill(content);
-  await page.getByRole("button", { name: "Add", exact: true }).click();
+  await fillAndSubmit([[page.getByLabel("Your idea…"), content]], page.getByRole("button", { name: "Add", exact: true }));
 }
 
 /** An idea in the voting list or the recap, to read or vote on. */
@@ -111,6 +126,31 @@ export async function vote(page: Page, content: string, choice: "For" | "Against
   const button = idea(page, content).getByRole("button", { name: choice });
   await button.click();
   await expect(button).toHaveAttribute("aria-pressed", "true");
+}
+
+/** From the topics page: Sam votes for both ideas, Lea against Pizza and for Sushi, then the recap.
+ * Sushi 2–0 is kept, Pizza 1–1 is dropped. */
+export async function voteAndSeeRecap(page: Page, guest: Page) {
+  await suggestPizzaAndSushi(page, guest);
+  await vote(page, "Pizza", "For");
+  await vote(page, "Sushi", "For");
+  await vote(guest, "Pizza", "Against");
+  await vote(guest, "Sushi", "For");
+  await seeRecap(page);
+  await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+}
+
+/** Downloads an export from the recap menu ("Export" button, "Markdown" or "CSV" item). */
+export async function downloadExport(page: Page, format: RegExp, button = "Export") {
+  await page.getByRole("button", { name: button, exact: true }).click();
+  const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("menuitem", { name: format }).click()]);
+  return { name: file.suggestedFilename(), content: await readFile(await file.path(), "utf8") };
+}
+
+/** Picks a choice in one of the footer menus ("Theme, Same as device", "Language, English"…). */
+export async function choose(page: Page, menu: string, option: string) {
+  await page.getByRole("button", { name: new RegExp(`^${menu}, `) }).click();
+  await page.getByRole("menuitemradio", { name: option }).click();
 }
 
 /** Clicks a button that asks for confirmation, then confirms (the dialog repeats its label). */

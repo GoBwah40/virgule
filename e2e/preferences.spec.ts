@@ -1,12 +1,6 @@
 import type { Page } from "@playwright/test";
 
-import { createRoom, expect, join, LIVE_TIMEOUT, test } from "./helpers";
-
-/** Picks a choice in one of the footer menus ("Theme, Same as device", "Language, English"…). */
-async function choose(page: Page, menu: string, option: string) {
-  await page.getByRole("button", { name: new RegExp(`^${menu}, `) }).click();
-  await page.getByRole("menuitemradio", { name: option }).click();
-}
+import { choose, createRoom, expect, join, LIVE_TIMEOUT, test } from "./helpers";
 
 const LIGHT_BACKGROUND = "rgb(255, 247, 240)"; // --background, #fff7f0
 const DARK_BACKGROUND = "rgb(28, 18, 22)"; // --background in dark, #1c1216
