@@ -26,10 +26,13 @@ permissions:
 jobs:
   reset:
     name: Empty ${{ inputs.target }}
+    # Only the repository owner can reset a database: anyone else's run is skipped
+    # before reaching the environment and its secrets (re-runs included).
+    if: github.triggering_actor == github.repository_owner
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # GitHub environment holding this database's TURSO_DATABASE_URL and TURSO_AUTH_TOKEN
-    # (add required reviewers on `production` for an extra approval step).
+    # GitHub environment holding this database's TURSO_DATABASE_URL and TURSO_AUTH_TOKEN.
+    # Both only accept `main`; `production` also waits for the owner's approval.
     environment: ${{ inputs.target == 'virgule' && 'production' || 'preview' }}
     steps:
       - name: Check the confirmation
