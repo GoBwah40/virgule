@@ -37,6 +37,9 @@ next-env.d.ts
 # Claude Code: local files
 .claude/settings.local.json
 .claude/worktrees/
+# Impeccable engine binary (platform-specific, re-downloaded and checksum-verified by its launcher)
+.claude/skills/impeccable/scripts/bin/
+.impeccable/config.local.json
 
 # Misc
 .DS_Store

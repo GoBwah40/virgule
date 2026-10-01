@@ -224,7 +224,12 @@ The **Reset database** workflow (`.github/workflows/reset-db.yml`) deletes every
 | `preview` | `virgule-preview` |
 | `production` | `virgule` |
 
-On `production`, add yourself under **Required reviewers**: the run then waits for an explicit approval.
+Then lock them down (already done for this repository):
+
+- **Deployment branches and tags** → **Selected branches**, `main` only, on both: a workflow edited on another branch cannot reach the secrets.
+- On `production`, add yourself under **Required reviewers**: the run then waits for an explicit approval.
+
+The workflow itself only runs for the repository owner (`github.triggering_actor == github.repository_owner`): a run started by anyone else is skipped.
 
 **Running it.** **Actions → Reset database → Run workflow**, choose the database, then type its name again in the confirmation field. A mismatch stops the run before anything is deleted.
 
