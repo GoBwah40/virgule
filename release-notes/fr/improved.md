@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.1 — 2026-10-01
+
+- L'animation du vote est plus douce, et les écrans d'erreur ou de page introuvable sont plus sobres.
+
 ## 0.6.0 — 2026-10-01
 
 - Sur téléphone, le champ où tu écris reste visible au-dessus du clavier.

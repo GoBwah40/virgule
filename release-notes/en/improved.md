@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.1 — 2026-10-01
+
+- The vote animation is smoother, and the not-found and error screens are more understated.
+
 ## 0.6.0 — 2026-10-01
 
 - On phones, the field you are typing in stays visible above the keyboard.
