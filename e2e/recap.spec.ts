@@ -1,7 +1,3 @@
-import { readFile } from "node:fs/promises";
-
-import type { Page } from "@playwright/test";
-
 import {
   clickAndConfirm,
   expect,
@@ -12,18 +8,8 @@ import {
   suggestPizzaAndSushi,
   test,
   vote,
+  voteAndSeeRecap,
 } from "./helpers";
-
-/** Sam votes for both ideas, Lea against Pizza and for Sushi: Sushi 2–0 is kept, Pizza 1–1 is dropped. */
-async function voteAndSeeRecap(page: Page, guest: Page) {
-  await suggestPizzaAndSushi(page, guest);
-  await vote(page, "Pizza", "For");
-  await vote(page, "Sushi", "For");
-  await vote(guest, "Pizza", "Against");
-  await vote(guest, "Sushi", "For");
-  await seeRecap(page);
-  await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
-}
 
 test("everyone sees the decision, only the host decides what comes next", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
@@ -133,39 +119,4 @@ test("ending the session freezes the recap for everyone", async ({ page, openAsG
 
   await guest.getByRole("button", { name: "Start a new session" }).click();
   await expect(guest.getByRole("button", { name: "Create the session" })).toBeVisible();
-});
-
-test("the recap can be exported, but not while votes are open", async ({ page, openAsGuest }) => {
-  const { link, guest } = await setUpSession(page, openAsGuest);
-  await suggestPizzaAndSushi(page, guest);
-  // Scores are secret until the recap: no export during the ideas phase.
-  expect((await page.request.get(`${link}/export?format=md`)).status()).toBe(409);
-
-  await vote(page, "Pizza", "For");
-  await vote(page, "Sushi", "For");
-  await vote(guest, "Pizza", "Against");
-  await vote(guest, "Sushi", "For");
-  await seeRecap(page);
-
-  const download = async (format: RegExp) => {
-    await page.getByRole("button", { name: "Export" }).click();
-    const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("menuitem", { name: format }).click()]);
-    return { name: file.suggestedFilename(), content: await readFile(await file.path(), "utf8") };
-  };
-
-  const markdown = await download(/Markdown/);
-  expect(markdown.name).toMatch(/\.md$/);
-  expect(markdown.content).toContain("# Recap — Friday night");
-  expect(markdown.content).toContain("- **Participants**: Sam, Lea");
-  expect(markdown.content).toContain("| Sushi | 2 | 0 | 2 | ✅ Kept |");
-  expect(markdown.content).toContain("| Pizza | 1 | 1 | 0 | Dropped |");
-
-  const csv = await download(/CSV/);
-  expect(csv.name).toMatch(/\.csv$/);
-  expect(csv.content).toContain("Round,Topic,Idea,For,Against,Score,Status");
-  expect(csv.content).toContain("1,Dinner,Sushi,2,0,2,Kept");
-
-  // Only participants can export.
-  const stranger = await openAsGuest(link);
-  expect((await stranger.request.get(`${link}/export?format=md`)).status()).toBe(403);
 });
