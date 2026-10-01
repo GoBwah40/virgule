@@ -8,6 +8,7 @@ import {
   idea,
   join,
   LIVE_TIMEOUT,
+  pick,
   startIdeas,
   suggestIdea,
   test,
@@ -20,13 +21,6 @@ async function setUpEmpty(page: Page, openAsGuest: (link: string) => Promise<Pag
   const guest = await openAsGuest(link);
   await join(guest, "Lea");
   return guest;
-}
-
-/** Picks an option of a segmented control: the radio itself is visually hidden, people tap its pill. */
-async function pick(page: Page, name: string) {
-  const radio = page.getByRole("radio", { name, exact: true });
-  await page.locator("label", { has: radio }).click();
-  await expect(radio).toBeChecked();
 }
 
 /** A topic row on the host's topics page. */
