@@ -1,18 +1,20 @@
 import type { Page } from "@playwright/test";
 
-import { addTopic, createRoom, expect, idea, join, LIVE_TIMEOUT, startIdeas, suggestIdea, test } from "./helpers";
-
-/** Sam hosts, Lea has joined, one "Dinner" topic. Stays on the topics page. */
-async function setUp(page: Page, openAsGuest: (link: string) => Promise<Page>) {
-  const link = await createRoom(page, { name: "Friday night", host: "Sam" });
-  const guest = await openAsGuest(link);
-  await join(guest, "Lea");
-  await addTopic(page, "Dinner");
-  return guest;
-}
+import {
+  expect,
+  idea,
+  LIVE_TIMEOUT,
+  seeRecap,
+  setUpSession,
+  startIdeas,
+  suggestIdea,
+  suggestPizzaAndSushi,
+  test,
+  vote,
+} from "./helpers";
 
 test("the guest follows the host into the ideas phase", async ({ page, openAsGuest }) => {
-  const guest = await setUp(page, openAsGuest);
+  const { guest } = await setUpSession(page, openAsGuest);
   await expect(guest.getByText("Dinner")).toBeVisible({ timeout: LIVE_TIMEOUT });
 
   await startIdeas(page);
@@ -22,7 +24,7 @@ test("the guest follows the host into the ideas phase", async ({ page, openAsGue
 });
 
 test("ideas are shared with the group, and only their author can remove them", async ({ page, openAsGuest }) => {
-  const guest = await setUp(page, openAsGuest);
+  const { guest } = await setUpSession(page, openAsGuest);
   await startIdeas(page);
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
 
@@ -40,7 +42,7 @@ test("ideas are shared with the group, and only their author can remove them", a
 });
 
 test("the same idea cannot be suggested twice in a topic", async ({ page, openAsGuest }) => {
-  const guest = await setUp(page, openAsGuest);
+  const { guest } = await setUpSession(page, openAsGuest);
   await startIdeas(page);
   await suggestIdea(page, "Pizza");
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
@@ -52,13 +54,8 @@ test("the same idea cannot be suggested twice in a topic", async ({ page, openAs
 });
 
 test("votes stay secret during the ideas phase and decide the recap", async ({ page, openAsGuest }) => {
-  const guest = await setUp(page, openAsGuest);
-  await startIdeas(page);
-  await suggestIdea(page, "Pizza");
-  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
-  await suggestIdea(guest, "Sushi");
-  await expect(idea(page, "Sushi")).toBeVisible({ timeout: LIVE_TIMEOUT });
-  await expect(idea(guest, "Pizza")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  const { guest } = await setUpSession(page, openAsGuest);
+  await suggestPizzaAndSushi(page, guest);
 
   const myVotes = (p: Page) => p.getByRole("progressbar", { name: "Ideas you voted on" });
   const groupVotes = page.getByRole("progressbar", { name: "Participants who voted" });
@@ -66,26 +63,22 @@ test("votes stay secret during the ideas phase and decide the recap", async ({ p
   await expect(groupVotes).toHaveAttribute("aria-valuetext", "Nobody has voted yet");
 
   // Sam: for both ideas (voting on your own is allowed by default).
-  await idea(page, "Pizza").getByRole("button", { name: "For" }).click();
-  await idea(page, "Sushi").getByRole("button", { name: "For" }).click();
-  await expect(idea(page, "Pizza").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "true");
+  await vote(page, "Pizza", "For");
+  await vote(page, "Sushi", "For");
   await expect(myVotes(page)).toHaveAttribute("aria-valuetext", "You voted on every idea");
   await expect(groupVotes).toHaveAttribute("aria-valuetext", "1 person out of 2 has voted");
 
   // Lea: against Pizza, then changes her mind on Sushi (against → for).
-  await idea(guest, "Pizza").getByRole("button", { name: "Against" }).click();
-  await idea(guest, "Sushi").getByRole("button", { name: "Against" }).click();
-  await idea(guest, "Sushi").getByRole("button", { name: "For" }).click();
-  await expect(idea(guest, "Sushi").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "true");
+  await vote(guest, "Pizza", "Against");
+  await vote(guest, "Sushi", "Against");
+  await vote(guest, "Sushi", "For");
   await expect(idea(guest, "Sushi").getByRole("button", { name: "Against" })).toHaveAttribute("aria-pressed", "false");
   await expect(groupVotes).toHaveAttribute("aria-valuetext", "Everyone has voted", { timeout: LIVE_TIMEOUT });
 
   // No score is visible while ideas are open, to anyone.
   for (const p of [page, guest]) await expect(p.getByText(/\d+ (for|against)/)).toHaveCount(0);
 
-  await page.getByRole("button", { name: "See the recap" }).click();
-  await page.getByRole("alertdialog").getByRole("button", { name: "See the recap" }).click();
-  await expect(page).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+  await seeRecap(page);
   await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
 
   // Kept: more "for" than "against". Sushi 2–0 is kept, Pizza 1–1 is dropped.
@@ -99,15 +92,11 @@ test("votes stay secret during the ideas phase and decide the recap", async ({ p
 });
 
 test("with self-voting turned off, nobody can vote on their own idea", async ({ page, openAsGuest }) => {
-  const guest = await setUp(page, openAsGuest);
+  const { guest } = await setUpSession(page, openAsGuest);
   const selfVote = page.getByRole("switch", { name: "Vote on your own ideas" });
   await selfVote.click();
   await expect(selfVote).not.toBeChecked();
-  await startIdeas(page);
-  await suggestIdea(page, "Pizza");
-  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
-  await suggestIdea(guest, "Sushi");
-  await expect(idea(page, "Sushi")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await suggestPizzaAndSushi(page, guest);
 
   await expect(idea(page, "Pizza").getByRole("button", { name: "For" })).toBeDisabled();
   await expect(idea(page, "Sushi").getByRole("button", { name: "For" })).toBeEnabled();

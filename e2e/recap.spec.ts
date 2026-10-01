@@ -1,0 +1,171 @@
+import { readFile } from "node:fs/promises";
+
+import type { Page } from "@playwright/test";
+
+import {
+  clickAndConfirm,
+  expect,
+  idea,
+  LIVE_TIMEOUT,
+  seeRecap,
+  setUpSession,
+  suggestPizzaAndSushi,
+  test,
+  vote,
+} from "./helpers";
+
+/** Sam votes for both ideas, Lea against Pizza and for Sushi: Sushi 2–0 is kept, Pizza 1–1 is dropped. */
+async function voteAndSeeRecap(page: Page, guest: Page) {
+  await suggestPizzaAndSushi(page, guest);
+  await vote(page, "Pizza", "For");
+  await vote(page, "Sushi", "For");
+  await vote(guest, "Pizza", "Against");
+  await vote(guest, "Sushi", "For");
+  await seeRecap(page);
+  await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+}
+
+test("everyone sees the decision, only the host decides what comes next", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await voteAndSeeRecap(page, guest);
+
+  for (const p of [page, guest]) {
+    await expect(p.getByRole("heading", { name: "The recap" })).toBeVisible();
+    await expect(p.getByText("1 of 2 ideas kept")).toBeVisible();
+    await expect(idea(p, "Sushi").getByText("Kept")).toBeVisible();
+    await expect(idea(p, "Pizza").getByText("Dropped")).toBeVisible();
+  }
+  // Recap rows show who suggested what only to its author.
+  await expect(idea(guest, "Sushi").getByText("Your idea")).toBeVisible();
+  await expect(idea(page, "Sushi").getByText("Your idea")).toHaveCount(0);
+
+  await expect(page.getByText("What's next")).toBeVisible();
+  await expect(guest.getByText("Sam is choosing what's next: a new round, or we stop here.")).toBeVisible();
+  await expect(guest.getByRole("button", { name: "End the session" })).toHaveCount(0);
+});
+
+test("turning off the positive score rule keeps every idea with a vote for", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await voteAndSeeRecap(page, guest);
+
+  const rule = page.getByRole("switch", { name: "Require a positive score" });
+  await expect(rule).toBeChecked();
+  await rule.click();
+  await expect(rule).not.toBeChecked();
+
+  // Pizza (1 for, 1 against) now qualifies, for the guest too.
+  await expect(page.getByText("2 of 2 ideas kept")).toBeVisible();
+  await expect(idea(guest, "Pizza").getByText("Kept")).toBeVisible({ timeout: LIVE_TIMEOUT });
+});
+
+test("another round keeps the ideas kept, with votes starting from zero", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await voteAndSeeRecap(page, guest);
+  await expect(page.getByText("1 idea kept goes back to the vote, and everyone can suggest new ones.")).toBeVisible();
+
+  await clickAndConfirm(page, "Go for another round");
+  for (const p of [page, guest]) {
+    await expect(p).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+    await expect(p.getByText("Round 2: we vote again on the ideas we kept, and you can suggest new ones.")).toBeVisible();
+    await expect(idea(p, "Sushi").getByText("Kept from the previous round")).toBeVisible();
+    await expect(idea(p, "Sushi").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "false");
+    await expect(idea(p, "Pizza")).toHaveCount(0);
+  }
+  await expect(page.getByLabel("Your idea…")).toBeVisible();
+
+  await vote(page, "Sushi", "For");
+  await seeRecap(page);
+
+  // One tab per round, the latest one open.
+  await expect(page.getByRole("tab", { name: "Round 2", selected: true })).toBeVisible();
+  await expect(page.getByText("1 of 1 idea kept")).toBeVisible();
+  await page.getByRole("tab", { name: "Round 1" }).click();
+  await expect(idea(page, "Pizza").getByText("Dropped")).toBeVisible();
+});
+
+test("a tie can be broken by voting again on the tied ideas only", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await suggestPizzaAndSushi(page, guest);
+  // Pizza 1–0, Sushi 1–0: both tied for first.
+  await vote(page, "Pizza", "For");
+  await vote(guest, "Sushi", "For");
+  await seeRecap(page);
+
+  await expect(page.getByText("1 topic has ideas tied for first.")).toBeVisible();
+  await expect(idea(page, "Pizza").getByText("Tied")).toBeVisible();
+  await expect(idea(page, "Sushi").getByText("Tied")).toBeVisible();
+
+  await clickAndConfirm(page, "Break the ties");
+  for (const p of [page, guest]) {
+    await expect(p).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+    await expect(p.getByText(/^Round 2, tiebreak:/)).toBeVisible();
+    await expect(idea(p, "Pizza")).toBeVisible();
+    await expect(idea(p, "Sushi")).toBeVisible();
+    // No new ideas during a tiebreak.
+    await expect(p.getByText("Tiebreak round: no new ideas.")).toBeVisible();
+    await expect(p.getByLabel("Your idea…")).toHaveCount(0);
+  }
+});
+
+test("reopening the vote brings everyone back with their votes", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await voteAndSeeRecap(page, guest);
+
+  await page.getByRole("button", { name: "Reopen voting" }).click();
+  await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await expect(guest.getByRole("heading", { name: "The ideas" })).toBeVisible();
+  await expect(idea(guest, "Pizza").getByRole("button", { name: "Against" })).toHaveAttribute("aria-pressed", "true");
+  await expect(idea(page, "Pizza").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "true");
+});
+
+test("ending the session freezes the recap for everyone", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await voteAndSeeRecap(page, guest);
+
+  await clickAndConfirm(page, "End the session");
+  for (const p of [page, guest]) {
+    await expect(p.getByRole("heading", { name: "It's decided" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+    await expect(p.getByText("The session is over. You can review and export the recap while it stays online.")).toBeVisible();
+    await expect(idea(p, "Sushi").getByText("Kept")).toBeVisible();
+  }
+  await expect(page.getByText("What's next")).toHaveCount(0);
+
+  await guest.getByRole("button", { name: "Start a new session" }).click();
+  await expect(guest.getByRole("button", { name: "Create the session" })).toBeVisible();
+});
+
+test("the recap can be exported, but not while votes are open", async ({ page, openAsGuest }) => {
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  await suggestPizzaAndSushi(page, guest);
+  // Scores are secret until the recap: no export during the ideas phase.
+  expect((await page.request.get(`${link}/export?format=md`)).status()).toBe(409);
+
+  await vote(page, "Pizza", "For");
+  await vote(page, "Sushi", "For");
+  await vote(guest, "Pizza", "Against");
+  await vote(guest, "Sushi", "For");
+  await seeRecap(page);
+
+  const download = async (format: RegExp) => {
+    await page.getByRole("button", { name: "Export" }).click();
+    const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("menuitem", { name: format }).click()]);
+    return { name: file.suggestedFilename(), content: await readFile(await file.path(), "utf8") };
+  };
+
+  const markdown = await download(/Markdown/);
+  expect(markdown.name).toMatch(/\.md$/);
+  expect(markdown.content).toContain("# Recap — Friday night");
+  expect(markdown.content).toContain("- **Participants**: Sam, Lea");
+  expect(markdown.content).toContain("| Sushi | 2 | 0 | 2 | ✅ Kept |");
+  expect(markdown.content).toContain("| Pizza | 1 | 1 | 0 | Dropped |");
+
+  const csv = await download(/CSV/);
+  expect(csv.name).toMatch(/\.csv$/);
+  expect(csv.content).toContain("Round,Topic,Idea,For,Against,Score,Status");
+  expect(csv.content).toContain("1,Dinner,Sushi,2,0,2,Kept");
+
+  // Only participants can export.
+  const stranger = await openAsGuest(link);
+  expect((await stranger.request.get(`${link}/export?format=md`)).status()).toBe(403);
+});
