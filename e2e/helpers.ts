@@ -44,11 +44,11 @@ export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
   },
 });
 
-/** Fills in the join form and waits for the first step. */
+/** Fills in the join form and waits for the current step of the session. */
 export async function join(page: Page, pseudo: string) {
   await page.getByLabel("What's your first name?").fill(pseudo);
   await page.getByRole("button", { name: "Join the session" }).click();
-  await expect(page).toHaveURL(/\/r\/[^/]+\/themes$/, { timeout: REDIRECT_TIMEOUT });
+  await expect(page).toHaveURL(/\/r\/[^/]+\/(themes|ideas|recap)$/, { timeout: REDIRECT_TIMEOUT });
 }
 
 /** Host: adds a free-text topic from the topics page. */
