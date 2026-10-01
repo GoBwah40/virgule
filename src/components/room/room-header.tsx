@@ -5,6 +5,7 @@ import { CopyButton } from "@/components/copy-button";
 import { PhaseStepper } from "@/components/phase-stepper";
 import { Logo } from "@/components/logo";
 import { InviteDialog } from "@/components/room/invite-dialog";
+import { LeaveRoomButton } from "@/components/room/leave-room-button";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
 import type { Phase } from "@/generated/prisma/enums";
@@ -55,11 +56,12 @@ export async function RoomHeader({ room, participants, meId }: Props) {
               successMessage={t("linkCopied")}
               hideLabelOnMobile
             />
+            {!isHost && canRemoveParticipants(room) && <LeaveRoomButton slug={room.slug} />}
           </div>
           <RoomSeats
             slug={room.slug}
             canManage={isHost && room.phase !== "CLOSED"}
-            canRemove={isHost && canRemoveParticipants(room)}
+            canRemove={canRemoveParticipants(room)}
             className="order-last col-span-2 sm:order-none"
             invitePath={invitePath}
             seats={participants.map((p) => ({ id: p.id, name: p.pseudo, isHost: p.isHost, isMe: p.id === meId }))}

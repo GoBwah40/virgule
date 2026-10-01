@@ -2,6 +2,12 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.0 — 2026-10-01
+
+- Sur téléphone, le champ où tu écris reste visible au-dessus du clavier.
+- Les sujets de la page des idées s'empilent sans trou, quelle que soit leur longueur.
+- Les options du menu des places affichent un pointeur au survol.
+
 ## 0.5.5 — 2026-10-01
 
 - Pour protéger Virgule des abus, trop d'actions en peu de temps sont brièvement refusées.

@@ -19,3 +19,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 export const Destructive: Story = { args: { variant: "destructive" } };
+export const DestructiveConfirm: Story = { args: { variant: "outline", destructive: true, children: "Leave the session" } };

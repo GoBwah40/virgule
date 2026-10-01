@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.0 — 2026-10-01
+
+- Jusqu'au premier bilan, tu peux quitter une séance depuis le bouton en haut ou depuis ta propre place : elle se libère pour quelqu'un d'autre.
+
 ## 0.5.0 — 2026-09-30
 
 - Virgule est disponible en anglais, avec un choix de la langue dans le pied de page ; par défaut, l'app suit la langue de l'appareil.

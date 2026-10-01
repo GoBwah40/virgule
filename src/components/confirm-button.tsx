@@ -9,11 +9,13 @@ type Props = Omit<React.ComponentProps<typeof Button>, "onClick"> & {
   title: string;
   description?: string;
   confirmLabel?: string;
+  /** Destructive confirmation, even when the button itself is not (default: follows `variant`). */
+  destructive?: boolean;
   onConfirm: () => void;
 };
 
 /** Button that asks for confirmation before a major action (phase change…). */
-export function ConfirmButton({ title, description, confirmLabel, onConfirm, children, ...props }: Props) {
+export function ConfirmButton({ title, description, confirmLabel, destructive, onConfirm, children, ...props }: Props) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -27,7 +29,7 @@ export function ConfirmButton({ title, description, confirmLabel, onConfirm, chi
         title={title}
         description={description}
         confirmLabel={confirmLabel ?? children}
-        destructive={props.variant === "destructive"}
+        destructive={destructive ?? props.variant === "destructive"}
         onConfirm={onConfirm}
       />
     </>

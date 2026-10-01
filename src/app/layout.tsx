@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { KeepFocusVisible } from "@/components/site/keep-focus-visible";
 import { LocalePreferenceToggle } from "@/components/site/locale-preference";
 import { ThemePreferenceToggle } from "@/components/site/theme-preference";
 import { SourceLink } from "@/components/source-link";
@@ -23,6 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
     description: t("description"),
   };
 }
+
+// On phones, the keyboard shrinks the page instead of covering it: the browser can then
+// keep the field being typed in visible.
+export const viewport: Viewport = { interactiveWidget: "resizes-content" };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const locale = await getLocale();
@@ -45,6 +50,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <ThemePreferenceToggle initial={theme} />
             </div>
           </footer>
+          <KeepFocusVisible />
           <Toaster theme={theme} richColors position="top-center" />
         </NextIntlClientProvider>
       </body>
