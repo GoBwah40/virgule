@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.5 — 2026-10-01
+
+- Les lecteurs d'écran annoncent maintenant le titre de chaque page et les places de l'écran pour rejoindre, et les boutons rouges gardent assez de contraste, y compris en mode sombre.
+
 ## 0.6.3 — 2026-10-01
 
 - Dans l'export en anglais, plus d'espace avant les deux-points : c'est un usage propre au français.

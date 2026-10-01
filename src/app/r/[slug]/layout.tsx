@@ -12,7 +12,9 @@ import { getRoomContext, hostName } from "@/lib/room";
 
 export async function generateMetadata({ params }: LayoutProps<"/r/[slug]">): Promise<Metadata> {
   const ctx = await getRoomContext((await params).slug);
-  return { title: ctx.status === "ok" ? ctx.room.name : undefined, robots: { index: false } };
+  const title =
+    ctx.status === "ok" ? ctx.room.name : ctx.status === "expired" ? (await getTranslations("expired"))("title") : undefined;
+  return { title, robots: { index: false } };
 }
 
 export default async function RoomLayout({ children, params }: LayoutProps<"/r/[slug]">) {

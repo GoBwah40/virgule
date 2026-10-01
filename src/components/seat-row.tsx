@@ -103,7 +103,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
                     !seat && onFreeSeatClick ? (
                       <button type="button" onClick={onFreeSeatClick} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
                     ) : (
-                      <span tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
+                      <span role="img" tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
                     )
                   }
                 >

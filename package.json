@@ -1,6 +1,6 @@
 {
   "name": "virgule",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -49,6 +49,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@storybook/addon-a11y": "10.6.0",
     "@storybook/addon-docs": "10.6.0",
