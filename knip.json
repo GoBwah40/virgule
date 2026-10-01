@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["scripts/*.mts"],
-  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mts", "e2e/**/*.ts"],
+  "entry": ["scripts/*.mts", "e2e/prepare-db.mts"],
+  "project": ["src/**/*.{ts,tsx}", "scripts/**/*.mts", "e2e/**/*.{ts,mts}"],
   "ignore": ["src/components/ui/**"],
   "ignoreDependencies": ["@prisma/client", "tailwindcss", "shadcn", "tw-animate-css"]
 }
