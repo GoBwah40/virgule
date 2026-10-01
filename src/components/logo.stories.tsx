@@ -14,3 +14,5 @@ type Story = StoryObj<typeof meta>;
 export const Wordmark: Story = {};
 export const Header: Story = { args: { className: "text-2xl" } };
 export const Mark: Story = { args: { variant: "mark" } };
+/** Session header: back home, in a 44 × 44 px touch area. */
+export const HomeLink: Story = { args: { href: "/", className: "text-lg" } };

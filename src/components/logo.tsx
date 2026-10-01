@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { cn } from "@/lib/utils";
 
 /** Comma path (64 grid): a round head of radius 14 sitting on the baseline,
@@ -9,11 +11,20 @@ type Props = {
   label: string;
   /** `wordmark`: the word followed by the comma; `mark`: the comma alone. */
   variant?: "wordmark" | "mark";
+  /** Makes the logo a link (e.g. back home), with a 44 × 44 px touch area around the word. */
+  href?: string;
   className?: string;
 };
 
 /** Virgule logo: the word in extra-bold Bricolage, closed by a papaya comma. Size follows `font-size`. */
-export function Logo({ label, variant = "wordmark", className }: Props) {
+export function Logo({ label, variant = "wordmark", href, className }: Props) {
+  if (href) {
+    return (
+      <Link href={href} className={cn("touch-target inline-flex rounded-sm outline-none focus-visible:ring-3 focus-visible:ring-ring/80", className)}>
+        <Logo label={label} variant={variant} />
+      </Link>
+    );
+  }
   const comma = (
     <svg viewBox="18 12 30 48" className="h-[0.72em] w-[0.45em] shrink-0 translate-y-[0.26em] fill-brand" aria-hidden>
       <path d={COMMA_PATH} />

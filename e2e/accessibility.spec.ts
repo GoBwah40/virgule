@@ -2,12 +2,15 @@ import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
 
 import {
+  addTopic,
   choose,
   clickAndConfirm,
+  createRoom,
   elapseTimer,
   expect,
   expireRoom,
   idea,
+  join,
   LIVE_TIMEOUT,
   pick,
   seeRecap,
@@ -15,8 +18,10 @@ import {
   setUpSession,
   startIdeas,
   suggestIdea,
+  suggestPizzaAndSushi,
   test,
   vote,
+  voteAndSeeRecap,
 } from "./helpers";
 
 // WCAG 2.0, 2.1 and 2.2 at level AA, including the 24 px minimum target size (2.5.8).
@@ -243,5 +248,133 @@ test.describe("reduced motion", () => {
     // The countdown's hourglass stops pulsing too.
     const hourglass = page.getByRole("timer").locator("svg");
     expect(await hourglass.evaluate((element) => getComputedStyle(element).animationName)).toBe("none");
+  });
+});
+
+/** Mobile first (CLAUDE.md): anything touchable offers at least 44 × 44 px. */
+const MIN_SIZE = 44;
+
+type Undersized = { element: string; width: number; height: number };
+
+/**
+ * Measures the touch area of every visible button, link, field and focusable element of the
+ * page: the area where a tap lands on the element, found by hit-testing outward from its centre
+ * along both axes. It counts invisible hit areas (pseudo-elements) and leaves out what a
+ * neighbour covers, which a bounding box would not. A visually hidden radio or checkbox is
+ * replaced by its label, the pill people actually tap.
+ */
+async function undersizedTargets(page: Page): Promise<Undersized[]> {
+  return page.evaluate((min) => {
+    // A disabled button does not take taps (`pointer-events: none`), but keeps the size it has
+    // once enabled: hit-test it as if enabled.
+    const style = document.createElement("style");
+    style.textContent = ':disabled, [aria-disabled="true"], [data-disabled] { pointer-events: auto !important; }';
+    document.head.append(style);
+
+    const selector = [
+      "a[href]",
+      "button",
+      "input:not([type=hidden])",
+      "select",
+      "textarea",
+      "summary",
+      '[tabindex]:not([tabindex="-1"])',
+      '[role="button"]',
+      '[role="switch"]',
+      '[role="tab"]',
+      '[role="menuitem"]',
+    ].join(", ");
+
+    const describe = (el: Element) => {
+      const labelledBy = el.getAttribute("aria-labelledby");
+      const label = el.getAttribute("aria-label") || (labelledBy && document.getElementById(labelledBy)?.textContent) || el.textContent;
+      const name = label?.trim().replace(/\s+/g, " ").slice(0, 40) ?? "";
+      return `<${el.tagName.toLowerCase()}${el.id ? `#${el.id}` : ""}> "${name}"`;
+    };
+
+    const targets = new Set<Element>();
+    for (const el of document.querySelectorAll(selector)) {
+      if (el.closest('[aria-hidden="true"], [inert]') || !el.checkVisibility({ visibilityProperty: true })) continue;
+      const { width, height } = el.getBoundingClientRect();
+      const visuallyHidden = width <= 1 || height <= 1;
+      if (!visuallyHidden) {
+        targets.add(el);
+        continue;
+      }
+      // Visually hidden radio or checkbox: its label is the touch target. Anything else
+      // visually hidden (a skip link before it gets focus…) is not on screen.
+      const label = el instanceof HTMLInputElement ? el.labels?.[0] : undefined;
+      if (label) targets.add(label);
+    }
+
+    const undersized: Undersized[] = [];
+    for (const el of targets) {
+      el.scrollIntoView({ block: "center", inline: "center" });
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const owns = (x: number, y: number) => {
+        const hit = document.elementFromPoint(x, y);
+        return !!hit && (el.contains(hit) || hit.closest("label")?.control === el);
+      };
+      // Furthest point still on the element, by half-pixel steps, in a direction.
+      const reach = (dx: number, dy: number) => {
+        let d = 0;
+        while (d < min && owns(cx + dx * (d + 0.5), cy + dy * (d + 0.5))) d += 0.5;
+        return d;
+      };
+      const width = owns(cx, cy) ? reach(-1, 0) + reach(1, 0) : 0;
+      const height = owns(cx, cy) ? reach(0, -1) + reach(0, 1) : 0;
+      // Half a pixel of rounding on each side.
+      if (width < min - 1 || height < min - 1) undersized.push({ element: describe(el), width, height });
+    }
+    style.remove();
+    return undersized;
+  }, MIN_SIZE);
+}
+
+/** Polled: while a step transition runs, its snapshot covers the page and takes every tap. */
+async function expectTouchTargets(page: Page) {
+  await expect.poll(() => undersizedTargets(page), { message: `touch areas under ${MIN_SIZE} × ${MIN_SIZE} px` }).toEqual([]);
+}
+
+
+test.describe(`touch targets of at least ${MIN_SIZE} px`, () => {
+  test("home", async ({ page }) => {
+    await page.goto("/");
+    await expectTouchTargets(page);
+  });
+
+  test("join form", async ({ page, openAsGuest }) => {
+    const link = await createRoom(page, { name: "Friday night", host: "Sam" });
+    const guest = await openAsGuest(link);
+    await expect(guest.getByRole("button", { name: "Join the session" })).toBeVisible();
+    await expectTouchTargets(guest);
+  });
+
+  test("topics, for the host and a guest", async ({ page, openAsGuest }) => {
+    // Empty list first: the one-tap suggestions only show while there are few topics.
+    const link = await createRoom(page, { name: "Friday night", host: "Sam" });
+    await expectTouchTargets(page);
+
+    const guest = await openAsGuest(link);
+    await join(guest, "Lea");
+    await addTopic(page, "Dinner");
+    await expectTouchTargets(page);
+    await expectTouchTargets(guest);
+  });
+
+  test("ideas, for the host and a guest", async ({ page, openAsGuest }) => {
+    const { guest } = await setUpSession(page, openAsGuest);
+    await suggestPizzaAndSushi(page, guest);
+    await expectTouchTargets(page);
+    await expectTouchTargets(guest);
+  });
+
+  test("recap, for the host and a guest", async ({ page, openAsGuest }) => {
+    const { guest } = await setUpSession(page, openAsGuest);
+    await voteAndSeeRecap(page, guest);
+    await expectTouchTargets(page);
+    await expectTouchTargets(guest);
   });
 });

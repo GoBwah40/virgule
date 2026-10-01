@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { CopyButton } from "@/components/copy-button";
@@ -31,10 +30,9 @@ export async function RoomHeader({ room, participants, meId }: Props) {
       {/* 2-column grid: name then steps on the left, link then seats on the right.
           The steps follow the name directly, without waiting for the seats' height. */}
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto] items-start gap-x-4 gap-y-3 px-4 py-4">
-        <div className="min-w-0 space-y-0.5">
-          <Link href="/" className="inline-flex text-lg">
-            <Logo label={tApp("name")} />
-          </Link>
+        {/* space-y-1: room for the logo's touch area above the name. */}
+        <div className="min-w-0 space-y-1">
+          <Logo label={tApp("name")} href="/" className="text-lg" />
           <h1 className="truncate text-2xl leading-tight font-extrabold">{room.name}</h1>
           <p className="text-xs text-muted-foreground">{t("expiresOn", { date: room.expiresAt })}</p>
         </div>

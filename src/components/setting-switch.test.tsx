@@ -13,4 +13,9 @@ describe("SettingSwitch", () => {
     await userEvent.click(screen.getByRole("switch"));
     expect(onCheckedChange).toHaveBeenCalledWith(true, expect.anything());
   });
+
+  it("gives the small switch a touch area 44 px high", () => {
+    renderUi(<SettingSwitch id="s" label="Vote on your own ideas" checked={false} onCheckedChange={() => {}} />);
+    expect(screen.getByRole("switch")).toHaveClass("after:-inset-y-[13px]");
+  });
 });
