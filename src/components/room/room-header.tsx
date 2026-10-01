@@ -41,7 +41,8 @@ export async function RoomHeader({ room, participants, meId }: Props) {
         {/* Right column: link then seats, stacked tightly on desktop.
             On mobile, `contents` keeps the button next to the name and the seats on the last row. */}
         <div className="contents sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:flex sm:flex-col sm:items-end sm:gap-4">
-          <div className="flex shrink-0 gap-2 justify-self-end">
+          {/* Invite and leave: screen-only, the printed recap keeps the name and the seats. */}
+          <div className="flex shrink-0 gap-2 justify-self-end print:hidden">
             <InviteDialog
               invitePath={invitePath}
               roomName={room.name}

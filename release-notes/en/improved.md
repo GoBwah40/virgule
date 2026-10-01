@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.3 — 2026-10-01
+
+- A printed or PDF recap leaves out the invite, copy and leave buttons, the free seats and the bottom of the page.
+
 ## 0.6.1 — 2026-10-01
 
 - The vote animation is smoother, and the not-found and error screens are more understated.

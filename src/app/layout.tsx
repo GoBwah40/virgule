@@ -43,7 +43,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-full flex-col text-base">
         <NextIntlClientProvider>
           <TooltipProvider>{children}</TooltipProvider>
-          <footer className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pb-4">
+          {/* Links and preferences: nothing to read on paper. */}
+          <footer className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pb-4 print:hidden">
             <SourceLink href={REPO_URL} label={tFooter("source")} className="-ml-3" />
             <div className="-mr-3 flex">
               <LocalePreferenceToggle initial={isLocale(locale) ? locale : defaultLocale} />
