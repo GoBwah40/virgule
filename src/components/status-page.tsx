@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   title: string;
   body: string;
-  /** Icon badge above the title. */
+  /** Icon above the title. */
   icon?: LucideIcon;
   /** Discreet technical detail (e.g. an error code to pass on). */
   details?: string;
@@ -27,11 +27,7 @@ export function StatusPage({ title, body, icon: Icon, details, children, size = 
         size === "full" ? "flex-1 py-12" : "py-8",
       )}
     >
-      {Icon && (
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-highlight-soft text-primary">
-          <Icon className="size-7" aria-hidden />
-        </span>
-      )}
+      {Icon && <Icon className="size-10 text-primary" strokeWidth={1.75} aria-hidden />}
       <Heading className="text-2xl font-extrabold">{title}</Heading>
       <p className="text-muted-foreground">{body}</p>
       {children && <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">{children}</div>}
