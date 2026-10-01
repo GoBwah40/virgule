@@ -8,6 +8,8 @@ const PORT = 3100;
 export default defineConfig({
   testDir: "e2e",
   fullyParallel: true,
+  // One SQLite file behind `next dev`: beyond 2 workers, writes time out (SocketTimeout).
+  workers: 2,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   reporter: process.env.CI ? "github" : "list",
