@@ -11,6 +11,8 @@ On Vercel, code runs in serverless functions whose disk is ephemeral and read-on
 | Local | `dev.db` file | `DATABASE_URL` |
 | Production | Turso | `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` (take precedence) |
 
+A local file is switched to WAL mode on the first connection (stored in the file, next to `dev.db-wal` and `dev.db-shm`): in the default journal mode, a write committed while another connection reads could lock the database until the server restarts. To start over by hand, delete the three files together, never `dev.db` alone.
+
 Turso's free plan is more than enough for this use.
 
 ## Requirements
