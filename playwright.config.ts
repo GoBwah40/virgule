@@ -23,7 +23,7 @@ export default defineConfig({
   // Mobile first: the app is mostly used on a phone.
   projects: [{ name: "mobile", use: { ...devices["Pixel 7"] } }],
   webServer: {
-    command: `rm -f e2e.db e2e.db-wal e2e.db-shm && prisma migrate deploy && tsx e2e/prepare-db.mts && next build && next start --port ${PORT}`,
+    command: `rm -f e2e.db e2e.db-wal e2e.db-shm && prisma migrate deploy && next build && next start --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     // Never reuse a server already on the port: it would serve an older build, and the tests
     // would check stale code without saying so. A busy port stops the run with an explicit error.
