@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.2 — 2026-10-01
+
+- In the English export, colons no longer have a space before them, a habit specific to French.
+
 ## 0.5.5 — 2026-10-01
 
 - Once the first recap is reached, the person hosting can no longer remove someone, so the results stay as voted.
