@@ -51,7 +51,7 @@ To test with several people on the same machine, open the room link on `http://l
 | `pnpm check` | Lint, types, tests and knip: run before every commit (GitHub Actions CI runs it again on every push and pull request) |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
 | `pnpm test` | Vitest tests: logic (Node) and components (jsdom) |
-| `pnpm test:e2e` | Playwright end-to-end tests (`e2e/`): starts the app on port 3100 against a throwaway `e2e.db` (CI runs them in a separate job). First time: `pnpm exec playwright install chromium` |
+| `pnpm test:e2e` | Playwright end-to-end tests (`e2e/`): builds and starts the app on port 3100 against a throwaway `e2e.db` (CI runs them in a separate job). First time: `pnpm exec playwright install chromium` |
 | `pnpm knip` | Detects unused files, exports and dependencies |
 | `pnpm storybook` | Catalog of the global components on http://localhost:6006 |
 | `pnpm db:migrate` | Creates or applies a migration on the local database |
