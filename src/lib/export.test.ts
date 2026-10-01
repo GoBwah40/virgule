@@ -4,6 +4,7 @@ import { exportFileName, toCsv, toMarkdown, type ExportData, type ExportLabels }
 
 const labels: ExportLabels = {
   csvSeparator: ";",
+  colon: ": ",
   title: "Recap",
   generatedOn: "Exported",
   participants: "Participants",
@@ -50,6 +51,11 @@ describe("toMarkdown", () => {
     expect(md).toContain("| Video \\| tutorial<br>in 2 min | 2 | 0 | 2 | ✅ Kept |");
     expect(md).toContain("## Round 1");
     expect(md).toContain("Camille, Sacha");
+  });
+
+  it("follows the reader's typography for the colon after a label", () => {
+    expect(toMarkdown(data, labels)).toContain("- **Participants**: Camille, Sacha");
+    expect(toMarkdown(data, { ...labels, colon: " : " })).toContain("- **Rule** : positive score");
   });
 });
 
