@@ -52,7 +52,7 @@ export async function join(page: Page, pseudo: string) {
 }
 
 /** Host: adds a free-text topic from the topics page. */
-async function addTopic(page: Page, title: string) {
+export async function addTopic(page: Page, title: string) {
   await page.getByLabel("Topic", { exact: true }).fill(title);
   await page.getByRole("button", { name: "Add the topic" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: title })).toBeVisible();
