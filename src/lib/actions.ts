@@ -9,12 +9,12 @@ import { z } from "zod";
 
 import type { Phase } from "@/generated/prisma/enums";
 import {
+  canRemoveParticipants,
   EXTEND_TIMER_MINUTES,
   IDEAS_TIMER_OPTIONS,
   LIMITS,
   MAX_PARTICIPANTS,
   MAX_THEMES,
-  REMOVE_PARTICIPANT_PHASES,
   ROOM_TTL_DAYS,
 } from "@/lib/config";
 import { db } from "@/lib/db";
@@ -531,14 +531,14 @@ export async function transferHost(slug: string, participantId: string) {
 
 /**
  * Removes a participant (seat taken by mistake). Their ideas and votes are deleted with
- * them; they can come back with the link if a seat is left. Not from the recap on: it would
- * change the results.
+ * them; they can come back with the link if a seat is left. Only before the first recap
+ * (`canRemoveParticipants`): afterwards, it would change the results.
  */
 export async function removeParticipant(slug: string, participantId: string) {
   if (!isId(participantId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { host: true });
-    if (!REMOVE_PARTICIPANT_PHASES.includes(room.phase)) throw new ActionFailure("wrongPhase");
+    if (!canRemoveParticipants(room)) throw new ActionFailure("wrongPhase");
     const target = await otherParticipant(room.id, me.id, participantId);
     await db.$transaction([
       // List options created by this person (while they were hosting) are kept.

@@ -8,7 +8,7 @@ import { InviteDialog } from "@/components/room/invite-dialog";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
 import type { Phase } from "@/generated/prisma/enums";
-import { MAX_PARTICIPANTS, REMOVE_PARTICIPANT_PHASES } from "@/lib/config";
+import { canRemoveParticipants, MAX_PARTICIPANTS } from "@/lib/config";
 
 const STEPS: Phase[] = ["THEMES", "IDEAS", "RECAP"];
 
@@ -59,7 +59,7 @@ export async function RoomHeader({ room, participants, meId }: Props) {
           <RoomSeats
             slug={room.slug}
             canManage={isHost && room.phase !== "CLOSED"}
-            canRemove={isHost && REMOVE_PARTICIPANT_PHASES.includes(room.phase)}
+            canRemove={isHost && canRemoveParticipants(room)}
             className="order-last col-span-2 sm:order-none"
             invitePath={invitePath}
             seats={participants.map((p) => ({ id: p.id, name: p.pseudo, isHost: p.isHost, isMe: p.id === meId }))}

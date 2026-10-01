@@ -4,7 +4,7 @@ Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
 ## 0.5.5 — 2026-10-01
 
-- Une fois au récap, la personne qui anime ne peut plus retirer quelqu'un : les résultats restent ceux du vote.
+- Une fois arrivé au premier récap, la personne qui anime ne peut plus retirer quelqu'un : les résultats restent ceux du vote.
 
 ## 0.5.4 — 2026-09-30
 

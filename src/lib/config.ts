@@ -3,8 +3,12 @@ import type { Phase } from "@/generated/prisma/enums";
 export const MAX_PARTICIPANTS = 6;
 export const ROOM_TTL_DAYS = 7;
 export const MAX_THEMES = 20;
-/** Steps during which the host can remove someone: from the recap on, it would change the results. */
-export const REMOVE_PARTICIPANT_PHASES: readonly Phase[] = ["THEMES", "IDEAS"];
+/**
+ * The host can remove someone only before the first recap: afterwards, their ideas and votes
+ * (deleted with them) would disappear from results already seen, including past rounds.
+ */
+export const canRemoveParticipants = (room: { phase: Phase; round: number }) =>
+  room.round === 1 && (room.phase === "THEMES" || room.phase === "IDEAS");
 
 export const LIMITS = {
   roomName: 80,

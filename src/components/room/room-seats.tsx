@@ -19,7 +19,7 @@ type Props = {
   successMessage: string;
   /** The host can hand over hosting (seat menu). */
   canManage: boolean;
-  /** The host can also remove someone (only before the recap). */
+  /** The host can also remove someone (only before the first recap). */
   canRemove: boolean;
   className?: string;
 };
