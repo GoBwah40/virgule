@@ -93,7 +93,7 @@ test("from the first recap on, seats are frozen so the results stay as voted", a
   await expect(guest.getByLabel("Lea · you")).toBeVisible();
 });
 
-test("the invite link can be copied or scanned", async ({ page, openAsGuest }) => {
+test("the invite link can be copied", async ({ page, openAsGuest }) => {
   const { link } = await setUpSession(page, openAsGuest);
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   const clipboard = () => page.evaluate(() => navigator.clipboard.readText());
@@ -106,11 +106,7 @@ test("the invite link can be copied or scanned", async ({ page, openAsGuest }) =
   await page.evaluate(() => navigator.clipboard.writeText(""));
   await page.getByRole("button", { name: "Free seat: tap to copy the invite link" }).first().click();
   await expect.poll(clipboard).toBe(link);
-
-  await page.getByRole("button", { name: "Invite with a QR code" }).click();
-  const dialog = page.getByRole("dialog", { name: "Invite the group" });
-  await expect(dialog.getByText("4 seats left. Scan the QR code or send the link.")).toBeVisible();
-  await expect(dialog.getByRole("img", { name: "QR code for the invite link" })).toBeVisible();
+  // The QR code and the share sheet: see invite.spec.ts.
 });
 
 test("the invite dialog says when every seat is taken", async ({ page, openAsGuest }) => {
