@@ -5,6 +5,8 @@ import type { RecapOverview, RecapRound } from "@/lib/room";
 export type ExportLabels = {
   /** CSV column separator expected by Excel in the reader's language. */
   csvSeparator: ";" | ",";
+  /** Colon after a label: French typography puts a space before it. */
+  colon: " : " | ": ";
   title: string;
   generatedOn: string;
   participants: string;
@@ -33,8 +35,8 @@ export function toMarkdown(data: ExportData, l: ExportLabels): string {
     "",
     `_${l.generatedOn}_`,
     "",
-    `- **${l.participants}** : ${data.participants.join(", ")}`,
-    `- **${l.rules}** : ${l.rule}`,
+    `- **${l.participants}**${l.colon}${data.participants.join(", ")}`,
+    `- **${l.rules}**${l.colon}${l.rule}`,
     "",
   ];
 

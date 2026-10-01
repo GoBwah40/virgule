@@ -29,8 +29,10 @@ export async function GET(request: Request, { params }: RouteContext<"/r/[slug]/
   const format_ = await getFormatter();
   const overviewText = await getOverviewText();
 
+  const french = (await getLocale()) === "fr";
   const labels: ExportLabels = {
-    csvSeparator: (await getLocale()) === "fr" ? ";" : ",",
+    csvSeparator: french ? ";" : ",",
+    colon: french ? " : " : ": ",
     title: t("fileTitle", { name: ctx.room.name }),
     generatedOn: t("generatedOn", { date: format_.dateTime(now, { dateStyle: "long", timeStyle: "short" }) }),
     participants: t("participants"),
