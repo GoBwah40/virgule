@@ -25,7 +25,9 @@ export default defineConfig({
   webServer: {
     command: `rm -f e2e.db && prisma migrate deploy && next build && next start --port ${PORT}`,
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    // Never reuse a server already on the port: it would serve an older build, and the tests
+    // would check stale code without saying so. A busy port stops the run with an explicit error.
+    reuseExistingServer: false,
     // Includes the build.
     timeout: 300_000,
     // Explicit values win over the .env files loaded by Prisma and Next.js.
