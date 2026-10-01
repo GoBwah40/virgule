@@ -11,6 +11,13 @@ export const LIVE_TIMEOUT = 10_000;
 
 /** Database of the app started by playwright.config.ts (spec files are loaded as CommonJS). */
 const db = createClient({ url: `file:${path.join(__dirname, "../e2e.db")}` });
+// The server writes to the same file: wait for its lock instead of failing at once (SQLITE_BUSY).
+const ready = db.execute("PRAGMA busy_timeout = 5000");
+
+async function write(sql: string, args: string[]) {
+  await ready;
+  await db.execute({ sql, args });
+}
 
 /** Creates a session from the home page and returns its share link. */
 export async function createRoom(page: Page, { name, host }: { name: string; host: string }) {
@@ -120,12 +127,22 @@ export async function seeRecap(page: Page) {
 
 const slugOf = (link: string) => new URL(link).pathname.split("/")[2];
 
-/** States the UI cannot reach quickly: written straight to the database. */
-export async function closeRoom(link: string) {
-  await db.execute({ sql: "UPDATE Room SET phase = 'CLOSED' WHERE slug = ?", args: [slugOf(link)] });
+/**
+ * States the UI cannot reach quickly, written straight to the database. Any text is accepted:
+ * a value the app does not know (an unknown phase…) makes it fail for real, to test errors.
+ */
+export async function setPhase(link: string, phase: string) {
+  await write("UPDATE Room SET phase = ? WHERE slug = ?", [phase, slugOf(link)]);
+}
+
+export const closeRoom = (link: string) => setPhase(link, "CLOSED");
+
+/** Answer type of every topic of the session (see `setPhase`). */
+export async function setTopicKind(link: string, kind: string) {
+  await write("UPDATE Theme SET kind = ? WHERE roomId = (SELECT id FROM Room WHERE slug = ?)", [kind, slugOf(link)]);
 }
 
 export async function expireRoom(link: string) {
   // `createdAt` is in the past and stored in the same format as `expiresAt`.
-  await db.execute({ sql: "UPDATE Room SET expiresAt = createdAt WHERE slug = ?", args: [slugOf(link)] });
+  await write("UPDATE Room SET expiresAt = createdAt WHERE slug = ?", [slugOf(link)]);
 }
