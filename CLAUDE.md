@@ -8,7 +8,7 @@ Brainstorming and planning app for small groups (6 participants max per room, no
 
 - `pnpm dev` to run the app; **`pnpm check`** (lint, types, tests, knip) must pass before a task is considered done.
 - `pnpm storybook` to work on a component in isolation.
-- `pnpm test:e2e`: Playwright end-to-end tests in `e2e/` (app on port 3100, throwaway `e2e.db`, not part of `pnpm check`, run by CI in its own job).
+- `pnpm test:e2e`: Playwright end-to-end tests in `e2e/` (production build on port 3100, throwaway `e2e.db`, not part of `pnpm check`, run by CI in its own job).
 - `pnpm preprod`: local production build on http://localhost:3001, against the `virgule-preview` database (needs `.env.preview.local`).
 - After changing `prisma/schema.prisma`: `pnpm db:migrate --name <name>`. The client is generated in `src/generated/prisma` (not versioned).
 - `next typegen` regenerates the `PageProps` / `LayoutProps` / `RouteContext` types when adding a route.
