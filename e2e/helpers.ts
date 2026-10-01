@@ -24,10 +24,10 @@ export async function createRoom(page: Page, { name, host }: { name: string; hos
 
 export { expect };
 
-export const test = base.extend<{
-  /** Opens the share link as a new person (fresh browser context, so no participation cookie). */
-  openAsGuest: (link: string) => Promise<Page>;
-}>({
+/** Opens the share link as a new person (fresh browser context, so no participation cookie). */
+type OpenAsGuest = (link: string) => Promise<Page>;
+
+export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
   // Closed at the end of each test: an open session page keeps polling the server every 3 s,
   // and leftover guests would slow down the next tests of the worker.
   // `provide` rather than `use`: the React Hooks lint rule would take it for `React.use`.
@@ -52,7 +52,7 @@ export async function join(page: Page, pseudo: string) {
 }
 
 /** Host: adds a free-text topic from the topics page. */
-export async function addTopic(page: Page, title: string) {
+async function addTopic(page: Page, title: string) {
   await page.getByLabel("Topic", { exact: true }).fill(title);
   await page.getByRole("button", { name: "Add the topic" }).click();
   await expect(page.getByRole("listitem").filter({ hasText: title })).toBeVisible();
@@ -70,8 +70,46 @@ export async function suggestIdea(page: Page, content: string) {
   await page.getByRole("button", { name: "Add", exact: true }).click();
 }
 
-/** An idea in the voting list, to read or vote on. */
+/** An idea in the voting list or the recap, to read or vote on. */
 export const idea = (page: Page, content: string) => page.getByRole("listitem").filter({ hasText: content });
+
+/** Sam hosts "Friday night", Lea has joined, one "Dinner" topic. Both stay on the topics page. */
+export async function setUpSession(page: Page, openAsGuest: OpenAsGuest) {
+  const link = await createRoom(page, { name: "Friday night", host: "Sam" });
+  const guest = await openAsGuest(link);
+  await join(guest, "Lea");
+  await addTopic(page, "Dinner");
+  return { link, guest };
+}
+
+/** From the topics page: ideas started, Sam suggests "Pizza", Lea "Sushi", both see both. */
+export async function suggestPizzaAndSushi(page: Page, guest: Page) {
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await suggestIdea(guest, "Sushi");
+  await expect(idea(page, "Sushi")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(idea(guest, "Pizza")).toBeVisible({ timeout: LIVE_TIMEOUT });
+}
+
+/** Votes on an idea and waits for the vote to be recorded. */
+export async function vote(page: Page, content: string, choice: "For" | "Against") {
+  const button = idea(page, content).getByRole("button", { name: choice });
+  await button.click();
+  await expect(button).toHaveAttribute("aria-pressed", "true");
+}
+
+/** Clicks a button that asks for confirmation, then confirms (the dialog repeats its label). */
+export async function clickAndConfirm(page: Page, name: string) {
+  await page.getByRole("button", { name }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name }).click();
+}
+
+/** Host: closes voting; everyone's page moves to the recap. */
+export async function seeRecap(page: Page) {
+  await clickAndConfirm(page, "See the recap");
+  await expect(page).toHaveURL(/\/recap$/, { timeout: REDIRECT_TIMEOUT });
+}
 
 const slugOf = (link: string) => new URL(link).pathname.split("/")[2];
 
