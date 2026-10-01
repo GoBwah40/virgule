@@ -15,4 +15,11 @@ describe("Logo", () => {
     renderUi(<Logo label="Virgule" variant="mark" />);
     expect(screen.getByRole("img", { name: "Virgule" })).toHaveTextContent("");
   });
+
+  it("becomes a link with a 44 px touch area when given a destination", () => {
+    renderUi(<Logo label="Virgule" href="/" />);
+    const link = screen.getByRole("link", { name: "Virgule" });
+    expect(link).toHaveAttribute("href", "/");
+    expect(link).toHaveClass("touch-target");
+  });
 });

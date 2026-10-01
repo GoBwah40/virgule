@@ -218,6 +218,8 @@ function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
               <Button
                 variant="ghost"
                 size="icon-xs"
+                // Small next to the badges, 44 px to tap.
+                className="touch-target"
                 aria-label={t("delete")}
                 title={t("delete")}
                 disabled={pending}
