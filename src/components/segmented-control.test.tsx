@@ -21,6 +21,11 @@ describe("SegmentedControl", () => {
     expect(onChange).toHaveBeenCalledWith("DATE");
   });
 
+  it("makes the pill around each radio a 44 px touch area", () => {
+    renderUi(<SegmentedControl name="kind" label="Answer type" options={options} value="TEXT" onChange={() => {}} />);
+    expect(screen.getByRole("radio", { name: "Date" }).closest("label")).toHaveClass("touch-target");
+  });
+
   it("blocks the choice when disabled", async () => {
     const onChange = vi.fn();
     renderUi(<SegmentedControl name="kind" label="Type" options={options} value="TEXT" onChange={onChange} disabled hint="Locked" />);

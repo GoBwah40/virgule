@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.6 — 2026-10-01
+
+- On phones, seats, topic buttons, suggestions, options, switches and the logo are easier to tap.
+
 ## 0.6.4 — 2026-10-01
 
 - A printed or PDF recap leaves out the invite, copy and leave buttons, the free seats and the bottom of the page.

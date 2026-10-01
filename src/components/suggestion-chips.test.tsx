@@ -23,6 +23,11 @@ describe("SuggestionChips", () => {
     expect(onSelect).toHaveBeenCalledWith("budget");
   });
 
+  it("gives every chip a 44 px touch area", () => {
+    renderUi(<SuggestionChips label="Topic ideas" items={[{ id: "dates", label: "Dates" }]} onSelect={() => {}} />);
+    expect(screen.getByRole("button", { name: "Dates" })).toHaveClass("touch-target");
+  });
+
   it("renders nothing when there are no suggestions left", () => {
     renderUi(<SuggestionChips label="Topic ideas" items={[]} onSelect={() => {}} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();

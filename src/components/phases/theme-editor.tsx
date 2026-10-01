@@ -184,19 +184,19 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
       }
       actions={
         <>
-          <Button variant="ghost" size="icon-sm" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
+          <Button variant="ghost" size="icon" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
             <ArrowUp />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={t("moveDown")} disabled={pending || isLast} onClick={() => run(() => moveTheme(slug, theme.id, "down"))}>
+          <Button variant="ghost" size="icon" aria-label={t("moveDown")} disabled={pending || isLast} onClick={() => run(() => moveTheme(slug, theme.id, "down"))}>
             <ArrowDown />
           </Button>
-          <Button variant="ghost" size="icon-sm" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>
+          <Button variant="ghost" size="icon" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>
             <Pencil />
           </Button>
           {theme.ideaCount > 0 ? (
             <ConfirmButton
               variant="ghost"
-              size="icon-sm"
+              size="icon"
               aria-label={t("delete")}
               disabled={pending}
               title={t("deleteConfirm", { title: theme.title })}
@@ -207,7 +207,7 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
               <Trash2 />
             </ConfirmButton>
           ) : (
-            <Button variant="ghost" size="icon-sm" aria-label={t("delete")} disabled={pending} onClick={remove}>
+            <Button variant="ghost" size="icon" aria-label={t("delete")} disabled={pending} onClick={remove}>
               <Trash2 />
             </Button>
           )}
