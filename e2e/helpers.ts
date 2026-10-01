@@ -182,6 +182,11 @@ export async function setTopicKind(link: string, kind: string) {
   await write("UPDATE Theme SET kind = ? WHERE roomId = (SELECT id FROM Room WHERE slug = ?)", [kind, slugOf(link)]);
 }
 
+/** Ideas timer already run out (`createdAt` is in the past, in the same format as `phaseEndsAt`). */
+export async function elapseTimer(link: string) {
+  await write("UPDATE Room SET phaseEndsAt = createdAt WHERE slug = ?", [slugOf(link)]);
+}
+
 export async function expireRoom(link: string) {
   // `createdAt` is in the past and stored in the same format as `expiresAt`.
   await write("UPDATE Room SET expiresAt = createdAt WHERE slug = ?", [slugOf(link)]);
