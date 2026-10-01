@@ -5,6 +5,9 @@
 
 # Tests
 /coverage
+/test-results/
+/playwright-report/
+/playwright/.cache/
 
 # Next.js
 /.next/
