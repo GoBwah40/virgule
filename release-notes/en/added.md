@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.0 — 2026-10-01
+
+- Until the first recap, you can leave a session from the button at the top or from your own seat: your seat is freed for someone else.
+
 ## 0.5.0 — 2026-09-30
 
 - Virgule is available in English, with a language picker in the footer; by default it follows the device language.

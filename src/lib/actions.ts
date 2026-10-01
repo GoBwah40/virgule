@@ -24,7 +24,7 @@ import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/re
 import { phasePath } from "@/lib/phase-path";
 import { isRateLimited } from "@/lib/rate-limit";
 import { getRoomContext } from "@/lib/room";
-import { setParticipantToken } from "@/lib/session";
+import { clearParticipantToken, setParticipantToken } from "@/lib/session";
 
 // i18n message keys ("errors" namespace in messages/*.json).
 type ActionError =
@@ -53,6 +53,7 @@ type ActionError =
   | "invalidOptions"
   | "choiceClosed"
   | "tooManyRequests"
+  | "hostCannotLeave"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -551,4 +552,31 @@ export async function removeParticipant(slug: string, participantId: string) {
       db.participant.delete({ where: { id: target.id } }),
     ]);
   });
+}
+
+/**
+ * A participant leaves the session: their seat is freed, their ideas and votes are deleted
+ * with them. Whoever is hosting hands over hosting first; only before the first recap
+ * (`canRemoveParticipants`).
+ */
+export async function leaveRoom(slug: string): Promise<ActionResult> {
+  try {
+    const { room, me } = await guard(slug);
+    if (me.isHost) throw new ActionFailure("hostCannotLeave");
+    // Same rule as removing someone: afterwards, leaving would change the results.
+    if (!canRemoveParticipants(room)) throw new ActionFailure("wrongPhase");
+    const host = await db.participant.findFirst({ where: { roomId: room.id, isHost: true }, select: { id: true } });
+    await db.$transaction([
+      // List options created while this person was hosting stay, with whoever hosts now.
+      ...(host ? [db.idea.updateMany({ where: { authorId: me.id, isOption: true }, data: { authorId: host.id } })] : []),
+      db.participant.delete({ where: { id: me.id } }),
+    ]);
+  } catch (error) {
+    if (error instanceof ActionFailure) return fail(error.code);
+    console.error("[action]", error);
+    return fail("unknown");
+  }
+  await clearParticipantToken(slug);
+  await notifyRoom(slug);
+  redirect("/");
 }

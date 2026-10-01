@@ -56,6 +56,8 @@ To test with several people on the same machine, open the room link on `http://l
 | `pnpm db:migrate` | Creates or applies a migration on the local database |
 | `pnpm db:migrate:prod` | Applies pending migrations on Turso |
 | `pnpm db:migrate:preview` | Same on the preview database `virgule-preview` (reads `.env.preview.local`) |
+| `pnpm db:reset` | Empties the local database and re-applies the migrations |
+| `pnpm db:reset:remote` | Deletes every session from a Turso database (needs `RESET_CONFIRM=yes`); in CI, the **Reset database** workflow |
 | `pnpm db:studio` | Prisma Studio (local database) |
 
 ### Local preproduction
@@ -123,6 +125,7 @@ messages/en.json            English UI copy (reference, typed keys)
 messages/fr.json            French UI copy (same keys)
 prisma/schema.prisma        Model: Room, Participant, Theme, Idea, Vote
 scripts/migrate-turso.mts   Applies migrations on Turso
+scripts/reset-turso.mts     Empties a Turso database (schema kept)
 scripts/preprod.sh          Local preproduction (production build + preview database)
 src/
   app/

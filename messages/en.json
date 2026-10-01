@@ -98,7 +98,10 @@
       "makeHostConfirmHint": "{name} will run the steps. You stay in the session as a participant.",
       "remove": "Remove from the session",
       "removeConfirm": "Remove {name} from the session?",
-      "removeConfirmHint": "Their ideas and votes are deleted. {name} can come back with the link if a seat is still free."
+      "removeConfirmHint": "Their ideas and votes are deleted. {name} can come back with the link if a seat is still free.",
+      "leave": "Leave the session",
+      "leaveConfirm": "Leave the session?",
+      "leaveConfirmHint": "Your ideas and votes are deleted and your seat is freed. You can come back with the link if a seat is still free."
     }
   },
   "themes": {
@@ -331,7 +334,8 @@
     "cannotTargetSelf": "You can't do that on your own seat.",
     "invalidOptions": "A list needs between 2 and 10 options, all different.",
     "choiceClosed": "This topic is a list: we vote on the options provided.",
-    "tooManyRequests": "You're going a bit fast. Wait a moment, then try again."
+    "tooManyRequests": "You're going a bit fast. Wait a moment, then try again.",
+    "hostCannotLeave": "Hand over hosting to someone else before leaving the session."
   },
   "theme": {
     "label": "Theme",

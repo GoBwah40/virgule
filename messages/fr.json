@@ -98,7 +98,10 @@
       "makeHostConfirmHint": "{name} pilotera les étapes. Tu restes dans la séance comme participant.",
       "remove": "Retirer de la séance",
       "removeConfirm": "Retirer {name} de la séance ?",
-      "removeConfirmHint": "Ses idées et ses votes sont supprimés. {name} pourra revenir avec le lien s'il reste une place."
+      "removeConfirmHint": "Ses idées et ses votes sont supprimés. {name} pourra revenir avec le lien s'il reste une place.",
+      "leave": "Quitter la séance",
+      "leaveConfirm": "Quitter la séance ?",
+      "leaveConfirmHint": "Tes idées et tes votes sont supprimés et ta place est libérée. Tu pourras revenir avec le lien s'il reste une place."
     }
   },
   "themes": {
@@ -331,7 +334,8 @@
     "cannotTargetSelf": "Tu ne peux pas faire ça sur ta propre place.",
     "invalidOptions": "Une liste demande entre 2 et 10 options, toutes différentes.",
     "choiceClosed": "Ce sujet est une liste : on vote sur les options proposées.",
-    "tooManyRequests": "Tu vas un peu vite. Attends un instant, puis réessaie."
+    "tooManyRequests": "Tu vas un peu vite. Attends un instant, puis réessaie.",
+    "hostCannotLeave": "Confie l'animation à quelqu'un d'autre avant de quitter la séance."
   },
   "theme": {
     "label": "Thème",

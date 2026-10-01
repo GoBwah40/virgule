@@ -22,3 +22,7 @@ export async function setParticipantToken(slug: string, token: string) {
     maxAge: ROOM_TTL_DAYS * 24 * 60 * 60,
   });
 }
+
+export async function clearParticipantToken(slug: string) {
+  (await cookies()).delete(cookieName(slug));
+}

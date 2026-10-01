@@ -49,4 +49,20 @@ describe("SeatRow", () => {
     await userEvent.click(await screen.findByRole("menuitem", { name: "Remove from the session" }));
     expect(onSelect).toHaveBeenCalledWith(seats[0], "remove");
   });
+
+  it("can offer a menu on your own seat only", async () => {
+    const onSelect = vi.fn();
+    const menu = {
+      label: (seat: { name: string }) => `${seat.name}'s seat: options`,
+      actions: (seat: { isMe?: boolean }) =>
+        seat.isMe ? [{ id: "leave", label: "Leave the session", icon: UserMinus, destructive: true }] : [],
+      onSelect,
+    };
+    renderUi(<SeatRow seats={seats} capacity={6} labels={labels} menu={menu} />);
+    expect(screen.queryByRole("button", { name: "Camille's seat: options" })).toBeNull();
+
+    await userEvent.click(screen.getByRole("button", { name: "sasha's seat: options" }));
+    await userEvent.click(await screen.findByRole("menuitem", { name: "Leave the session" }));
+    expect(onSelect).toHaveBeenCalledWith(seats[1], "leave");
+  });
 });

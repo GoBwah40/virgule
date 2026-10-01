@@ -213,6 +213,27 @@ Prefer migrations compatible with the old code: add an optional column rather th
 
 By default, Turso variables apply to every Vercel environment: preview deployments therefore write to the production database. To separate them, create a second database (`turso db create virgule-preview`), migrate it, then, in Vercel, give the `TURSO_*` variables a different value for the *Preview* environment.
 
+## Resetting a database
+
+The **Reset database** workflow (`.github/workflows/reset-db.yml`) deletes every session (participants, topics, ideas, votes) from `virgule-preview` or `virgule`. The schema and the migration history are kept: the app keeps working right away.
+
+**One-time setup.** In the repository, **Settings → Environments**, create two environments, each with the secrets `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` of its database:
+
+| Environment | Database |
+| --- | --- |
+| `preview` | `virgule-preview` |
+| `production` | `virgule` |
+
+On `production`, add yourself under **Required reviewers**: the run then waits for an explicit approval.
+
+**Running it.** **Actions → Reset database → Run workflow**, choose the database, then type its name again in the confirmation field. A mismatch stops the run before anything is deleted.
+
+Locally, the same script runs with the database values (`RESET_CONFIRM=yes` is required):
+
+```bash
+(set -a; . ./.env.preview.local; set +a; RESET_CONFIRM=yes pnpm db:reset:remote)
+```
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Fix |

@@ -2,6 +2,12 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.0 — 2026-10-01
+
+- On phones, the field you are typing in stays visible above the keyboard.
+- The topics on the ideas page stack without gaps, whatever their length.
+- Seat menu options show a pointer on hover.
+
 ## 0.5.5 — 2026-10-01
 
 - To protect Virgule from abuse, too many actions in a short time are briefly refused.
