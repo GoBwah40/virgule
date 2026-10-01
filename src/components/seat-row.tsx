@@ -42,7 +42,10 @@ type Props = {
 
 const LETTERS = "ABCDEFGHIJ";
 
-/** Participants shown as a row of seats: who is on board, how many seats are left. */
+/**
+ * Participants shown as a row of seats: who is on board, how many seats are left.
+ * Printed, only the taken seats remain: a free seat means nothing on paper.
+ */
 export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size = "sm", className }: Props) {
   const aisle = Math.ceil(capacity / 2);
   const box = size === "md" ? "h-12 w-11 text-base" : "h-10 w-9 text-sm";
@@ -81,7 +84,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
         return (
           <li
             key={seat?.id ?? `free-${letter}`}
-            className={cn("relative grid justify-items-center gap-0.5", i === aisle && "ml-2.5")}
+            className={cn("relative grid justify-items-center gap-0.5", i === aisle && "ml-2.5", !seat && "print:hidden")}
           >
             {seat?.isHost && (
               // Crown sitting on the seat: no row reserved above each seat.

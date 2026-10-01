@@ -2,7 +2,7 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
-## 0.6.2 — 2026-10-01
+## 0.6.3 — 2026-10-01
 
 - In the English export, colons no longer have a space before them, a habit specific to French.
 

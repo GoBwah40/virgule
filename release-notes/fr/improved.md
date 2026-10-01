@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.4 — 2026-10-01
+
+- Le bilan imprimé ou en PDF laisse de côté les boutons pour inviter, copier le lien et partir, les places libres et le bas de page.
+
 ## 0.6.2 — 2026-10-01
 
 - Les menus, infobulles et fenêtres apparaissent sans mouvement quand ton appareil demande de réduire les animations.
