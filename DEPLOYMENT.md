@@ -82,6 +82,15 @@ Without Pusher, each browser resyncs every 3 seconds, which is fine for 6 people
 
 Messages sent to Pusher contain no data: they only tell browsers to reload the state from the server.
 
+### Also optional: rate limiting with Upstash
+
+Without Upstash, nothing is limited: a script could create rooms in bulk and fill the database until the nightly purge. With it, the app refuses (with a "You're going a bit fast" message) more than 10 rooms created per hour and 30 joins per 10 minutes from the same IP, and more than 120 actions per minute from the same participant. Limits are in `src/lib/rate-limit.ts`; if Upstash does not answer within a second, requests go through.
+
+1. Create an account on [upstash.com](https://console.upstash.com), then a **Redis** database in the region closest to Vercel's functions (`eu-west-1`, Ireland). The free plan is enough.
+2. In the database's **REST API** section, note `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
+
+Previews can share the same database: keys only hold counters (IP or participant id), which expire with their window.
+
 ## 4. Generate the cron secret
 
 A scheduled job deletes expired rooms (7 days) every night. It is protected by a secret:
@@ -107,6 +116,8 @@ Write down the value: it will be `CRON_SECRET`.
 | `PUSHER_SECRET` | `secret` | No (real time) |
 | `NEXT_PUBLIC_PUSHER_KEY` | `key` | No (real time) |
 | `NEXT_PUBLIC_PUSHER_CLUSTER` | `cluster`, for example `eu` | No (real time) |
+| `UPSTASH_REDIS_REST_URL` | REST URL from step 3 | No (rate limiting) |
+| `UPSTASH_REDIS_REST_TOKEN` | REST token from step 3 | No (rate limiting) |
 
 Do not set `DATABASE_URL` on Vercel: it is only used locally.
 

@@ -330,7 +330,8 @@
     "participantNotFound": "This person is no longer in the session.",
     "cannotTargetSelf": "You can't do that on your own seat.",
     "invalidOptions": "A list needs between 2 and 10 options, all different.",
-    "choiceClosed": "This topic is a list: we vote on the options provided."
+    "choiceClosed": "This topic is a list: we vote on the options provided.",
+    "tooManyRequests": "You're going a bit fast. Wait a moment, then try again."
   },
   "theme": {
     "label": "Theme",

@@ -330,7 +330,8 @@
     "participantNotFound": "Cette personne n'est plus dans la séance.",
     "cannotTargetSelf": "Tu ne peux pas faire ça sur ta propre place.",
     "invalidOptions": "Une liste demande entre 2 et 10 options, toutes différentes.",
-    "choiceClosed": "Ce sujet est une liste : on vote sur les options proposées."
+    "choiceClosed": "Ce sujet est une liste : on vote sur les options proposées.",
+    "tooManyRequests": "Tu vas un peu vite. Attends un instant, puis réessaie."
   },
   "theme": {
     "label": "Thème",

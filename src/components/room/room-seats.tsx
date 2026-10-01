@@ -17,8 +17,10 @@ type Props = {
   invitePath: string;
   labels: React.ComponentProps<typeof SeatRow>["labels"];
   successMessage: string;
-  /** The host can hand over hosting or remove someone (seat menu). */
+  /** The host can hand over hosting (seat menu). */
   canManage: boolean;
+  /** The host can also remove someone (only before the first recap). */
+  canRemove: boolean;
   className?: string;
 };
 
@@ -28,7 +30,7 @@ type Pending = { seat: Seat; action: "host" | "remove" } | null;
  * Row of session seats: tapping a free seat copies the invite link; for the host,
  * right-clicking or clicking a taken seat opens its options.
  */
-export function RoomSeats({ slug, seats, invitePath, labels, successMessage, canManage, className }: Props) {
+export function RoomSeats({ slug, seats, invitePath, labels, successMessage, canManage, canRemove, className }: Props) {
   const t = useTranslations("room.seats");
   const [, run] = useAction();
   const [pending, setPending] = useState<Pending>(null);
@@ -53,7 +55,7 @@ export function RoomSeats({ slug, seats, invitePath, labels, successMessage, can
                     ? []
                     : [
                         { id: "host", label: t("makeHost"), icon: Crown },
-                        { id: "remove", label: t("remove"), icon: UserMinus, destructive: true },
+                        ...(canRemove ? [{ id: "remove", label: t("remove"), icon: UserMinus, destructive: true }] : []),
                       ],
                 onSelect: (seat, action) => setPending({ seat, action: action as "host" | "remove" }),
               }

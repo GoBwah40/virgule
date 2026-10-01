@@ -8,12 +8,21 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import type { Phase } from "@/generated/prisma/enums";
-import { EXTEND_TIMER_MINUTES, IDEAS_TIMER_OPTIONS, LIMITS, MAX_PARTICIPANTS, MAX_THEMES, ROOM_TTL_DAYS } from "@/lib/config";
+import {
+  canRemoveParticipants,
+  EXTEND_TIMER_MINUTES,
+  IDEAS_TIMER_OPTIONS,
+  LIMITS,
+  MAX_PARTICIPANTS,
+  MAX_THEMES,
+  ROOM_TTL_DAYS,
+} from "@/lib/config";
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
 import { ideaKey, type IdeaInput, parseChoiceOptions, parseIdeaInput, readChoiceOptions, textKey, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
+import { isRateLimited } from "@/lib/rate-limit";
 import { getRoomContext } from "@/lib/room";
 import { setParticipantToken } from "@/lib/session";
 
@@ -43,6 +52,7 @@ type ActionError =
   | "cannotTargetSelf"
   | "invalidOptions"
   | "choiceClosed"
+  | "tooManyRequests"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -56,6 +66,12 @@ const newToken = () => randomBytes(24).toString("base64url");
 
 const text = (max: number) => z.string().trim().min(1).max(max);
 
+// Server Action arguments arrive from the client as-is, whatever their TypeScript type:
+// an object in place of an id would become a Prisma filter ({ not: "" } matches everything).
+const idSchema = z.string().min(1).max(64);
+const isId = (value: unknown): value is string => idSchema.safeParse(value).success;
+const isBoolean = (value: unknown): value is boolean => typeof value === "boolean";
+
 /** End of the ideas timer, if the host has set one. */
 const timerEnd = (minutes: number | null) => (minutes ? new Date(Date.now() + minutes * 60_000) : null);
 
@@ -67,10 +83,12 @@ class ActionFailure extends Error {
 
 /** Checks that the caller has joined the room (and, if asked, is the host / in the right phase). */
 async function guard(slug: string, opts: { host?: boolean; phase?: Phase } = {}) {
+  if (!isId(slug)) throw new ActionFailure("invalidInput");
   const ctx = await getRoomContext(slug);
   if (ctx.status === "not_found") throw new ActionFailure("roomNotFound");
   if (ctx.status === "expired") throw new ActionFailure("roomExpired");
   if (!ctx.me) throw new ActionFailure("notJoined");
+  if (await isRateLimited("participant", ctx.me.id)) throw new ActionFailure("tooManyRequests");
   if (opts.host && !ctx.me.isHost) throw new ActionFailure("notHost");
   if (opts.phase && ctx.room.phase !== opts.phase) throw new ActionFailure("wrongPhase");
   return { room: ctx.room, me: ctx.me };
@@ -104,6 +122,7 @@ const createSchema = z.object({ name: text(LIMITS.roomName), pseudo: text(LIMITS
 export async function createRoom(input: { name: string; pseudo: string }): Promise<ActionResult> {
   const parsed = createSchema.safeParse(input);
   if (!parsed.success) return fail("invalidInput");
+  if (await isRateLimited("createRoom")) return fail("tooManyRequests");
 
   const slug = newSlug();
   const token = newToken();
@@ -120,6 +139,7 @@ export async function createRoom(input: { name: string; pseudo: string }): Promi
 }
 
 export async function joinRoom(slug: string, input: { pseudo: string }): Promise<ActionResult> {
+  if (!isId(slug)) return fail("invalidInput");
   const parsed = z.object({ pseudo: text(LIMITS.pseudo) }).safeParse(input);
   if (!parsed.success) return fail("invalidInput");
   const pseudo = parsed.data.pseudo;
@@ -130,6 +150,7 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
   if (ctx.me) redirect(phasePath(slug, ctx.room.phase));
   if (ctx.room.phase === "CLOSED") return fail("roomClosed");
   if (ctx.participants.length >= MAX_PARTICIPANTS) return fail("roomFull");
+  if (await isRateLimited("joinRoom")) return fail("tooManyRequests");
   if (ctx.participants.some((p) => p.pseudo.toLowerCase() === pseudo.toLowerCase())) {
     return fail("pseudoTaken");
   }
@@ -201,7 +222,7 @@ export async function updateTheme(
   input: ThemeInput,
 ) {
   const parsed = themeSchema.safeParse(input);
-  if (!parsed.success) return fail("invalidInput");
+  if (!parsed.success || !isId(themeId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     const theme = await db.theme.findFirst({
@@ -216,6 +237,7 @@ export async function updateTheme(
 }
 
 export async function deleteTheme(slug: string, themeId: string) {
+  if (!isId(themeId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     await db.theme.deleteMany({ where: { id: themeId, roomId: room.id } });
@@ -223,6 +245,7 @@ export async function deleteTheme(slug: string, themeId: string) {
 }
 
 export async function moveTheme(slug: string, themeId: string, direction: "up" | "down") {
+  if (!isId(themeId) || (direction !== "up" && direction !== "down")) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     const themes = await db.theme.findMany({ where: { roomId: room.id }, orderBy: { position: "asc" } });
@@ -239,6 +262,7 @@ export async function moveTheme(slug: string, themeId: string, direction: "up" |
 }
 
 export async function setAllowSelfVote(slug: string, value: boolean) {
+  if (!isBoolean(value)) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     await db.room.update({ where: { id: room.id }, data: { allowSelfVote: value } });
@@ -301,7 +325,7 @@ const ideaInputSchema = z.object({
 /** Text idea (`content`) or typed one (dates / amounts), validated against the topic kind. */
 export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
   const raw = ideaInputSchema.safeParse(input);
-  if (!raw.success) return fail("invalidInput");
+  if (!raw.success || !isId(themeId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     if (room.tiebreak) throw new ActionFailure("tiebreakNoNewIdeas");
@@ -329,6 +353,7 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
 }
 
 export async function deleteIdea(slug: string, ideaId: string) {
+  if (!isId(ideaId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
@@ -343,6 +368,7 @@ export async function deleteIdea(slug: string, ideaId: string) {
 
 /** `positive = null` removes the vote. */
 export async function castVote(slug: string, ideaId: string, positive: boolean | null) {
+  if (!isId(ideaId) || (positive !== null && !isBoolean(positive))) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
@@ -409,6 +435,7 @@ export async function reopenVoting(slug: string) {
 }
 
 export async function setRequireNetPositive(slug: string, value: boolean) {
+  if (!isBoolean(value)) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
     await db.room.update({ where: { id: room.id }, data: { requireNetPositive: value } });
@@ -495,8 +522,10 @@ async function otherParticipant(roomId: string, meId: string, participantId: str
 
 /** Hands hosting over to another participant; the former host stays in the session. */
 export async function transferHost(slug: string, participantId: string) {
+  if (!isId(participantId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { host: true });
+    if (room.phase === "CLOSED") throw new ActionFailure("wrongPhase");
     const target = await otherParticipant(room.id, me.id, participantId);
     await db.$transaction([
       db.participant.update({ where: { id: me.id }, data: { isHost: false } }),
@@ -507,11 +536,14 @@ export async function transferHost(slug: string, participantId: string) {
 
 /**
  * Removes a participant (seat taken by mistake). Their ideas and votes are deleted with
- * them; they can come back with the link if a seat is left.
+ * them; they can come back with the link if a seat is left. Only before the first recap
+ * (`canRemoveParticipants`): afterwards, it would change the results.
  */
 export async function removeParticipant(slug: string, participantId: string) {
+  if (!isId(participantId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { host: true });
+    if (!canRemoveParticipants(room)) throw new ActionFailure("wrongPhase");
     const target = await otherParticipant(room.id, me.id, participantId);
     await db.$transaction([
       // List options created by this person (while they were hosting) are kept.
