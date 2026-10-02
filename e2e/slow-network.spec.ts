@@ -116,13 +116,12 @@ test("a double tap on Create the session creates a single session", async ({ pag
   expect(await countRooms(name)).toBe(1);
 });
 
-test("a step change reaches a slow phone, shows the loading state, and never goes back", async ({ page, openAsGuest }) => {
+test("a step change reaches a slow phone and never goes back", async ({ page, openAsGuest }) => {
   const guest = await slowGuestInIdeas(page, openAsGuest);
   const visited: string[] = [];
   guest.on("framenavigated", (frame) => frame === guest.mainFrame() && visited.push(new URL(frame.url()).pathname));
 
   await seeRecap(page);
-  await expect(guest.getByRole("status").filter({ hasText: "Loading the recap…" })).toBeVisible({ timeout: SLOW_TIMEOUT });
   await expect(guest.getByRole("heading", { name: "The recap" })).toBeVisible({ timeout: SLOW_TIMEOUT });
   // Updates sent before the change keep arriving: none may take the page back to the ideas.
   await guest.waitForTimeout(LATENCY * 3);

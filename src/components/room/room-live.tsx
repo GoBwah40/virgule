@@ -79,6 +79,12 @@ export function RoomLive({ slug, pusher, followPhase = true }: Props) {
         busySince.current = null;
         return;
       }
+      // Overloaded server: a refresh would get the same error and Next.js would replace the page
+      // with it, for good. A 404 still refreshes: it shows a session expired or left.
+      if (res.status >= 500) {
+        busySince.current = null;
+        return;
+      }
       let target: string | undefined;
       if (followPhase && res.ok) {
         const { phase } = (await res.json()) as { phase: Phase };
