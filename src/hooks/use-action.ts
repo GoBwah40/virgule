@@ -5,6 +5,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import type { ActionResult } from "@/lib/actions";
+import { isNetworkError } from "@/lib/network-error";
 
 /** Runs a server action in a transition and shows any error as a toast. */
 export function useAction() {
@@ -17,10 +18,12 @@ export function useAction() {
       try {
         result = await action();
       } catch (error) {
-        // Online, let it through as before (a redirect also cancels the request in flight).
-        if (navigator.onLine) throw error;
-        // The request never reached the server: an optimistic update reverts on its own.
-        toast.error(t("offline"));
+        // Anything else than a lost request goes through as before (a redirect also cancels the
+        // request in flight, and must not show an error).
+        if (navigator.onLine && !isNetworkError(error)) throw error;
+        // The request never reached the server: an optimistic update reverts on its own. Online
+        // but lost: the connection dropped or switched (Wi-Fi to mobile data).
+        toast.error(t(navigator.onLine ? "network" : "offline"));
         return;
       }
       // Actions that redirect return nothing.
