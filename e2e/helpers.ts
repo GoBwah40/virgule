@@ -20,6 +20,13 @@ async function write(sql: string, args: string[]) {
   await db.execute({ sql, args });
 }
 
+/** Sessions with this name in the test database. */
+export async function countRooms(name: string) {
+  await ready;
+  const { rows } = await db.execute({ sql: 'SELECT COUNT(*) AS n FROM "Room" WHERE name = ?', args: [name] });
+  return Number(rows[0].n);
+}
+
 /**
  * Fills in a form, then submits it. Typed before React has hydrated the page, a value shows in
  * the field but not in the component state, and the button stays disabled: type it again until
