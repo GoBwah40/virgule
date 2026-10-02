@@ -12,6 +12,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { defaultLocale } from "@/i18n/config";
 import { isLocale } from "@/i18n/locale";
 import { REPO_URL } from "@/lib/config";
+import { RELOAD_WHEN_BACK_ONLINE_SCRIPT } from "@/lib/reload-when-online";
 import { parseThemePreference, THEME_COOKIE } from "@/lib/theme";
 
 import { fontVariables } from "./fonts";
@@ -40,6 +41,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fontVariables} h-full antialiased`}
       data-theme={theme === "system" ? undefined : theme}
     >
+      <head>
+        {/* First in the page, to see the scripts and styles that fail while loading. */}
+        <script dangerouslySetInnerHTML={{ __html: RELOAD_WHEN_BACK_ONLINE_SCRIPT }} />
+      </head>
       <body className="flex min-h-full flex-col text-base">
         <NextIntlClientProvider>
           <TooltipProvider>{children}</TooltipProvider>

@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.8 — 2026-10-02
+
+- A page cut off by the network while loading, left without styles or working buttons, now reloads by itself as soon as you are back online.
+
 ## 0.6.7 — 2026-10-02
 
 - Losing the network for a moment no longer replaces the session with the browser's offline page: it stays on screen, tells you when a vote or an idea could not be sent, and catches up as soon as you are back online.

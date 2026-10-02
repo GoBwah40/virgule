@@ -25,7 +25,7 @@ async function write(sql: string, args: string[]) {
  * the field but not in the component state, and the button stays disabled: type it again until
  * the button is enabled. A person cannot type that fast after the page loads; Playwright can.
  */
-async function fillAndSubmit(fields: [Locator, string][], submit: Locator) {
+export async function fillAndSubmit(fields: [Locator, string][], submit: Locator) {
   await expect(async () => {
     for (const [field, value] of fields) await field.fill(value);
     await expect(submit).toBeEnabled({ timeout: 1_000 });
