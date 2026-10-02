@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.10 — 2026-10-02
+
+- After a dropped real-time connection, the session catches up as soon as it reconnects, instead of up to 30 seconds later.
+
 ## 0.6.9 — 2026-10-02
 
 - When your phone wakes up before its network, the session no longer gives way to the browser's error page: it waits for the connection, then catches up.

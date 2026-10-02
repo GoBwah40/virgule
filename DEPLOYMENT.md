@@ -249,7 +249,7 @@ Locally, the same script runs with the database values (`RESET_CONFIRM=yes` is r
 | `401` or `Unauthorized` error from Turso | Invalid or revoked token | `turso db tokens create virgule`, update `TURSO_AUTH_TOKEN`, redeploy |
 | The app tries to open `file:./dev.db` in production | `TURSO_DATABASE_URL` missing from the environment concerned | Check the variable for *Production* (and *Preview*) |
 | No instant update, but a refresh every ~30 s | Pusher OK in the browser, server-side sending fails | Check `PUSHER_APP_ID` and `PUSHER_SECRET`; logs show `[realtime] notification failed` |
-| Updates every 3 s despite Pusher | `NEXT_PUBLIC_PUSHER_*` added after the build | Redeploy |
+| Updates every 3 s despite Pusher | `NEXT_PUBLIC_PUSHER_*` missing from the running deployment (they are read at run time, not at build time) | Check the variables, then redeploy so Vercel applies them |
 | A tag was pushed, nothing is deployed | The tag is not the highest version, or the secrets are missing | Read the **Deploy to production** run in the **Actions** tab |
 | `Error: The specified token is not valid` in the workflow | `VERCEL_TOKEN` expired or revoked | Create a new token, update the GitHub secret, re-run the workflow |
 | The cron deletes nothing | No room older than 7 days, or `CRON_SECRET` missing | Test with the `curl` command from step 6 |

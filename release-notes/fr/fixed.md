@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.10 — 2026-10-02
+
+- Après une coupure de la connexion en temps réel, la séance se met à jour dès la reconnexion, au lieu de jusqu'à 30 secondes plus tard.
+
 ## 0.6.9 — 2026-10-02
 
 - Quand ton téléphone sort de veille avant son réseau, la séance ne laisse plus place à la page d'erreur du navigateur : elle attend la connexion, puis se met à jour.

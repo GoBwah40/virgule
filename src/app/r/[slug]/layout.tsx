@@ -8,6 +8,7 @@ import { RoomHeader } from "@/components/room/room-header";
 import { RoomLive } from "@/components/room/room-live";
 import { SeatRow } from "@/components/seat-row";
 import { MAX_PARTICIPANTS } from "@/lib/config";
+import { pusherClientConfig } from "@/lib/realtime/server";
 import { getRoomContext, hostName } from "@/lib/room";
 
 export async function generateMetadata({ params }: LayoutProps<"/r/[slug]">): Promise<Metadata> {
@@ -49,7 +50,7 @@ export default async function RoomLayout({ children, params }: LayoutProps<"/r/[
           }
         />
         {/* Updates the seat count while the person is choosing a nickname. */}
-        <RoomLive slug={slug} followPhase={false} />
+        <RoomLive slug={slug} pusher={pusherClientConfig()} followPhase={false} />
       </main>
     );
   }
@@ -58,7 +59,7 @@ export default async function RoomLayout({ children, params }: LayoutProps<"/r/[
     <>
       <RoomHeader room={ctx.room} participants={ctx.participants} meId={ctx.me.id} />
       <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
-      <RoomLive slug={slug} />
+      <RoomLive slug={slug} pusher={pusherClientConfig()} />
     </>
   );
 }
