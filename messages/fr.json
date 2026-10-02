@@ -324,6 +324,7 @@
     "notAuthor": "Tu ne peux retirer que tes propres idées du tour en cours.",
     "selfVoteForbidden": "Le vote sur tes propres idées est désactivé.",
     "unknown": "Quelque chose n'a pas marché. Réessaie dans un instant.",
+    "offline": "Tu es hors ligne. Vérifie ta connexion et réessaie.",
     "invalidDateRange": "La date de fin doit être le même jour ou après la date de début.",
     "invalidAmountRange": "Le second montant doit être supérieur ou égal au premier.",
     "themeKindLocked": "Des idées ont déjà été proposées sur ce sujet : son type de réponse ne peut plus changer.",
