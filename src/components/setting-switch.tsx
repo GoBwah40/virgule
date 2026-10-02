@@ -22,7 +22,8 @@ export function SettingSwitch({ id, label, hint, checked, onCheckedChange, disab
         </Label>
         {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
       </div>
-      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} className="mt-0.5" />
+      {/* 32 × 18 px switch: its touch area grows to 44 px high (56 px wide from Switch itself). */}
+      <Switch id={id} checked={checked} disabled={disabled} onCheckedChange={onCheckedChange} className="mt-0.5 after:-inset-y-[13px]" />
     </div>
   );
 }

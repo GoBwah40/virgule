@@ -25,7 +25,7 @@ A room expires **7 days** after it is created; a daily scheduled job then delete
 | Real time | [Pusher Channels](https://pusher.com/channels) (optional), with automatic fallback to polling |
 | Rate limiting | [Upstash Redis](https://upstash.com) (optional), per IP and per participant |
 | i18n | next-intl: English and French |
-| Quality | Vitest + Testing Library, Storybook 10, ESLint, knip |
+| Quality | Vitest + Testing Library, Playwright, Storybook 10, ESLint, knip |
 | Hosting | Vercel (+ Vercel Cron for the purge) |
 
 ## Running locally
@@ -51,6 +51,7 @@ To test with several people on the same machine, open the room link on `http://l
 | `pnpm check` | Lint, types, tests and knip: run before every commit (GitHub Actions CI runs it again on every push and pull request) |
 | `pnpm lint` / `pnpm typecheck` | ESLint / TypeScript |
 | `pnpm test` | Vitest tests: logic (Node) and components (jsdom) |
+| `pnpm test:e2e` | Playwright end-to-end tests (`e2e/`): builds and starts the app on port 3100 against a throwaway `e2e.db`, plus a second server with Pusher turned on (port 3101, `e2e-pusher.db`) for `e2e/pusher.spec.ts` (CI runs them in a separate job). First time: `pnpm exec playwright install chromium` |
 | `pnpm knip` | Detects unused files, exports and dependencies |
 | `pnpm storybook` | Catalog of the global components on http://localhost:6006 |
 | `pnpm db:migrate` | Creates or applies a migration on the local database |

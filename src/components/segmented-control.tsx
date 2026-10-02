@@ -22,8 +22,8 @@ type Props<T extends string> = {
 };
 
 /**
- * Single choice among several options, as pills. Built on real radio buttons: arrow-key
- * navigation and screen reader support come from the browser.
+ * Single choice among several options, as pills (40 px high in a 44 px touch area). Built on
+ * real radio buttons: arrow-key navigation and screen reader support come from the browser.
  */
 export function SegmentedControl<T extends string>({
   name,
@@ -44,7 +44,7 @@ export function SegmentedControl<T extends string>({
           <label
             key={optionValue}
             className={cn(
-              "inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] px-3.5 text-sm font-semibold transition-colors",
+              "touch-target inline-flex h-10 cursor-pointer items-center gap-1.5 rounded-full border-[1.5px] px-3.5 text-sm font-semibold transition-colors",
               "has-[:focus-visible]:ring-3 has-[:focus-visible]:ring-ring/80",
               "has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-50",
               optionValue === value

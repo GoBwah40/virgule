@@ -22,6 +22,22 @@ describe("SeatRow", () => {
     expect(screen.getAllByLabelText("Free seat")).toHaveLength(4);
   });
 
+  it("leaves only the taken seats on paper", () => {
+    renderUi(<SeatRow seats={seats} capacity={6} labels={labels} />);
+    const items = [...screen.getByRole("list", { name: labels.row }).children];
+    expect(items.filter((item) => item.classList.contains("print:hidden"))).toHaveLength(4);
+    expect(screen.getByLabelText("Camille · is hosting").closest("li")).not.toHaveClass("print:hidden");
+  });
+
+  it("gives every seat a 44 × 44 px touch area, the seat itself staying smaller", () => {
+    const onFreeSeatClick = vi.fn();
+    renderUi(<SeatRow seats={seats} capacity={6} labels={labels} onFreeSeatClick={onFreeSeatClick} />);
+    for (const trigger of [screen.getByLabelText("Camille · is hosting"), ...screen.getAllByRole("button", { name: "Free seat" })]) {
+      expect(trigger).toHaveClass("min-h-11", "min-w-11");
+      expect(trigger.firstElementChild).toHaveClass("h-10", "w-9");
+    }
+  });
+
   it("makes free seats clickable only when an action is provided", async () => {
     const { unmount } = renderUi(<SeatRow seats={seats} capacity={6} labels={labels} />);
     expect(screen.queryAllByRole("button", { name: "Free seat" })).toHaveLength(0);

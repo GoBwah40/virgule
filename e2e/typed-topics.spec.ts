@@ -1,0 +1,174 @@
+import type { Page } from "@playwright/test";
+
+import {
+  createRoom,
+  expect,
+  idea,
+  join,
+  LIVE_TIMEOUT,
+  pick,
+  seeRecap,
+  startIdeas,
+  test,
+  vote,
+} from "./helpers";
+
+// Dates and amounts are formatted with `Intl` in English: "June 20 – 25, 2027" (thin spaces
+// around the dash, hence `\s`), "€1,200".
+
+/** Sam hosts "Holidays" and Lea has joined. */
+async function setUp(page: Page, openAsGuest: (link: string) => Promise<Page>) {
+  const link = await createRoom(page, { name: "Holidays", host: "Sam" });
+  const guest = await openAsGuest(link);
+  await join(guest, "Lea");
+  return guest;
+}
+
+/** Adds one of the suggested topics ("Dates" is a period, "Budget" a range). */
+async function addSuggestedTopic(page: Page, name: "Dates" | "Budget") {
+  await page.getByRole("list", { name: "Topic ideas" }).getByRole("button", { name }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: name })).toBeVisible();
+}
+
+/** A topic card on the ideas page, holding its ideas and its composer. */
+const card = (page: Page, title: string) => page.locator('[data-slot="card"]').filter({ hasText: title });
+
+async function suggestPeriod(page: Page, from: string, to: string) {
+  const dates = card(page, "Dates");
+  await dates.getByLabel("From").fill(from);
+  await dates.getByLabel("To").fill(to);
+  await dates.getByRole("button", { name: "Add", exact: true }).click();
+  // Emptied once added: typing the next one earlier would be wiped out.
+  await expect(dates.getByLabel("From")).toHaveValue("");
+}
+
+async function suggestRange(page: Page, min: string, max: string) {
+  const budget = card(page, "Budget");
+  await budget.getByLabel(/^Between/).fill(min);
+  await budget.getByLabel(/^And/).fill(max);
+  await budget.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(budget.getByLabel(/^Between/)).toHaveValue("");
+}
+
+test("a period is suggested from… to…, never ending before it starts", async ({ page, openAsGuest }) => {
+  const guest = await setUp(page, openAsGuest);
+  await addSuggestedTopic(page, "Dates");
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  const dates = card(guest, "Dates");
+  const add = dates.getByRole("button", { name: "Add", exact: true });
+  await dates.getByLabel("From").fill("2027-06-20");
+  await dates.getByLabel("To").fill("2027-06-10");
+  await expect(add).toBeDisabled();
+  await dates.getByLabel("To").fill("2027-06-25");
+  await add.click();
+
+  await expect(idea(guest, "Your idea")).toHaveText(/June 20\s–\s25, 2027/);
+  await expect(idea(page, "2027")).toHaveText(/June 20\s–\s25, 2027/, { timeout: LIVE_TIMEOUT });
+  // The fields are emptied for the next idea.
+  await expect(dates.getByLabel("From")).toHaveValue("");
+
+  // The same period twice is a duplicate (and the fields keep it, to fix it).
+  const hostDates = card(page, "Dates");
+  await hostDates.getByLabel("From").fill("2027-06-20");
+  await hostDates.getByLabel("To").fill("2027-06-25");
+  await hostDates.getByRole("button", { name: "Add", exact: true }).click();
+  await expect(page.getByText("This idea is already suggested in this topic: you can vote for it.")).toBeVisible();
+});
+
+test("a budget range is in whole euros, the second amount at least the first", async ({ page, openAsGuest }) => {
+  const guest = await setUp(page, openAsGuest);
+  await addSuggestedTopic(page, "Budget");
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  const budget = card(guest, "Budget");
+  const add = budget.getByRole("button", { name: "Add", exact: true });
+  // Digits only: no sign, no decimals.
+  await budget.getByLabel(/^Between/).fill("5a0.0");
+  await expect(budget.getByLabel(/^Between/)).toHaveValue("500");
+  await budget.getByLabel(/^And/).fill("100");
+  await expect(add).toBeDisabled();
+  await budget.getByLabel(/^And/).fill("1200");
+  await add.click();
+
+  await expect(idea(guest, "From €500 to €1,200")).toBeVisible();
+  await expect(idea(page, "From €500 to €1,200")).toBeVisible({ timeout: LIVE_TIMEOUT });
+});
+
+test("a single date or amount is shown in full", async ({ page, openAsGuest }) => {
+  const guest = await setUp(page, openAsGuest);
+  for (const [title, kind] of [
+    ["Party day", "Date"],
+    ["Ticket price", "Amount"],
+  ]) {
+    await page.getByLabel("Topic", { exact: true }).fill(title);
+    await pick(page, kind);
+    await page.getByRole("button", { name: "Add the topic" }).click();
+    await expect(page.getByRole("listitem").filter({ hasText: title })).toBeVisible();
+  }
+  await startIdeas(page);
+
+  await card(page, "Party day").getByLabel("Date").fill("2027-06-12");
+  await card(page, "Party day").getByRole("button", { name: "Add", exact: true }).click();
+  await card(page, "Ticket price").getByLabel(/^Amount/).fill("35");
+  await card(page, "Ticket price").getByRole("button", { name: "Add", exact: true }).click();
+
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await expect(card(guest, "Party day").getByText("June 12, 2027")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(card(guest, "Ticket price").getByText("€35")).toBeVisible();
+});
+
+test("the recap finds the common slot and the compatible budget", async ({ page, openAsGuest }) => {
+  const guest = await setUp(page, openAsGuest);
+  await addSuggestedTopic(page, "Dates");
+  await addSuggestedTopic(page, "Budget");
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  await suggestPeriod(page, "2027-06-10", "2027-06-20");
+  await suggestRange(page, "500", "1000");
+  await suggestPeriod(guest, "2027-06-15", "2027-06-25");
+  await suggestRange(guest, "800", "1500");
+  await expect(card(page, "Budget").getByRole("listitem")).toHaveCount(2, { timeout: LIVE_TIMEOUT });
+  await expect(card(guest, "Dates").getByRole("listitem")).toHaveCount(2, { timeout: LIVE_TIMEOUT });
+
+  // Everyone is for every idea: all four are kept.
+  for (const p of [page, guest]) {
+    for (const content of ["June 10", "June 15", "€500", "€800"]) await vote(p, content, "For");
+  }
+  await seeRecap(page);
+  await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+
+  for (const p of [page, guest]) {
+    await expect(p.getByText("4 of 4 ideas kept")).toBeVisible();
+    await expect(card(p, "Dates").getByText(/Common slot: June 15\s–\s20, 2027/)).toBeVisible();
+    await expect(card(p, "Dates").getByText("Shared by all 2 periods kept.")).toBeVisible();
+    await expect(card(p, "Budget").getByText("Compatible budget: €800 to €1,000")).toBeVisible();
+    await expect(card(p, "Budget").getByText("Shared by all 2 ranges kept.")).toBeVisible();
+  }
+});
+
+test("each person reads dates and amounts in their own language", async ({ page, openAsGuest }) => {
+  const link = await createRoom(page, { name: "Holidays", host: "Sam" });
+  await addSuggestedTopic(page, "Dates");
+  await addSuggestedTopic(page, "Budget");
+  await startIdeas(page);
+  await suggestPeriod(page, "2027-06-01", "2027-06-14");
+  await suggestPeriod(page, "2027-05-30", "2027-06-02");
+  await suggestRange(page, "500", "1200");
+
+  // Lea's browser is in French: the whole session follows, values included.
+  const guest = await openAsGuest(link, { locale: "fr-FR" });
+  await guest.getByLabel("C'est quoi ton prénom ?").fill("Lea");
+  await guest.getByRole("button", { name: "Rejoindre la séance" }).click();
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  // French is built by hand: "1er", and the month only once when it is shared.
+  await expect(idea(guest, "Du 1er au 14 juin 2027")).toBeVisible();
+  await expect(idea(guest, "Du 30 mai au 2 juin 2027")).toBeVisible();
+  await expect(idea(guest, "De 500")).toHaveText(/De 500\s€ à 1\s200\s€/);
+  // Sam still reads English.
+  await expect(idea(page, "June 1")).toHaveText(/June 1\s–\s14, 2027/);
+});

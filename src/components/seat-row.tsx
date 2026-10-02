@@ -42,13 +42,22 @@ type Props = {
 
 const LETTERS = "ABCDEFGHIJ";
 
-/** Participants shown as a row of seats: who is on board, how many seats are left. */
+/** Seat button or tooltip trigger: a touch area of at least 44 × 44 px around the seat. The
+    small seats (36 × 40) sit side by side in theirs, which makes the gap between them. */
+const TRIGGER = "group/seat grid min-h-11 min-w-11 place-items-center outline-none";
+/** Keyboard focus: drawn around the seat itself, not its touch area. */
+const FOCUS_RING = "group-focus-visible/seat:ring-3 group-focus-visible/seat:ring-ring/80";
+
+/**
+ * Participants shown as a row of seats: who is on board, how many seats are left.
+ * Printed, only the taken seats remain: a free seat means nothing on paper.
+ */
 export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size = "sm", className }: Props) {
   const aisle = Math.ceil(capacity / 2);
   const box = size === "md" ? "h-12 w-11 text-base" : "h-10 w-9 text-sm";
 
   return (
-    <ul aria-label={labels.row} className={cn("flex items-end gap-1.5", className)}>
+    <ul aria-label={labels.row} className={cn("flex items-end", size === "md" && "gap-1.5", className)}>
       {Array.from({ length: capacity }, (_, i) => {
         const seat = seats[i];
         const letter = LETTERS[i];
@@ -60,6 +69,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
           <span
             className={cn(
               "grid place-items-center rounded-t-[10px] rounded-b-md font-bold",
+              FOCUS_RING,
               "motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 motion-safe:duration-300",
               box,
               seat.isMe ? "bg-highlight text-[#2a1a24]" : "bg-highlight-soft text-highlight-foreground",
@@ -71,6 +81,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
           <span
             className={cn(
               "grid place-items-center rounded-t-[10px] rounded-b-md border-[1.5px] border-dashed border-muted-foreground/70 text-muted-foreground",
+              FOCUS_RING,
               box,
             )}
           >
@@ -81,11 +92,12 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
         return (
           <li
             key={seat?.id ?? `free-${letter}`}
-            className={cn("relative grid justify-items-center gap-0.5", i === aisle && "ml-2.5")}
+            // Small seats sit 2 px inside their touch area: same gap to the letter and crown.
+            className={cn("relative grid justify-items-center", size === "md" && "gap-0.5", i === aisle && "ml-2.5", !seat && "print:hidden")}
           >
             {seat?.isHost && (
               // Crown sitting on the seat: no row reserved above each seat.
-              <span className="absolute -top-2 left-1/2 z-10 -translate-x-1/2 rounded-full bg-card px-0.5 text-primary" aria-hidden>
+              <span className={cn("absolute left-1/2 z-10 -translate-x-1/2", size === "md" ? "-top-2" : "-top-1.5", "pointer-events-none rounded-full bg-card px-0.5 text-primary")} aria-hidden>
                 <Crown className="size-3" />
               </span>
             )}
@@ -98,9 +110,9 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
                 <TooltipTrigger
                   render={
                     !seat && onFreeSeatClick ? (
-                      <button type="button" onClick={onFreeSeatClick} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
+                      <button type="button" onClick={onFreeSeatClick} aria-label={label} className={TRIGGER} />
                     ) : (
-                      <span tabIndex={0} aria-label={label} className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80" />
+                      <span role="img" tabIndex={0} aria-label={label} className={TRIGGER} />
                     )
                   }
                 >
@@ -109,7 +121,8 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
                 <TooltipContent>{label}</TooltipContent>
               </Tooltip>
             )}
-            <span className="font-mono text-[10px] leading-none text-muted-foreground" aria-hidden>
+            {/* Decorative, like the crown: taps go through to the seat above. */}
+            <span className="pointer-events-none font-mono text-[10px] leading-none text-muted-foreground" aria-hidden>
               {letter}
             </span>
           </li>
@@ -129,7 +142,7 @@ function SeatMenuTrigger({ seat, menu, label, children }: { seat: Seat; menu: Se
             type="button"
             aria-label={menu.label(seat)}
             title={label}
-            className="rounded-md outline-none focus-visible:ring-3 focus-visible:ring-ring/80"
+            className={TRIGGER}
             // Right click (and long press on Android): same menu as a click.
             onContextMenu={(e) => {
               e.preventDefault();

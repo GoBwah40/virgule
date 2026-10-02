@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { CopyButton } from "@/components/copy-button";
@@ -31,17 +30,17 @@ export async function RoomHeader({ room, participants, meId }: Props) {
       {/* 2-column grid: name then steps on the left, link then seats on the right.
           The steps follow the name directly, without waiting for the seats' height. */}
       <div className="mx-auto grid w-full max-w-5xl grid-cols-[1fr_auto] items-start gap-x-4 gap-y-3 px-4 py-4">
-        <div className="min-w-0 space-y-0.5">
-          <Link href="/" className="inline-flex text-lg">
-            <Logo label={tApp("name")} />
-          </Link>
+        {/* space-y-1: room for the logo's touch area above the name. */}
+        <div className="min-w-0 space-y-1">
+          <Logo label={tApp("name")} href="/" className="text-lg" />
           <h1 className="truncate text-2xl leading-tight font-extrabold">{room.name}</h1>
           <p className="text-xs text-muted-foreground">{t("expiresOn", { date: room.expiresAt })}</p>
         </div>
         {/* Right column: link then seats, stacked tightly on desktop.
             On mobile, `contents` keeps the button next to the name and the seats on the last row. */}
         <div className="contents sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:flex sm:flex-col sm:items-end sm:gap-4">
-          <div className="flex shrink-0 gap-2 justify-self-end">
+          {/* Invite and leave: screen-only, the printed recap keeps the name and the seats. */}
+          <div className="flex shrink-0 gap-2 justify-self-end print:hidden">
             <InviteDialog
               invitePath={invitePath}
               roomName={room.name}

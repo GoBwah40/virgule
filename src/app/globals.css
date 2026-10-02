@@ -138,6 +138,22 @@
     text-wrap: balance;
   }
 }
+
+/* Touch area of at least 44 × 44 px around a smaller visual (chip, small icon button):
+   an invisible pseudo-element centred on the element, the visual keeps its size.
+   Only where neighbours are far enough apart, otherwise the areas would overlap. */
+@utility touch-target {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    translate: -50% -50%;
+  }
+}
 /* ─── Motion ────────────────────────────────────────────────────────────────
    Principle: short (≤ 300 ms), subtle, and only where they help understand
    what changes. All disabled if the user reduces motion. */
