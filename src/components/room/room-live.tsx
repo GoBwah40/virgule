@@ -1,12 +1,15 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useTransition } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
 import { POLL_INTERVAL_MS, SAFETY_POLL_INTERVAL_MS } from "@/lib/config";
 import { phasePath } from "@/lib/phase-path";
 import { ROOM_EVENT, roomChannel } from "@/lib/realtime/shared";
+
+// An update that has not landed after this long no longer holds the next ones back.
+const MAX_UPDATE_MS = 30_000;
 
 type Props = {
   slug: string;
@@ -25,6 +28,9 @@ type Props = {
  * On each update, the current step is checked first: if it has changed, we navigate
  * straight to its page (a single transition, no blank screen); otherwise we refresh
  * the Server Components of the current page.
+ * One update at a time: Next.js only shows the latest refresh, so on a connection slower than
+ * the polling interval each one would replace the previous before it landed, and the page would
+ * never change. A round falling during an update is played once it has landed.
  */
 export function RoomLive({ slug, pusher, followPhase = true }: Props) {
   const router = useRouter();
@@ -34,9 +40,24 @@ export function RoomLive({ slug, pusher, followPhase = true }: Props) {
   const pusherKey = pusher?.key;
   const pusherCluster = pusher?.cluster;
 
+  const [updating, startUpdate] = useTransition();
+  const busySince = useRef<number | null>(null);
+  const again = useRef(false);
+  const scheduleRef = useRef(() => {});
+
   useEffect(() => {
     pathnameRef.current = pathname;
   }, [pathname]);
+
+  // The update under way has landed: play the round that came meanwhile, if any.
+  useEffect(() => {
+    if (updating) return;
+    busySince.current = null;
+    if (again.current) {
+      again.current = false;
+      scheduleRef.current();
+    }
+  }, [updating]);
 
   useEffect(() => {
     let debounce: ReturnType<typeof setTimeout> | undefined;
@@ -45,28 +66,34 @@ export function RoomLive({ slug, pusher, followPhase = true }: Props) {
       // Without network, a refresh would fail and Next.js would fall back to a full page load,
       // leaving the browser's own offline page for good. Offline: wait for the "online" event.
       if (!navigator.onLine) return;
+      if (busySince.current !== null && Date.now() - busySince.current < MAX_UPDATE_MS) {
+        again.current = true;
+        return;
+      }
+      busySince.current = Date.now();
       let res: Response;
       try {
         res = await fetch(`/r/${slug}/phase`, { cache: "no-store" });
       } catch {
         // Seen as online but unreachable (a phone waking up before its network): next round.
+        busySince.current = null;
         return;
       }
+      let target: string | undefined;
       if (followPhase && res.ok) {
         const { phase } = (await res.json()) as { phase: Phase };
-        const target = phasePath(slug, phase);
-        if (target !== pathnameRef.current) {
-          router.push(target);
-          return;
-        }
+        const path = phasePath(slug, phase);
+        if (path !== pathnameRef.current) target = path;
       }
-      router.refresh();
+      // Followed until it lands (`updating`), which frees the next round.
+      startUpdate(() => (target ? router.push(target) : router.refresh()));
     };
 
     const schedule = () => {
       clearTimeout(debounce);
       debounce = setTimeout(sync, 150);
     };
+    scheduleRef.current = schedule;
 
     const interval = setInterval(() => {
       if (document.visibilityState === "visible") schedule();

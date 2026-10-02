@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.12 — 2026-10-02
+
+- Sur une connexion lente, la séance restait figée, même sur l'idée que tu venais d'ajouter : elle se met maintenant à jour, une modification après l'autre.
+
 ## 0.6.11 — 2026-10-02
 
 - Un vote, une idée ou une nouvelle séance perdus pendant que ton téléphone change de réseau ne remplacent plus l'étape par une page d'erreur : un message te propose de réessayer, et ce que tu as saisi reste.

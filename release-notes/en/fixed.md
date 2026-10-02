@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.12 — 2026-10-02
+
+- On a slow connection, the session kept showing the same thing, even the idea you had just added: it now updates, one change after another.
+
 ## 0.6.11 — 2026-10-02
 
 - A vote, an idea or a new session lost while your phone switches networks no longer replaces the step with an error page: a message asks you to try again, and what you typed stays.
