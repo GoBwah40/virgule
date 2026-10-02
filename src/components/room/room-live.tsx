@@ -21,7 +21,8 @@ type Props = {
  * Keeps the page in sync with the other participants.
  * - Pusher configured: updates on every notification (+ slow fallback polling).
  * - Otherwise: polling every few seconds.
- * - Offline: no update until the device is back online, then one straight away.
+ * - Offline: no update until the device is back online, then one straight away. The step is
+ *   always asked first, which also checks the server can be reached before refreshing.
  * On each update, the current step is checked first: if it has changed, we navigate
  * straight to its page (a single transition, no blank screen); otherwise we refresh
  * the Server Components of the current page.
@@ -39,22 +40,22 @@ export function RoomLive({ slug, followPhase = true }: Props) {
     let debounce: ReturnType<typeof setTimeout> | undefined;
 
     const sync = async () => {
-      // Offline, a refresh would fail and Next.js would fall back to a full page load, leaving
-      // the browser's own offline page: wait for the "online" event instead.
+      // Without network, a refresh would fail and Next.js would fall back to a full page load,
+      // leaving the browser's own offline page for good. Offline: wait for the "online" event.
       if (!navigator.onLine) return;
-      if (followPhase) {
-        try {
-          const res = await fetch(`/r/${slug}/phase`, { cache: "no-store" });
-          if (res.ok) {
-            const { phase } = (await res.json()) as { phase: Phase };
-            const target = phasePath(slug, phase);
-            if (target !== pathnameRef.current) {
-              router.push(target);
-              return;
-            }
-          }
-        } catch {
-          // Network unavailable: fall back to a plain refresh.
+      let res: Response;
+      try {
+        res = await fetch(`/r/${slug}/phase`, { cache: "no-store" });
+      } catch {
+        // Seen as online but unreachable (a phone waking up before its network): next round.
+        return;
+      }
+      if (followPhase && res.ok) {
+        const { phase } = (await res.json()) as { phase: Phase };
+        const target = phasePath(slug, phase);
+        if (target !== pathnameRef.current) {
+          router.push(target);
+          return;
         }
       }
       router.refresh();

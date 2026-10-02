@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.9 — 2026-10-02
+
+- When your phone wakes up before its network, the session no longer gives way to the browser's error page: it waits for the connection, then catches up.
+
 ## 0.6.8 — 2026-10-02
 
 - A page cut off by the network while loading, left without styles or working buttons, now reloads by itself as soon as you are back online.
