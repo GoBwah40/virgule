@@ -50,7 +50,7 @@ export async function createRoom(page: Page, { name, host }: { name: string; hos
 export { expect };
 
 /** Opens the share link as a new person (fresh browser context, so no participation cookie). */
-type OpenAsGuest = (link: string, options?: { locale?: string }) => Promise<Page>;
+export type OpenAsGuest = (link: string, options?: { locale?: string }) => Promise<Page>;
 
 export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
   // Closed at the end of each test: an open session page keeps polling the server every 3 s,

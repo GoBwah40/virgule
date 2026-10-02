@@ -13,7 +13,16 @@ export function useAction() {
 
   const run = (action: () => Promise<ActionResult | void>, onSuccess?: () => void) =>
     startTransition(async () => {
-      const result = await action();
+      let result: ActionResult | void;
+      try {
+        result = await action();
+      } catch (error) {
+        // Online, let it through as before (a redirect also cancels the request in flight).
+        if (navigator.onLine) throw error;
+        // The request never reached the server: an optimistic update reverts on its own.
+        toast.error(t("offline"));
+        return;
+      }
       // Actions that redirect return nothing.
       if (result && !result.ok) toast.error(t(result.error));
       else onSuccess?.();

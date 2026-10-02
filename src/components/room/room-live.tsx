@@ -21,6 +21,7 @@ type Props = {
  * Keeps the page in sync with the other participants.
  * - Pusher configured: updates on every notification (+ slow fallback polling).
  * - Otherwise: polling every few seconds.
+ * - Offline: no update until the device is back online, then one straight away.
  * On each update, the current step is checked first: if it has changed, we navigate
  * straight to its page (a single transition, no blank screen); otherwise we refresh
  * the Server Components of the current page.
@@ -38,6 +39,9 @@ export function RoomLive({ slug, followPhase = true }: Props) {
     let debounce: ReturnType<typeof setTimeout> | undefined;
 
     const sync = async () => {
+      // Offline, a refresh would fail and Next.js would fall back to a full page load, leaving
+      // the browser's own offline page: wait for the "online" event instead.
+      if (!navigator.onLine) return;
       if (followPhase) {
         try {
           const res = await fetch(`/r/${slug}/phase`, { cache: "no-store" });
@@ -67,6 +71,8 @@ export function RoomLive({ slug, followPhase = true }: Props) {
 
     const onVisible = () => document.visibilityState === "visible" && schedule();
     document.addEventListener("visibilitychange", onVisible);
+    // Back online: catch up at once on what the others did meanwhile.
+    window.addEventListener("online", schedule);
 
     let cancelled = false;
     let pusher: { disconnect: () => void } | undefined;
@@ -84,6 +90,7 @@ export function RoomLive({ slug, followPhase = true }: Props) {
       clearTimeout(debounce);
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", schedule);
       pusher?.disconnect();
     };
   }, [router, slug, followPhase]);
