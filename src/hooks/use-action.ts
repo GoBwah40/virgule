@@ -5,7 +5,7 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 
 import type { ActionResult } from "@/lib/actions";
-import { isNetworkError } from "@/lib/network-error";
+import { isBadServerResponse, isNetworkError } from "@/lib/network-error";
 
 /** Runs a server action in a transition and shows any error as a toast. */
 export function useAction() {
@@ -18,6 +18,11 @@ export function useAction() {
       try {
         result = await action();
       } catch (error) {
+        // The server is there but not answering properly (overloaded): try again later.
+        if (isBadServerResponse(error)) {
+          toast.error(t("unknown"));
+          return;
+        }
         // Anything else than a lost request goes through as before (a redirect also cancels the
         // request in flight, and must not show an error).
         if (navigator.onLine && !isNetworkError(error)) throw error;

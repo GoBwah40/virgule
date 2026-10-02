@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.13 — 2026-10-02
+
+- When the server is overloaded, the session no longer gives way to a bare error page: it stays on screen, a vote that could not be saved says so, and everything catches up once the server answers again.
+
 ## 0.6.12 — 2026-10-02
 
 - On a slow connection, the session kept showing the same thing, even the idea you had just added: it now updates, one change after another.

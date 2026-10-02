@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.13 — 2026-10-02
+
+- Quand le serveur est surchargé, la séance ne laisse plus place à une page d'erreur brute : elle reste à l'écran, un vote qui n'a pas pu être enregistré te le dit, et tout se met à jour dès que le serveur répond de nouveau.
+
 ## 0.6.12 — 2026-10-02
 
 - Sur une connexion lente, la séance restait figée, même sur l'idée que tu venais d'ajouter : elle se met maintenant à jour, une modification après l'autre.
