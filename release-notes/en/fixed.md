@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.11 — 2026-10-02
+
+- A vote, an idea or a new session lost while your phone switches networks no longer replaces the step with an error page: a message asks you to try again, and what you typed stays.
+
 ## 0.6.10 — 2026-10-02
 
 - After a dropped real-time connection, the session catches up as soon as it reconnects, instead of up to 30 seconds later.
