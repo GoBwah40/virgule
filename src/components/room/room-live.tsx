@@ -8,11 +8,10 @@ import { POLL_INTERVAL_MS, SAFETY_POLL_INTERVAL_MS } from "@/lib/config";
 import { phasePath } from "@/lib/phase-path";
 import { ROOM_EVENT, roomChannel } from "@/lib/realtime/shared";
 
-const PUSHER_KEY = process.env.NEXT_PUBLIC_PUSHER_KEY;
-const PUSHER_CLUSTER = process.env.NEXT_PUBLIC_PUSHER_CLUSTER;
-
 type Props = {
   slug: string;
+  /** Pusher's public settings; without them, polling only. */
+  pusher: { key: string; cluster: string } | null;
   /** Follow step changes (false on the "Join" screen, which stays in place). */
   followPhase?: boolean;
 };
@@ -27,10 +26,13 @@ type Props = {
  * straight to its page (a single transition, no blank screen); otherwise we refresh
  * the Server Components of the current page.
  */
-export function RoomLive({ slug, followPhase = true }: Props) {
+export function RoomLive({ slug, pusher, followPhase = true }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const pathnameRef = useRef(pathname);
+  // Strings rather than the object, which every refresh sends anew: the connection stays up.
+  const pusherKey = pusher?.key;
+  const pusherCluster = pusher?.cluster;
 
   useEffect(() => {
     pathnameRef.current = pathname;
@@ -68,7 +70,7 @@ export function RoomLive({ slug, followPhase = true }: Props) {
 
     const interval = setInterval(() => {
       if (document.visibilityState === "visible") schedule();
-    }, PUSHER_KEY ? SAFETY_POLL_INTERVAL_MS : POLL_INTERVAL_MS);
+    }, pusherKey ? SAFETY_POLL_INTERVAL_MS : POLL_INTERVAL_MS);
 
     const onVisible = () => document.visibilityState === "visible" && schedule();
     document.addEventListener("visibilitychange", onVisible);
@@ -76,13 +78,19 @@ export function RoomLive({ slug, followPhase = true }: Props) {
     window.addEventListener("online", schedule);
 
     let cancelled = false;
-    let pusher: { disconnect: () => void } | undefined;
-    if (PUSHER_KEY && PUSHER_CLUSTER) {
+    let client: { disconnect: () => void } | undefined;
+    if (pusherKey && pusherCluster) {
       import("pusher-js").then(({ default: Pusher }) => {
         if (cancelled) return;
-        const client = new Pusher(PUSHER_KEY, { cluster: PUSHER_CLUSTER });
-        client.subscribe(roomChannel(slug)).bind(ROOM_EVENT, schedule);
-        pusher = client;
+        const connection = new Pusher(pusherKey, { cluster: pusherCluster });
+        connection.subscribe(roomChannel(slug)).bind(ROOM_EVENT, schedule);
+        // Notifications sent while the connection was down are lost: catch up on reconnecting.
+        let connectedBefore = false;
+        connection.connection.bind("connected", () => {
+          if (connectedBefore) schedule();
+          connectedBefore = true;
+        });
+        client = connection;
       });
     }
 
@@ -92,9 +100,9 @@ export function RoomLive({ slug, followPhase = true }: Props) {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("online", schedule);
-      pusher?.disconnect();
+      client?.disconnect();
     };
-  }, [router, slug, followPhase]);
+  }, [router, slug, pusherKey, pusherCluster, followPhase]);
 
   return null;
 }
