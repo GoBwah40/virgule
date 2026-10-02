@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.9 — 2026-10-02
+
+- Quand ton téléphone sort de veille avant son réseau, la séance ne laisse plus place à la page d'erreur du navigateur : elle attend la connexion, puis se met à jour.
+
 ## 0.6.8 — 2026-10-02
 
 - Une page coupée par le réseau pendant son chargement, restée sans mise en forme ni boutons qui marchent, se recharge maintenant d'elle-même dès que tu es de nouveau en ligne.
