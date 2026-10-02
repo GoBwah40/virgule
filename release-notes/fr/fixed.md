@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.8 — 2026-10-02
+
+- Une page coupée par le réseau pendant son chargement, restée sans mise en forme ni boutons qui marchent, se recharge maintenant d'elle-même dès que tu es de nouveau en ligne.
+
 ## 0.6.7 — 2026-10-02
 
 - Une coupure de réseau ne remplace plus la séance par la page hors ligne du navigateur : elle reste à l'écran, te prévient quand un vote ou une idée n'a pas pu partir, et se met à jour dès que tu es de nouveau en ligne.
