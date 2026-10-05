@@ -134,7 +134,8 @@ src/
     r/[slug]/(session)/layout.tsx   Access guard (not found / expired / join) + header + sync
     r/[slug]/(session)/page.tsx     Share link → redirects to the current phase
     r/[slug]/(session)/themes|ideas|recap/page.tsx   One page per phase
-    r/[slug]/present/page.tsx       Room screen (host only), outside the session header
+    r/[slug]/present/page.tsx       Room screen (host or paired screen), outside the session header
+    present/page.tsx                Pairing a TV or a projector with the code from the host's phone
     r/[slug]/export/route.ts               Markdown / CSV export
     api/cron/purge/route.ts                Purge of expired rooms
   components/*.tsx          Reusable global components (+ .stories.tsx and .test.tsx)
@@ -167,7 +168,12 @@ src/
 - **Timer** (optional, set with the topics: 3, 5, 10 or 15 min): it starts when ideas open and at each new round. Everyone sees the remaining time; the person hosting can add 2 minutes or stop it. When it ends, nothing is blocked.
 - **Seat management**: right-click (or click) on an occupied seat, for the person hosting: **hand over hosting** to someone else, or **remove** a person (seat taken by mistake; their ideas and votes go with them).
 - **Gentle reminder**: during voting, everyone sees how many ideas they still have to vote on; the person hosting also sees how many participants have voted, without knowing what.
-- **Room screen**: for a group gathered in one place, the person hosting opens `/r/<slug>/present` from the button in the header, in a tab of its own, and shows it on a TV or a projector. No extra link and no seat taken: only the host can open it, anyone else goes back to the session. It is a view of its own, built for the group (`getPresentationView`): never whose idea it is (the host's own page marks their ideas), no score nor vote while ideas are open, only how many people have voted, and in the recap the totals everyone already sees, one topic at a time (arrow keys, Page Up / Page Down or a presentation clicker to move, space to pause). Text sized to be read from across the room, always dark, no controls; it follows the session like the phones do, asks for full screen on the first click or key press and keeps the screen awake where the browser allows it.
+- **Room screen**: for a group gathered in one place, the person hosting shows the session on a TV or a projector from the "Show on a big screen" button in the header. No extra link and no seat taken:
+  - **paired with a code**: the phone shows a one-time code (6 unambiguous characters, valid 10 minutes, only its hash stored), typed on the screen at `/present`. The screen then holds a secret of its own in a cookie (`Room.screenToken`, never sent to a page), is no participant, and follows the session while the host keeps the controls on the phone. One screen per session: the host disconnects it from the same dialog, and it goes back to `/present`. Wrong codes count against a per-IP rate limit;
+  - **or on the host's own device**, in a tab of its own (a second display);
+  - anyone else opening `/r/<slug>/present` goes back to the session.
+
+  It is a view of its own, built for the group (`getPresentationView`): never whose idea it is (the host's own page marks their ideas), no score nor vote while ideas are open, only how many people have voted, and in the recap the totals everyone already sees, one topic at a time (arrow keys, Page Up / Page Down or a presentation clicker to move, space to pause). Text sized to be read from across the room, always dark, no controls; it follows the session like the phones do, asks for full screen on the first click or key press and keeps the screen awake where the browser allows it.
 - **Invitation**: link to copy, QR code to scan for a group gathered in the same place, and the phone's native sharing when the browser offers it.
 - **What's new**: a button in the home page header (version number, and a dot until the latest version has been viewed on this browser) opens the release notes in a panel that slides up from the bottom of the screen.
 - **Theme**: light or dark following the device, or chosen in the footer. The choice is kept in a cookie (`virgule_theme`) read by the root layout, which renders `data-theme` directly on `<html>`: no flash on load.

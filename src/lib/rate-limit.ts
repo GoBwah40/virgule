@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 // Rate limiting is optional, like Pusher: without Upstash environment variables (local
 // development), nothing is limited. If Upstash is slow or down, requests go through.
 
-type Bucket = "createRoom" | "joinRoom" | "participant";
+type Bucket = "createRoom" | "joinRoom" | "pairScreen" | "participant";
 
 /** Sliding windows. Generous enough for a whole team behind the same office IP. */
 const RULES: Record<Bucket, { requests: number; window: Duration }> = {
@@ -15,6 +15,8 @@ const RULES: Record<Bucket, { requests: number; window: Duration }> = {
   createRoom: { requests: 10, window: "1 h" },
   // Per IP: a seat is limited to 6 per room, but each join is a row and a cookie.
   joinRoom: { requests: 30, window: "10 m" },
+  // Per IP: a wrong pairing code costs a try, so codes cannot be guessed by trying them all.
+  pairScreen: { requests: 10, window: "10 m" },
   // Per participant, every action: each one writes and sends a real-time message.
   participant: { requests: 120, window: "1 m" },
 };
@@ -36,7 +38,12 @@ function getLimiters(): Record<Bucket, Ratelimit> | null {
       ephemeralCache: new Map(),
       timeout: 1000,
     });
-  return (limiters = { createRoom: make("createRoom"), joinRoom: make("joinRoom"), participant: make("participant") });
+  return (limiters = {
+    createRoom: make("createRoom"),
+    joinRoom: make("joinRoom"),
+    pairScreen: make("pairScreen"),
+    participant: make("participant"),
+  });
 }
 
 /**

@@ -331,7 +331,26 @@
     "noneKept": "Aucune idée gardée sur ce sujet",
     "votes": "{up} pour, {down} contre",
     "more": "{count, plural, one {+ # autre idée} other {+ # autres idées}}",
-    "anonymous": "Personne ne sait qui a voté quoi"
+    "anonymous": "Personne ne sait qui a voté quoi",
+    "dialogTitle": "Afficher en grand",
+    "dialogDescription": "Pour un groupe réuni dans la même pièce : une télé ou un vidéoprojecteur montre la séance, jamais qui a proposé quoi. Il ne prend aucune place.",
+    "step1": "Sur le grand écran, ouvre cette adresse :",
+    "step2": "Tapes-y ce code :",
+    "codeLabel": "Code d'appairage",
+    "codeValid": "Code valable encore",
+    "codeExpired": "Code expiré",
+    "newCode": "Nouveau code",
+    "thisDevice": "Ouvrir plutôt sur cet appareil",
+    "paired": "Un écran affiche la séance",
+    "pairedHint": "Il suit chaque étape tout seul. Tu gardes la main ici.",
+    "unpair": "Déconnecter l'écran",
+    "another": "Utiliser un autre écran"
+  },
+  "pair": {
+    "title": "Afficher une séance sur cet écran",
+    "description": "Sur le téléphone de la personne qui anime, « Afficher en grand » donne un code. Tape-le ici.",
+    "code": "Code",
+    "submit": "Afficher la séance"
   },
   "export": {
     "button": "Exporter",
@@ -392,7 +411,8 @@
     "tooManySuggestions": "Tu as déjà plusieurs propositions en attente : attends qu'elles soient traitées.",
     "duplicateTheme": "Ce sujet est déjà dans la liste ou déjà proposé.",
     "suggestionNotFound": "Cette proposition a déjà été traitée.",
-    "voteLimitReached": "Tu as utilisé tous tes votes « pour » dans ce sujet : retires-en un pour voter pour une autre idée."
+    "voteLimitReached": "Tu as utilisé tous tes votes « pour » dans ce sujet : retires-en un pour voter pour une autre idée.",
+    "invalidScreenCode": "Ce code ne marche pas : il a peut-être expiré. Demande-en un nouveau."
   },
   "theme": {
     "label": "Thème",

@@ -5,7 +5,9 @@ import {
   idea,
   LIVE_TIMEOUT,
   openPresentation,
+  pairScreen,
   participantSecrets,
+  screenSecret,
   seeRecap,
   setUpSession,
   startIdeas,
@@ -192,4 +194,32 @@ test("during the ideas phase, a vote changes nothing on the room screen", async 
   await expect.poll(() => updates.length, { timeout: LIVE_TIMEOUT }).toBeGreaterThanOrEqual(afterIdea + 1);
   await expect.poll(() => steady(updates.at(-1)!.body), { timeout: LIVE_TIMEOUT }).not.toBe(before);
   await expect(screen.getByRole("region", { name: "Dinner" })).toContainText("Tacos");
+});
+
+test("a TV paired by the host never receives anyone's token, nor its own secret", async ({ page, openAsGuest }) => {
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  const hostAnswers = await recordAnswers(page);
+  const guestAnswers = await recordAnswers(guest);
+  const tv = await pairScreen(page, openAsGuest);
+  const tvAnswers = await recordAnswers(tv);
+
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(tv.getByRole("region", { name: "Dinner" })).toContainText("Pizza", { timeout: LIVE_TIMEOUT });
+  await expect(tv.getByText("Your idea")).toHaveCount(0);
+  await tv.reload();
+  expect(containing(tvAnswers, "Pizza").length).toBeGreaterThan(0);
+
+  const secret = await screenSecret(link);
+  expect(secret).not.toBeNull();
+  // The screen's secret lives in its httpOnly cookie only.
+  for (const [who, answers] of [["the TV", tvAnswers], ["Sam", hostAnswers], ["Lea", guestAnswers]] as const) {
+    expect(containing(answers, secret!), `the screen's secret in ${who}'s pages`).toEqual([]);
+  }
+  for (const { token, pseudo } of await participantSecrets(link)) {
+    expect(containing(tvAnswers, token), `${pseudo}'s token on the TV`).toEqual([]);
+  }
+  for (const field of ['"isMine"', '"canDelete"', '"myVote"', '"authorId"', '"token"', '"screenToken"']) {
+    expect(containing(tvAnswers, field), field).toEqual([]);
+  }
 });

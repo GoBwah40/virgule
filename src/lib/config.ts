@@ -34,6 +34,9 @@ export const POLL_INTERVAL_MS = 3000;
 /** Safety net when Pusher is active (missed message, reconnection…). */
 export const SAFETY_POLL_INTERVAL_MS = 30000;
 
+/** Validity of a room screen pairing code, shown on the host's phone. */
+export const SCREEN_CODE_TTL_MINUTES = 10;
+
 /** Durations offered for the ideas timer, in minutes. */
 export const IDEAS_TIMER_OPTIONS: readonly number[] = [3, 5, 10, 15];
 /** Limits offered for the "for" votes per participant in a topic (no limit by default). */

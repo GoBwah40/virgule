@@ -18,6 +18,7 @@ import {
   MAX_THEMES,
   ROOM_SIZES,
   ROOM_TTL_DAYS,
+  SCREEN_CODE_TTL_MINUTES,
   VOTE_LIMIT_OPTIONS,
 } from "@/lib/config";
 import { db } from "@/lib/db";
@@ -27,7 +28,8 @@ import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/re
 import { phasePath } from "@/lib/phase-path";
 import { isRateLimited } from "@/lib/rate-limit";
 import { getRoomContext } from "@/lib/room";
-import { clearParticipantToken, setParticipantToken } from "@/lib/session";
+import { hashScreenCode, newScreenCode, normalizeScreenCode } from "@/lib/screen-code";
+import { clearParticipantToken, setParticipantToken, setScreenToken } from "@/lib/session";
 
 // i18n message keys ("errors" namespace in messages/*.json).
 type ActionError =
@@ -62,6 +64,7 @@ type ActionError =
   | "suggestionNotFound"
   | "sizeBelowParticipants"
   | "voteLimitReached"
+  | "invalidScreenCode"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -725,4 +728,77 @@ export async function leaveRoom(slug: string): Promise<ActionResult> {
   await clearParticipantToken(slug);
   await notifyRoom(slug);
   redirect("/");
+}
+
+// ─── Room screen pairing ───────────────────────────────────────────────────
+// The host shows the session on a TV or a projector without giving it a seat: their phone shows
+// a one-time code, typed on the screen. The screen then holds a secret of its own (cookie), and
+// sees the room screen only (getPresentationView), never a participant's page.
+
+export type ScreenCodeResult = { ok: true; code: string; expiresAt: string } | { ok: false; error: ActionError };
+
+/** Host: a new pairing code, valid a few minutes; the previous one stops working. */
+export async function createScreenCode(slug: string): Promise<ScreenCodeResult> {
+  try {
+    // Closed sessions too: the recap can still be shown to the room.
+    const { room } = await guard(slug, { host: true });
+    const expiresAt = new Date(Date.now() + SCREEN_CODE_TTL_MINUTES * 60_000);
+    // Another session may hold the same code at that moment (unique hash): draw again.
+    for (let attempt = 0; ; attempt++) {
+      const code = newScreenCode();
+      try {
+        await db.room.update({
+          where: { id: room.id },
+          data: { screenCodeHash: hashScreenCode(code), screenCodeExpiresAt: expiresAt },
+        });
+        return { ok: true, code, expiresAt: expiresAt.toISOString() };
+      } catch (error) {
+        if (attempt >= 2) throw error;
+      }
+    }
+  } catch (error) {
+    if (error instanceof ActionFailure) return { ok: false, error: error.code };
+    console.error("[action]", error);
+    return { ok: false, error: "unknown" };
+  }
+}
+
+/** On the screen: the code typed pairs it with its session, once, then shows the room screen. */
+export async function pairScreen(input: { code: string }): Promise<ActionResult> {
+  // Every try counts, a wrong one included: codes cannot be found by trying them all.
+  if (await isRateLimited("pairScreen")) return fail("tooManyRequests");
+  const code = typeof input?.code === "string" ? normalizeScreenCode(input.code) : null;
+  if (!code) return fail("invalidScreenCode");
+
+  const hash = hashScreenCode(code);
+  const room = await db.room.findUnique({
+    where: { screenCodeHash: hash },
+    select: { id: true, slug: true, expiresAt: true, screenCodeExpiresAt: true },
+  });
+  const now = new Date();
+  if (!room || !room.screenCodeExpiresAt || room.screenCodeExpiresAt < now) return fail("invalidScreenCode");
+  if (room.expiresAt < now) return fail("roomExpired");
+
+  const token = newToken();
+  // Single use: typed on two screens at once, only one gets it. A screen paired before stops.
+  const { count } = await db.room.updateMany({
+    where: { id: room.id, screenCodeHash: hash },
+    data: { screenToken: token, screenCodeHash: null, screenCodeExpiresAt: null },
+  });
+  if (count === 0) return fail("invalidScreenCode");
+
+  await setScreenToken(room.slug, token);
+  await notifyRoom(room.slug);
+  redirect(`/r/${room.slug}/present`);
+}
+
+/** Host: the paired screen stops showing the session (and any code waiting is dropped). */
+export async function unpairScreen(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true });
+    await db.room.update({
+      where: { id: room.id },
+      data: { screenToken: null, screenCodeHash: null, screenCodeExpiresAt: null },
+    });
+  });
 }

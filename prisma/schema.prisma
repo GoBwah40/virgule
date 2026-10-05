@@ -42,6 +42,12 @@ model Room {
   tiebreak         Boolean       @default(false)
   /// Number of seats chosen by the host (null = the default size, see ROOM_SIZES in config.ts).
   maxParticipants  Int?
+  /// Room screen pairing: hash of the one-time code shown on the host's phone (null = none).
+  screenCodeHash   String?       @unique
+  /// End of validity of that code.
+  screenCodeExpiresAt DateTime?
+  /// Secret of the paired room screen, kept in its cookie (null = no screen). Never exposed.
+  screenToken      String?       @unique
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]
