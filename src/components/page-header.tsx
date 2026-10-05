@@ -17,7 +17,7 @@ export function PageHeader({
       {/* Mobile: full-width stacked actions, within thumb reach. Hidden while every action is
           (the list/board switch alone, below tablets), so it leaves no gap. */}
       {actions && (
-        <div className="hidden flex-col gap-2 has-[>:not(.hidden)]:flex sm:flex-row sm:flex-wrap sm:items-center md:flex [&>*]:w-full sm:[&>*]:w-auto">
+        <div className="hidden flex-col gap-2 has-[>:not(.hidden)]:flex sm:grow sm:flex-row sm:flex-wrap sm:items-center sm:justify-end md:flex [&>*]:w-full sm:[&>*]:w-auto">
           {actions}
         </div>
       )}
