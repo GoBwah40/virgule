@@ -262,10 +262,7 @@
     "backToThemesConfirm": "Go back to the topics?",
     "backToThemesHint": "Everyone goes back to the topics page. Ideas and votes are kept, but deleting a topic also deletes its ideas.",
     "finish": "See the recap",
-    "finishConfirm": "Close voting for everyone?",
-    "viewLabel": "Display",
-    "viewList": "List",
-    "viewBoard": "Board"
+    "finishConfirm": "Close voting for everyone?"
   },
   "recap": {
     "title": "The recap",
@@ -315,6 +312,14 @@
     "closeConfirm": "Is it decided?",
     "closeConfirmHint": "Once the session is over, nobody can suggest or vote anymore.",
     "waitingHost": "{host} is choosing what's next: a new round, or we stop here."
+  },
+  "view": {
+    "label": "Display",
+    "list": "List",
+    "board": "Board",
+    "oneByOne": "Topic by topic",
+    "previous": "Previous topic",
+    "next": "Next topic"
   },
   "present": {
     "open": "Show on a big screen",

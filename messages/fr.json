@@ -262,10 +262,7 @@
     "backToThemesConfirm": "Revenir aux sujets ?",
     "backToThemesHint": "Tout le monde retourne sur la page des sujets. Les idées et les votes sont conservés, mais supprimer un sujet supprime aussi ses idées.",
     "finish": "Voir le bilan",
-    "finishConfirm": "Clore les votes pour tout le monde ?",
-    "viewLabel": "Affichage",
-    "viewList": "Liste",
-    "viewBoard": "Tableau"
+    "finishConfirm": "Clore les votes pour tout le monde ?"
   },
   "recap": {
     "title": "Le bilan",
@@ -315,6 +312,14 @@
     "closeConfirm": "C'est décidé ?",
     "closeConfirmHint": "Une fois la séance terminée, plus personne ne pourra proposer ni voter.",
     "waitingHost": "{host} choisit la suite : un nouveau tour, ou on s'arrête là."
+  },
+  "view": {
+    "label": "Affichage",
+    "list": "Liste",
+    "board": "Tableau",
+    "oneByOne": "Sujet par sujet",
+    "previous": "Sujet précédent",
+    "next": "Sujet suivant"
   },
   "present": {
     "open": "Afficher en grand",

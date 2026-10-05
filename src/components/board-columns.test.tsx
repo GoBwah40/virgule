@@ -17,3 +17,14 @@ describe("BoardColumns", () => {
     expect(container.firstChild).toHaveClass("grid", "md:grid-cols-[repeat(auto-fill,minmax(16rem,1fr))]");
   });
 });
+
+describe("BoardColumns, as a list", () => {
+  it("renders a list for list items", () => {
+    renderUi(
+      <BoardColumns as="ul">
+        <li key="a">Dates</li>
+      </BoardColumns>,
+    );
+    expect(screen.getByRole("list")).toContainElement(screen.getByRole("listitem"));
+  });
+});

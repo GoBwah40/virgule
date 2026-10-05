@@ -51,6 +51,11 @@ for (const [label, viewport, isMobile] of [
       await addTopic(page, "T".repeat(LIMITS.themeTitle));
       await expectNoSideScroll(page, "topics");
       await expectNoSideScroll(guest, "topics, guest");
+      if (!isMobile) {
+        await page.getByRole("radio", { name: "Board" }).locator("..").click();
+        await expect(page.getByRole("radio", { name: "Board" })).toBeChecked();
+        await expectNoSideScroll(page, "topics board");
+      }
 
       await startIdeas(page);
       await suggestIdea(page, IDEA);
@@ -59,13 +64,18 @@ for (const [label, viewport, isMobile] of [
       await expectNoSideScroll(page, "ideas");
       await expectNoSideScroll(guest, "ideas, guest");
       if (!isMobile) {
-        await page.getByRole("radio", { name: "Board" }).locator("..").click();
+        // The board picked on the topics stays.
         await expect(page.getByRole("radio", { name: "Board" })).toBeChecked();
         await expectNoSideScroll(page, "ideas board");
       }
 
       await seeRecap(page);
       await expectNoSideScroll(page, "recap");
+      if (!isMobile) {
+        await expect(page.getByRole("radio", { name: "Topic by topic" })).toBeChecked();
+        await page.getByRole("radio", { name: "List" }).locator("..").click();
+        await expectNoSideScroll(page, "recap, list");
+      }
     });
   });
 }

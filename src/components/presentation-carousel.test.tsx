@@ -49,3 +49,22 @@ describe("PresentationCarousel", () => {
     expect(screen.queryByText("Topic 1 of 1")).toBeNull();
   });
 });
+
+describe("PresentationCarousel, on someone's own device", () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it("moves with its buttons only: no rotation, no page-wide keys", () => {
+    renderUi(<PresentationCarousel {...props} controls={{ previous: "Previous topic", next: "Next topic" }} />);
+    act(() => vi.advanceTimersByTime(5000));
+    expect(current()).toBe("Topic 1 of 3");
+    fireEvent.keyDown(window, { key: "ArrowRight" });
+    expect(current()).toBe("Topic 1 of 3");
+
+    fireEvent.click(screen.getByRole("button", { name: "Next topic" }));
+    expect(current()).toBe("Topic 2 of 3");
+    fireEvent.click(screen.getByRole("button", { name: "Previous topic" }));
+    fireEvent.click(screen.getByRole("button", { name: "Previous topic" }));
+    expect(current()).toBe("Topic 3 of 3");
+  });
+});

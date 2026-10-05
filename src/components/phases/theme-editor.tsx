@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, Pencil, Play, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
+import { BoardColumns } from "@/components/board-columns";
 import { ConfirmButton } from "@/components/confirm-button";
 import { FormField } from "@/components/form-field";
 import { IconBadge } from "@/components/icon-badge";
@@ -13,14 +14,19 @@ import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { SegmentedControl } from "@/components/segmented-control";
 import { SettingSwitch } from "@/components/setting-switch";
 import { SuggestionChips } from "@/components/suggestion-chips";
+import { TopicCard } from "@/components/topic-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ViewSwitch } from "@/components/view-switch";
 import { useAction } from "@/hooks/use-action";
+import { useViewPreference } from "@/hooks/use-view-preference";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
+import { cn } from "@/lib/utils";
+import type { ViewPreference } from "@/lib/view-preference";
 
 type Theme = {
   id: string;
@@ -62,6 +68,7 @@ export function ThemeEditor({
   ideasTimerMinutes,
   capacity,
   participantCount,
+  initialView,
 }: {
   slug: string;
   themes: Theme[];
@@ -69,9 +76,12 @@ export function ThemeEditor({
   ideasTimerMinutes: number | null;
   capacity: number;
   participantCount: number;
+  initialView: ViewPreference;
 }) {
   const t = useTranslations("themes");
+  const tView = useTranslations("view");
   const [pending, run] = useAction();
+  const [view, choose] = useViewPreference(initialView);
   // Back from the ideas phase: we resume rather than start.
   const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
@@ -82,17 +92,20 @@ export function ThemeEditor({
     (s) => !existing.has(s.label.toLowerCase()),
   );
 
+  const rows = themes.map((theme, i) => (
+    <ThemeRow key={theme.id} slug={slug} theme={theme} isFirst={i === 0} isLast={i === themes.length - 1} board={view === "board"} />
+  ));
+
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-4">
+      <div className="min-w-0 space-y-4">
         {themes.length === 0 ? (
           <p className="text-muted-foreground">{t("empty")}</p>
         ) : (
-          <ul className="space-y-2">
-            {themes.map((theme, i) => (
-              <ThemeRow key={theme.id} slug={slug} theme={theme} isFirst={i === 0} isLast={i === themes.length - 1} />
-            ))}
-          </ul>
+          <>
+            <ViewSwitch value={view} onChange={choose} labels={{ label: tView("label"), list: tView("list"), board: tView("board") }} />
+            {view === "board" ? <BoardColumns as="ul">{rows}</BoardColumns> : <ul className="space-y-2">{rows}</ul>}
+          </>
         )}
 
         <SuggestionChips
@@ -171,14 +184,28 @@ export function ThemeEditor({
   );
 }
 
-function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme; isFirst: boolean; isLast: boolean }) {
+function ThemeRow({
+  slug,
+  theme,
+  isFirst,
+  isLast,
+  board,
+}: {
+  slug: string;
+  theme: Theme;
+  isFirst: boolean;
+  isLast: boolean;
+  /** A card on the board rather than a row of the list: same actions. */
+  board: boolean;
+}) {
   const t = useTranslations("themes");
   const [editing, setEditing] = useState(false);
   const [pending, run] = useAction();
 
   if (editing) {
     return (
-      <li>
+      // On the board, the form takes the whole row: a column is too narrow for it.
+      <li className={cn(board && "md:col-span-full")}>
         <ThemeForm
           initial={theme}
           submitLabel={t("save")}
@@ -191,6 +218,51 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
   }
 
   const remove = () => run(() => deleteTheme(slug, theme.id));
+  const actions = (
+    <>
+      <Button variant="ghost" size="icon" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
+        <ArrowUp />
+      </Button>
+      <Button variant="ghost" size="icon" aria-label={t("moveDown")} disabled={pending || isLast} onClick={() => run(() => moveTheme(slug, theme.id, "down"))}>
+        <ArrowDown />
+      </Button>
+      <Button variant="ghost" size="icon" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>
+        <Pencil />
+      </Button>
+      {theme.ideaCount > 0 ? (
+        <ConfirmButton
+          variant="ghost"
+          size="icon"
+          aria-label={t("delete")}
+          disabled={pending}
+          title={t("deleteConfirm", { title: theme.title })}
+          description={t("deleteConfirmHint", { count: theme.ideaCount })}
+          confirmLabel={t("delete")}
+          onConfirm={remove}
+        >
+          <Trash2 />
+        </ConfirmButton>
+      ) : (
+        <Button variant="ghost" size="icon" aria-label={t("delete")} disabled={pending} onClick={remove}>
+          <Trash2 />
+        </Button>
+      )}
+    </>
+  );
+
+  if (board) {
+    return (
+      <TopicCard
+        title={theme.title}
+        description={theme.description}
+        badges={[
+          ...(theme.kind === "TEXT" ? [] : [{ label: t(`kinds.${theme.kind}`), icon: THEME_KIND_ICONS[theme.kind] }]),
+          ...(theme.maxVotes === null ? [] : [{ label: t("voteLimitBadge", { count: theme.maxVotes }), icon: Vote }]),
+        ]}
+        actions={actions}
+      />
+    );
+  }
 
   return (
     <ListItem
@@ -204,37 +276,7 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
           </>
         )
       }
-      actions={
-        <>
-          <Button variant="ghost" size="icon" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
-            <ArrowUp />
-          </Button>
-          <Button variant="ghost" size="icon" aria-label={t("moveDown")} disabled={pending || isLast} onClick={() => run(() => moveTheme(slug, theme.id, "down"))}>
-            <ArrowDown />
-          </Button>
-          <Button variant="ghost" size="icon" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>
-            <Pencil />
-          </Button>
-          {theme.ideaCount > 0 ? (
-            <ConfirmButton
-              variant="ghost"
-              size="icon"
-              aria-label={t("delete")}
-              disabled={pending}
-              title={t("deleteConfirm", { title: theme.title })}
-              description={t("deleteConfirmHint", { count: theme.ideaCount })}
-              confirmLabel={t("delete")}
-              onConfirm={remove}
-            >
-              <Trash2 />
-            </ConfirmButton>
-          ) : (
-            <Button variant="ghost" size="icon" aria-label={t("delete")} disabled={pending} onClick={remove}>
-              <Trash2 />
-            </Button>
-          )}
-        </>
-      }
+      actions={actions}
     >
       {theme.title}
     </ListItem>
