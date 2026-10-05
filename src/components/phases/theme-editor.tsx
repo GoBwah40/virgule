@@ -29,6 +29,7 @@ type Theme = {
   kind: ThemeKind;
   options: string[];
   allowOtherIdeas: boolean;
+  singleChoice: boolean;
   ideaCount: number;
 };
 
@@ -38,6 +39,7 @@ type ThemeValues = {
   kind: ThemeKind;
   options: string[];
   allowOtherIdeas: boolean;
+  singleChoice: boolean;
 };
 
 /** Common topics offered in one tap (keys of the themes.suggestions namespace), with their answer kind. */
@@ -238,6 +240,7 @@ function ThemeForm({
   const [kind, setKind] = useState<ThemeKind>(initial?.kind ?? "TEXT");
   const [options, setOptions] = useState<string[]>(initial?.options ?? []);
   const [allowOtherIdeas, setAllowOtherIdeas] = useState(initial?.allowOtherIdeas ?? false);
+  const [singleChoice, setSingleChoice] = useState(initial?.singleChoice ?? false);
   const optionsMissing = kind === "CHOICE" && options.length < CHOICE_OPTIONS.min;
   const idPrefix = initial?.id ?? "new";
   // Ideas already exist: changing their kind would make them unreadable.
@@ -250,12 +253,13 @@ function ThemeForm({
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit({ title, description, kind, options, allowOtherIdeas }, () => {
+            onSubmit({ title, description, kind, options, allowOtherIdeas, singleChoice }, () => {
               setTitle("");
               setDescription("");
               setKind("TEXT");
               setOptions([]);
               setAllowOtherIdeas(false);
+              setSingleChoice(false);
             });
           }}
         >
@@ -311,6 +315,15 @@ function ThemeForm({
                 hint={t("allowOtherIdeasHint")}
                 checked={allowOtherIdeas}
                 onCheckedChange={setAllowOtherIdeas}
+              />
+              <SettingSwitch
+                id={`${idPrefix}-single-choice`}
+                label={t("singleChoice")}
+                // Votes may already exist: switching would break the rule for them.
+                hint={kindLocked ? t("singleChoiceLocked") : t("singleChoiceHint")}
+                checked={singleChoice}
+                disabled={kindLocked}
+                onCheckedChange={setSingleChoice}
               />
             </div>
           )}

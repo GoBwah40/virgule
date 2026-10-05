@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -11,14 +11,24 @@ type Props = {
   value: boolean | null;
   /** Receives the new value; clicking the active vote again removes it (null). */
   onChange: (next: boolean | null) => void;
-  labels: { up: string; down: string };
+  /** `down` is not used in "pick" mode. */
+  labels: { up: string; down?: string };
+  /**
+   * "upDown": for / against. "pick": a single ✓ button, to pick one option among
+   * several (single-answer list); the value is then true or null.
+   */
+  mode?: "upDown" | "pick";
   /** If set, the buttons are disabled and this text explains why. */
   disabledReason?: string;
   className?: string;
 };
 
-/** Pair of ↑ / ↓ buttons (44 px); the label is in the tooltip and the aria-label. */
-export function VoteButtons({ value, onChange, labels, disabledReason, className }: Props) {
+// The `dark:` variants are needed: the `outline` button forces its own background in dark mode.
+const UP_PRESSED =
+  "border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground dark:border-success dark:bg-success dark:hover:bg-success/90";
+
+/** Pair of ↑ / ↓ buttons (44 px), or a single ✓ in "pick" mode; the label is in the tooltip and the aria-label. */
+export function VoteButtons({ value, onChange, labels, mode = "upDown", disabledReason, className }: Props) {
   const disabled = !!disabledReason;
   const buttons = (
     <div className={cn("flex shrink-0 gap-1.5", className)}>
@@ -27,20 +37,21 @@ export function VoteButtons({ value, onChange, labels, disabledReason, className
         pressed={value === true}
         disabled={disabled}
         onClick={() => onChange(value === true ? null : true)}
-        // The `dark:` variants are needed: the `outline` button forces its own background in dark mode.
-        pressedClassName="border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground dark:border-success dark:bg-success dark:hover:bg-success/90"
+        pressedClassName={UP_PRESSED}
       >
-        <ArrowUp />
+        {mode === "pick" ? <Check /> : <ArrowUp />}
       </VoteButton>
-      <VoteButton
-        label={labels.down}
-        pressed={value === false}
-        disabled={disabled}
-        onClick={() => onChange(value === false ? null : false)}
-        pressedClassName="border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white dark:border-destructive dark:bg-destructive dark:text-background dark:hover:bg-destructive/90 dark:hover:text-background"
-      >
-        <ArrowDown />
-      </VoteButton>
+      {mode === "upDown" && (
+        <VoteButton
+          label={labels.down ?? ""}
+          pressed={value === false}
+          disabled={disabled}
+          onClick={() => onChange(value === false ? null : false)}
+          pressedClassName="border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white dark:border-destructive dark:bg-destructive dark:text-background dark:hover:bg-destructive/90 dark:hover:text-background"
+        >
+          <ArrowDown />
+        </VoteButton>
+      )}
     </div>
   );
 

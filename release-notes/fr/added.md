@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.7.0 — 2026-10-05
+
+- Les sujets « Liste » peuvent demander une seule réponse par personne, pour une question oui ou non par exemple.
+
 ## 0.6.0 — 2026-10-01
 
 - Jusqu'au premier bilan, tu peux quitter une séance depuis le bouton en haut ou depuis ta propre place : elle se libère pour quelqu'un d'autre.

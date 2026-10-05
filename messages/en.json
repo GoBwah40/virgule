@@ -141,6 +141,9 @@
     "optionRemove": "Remove the option “{option}”",
     "allowOtherIdeas": "Allow other suggestions",
     "allowOtherIdeasHint": "Participants can add their own ideas to the list.",
+    "singleChoice": "One answer per person",
+    "singleChoiceHint": "Everyone picks a single option, as for a yes or no question.",
+    "singleChoiceLocked": "Ideas have already been suggested: this setting can no longer change.",
     "suggestionsLabel": "Topic ideas",
     "suggestions": {
       "goal": {
@@ -201,6 +204,8 @@
     "listLabel": "Ideas for {title}",
     "ideaCount": "{count, plural, one {# idea} other {# ideas}}",
     "votedCount": "{done}/{total} voted",
+    "singleChoiceHint": "One answer per person: pick the one you prefer.",
+    "pick": "Pick this one",
     "placeholder": "Your idea…",
     "date": "Date",
     "dateFrom": "From",

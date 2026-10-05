@@ -88,6 +88,8 @@ model Theme {
   options     String?
   /// CHOICE topics: can participants suggest other ideas?
   allowOtherIdeas Boolean @default(false)
+  /// CHOICE topics: each participant picks a single option (e.g. yes / no), with no "against" votes.
+  singleChoice Boolean @default(false)
   ideas       Idea[]
 
   @@index([roomId, position])
