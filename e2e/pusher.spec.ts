@@ -1,7 +1,7 @@
 import type { Page, WebSocketRoute } from "@playwright/test";
 
 import type { OpenAsGuest } from "./helpers";
-import { addTopic, expect, setUpSession, startIdeas, test } from "./helpers";
+import { addTopic, expect, LIVE_TIMEOUT, setUpSession, startIdeas, test } from "./helpers";
 
 // Runs on the second server (playwright.config.ts), where the browser gets a Pusher key. The test
 // plays the Pusher server: the app's server sends nothing, so each test sends the notification
@@ -131,4 +131,20 @@ test("page updates keep the same Pusher connection", async ({ page, openAsGuest 
   }
   // Each update refreshes the page: none of them may open a new connection.
   expect(pusher.connections).toBe(1);
+});
+
+test("going back to a past step shows the current one at once, without waiting for the polling", async ({
+  page,
+  openAsGuest,
+}) => {
+  const { guest, pusher } = await withPusher(page, openAsGuest);
+  await startIdeas(page);
+  pusher.notify();
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: AT_ONCE });
+
+  // The topics page comes back from the history, with no notification to correct it: only the
+  // 30 s safety polling would, without the navigation itself.
+  await guest.goBack();
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: AT_ONCE });
+  await expect(guest.getByRole("heading", { name: "The ideas" })).toBeVisible({ timeout: LIVE_TIMEOUT });
 });

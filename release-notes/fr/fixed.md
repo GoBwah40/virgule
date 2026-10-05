@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.14 — 2026-10-05
+
+- Revenir en arrière dans ton navigateur n'affiche plus une étape terminée (jusqu'à 30 secondes avec les mises à jour en temps réel) : l'étape en cours revient aussitôt, et revenir en arrière quitte la séance au lieu de tourner en rond.
+
 ## 0.6.13 — 2026-10-02
 
 - Quand le serveur est surchargé, la séance ne laisse plus place à une page d'erreur brute : elle reste à l'écran, un vote qui n'a pas pu être enregistré te le dit, et tout se met à jour dès que le serveur répond de nouveau.

@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.14 — 2026-10-05
+
+- Going back in your browser no longer shows a step that is over (up to 30 seconds with real-time updates on): the current step comes back at once, and going back leaves the session instead of going round in circles.
+
 ## 0.6.13 — 2026-10-02
 
 - When the server is overloaded, the session no longer gives way to a bare error page: it stays on screen, a vote that could not be saved says so, and everything catches up once the server answers again.
