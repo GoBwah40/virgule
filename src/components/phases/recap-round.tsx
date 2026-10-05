@@ -6,11 +6,14 @@ import { DateOverview } from "@/components/date-overview";
 import { ExpandableListItem } from "@/components/expandable-list-item";
 import { MapLink } from "@/components/map-link";
 import { OverviewSummary } from "@/components/overview-summary";
+import { PresentationCarousel } from "@/components/presentation-carousel";
+import { PresentationResult } from "@/components/presentation-result";
 import { StatusBadge } from "@/components/status-badge";
 import { VoteSummary } from "@/components/vote-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOverviewText } from "@/lib/overview-format";
+import { topQualified } from "@/lib/results";
 import type { RecapOverview, RecapRound } from "@/lib/room";
 
 export async function RecapRoundView({ round }: { round: RecapRound }) {
@@ -121,5 +124,45 @@ async function ThemeOverview({ overview }: { overview: RecapOverview }) {
         labels={{ range: t("overviewRange"), zone: t("overviewZone"), amounts: t("overviewAmounts") }}
       />
     </div>
+  );
+}
+
+/**
+ * The recap "topic by topic", as on the room screen: the kept idea in large, then every idea with
+ * its votes. On someone's own device, so with previous / next buttons rather than moving on alone.
+ */
+export async function RecapRoundSpotlight({ round }: { round: RecapRound }) {
+  const t = await getTranslations("present");
+  const tRecap = await getTranslations("recap");
+  const tView = await getTranslations("view");
+  const total = round.themes.length;
+
+  return (
+    <PresentationCarousel
+      label={t("results")}
+      positions={round.themes.map((_, i) => t("topicPosition", { current: i + 1, total }))}
+      controls={{ previous: tView("previous"), next: tView("next") }}
+      slides={round.themes.map((theme) => {
+        const winners = topQualified(theme.ideas).map((idea) => idea.content);
+        return (
+          <PresentationResult
+            key={theme.id}
+            variant="page"
+            topic={theme.title}
+            winners={winners}
+            verdict={winners.length === 0 ? t("noneKept") : winners.length > 1 ? t("tied") : t("kept")}
+            ideas={theme.ideas.map((idea) => ({
+              id: idea.id,
+              content: idea.content,
+              up: idea.score.up,
+              down: idea.score.down,
+              qualified: idea.qualified,
+              votesLabel: t("votes", { up: idea.score.up, down: idea.score.down }),
+              statusLabel: idea.qualified ? tRecap("qualified") : tRecap("notQualified"),
+            }))}
+          />
+        );
+      })}
+    />
   );
 }

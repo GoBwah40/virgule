@@ -67,3 +67,15 @@ describe("PresentationResult, long idea", () => {
     expect(screen.getByText(long)).toHaveClass("stage-md");
   });
 });
+
+describe("PresentationResult, in the recap page", () => {
+  it("sits in a card at page sizes, its topic in a colour that reads on light", () => {
+    const { container } = renderUi(
+      <PresentationResult topic="Where to?" winners={["Annecy"]} verdict="Kept by the group" ideas={[]} variant="page" />,
+    );
+    expect(container.firstChild).toHaveClass("bg-card");
+    expect(screen.getByRole("heading", { name: "Where to?" })).toHaveClass("text-primary");
+    expect(screen.getByText("Annecy")).toHaveClass("text-5xl");
+    expect(screen.getByText("Annecy")).not.toHaveClass("stage-xl");
+  });
+});

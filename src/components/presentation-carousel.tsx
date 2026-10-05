@@ -1,7 +1,9 @@
 "use client";
 
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -12,28 +14,37 @@ type Props = {
   label: string;
   /** Time on each slide. */
   intervalMs?: number;
+  /**
+   * On someone's own device: previous / next buttons instead of moving on by itself, and no
+   * keyboard shortcuts across the page (its fields and buttons keep their keys).
+   */
+  controls?: { previous: string; next: string };
   className?: string;
 };
 
 /**
- * One slide at a time on the room screen, moving on by itself. No controls on screen: on the
- * device showing it, arrows and Page Up / Page Down (a presentation clicker) move between slides,
- * the space bar pauses.
+ * One slide at a time. On the room screen, it moves on by itself, with no controls on screen: on
+ * the device showing it, arrows and Page Up / Page Down (a presentation clicker) move between
+ * slides, the space bar pauses. With `controls`, buttons instead, for someone's own device.
  */
-export function PresentationCarousel({ slides, positions, label, intervalMs = 12_000, className }: Props) {
+export function PresentationCarousel({ slides, positions, label, intervalMs = 12_000, controls, className }: Props) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
   // Fewer slides after an update (a topic deleted): stay within bounds.
   const current = Math.min(index, count - 1);
 
-  useEffect(() => {
-    if (count < 2 || paused) return;
-    const timer = setInterval(() => setIndex((i) => (Math.min(i, count - 1) + 1) % count), intervalMs);
-    return () => clearInterval(timer);
-  }, [count, paused, intervalMs, index]);
+  const stage = !controls;
+  const step = (delta: number) => setIndex((i) => (Math.min(i, count - 1) + delta + count) % count);
 
   useEffect(() => {
+    if (!stage || count < 2 || paused) return;
+    const timer = setInterval(() => setIndex((i) => (Math.min(i, count - 1) + 1) % count), intervalMs);
+    return () => clearInterval(timer);
+  }, [stage, count, paused, intervalMs, index]);
+
+  useEffect(() => {
+    if (!stage) return;
     const onKey = (event: KeyboardEvent) => {
       if (count < 2) return;
       if (event.key === "ArrowRight" || event.key === "PageDown") setIndex((i) => (Math.min(i, count - 1) + 1) % count);
@@ -44,7 +55,7 @@ export function PresentationCarousel({ slides, positions, label, intervalMs = 12
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [count]);
+  }, [stage, count]);
 
   if (count === 0) return null;
 
@@ -60,13 +71,27 @@ export function PresentationCarousel({ slides, positions, label, intervalMs = 12
         {slides[current]}
       </div>
       {count > 1 && (
-        <div className="flex items-center gap-[0.8em] stage-xs text-muted-foreground">
-          <span aria-live={paused ? "polite" : "off"}>{positions[current]}</span>
+        <div className={cn("flex items-center gap-[0.8em] text-muted-foreground", stage ? "stage-xs" : "justify-center text-sm")}>
+          {controls && (
+            <Button variant="outline" size="icon" aria-label={controls.previous} title={controls.previous} onClick={() => step(-1)}>
+              <ChevronLeft />
+            </Button>
+          )}
+          <span aria-live={paused || !stage ? "polite" : "off"}>{positions[current]}</span>
           <span className="flex gap-[0.4em]" aria-hidden>
             {slides.map((_, i) => (
-              <span key={i} className={cn("size-[0.6em] rounded-full", i === current ? "bg-highlight" : "bg-muted")} />
+              <span
+                key={i}
+                // On a light page, muted would not show: a darker grey for the others.
+                className={cn("size-[0.6em] rounded-full", i === current ? "bg-highlight" : stage ? "bg-muted" : "bg-muted-foreground/30")}
+              />
             ))}
           </span>
+          {controls && (
+            <Button variant="outline" size="icon" aria-label={controls.next} title={controls.next} onClick={() => step(1)}>
+              <ChevronRight />
+            </Button>
+          )}
         </div>
       )}
     </section>

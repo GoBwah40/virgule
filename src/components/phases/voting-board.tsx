@@ -1,6 +1,6 @@
 "use client";
 
-import { Columns3, LayoutList, ListChecks, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
+import { ListChecks, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
@@ -16,7 +16,7 @@ import { MapLink } from "@/components/map-link";
 import { MasonryColumns } from "@/components/masonry-columns";
 import { ScrollableList } from "@/components/scrollable-list";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
-import { SegmentedControl } from "@/components/segmented-control";
+import { ViewSwitch } from "@/components/view-switch";
 import { VoteButtons } from "@/components/vote-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,19 +24,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
+import { useViewPreference } from "@/hooks/use-view-preference";
 import { addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, stopTimer } from "@/lib/actions";
 import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
 import type { IdeaInput, ThemeKind } from "@/lib/idea-value";
-import { IDEAS_VIEW_COOKIE, type IdeasView } from "@/lib/ideas-view";
+import type { ViewPreference } from "@/lib/view-preference";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
-const ONE_YEAR = 60 * 60 * 24 * 365;
-
 /**
  * Every topic with its ideas, as a list (two columns of cards) or as a board (one column per
- * topic, like the room screen). Each person picks, from tablets up; the choice is kept in a cookie
- * read by the server, so the page comes back as left.
+ * topic, like the room screen). Each person picks, from tablets up, once for every step.
  */
 export function IdeasBoard({
   slug,
@@ -49,33 +47,17 @@ export function IdeasBoard({
   themes: VotingTheme[];
   allowNewIdeas: boolean;
   hostName: string;
-  initialView: IdeasView;
+  initialView: ViewPreference;
 }) {
-  const t = useTranslations("ideas");
-  const [view, setView] = useState(initialView);
-  const choose = (next: IdeasView) => {
-    setView(next);
-    document.cookie = `${IDEAS_VIEW_COOKIE}=${next}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
-  };
+  const t = useTranslations("view");
+  const [view, choose] = useViewPreference(initialView);
   const blocks = themes.map((theme) => (
     <ThemeIdeas key={theme.id} slug={slug} theme={theme} allowNewIdeas={allowNewIdeas} hostName={hostName} variant={view} />
   ));
 
   return (
     <>
-      {/* Phones have room for one column only: the choice starts with tablets. */}
-      <SegmentedControl
-        className="mb-4 hidden justify-items-end md:grid"
-        name="ideas-view"
-        label={t("viewLabel")}
-        labelHidden
-        options={[
-          { value: "list", label: t("viewList"), icon: LayoutList },
-          { value: "board", label: t("viewBoard"), icon: Columns3 },
-        ]}
-        value={view}
-        onChange={choose}
-      />
+      <ViewSwitch className="mb-4" value={view} onChange={choose} labels={{ label: t("label"), list: t("list"), board: t("board") }} />
       {view === "board" ? <BoardColumns>{blocks}</BoardColumns> : <MasonryColumns>{blocks}</MasonryColumns>}
     </>
   );
@@ -93,7 +75,7 @@ function ThemeIdeas({
   allowNewIdeas: boolean;
   hostName: string;
   /** `board`: a column of the board, idea input on top and the latest ideas first. */
-  variant?: IdeasView;
+  variant?: ViewPreference;
 }) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");

@@ -1,16 +1,19 @@
 import { Plus } from "lucide-react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/page-header";
 import { PhaseTransition } from "@/components/phase-transition";
 import { ExportMenu, RecapHostControls } from "@/components/phases/recap-controls";
-import { RecapRoundView } from "@/components/phases/recap-round";
+import { RecapRoundSpotlight, RecapRoundView } from "@/components/phases/recap-round";
+import { ViewChoice } from "@/components/phases/view-choice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getRecap, hostName, loadPhasePage } from "@/lib/room";
 import { cn } from "@/lib/utils";
+import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 
 export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">) {
   const { slug } = await params;
@@ -22,6 +25,26 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
   const rounds = await getRecap(room, me.id);
   const current = rounds[rounds.length - 1];
   const closed = room.phase === "CLOSED";
+  // One round: its recap; several: a tab each, the current one open.
+  const byRound = (render: (round: (typeof rounds)[number]) => React.ReactNode) =>
+    rounds.length === 1 ? (
+      render(current)
+    ) : (
+      <Tabs defaultValue={String(current.round)}>
+        <TabsList className="mb-4">
+          {rounds.map((r) => (
+            <TabsTrigger key={r.round} value={String(r.round)}>
+              {t("roundTab", { round: r.round })}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        {rounds.map((r) => (
+          <TabsContent key={r.round} value={String(r.round)} className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
+            {render(r)}
+          </TabsContent>
+        ))}
+      </Tabs>
+    );
 
   return (
     <PhaseTransition>
@@ -50,28 +73,18 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
 
       <div className={cn("grid gap-6", !closed && "lg:grid-cols-[1fr_300px]")}>
         <div className="min-w-0">
-          {rounds.length === 1 ? (
-            <RecapRoundView round={current} />
-          ) : (
-            <Tabs defaultValue={String(current.round)}>
-              <TabsList className="mb-4">
-                {rounds.map((r) => (
-                  <TabsTrigger key={r.round} value={String(r.round)}>
-                    {t("roundTab", { round: r.round })}
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-              {rounds.map((r) => (
-                <TabsContent
-                  key={r.round}
-                  value={String(r.round)}
-                  className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300"
-                >
-                  <RecapRoundView round={r} />
-                </TabsContent>
-              ))}
-            </Tabs>
-          )}
+          {/* Printed, always the full list: "topic by topic" would print a single topic. */}
+          <ViewChoice
+            initialView={parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value)}
+            boardLabel="oneByOne"
+            list={byRound((round) => <RecapRoundView round={round} />)}
+            board={
+              <>
+                <div className="print:hidden">{byRound((round) => <RecapRoundSpotlight round={round} />)}</div>
+                <div className="hidden print:block">{byRound((round) => <RecapRoundView round={round} />)}</div>
+              </>
+            }
+          />
         </div>
 
         {!closed && (

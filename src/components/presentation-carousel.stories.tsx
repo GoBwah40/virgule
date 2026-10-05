@@ -29,3 +29,6 @@ type Story = StoryObj<typeof meta>;
 
 export const Rotating: Story = {};
 export const Single: Story = { args: { slides: [slide("Annecy")], positions: ["Topic 1 of 1"] } };
+export const WithButtons: Story = {
+  args: { controls: { previous: "Previous topic", next: "Next topic" } },
+};

@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
 import { BackToThemesButton, FinishVotingButton, IdeasBoard, TimerControls } from "@/components/phases/voting-board";
-import { IDEAS_VIEW_COOKIE, parseIdeasView } from "@/lib/ideas-view";
+import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
 
 export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">) {
@@ -89,7 +89,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
         themes={themes}
         allowNewIdeas={!room.tiebreak}
         hostName={hostName(page.participants)}
-        initialView={parseIdeasView((await cookies()).get(IDEAS_VIEW_COOKIE)?.value)}
+        initialView={parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value)}
       />
     </PhaseTransition>
   );

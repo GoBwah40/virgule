@@ -52,3 +52,7 @@ export const NoneKept: Story = {
 };
 export const Many: Story = { args: { moreLabel: "+ 4 more ideas" } };
 export const NoIdeas: Story = { args: { winners: [], verdict: "No idea kept on this topic", ideas: [] } };
+export const InRecapPage: Story = {
+  args: { variant: "page" },
+  decorators: [(Story) => <div className="bg-background p-6"><Story /></div>],
+};
