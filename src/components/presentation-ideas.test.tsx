@@ -34,3 +34,16 @@ describe("PresentationIdeas", () => {
     expect(screen.getByRole("region", { name: "How much?" })).toHaveTextContent("Waiting for the first idea");
   });
 });
+
+describe("PresentationIdeas, headings", () => {
+  it("puts the count under the title, so a narrow column never breaks a word to make room", () => {
+    renderUi(
+      <PresentationIdeas emptyLabel="Waiting" topics={[{ id: "1", title: "Feculent", countLabel: "No ideas yet", ideas: [] }]} />,
+    );
+    const title = screen.getByRole("heading", { name: "Feculent" });
+    expect(title).toHaveClass("wrap-break-word");
+    expect(title).not.toHaveClass("[overflow-wrap:anywhere]");
+    expect(title.nextElementSibling).toHaveTextContent("No ideas yet");
+    expect(title.parentElement).not.toHaveClass("flex");
+  });
+});

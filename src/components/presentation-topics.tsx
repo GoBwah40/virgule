@@ -21,7 +21,7 @@ export function PresentationTopics({ title, topics, className }: Props) {
             {topic.kindLabel && (
               <p className="stage-xs font-semibold tracking-[0.1em] text-highlight uppercase">{topic.kindLabel}</p>
             )}
-            <h3 className="font-heading stage-lg font-bold [overflow-wrap:anywhere]">{topic.title}</h3>
+            <h3 className="font-heading stage-lg font-bold wrap-break-word hyphens-auto">{topic.title}</h3>
             {topic.description && <p className="stage-sm text-muted-foreground [overflow-wrap:anywhere]">{topic.description}</p>}
           </li>
         ))}

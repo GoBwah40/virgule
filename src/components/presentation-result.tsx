@@ -35,7 +35,7 @@ export function PresentationResult({ topic, winners, verdict, ideas, moreLabel, 
   return (
     <div className={cn("grid flex-1 content-center items-center gap-x-[4vw] gap-y-[4vh] lg:grid-cols-[1.2fr_1fr]", className)}>
       <div className="min-w-0 space-y-[2vh]">
-        <h2 className="stage-sm font-semibold tracking-[0.12em] text-highlight uppercase [overflow-wrap:anywhere]">{topic}</h2>
+        <h2 className="stage-sm font-semibold tracking-[0.12em] text-highlight uppercase wrap-break-word hyphens-auto">{topic}</h2>
         {winners.length > 0 && (
           <ul className="space-y-[1vh]">
             {winners.map((winner) => (

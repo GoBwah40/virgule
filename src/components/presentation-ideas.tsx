@@ -28,12 +28,18 @@ export function PresentationIdeas({ topics, emptyLabel, className }: Props) {
       )}
     >
       {topics.map((topic) => (
-        <section key={topic.id} aria-labelledby={`present-topic-${topic.id}`} className="flex min-h-0 min-w-0 flex-col gap-[1.2vh]">
-          <header className="flex items-baseline justify-between gap-3">
-            <h2 id={`present-topic-${topic.id}`} className="min-w-0 font-heading stage-lg font-bold [overflow-wrap:anywhere]">
+        // One panel per topic: the columns stay apart on a washed-out projector too.
+        <section
+          key={topic.id}
+          aria-labelledby={`present-topic-${topic.id}`}
+          className="flex min-h-0 min-w-0 flex-col gap-[1.2vh] rounded-[1.2em] border-[1.5px] border-border bg-card p-[1em] stage-sm"
+        >
+          {/* Title on a line of its own, the count under it: never squeezed into breaking a word. */}
+          <header className="space-y-[0.2em]">
+            <h2 id={`present-topic-${topic.id}`} className="font-heading stage-lg font-bold wrap-break-word hyphens-auto">
               {topic.title}
             </h2>
-            <span className="shrink-0 stage-xs text-muted-foreground tabular-nums">{topic.countLabel}</span>
+            <p className="stage-xs text-muted-foreground tabular-nums">{topic.countLabel}</p>
           </header>
           {topic.ideas.length === 0 ? (
             <p className="stage-sm text-muted-foreground">{emptyLabel}</p>
@@ -43,7 +49,7 @@ export function PresentationIdeas({ topics, emptyLabel, className }: Props) {
                 <li
                   key={idea.id}
                   className={cn(
-                    "shrink-0 rounded-[0.8em] border-[1.5px] bg-card px-[0.9em] py-[0.55em] stage-md font-semibold [overflow-wrap:anywhere]",
+                    "shrink-0 rounded-[0.8em] border-[1.5px] bg-background px-[0.9em] py-[0.55em] stage-md font-semibold [overflow-wrap:anywhere]",
                     "motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-300",
                     i === 0 ? "border-highlight" : "border-border",
                   )}
