@@ -149,6 +149,17 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expectAccessible(screen, "room screen, session over");
     });
 
+    test("the ideas board passes axe", async ({ page, openAsGuest }) => {
+      await page.setViewportSize({ width: 1280, height: 800 });
+      await settle(page);
+      const { guest } = await setUpSession(page, openAsGuest);
+      await startIdeas(page);
+      await suggestIdea(page, "Pizza");
+      await pick(page, "Board");
+      await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+      await expectAccessible(page, "ideas board");
+    });
+
     test("dialogs and menus pass axe", async ({ page, openAsGuest }) => {
       await settle(page);
       await setUpSession(page, openAsGuest);

@@ -5,6 +5,7 @@ New features, visible to the people using Virgule. Format and rules: [VERSIONS.m
 ## 0.11.0 — 2026-10-05
 
 - Room screen for a group gathered in one place: the person hosting shows the session on a TV or a projector by typing there a code from their phone, which keeps the controls; the screen shows the code to join, the ideas arriving live without who suggested them, and the recap topic by topic.
+- On a computer or a tablet, the ideas page can be shown as a board, one column per topic, like the room screen; each person picks and finds it as they left it.
 
 ## 0.10.0 — 2026-10-05
 

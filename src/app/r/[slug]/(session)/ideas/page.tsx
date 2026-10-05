@@ -1,11 +1,12 @@
+import { cookies } from "next/headers";
 import { getTranslations } from "next-intl/server";
 
 import { Countdown } from "@/components/countdown";
-import { MasonryColumns } from "@/components/masonry-columns";
 import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
-import { BackToThemesButton, FinishVotingButton, ThemeIdeas, TimerControls } from "@/components/phases/voting-board";
+import { BackToThemesButton, FinishVotingButton, IdeasBoard, TimerControls } from "@/components/phases/voting-board";
+import { IDEAS_VIEW_COOKIE, parseIdeasView } from "@/lib/ideas-view";
 import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
 
 export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">) {
@@ -83,11 +84,13 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
           />
         )}
       </div>
-      <MasonryColumns>
-        {themes.map((theme) => (
-          <ThemeIdeas key={theme.id} slug={slug} theme={theme} allowNewIdeas={!room.tiebreak} hostName={hostName(page.participants)} />
-        ))}
-      </MasonryColumns>
+      <IdeasBoard
+        slug={slug}
+        themes={themes}
+        allowNewIdeas={!room.tiebreak}
+        hostName={hostName(page.participants)}
+        initialView={parseIdeasView((await cookies()).get(IDEAS_VIEW_COOKIE)?.value)}
+      />
     </PhaseTransition>
   );
 }

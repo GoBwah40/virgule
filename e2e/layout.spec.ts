@@ -58,6 +58,11 @@ for (const [label, viewport, isMobile] of [
       await vote(guest, IDEA, "For");
       await expectNoSideScroll(page, "ideas");
       await expectNoSideScroll(guest, "ideas, guest");
+      if (!isMobile) {
+        await page.getByRole("radio", { name: "Board" }).locator("..").click();
+        await expect(page.getByRole("radio", { name: "Board" })).toBeChecked();
+        await expectNoSideScroll(page, "ideas board");
+      }
 
       await seeRecap(page);
       await expectNoSideScroll(page, "recap");
