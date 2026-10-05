@@ -33,3 +33,5 @@ export const Interactive: Story = {
 export const For: Story = { args: { value: true } };
 export const Against: Story = { args: { value: false } };
 export const Disabled: Story = { args: { disabledReason: "Voting on your own ideas is turned off." } };
+export const Pick: Story = { args: { mode: "pick", labels: { up: "Pick this option" } } };
+export const Picked: Story = { args: { mode: "pick", value: true, labels: { up: "Pick this option" } } };

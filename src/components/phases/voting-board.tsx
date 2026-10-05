@@ -40,9 +40,21 @@ export function ThemeIdeas({
 }) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");
-  // Only the ideas you can vote on count (not your own when self-voting is off).
+  // Only the ideas you can vote on count (not your own when self-voting is off). A single-answer
+  // list counts as one vote: picking one option is enough.
   const votable = theme.ideas.filter((idea) => idea.canVote);
-  const voted = votable.filter((idea) => idea.myVote !== null).length;
+  const votedIdeas = votable.filter((idea) => idea.myVote !== null).length;
+  const [voted, total] = theme.singleChoice
+    ? [Math.min(votedIdeas, 1), Math.min(votable.length, 1)]
+    : [votedIdeas, votable.length];
+  // Single-answer list: the choice is held here so picking an idea un-picks the previous one at once.
+  const [pending, run] = useAction();
+  const [chosenId, setOptimisticChoice] = useOptimistic(theme.ideas.find((idea) => idea.myVote === true)?.id ?? null);
+  const pick = (ideaId: string, next: boolean | null) =>
+    run(async () => {
+      setOptimisticChoice(next ? ideaId : null);
+      return castVote(slug, ideaId, next);
+    });
 
   return (
     <Card>
@@ -55,14 +67,15 @@ export function ThemeIdeas({
               <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={tThemes(`kinds.${theme.kind}`)} />
             )}
             {theme.ideas.length > 0 && <CountBadge label={t("ideaCount", { count: theme.ideas.length })} />}
-            {votable.length > 0 && (
+            {total > 0 && (
               <CountBadge
-                label={t("votedCount", { done: voted, total: votable.length })}
-                tone={voted === votable.length ? "complete" : "progress"}
+                label={t("votedCount", { done: voted, total })}
+                tone={voted === total ? "complete" : "progress"}
               />
             )}
           </div>
         )}
+        {theme.singleChoice && <p className="text-sm text-muted-foreground">{t("singleChoiceHint")}</p>}
       </CardHeader>
       <CardContent>
         {theme.ideas.length === 0 ? (
@@ -70,7 +83,16 @@ export function ThemeIdeas({
         ) : (
           <ScrollableList label={t("listLabel", { title: theme.title })}>
             {theme.ideas.map((idea) => (
-              <IdeaItem key={idea.id} slug={slug} idea={idea} />
+              <IdeaItem
+                key={idea.id}
+                slug={slug}
+                idea={idea}
+                pick={
+                  theme.singleChoice
+                    ? { chosen: chosenId === idea.id, pending, onChange: (next) => pick(idea.id, next) }
+                    : undefined
+                }
+              />
             ))}
           </ScrollableList>
         )}
@@ -215,7 +237,16 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
   );
 }
 
-function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
+function IdeaItem({
+  slug,
+  idea,
+  pick,
+}: {
+  slug: string;
+  idea: VotingIdea;
+  /** Single-answer list: the choice is handled by the topic, across its ideas. */
+  pick?: { chosen: boolean; pending: boolean; onChange: (next: boolean | null) => void };
+}) {
   const t = useTranslations("ideas");
   const [pending, run] = useAction();
   // Shows the vote immediately; reverts to the server value on error.
@@ -223,7 +254,7 @@ function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
 
   return (
     <ListItem
-      className={pending ? "opacity-80" : undefined}
+      className={pending || pick?.pending ? "opacity-80" : undefined}
       meta={
         (idea.isMine || !idea.isNew || idea.canDelete || idea.mapQuery) && (
           <>
@@ -248,17 +279,27 @@ function IdeaItem({ slug, idea }: { slug: string; idea: VotingIdea }) {
         )
       }
       actions={
-        <VoteButtons
-          value={vote}
-          labels={{ up: t("voteUp"), down: t("voteDown") }}
-          disabledReason={idea.canVote ? undefined : t("selfVoteDisabled")}
-          onChange={(next) =>
-            run(async () => {
-              setOptimisticVote(next);
-              return castVote(slug, idea.id, next);
-            })
-          }
-        />
+        pick ? (
+          <VoteButtons
+            mode="pick"
+            value={pick.chosen || null}
+            labels={{ up: t("pick") }}
+            disabledReason={idea.canVote ? undefined : t("selfVoteDisabled")}
+            onChange={pick.onChange}
+          />
+        ) : (
+          <VoteButtons
+            value={vote}
+            labels={{ up: t("voteUp"), down: t("voteDown") }}
+            disabledReason={idea.canVote ? undefined : t("selfVoteDisabled")}
+            onChange={(next) =>
+              run(async () => {
+                setOptimisticVote(next);
+                return castVote(slug, idea.id, next);
+              })
+            }
+          />
+        )
       }
     >
       {idea.content}

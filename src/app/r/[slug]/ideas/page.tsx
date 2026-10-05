@@ -21,8 +21,14 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
     me.isHost ? getVoteProgress(room.id, room.round, room.allowSelfVote) : null,
   ]);
 
-  const votable = themes.flatMap((th) => th.ideas).filter((i) => i.canVote);
-  const voted = votable.filter((i) => i.myVote !== null).length;
+  // What is left for you to vote on: one unit per idea, except a single-answer list,
+  // where picking one option is enough.
+  const units = themes.flatMap((th) => {
+    const votable = th.ideas.filter((i) => i.canVote);
+    if (!th.singleChoice) return votable.map((i) => i.myVote !== null);
+    return votable.length > 0 ? [votable.some((i) => i.myVote !== null)] : [];
+  });
+  const voted = units.filter(Boolean).length;
 
   return (
     <PhaseTransition>
@@ -64,11 +70,11 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
           />
         )}
         {/* Gentle nudge: everyone sees what they have left, without knowing anything about the others. */}
-        {votable.length > 0 && (
+        {units.length > 0 && (
           <ProgressMeter
             value={voted}
-            max={votable.length}
-            label={t("myVotesLeft", { count: votable.length - voted })}
+            max={units.length}
+            label={t("myVotesLeft", { count: units.length - voted })}
             completeLabel={t("myVotesComplete")}
             ariaLabel={t("myVotesLabel")}
           />

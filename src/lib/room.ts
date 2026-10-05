@@ -88,6 +88,7 @@ export async function getThemes(roomId: string) {
       kind: true,
       options: true,
       allowOtherIdeas: true,
+      singleChoice: true,
       _count: { select: { ideas: true } },
     },
   });
@@ -123,6 +124,8 @@ export type VotingTheme = {
   kind: ThemeKind;
   /** False for a closed list: only the options can be voted on. */
   acceptsIdeas: boolean;
+  /** Single-answer list: each participant picks one idea, with no "against". */
+  singleChoice: boolean;
   ideas: VotingIdea[];
 };
 
@@ -155,6 +158,7 @@ export async function getVotingView(
     description: theme.description,
     kind: theme.kind,
     acceptsIdeas: theme.kind !== "CHOICE" || theme.allowOtherIdeas,
+    singleChoice: theme.kind === "CHOICE" && theme.singleChoice,
     ideas: theme.ideas
       .filter((idea) => isActiveInRound(idea, round))
       .map((idea) => {

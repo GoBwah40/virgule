@@ -35,4 +35,16 @@ describe("VoteButtons", () => {
     expect(screen.getByRole("button", { name: "For" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Against" })).toBeDisabled();
   });
+
+  it("shows a single button in pick mode, which picks then unpicks", async () => {
+    const onChange = vi.fn();
+    const { rerender } = renderUi(<VoteButtons mode="pick" value={null} onChange={onChange} labels={{ up: "Pick" }} />);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+    await userEvent.click(screen.getByRole("button", { name: "Pick" }));
+    expect(onChange).toHaveBeenLastCalledWith(true);
+
+    rerender(<VoteButtons mode="pick" value={true} onChange={onChange} labels={{ up: "Pick" }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Pick" }));
+    expect(onChange).toHaveBeenLastCalledWith(null);
+  });
 });

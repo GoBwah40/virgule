@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.7.0 — 2026-10-05
+
+- "List" topics can ask for a single answer per person, for a yes or no question for example.
+
 ## 0.6.0 — 2026-10-01
 
 - Until the first recap, you can leave a session from the button at the top or from your own seat: your seat is freed for someone else.

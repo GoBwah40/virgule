@@ -183,6 +183,7 @@ const themeSchema = z.object({
   kind: z.enum(THEME_KINDS).default("TEXT"),
   options: z.array(z.string()).optional(),
   allowOtherIdeas: z.boolean().optional(),
+  singleChoice: z.boolean().optional(),
 });
 
 type ThemeInput = {
@@ -192,15 +193,22 @@ type ThemeInput = {
   /** CHOICE topics: options set by the host. */
   options?: string[];
   allowOtherIdeas?: boolean;
+  /** CHOICE topics: one option per person. */
+  singleChoice?: boolean;
 };
 
 /** Topic fields to save; options only exist for a list. */
 function themeFields(data: z.infer<typeof themeSchema>) {
   const base = { title: data.title, description: data.description || null, kind: data.kind };
-  if (data.kind !== "CHOICE") return { ...base, options: null, allowOtherIdeas: false };
+  if (data.kind !== "CHOICE") return { ...base, options: null, allowOtherIdeas: false, singleChoice: false };
   const options = parseChoiceOptions(data.options);
   if (!options) throw new ActionFailure("invalidOptions");
-  return { ...base, options: JSON.stringify(options), allowOtherIdeas: data.allowOtherIdeas ?? false };
+  return {
+    ...base,
+    options: JSON.stringify(options),
+    allowOtherIdeas: data.allowOtherIdeas ?? false,
+    singleChoice: data.singleChoice ?? false,
+  };
 }
 
 export async function addTheme(slug: string, input: ThemeInput) {
@@ -228,12 +236,15 @@ export async function updateTheme(
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     const theme = await db.theme.findFirst({
       where: { id: themeId, roomId: room.id },
-      select: { kind: true, _count: { select: { ideas: true } } },
+      select: { kind: true, singleChoice: true, _count: { select: { ideas: true } } },
     });
     if (!theme) throw new ActionFailure("invalidInput");
-    // Changing the kind would make ideas already submitted unreadable.
-    if (theme.kind !== parsed.data.kind && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
-    await db.theme.update({ where: { id: themeId }, data: themeFields(parsed.data) });
+    const fields = themeFields(parsed.data);
+    // Changing the kind would make ideas already submitted unreadable; switching to a single
+    // answer would leave votes already cast (several options, "against") that break the rule.
+    const changed = theme.kind !== fields.kind || theme.singleChoice !== fields.singleChoice;
+    if (changed && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
+    await db.theme.update({ where: { id: themeId }, data: fields });
   });
 }
 
@@ -367,24 +378,41 @@ export async function deleteIdea(slug: string, ideaId: string) {
   });
 }
 
-/** `positive = null` removes the vote. */
+/**
+ * `positive = null` removes the vote. In a single-answer list, only "for" exists and
+ * picking an idea removes the vote on the one picked before.
+ */
 export async function castVote(slug: string, ideaId: string, positive: boolean | null) {
   if (!isId(ideaId) || (positive !== null && !isBoolean(positive))) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
-    const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
+    const idea = await db.idea.findFirst({
+      where: { id: ideaId, roomId: room.id },
+      include: { theme: { select: { kind: true, singleChoice: true } } },
+    });
     if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
     if (!room.allowSelfVote && idea.authorId === me.id && !idea.isOption) throw new ActionFailure("selfVoteForbidden");
+    const single = idea.theme.kind === "CHOICE" && idea.theme.singleChoice;
+    if (single && positive === false) throw new ActionFailure("invalidInput");
 
     const where = { ideaId_participantId_round: { ideaId, participantId: me.id, round: room.round } };
     if (positive === null) {
       await db.vote.deleteMany({ where: where.ideaId_participantId_round });
     } else {
-      await db.vote.upsert({
-        where,
-        create: { ideaId, participantId: me.id, round: room.round, positive },
-        update: { positive },
-      });
+      await db.$transaction([
+        ...(single
+          ? [
+              db.vote.deleteMany({
+                where: { participantId: me.id, round: room.round, ideaId: { not: ideaId }, idea: { themeId: idea.themeId } },
+              }),
+            ]
+          : []),
+        db.vote.upsert({
+          where,
+          create: { ideaId, participantId: me.id, round: room.round, positive },
+          update: { positive },
+        }),
+      ]);
     }
   });
 }
