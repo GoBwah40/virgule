@@ -313,6 +313,26 @@
     "closeConfirmHint": "Une fois la séance terminée, plus personne ne pourra proposer ni voter.",
     "waitingHost": "{host} choisit la suite : un nouveau tour, ou on s'arrête là."
   },
+  "present": {
+    "open": "Afficher en grand",
+    "fullscreenHint": "Clique ou appuie sur une touche pour passer en plein écran",
+    "lobbyNote": "{host} prépare les sujets. Scanne le code pour rejoindre.",
+    "join": "Scanne pour rejoindre",
+    "seats": "{count, plural, one {# place sur {max} occupée} other {# places sur {max} occupées}}",
+    "full": "Toutes les places sont prises",
+    "topicsTitle": "Ce qu'on doit décider",
+    "topicsNote": "Les idées commencent quand {host} lance l'étape suivante",
+    "ideaCount": "{count, plural, =0 {Pas encore d'idée} one {# idée} other {# idées}}",
+    "waitingIdeas": "En attente de la première idée",
+    "results": "Résultats par sujet",
+    "topicPosition": "Sujet {current} sur {total}",
+    "kept": "Gardée par le groupe",
+    "tied": "À égalité en tête",
+    "noneKept": "Aucune idée gardée sur ce sujet",
+    "votes": "{up} pour, {down} contre",
+    "more": "{count, plural, one {+ # autre idée} other {+ # autres idées}}",
+    "anonymous": "Personne ne sait qui a voté quoi"
+  },
   "export": {
     "button": "Exporter",
     "markdown": "Markdown (.md)",

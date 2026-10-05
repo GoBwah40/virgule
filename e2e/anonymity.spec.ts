@@ -4,6 +4,7 @@ import {
   expect,
   idea,
   LIVE_TIMEOUT,
+  openPresentation,
   participantSecrets,
   seeRecap,
   setUpSession,
@@ -115,4 +116,80 @@ test("the step endpoint answers participants only", async ({ page, openAsGuest }
   expect(theirs.status()).toBe(404);
   const unknown = await stranger.request.get(`${new URL(link).origin}/r/doesnotexist/phase`);
   expect(unknown.status()).toBe(404);
+});
+
+// The room screen is seen by the whole room: it must not even say what the host's own page says
+// to the host ("Your idea"), nor show any vote while ideas are open.
+
+test("the room screen never receives who suggested an idea, nor anyone's token", async ({ page, openAsGuest }) => {
+  test.slow();
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  const screen = await openPresentation(page);
+  const screenAnswers = await recordAnswers(screen);
+  const hostAnswers = await recordAnswers(page);
+
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await suggestIdea(guest, "Sushi");
+  const dinner = screen.getByRole("region", { name: "Dinner" });
+  await expect(dinner.getByRole("listitem")).toHaveText(["Sushi", "Pizza"], { timeout: LIVE_TIMEOUT });
+  // Nothing on screen tells Sam's idea from Lea's.
+  await expect(screen.getByText("Your idea")).toHaveCount(0);
+  await expect(screen.getByRole("button")).toHaveCount(0);
+  await vote(page, "Sushi", "For");
+  await vote(guest, "Pizza", "Against");
+  await seeRecap(page);
+  await expect(screen.getByText("Nobody knows who voted what")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await screen.reload();
+  await page.reload();
+  // The recording does see what the screen gets.
+  expect(containing(screenAnswers, "Pizza").length).toBeGreaterThan(0);
+  expect(containing(screenAnswers, "Sushi").length).toBeGreaterThan(0);
+
+  for (const { token, id, pseudo } of await participantSecrets(link)) {
+    expect(containing(screenAnswers, token), `${pseudo}'s token on the room screen`).toEqual([]);
+    // Participant ids only go with the seats, never with an idea: no idea field carries one.
+    expect(containing(screenAnswers, `"authorId":"${id}"`), `${pseudo}'s ideas on the room screen`).toEqual([]);
+  }
+  // Not even whether an idea is the host's: the host's own page says so, the screen never does.
+  for (const field of ['"isMine"', '"canDelete"', '"myVote"', '"authorId"', '"token"']) {
+    expect(containing(screenAnswers, field), field).toEqual([]);
+  }
+  expect(containing(hostAnswers, '"isMine"').length, "witness: the host's page does say it").toBeGreaterThan(0);
+});
+
+test("during the ideas phase, a vote changes nothing on the room screen", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await suggestIdea(guest, "Sushi");
+  await expect(idea(page, "Sushi")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  // Everyone has voted once: from now on, the number of people who voted cannot move.
+  await vote(page, "Sushi", "For");
+  await vote(guest, "Pizza", "For");
+
+  const screen = await openPresentation(page);
+  await expect(screen.getByRole("progressbar")).toHaveText("Everyone has voted");
+  const updates = await recordAnswers(screen, /\/present\?_rsc=/);
+  await expect.poll(() => updates.length, { timeout: LIVE_TIMEOUT }).toBeGreaterThanOrEqual(2);
+  const [before, again] = updates.slice(-2).map((update) => steady(update.body));
+  expect(again).toBe(before);
+
+  // New votes and a vote changed: nothing of it reaches the screen, not even a count.
+  await vote(page, "Pizza", "Against");
+  await vote(guest, "Pizza", "Against");
+  await vote(guest, "Sushi", "For");
+  const seen = updates.length;
+  await expect.poll(() => updates.length, { timeout: LIVE_TIMEOUT }).toBeGreaterThanOrEqual(seen + 2);
+  expect(steady(updates.at(-1)!.body)).toBe(before);
+  await expect(screen.getByText(/\d+ (for|against)/)).toHaveCount(0);
+
+  // Whereas a new idea does show: the comparison does see changes.
+  await suggestIdea(guest, "Tacos");
+  const afterIdea = updates.length;
+  await expect.poll(() => updates.length, { timeout: LIVE_TIMEOUT }).toBeGreaterThanOrEqual(afterIdea + 1);
+  await expect.poll(() => steady(updates.at(-1)!.body), { timeout: LIVE_TIMEOUT }).not.toBe(before);
+  await expect(screen.getByRole("region", { name: "Dinner" })).toContainText("Tacos");
 });

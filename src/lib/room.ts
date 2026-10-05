@@ -357,3 +357,106 @@ export async function loadPhasePage(slug: string, allowed: Phase[]) {
   return { room: ctx.room, me: ctx.me, participants: ctx.participants };
 }
 
+
+// ─── Presentation screen (host only, seen by the whole room) ────────────────
+
+type PresentationTopic = { id: string; title: string; description: string | null; kind: ThemeKind };
+
+export type PresentationView =
+  | { step: "THEMES"; topics: PresentationTopic[] }
+  | {
+      step: "IDEAS";
+      topics: (PresentationTopic & { ideas: { id: string; content: string }[] })[];
+      progress: { done: number; total: number };
+      endsAt: Date | null;
+    }
+  | {
+      step: "RECAP";
+      closed: boolean;
+      topics: (PresentationTopic & {
+        ideas: { id: string; content: string; score: Score; qualified: boolean; leading: boolean }[];
+      })[];
+    };
+
+/**
+ * What the room screen shows, built for the group rather than taken from the host's view: never
+ * whose idea it is (no "Your idea", nothing removable), no score nor vote while ideas are open
+ * (only how many people have voted), and in the recap the same totals every participant sees.
+ */
+export async function getPresentationView(room: {
+  id: string;
+  phase: Phase;
+  round: number;
+  allowSelfVote: boolean;
+  requireNetPositive: boolean;
+  phaseEndsAt: Date | null;
+}): Promise<PresentationView> {
+  const topicOf = (theme: PresentationTopic): PresentationTopic => ({
+    id: theme.id,
+    title: theme.title,
+    description: theme.description,
+    kind: theme.kind,
+  });
+
+  if (room.phase === "THEMES") {
+    return { step: "THEMES", topics: (await getThemes(room.id)).map(topicOf) };
+  }
+
+  if (room.phase === "IDEAS") {
+    const [themes, progress, format] = await Promise.all([
+      db.theme.findMany({
+        where: { roomId: room.id },
+        orderBy: { position: "asc" },
+        // Nothing about authors or votes is read: it cannot leak.
+        include: {
+          ideas: {
+            orderBy: { createdAt: "asc" },
+            select: {
+              id: true,
+              content: true,
+              dateStart: true,
+              dateEnd: true,
+              amountMin: true,
+              amountMax: true,
+              createdRound: true,
+              eliminatedRound: true,
+            },
+          },
+        },
+      }),
+      getVoteProgress(room.id, room.round, room.allowSelfVote),
+      getIdeaFormat(),
+    ]);
+    return {
+      step: "IDEAS",
+      topics: themes.map((theme) => ({
+        ...topicOf(theme),
+        ideas: theme.ideas
+          .filter((idea) => isActiveInRound(idea, room.round))
+          .map((idea) => ({ id: idea.id, content: describeIdea(theme.kind, idea, format) })),
+      })),
+      progress,
+      endsAt: room.phaseEndsAt,
+    };
+  }
+
+  // Recap: the current round, as everyone sees it (nobody is "me" on the room screen).
+  const rounds = await getRecap(room, null);
+  return {
+    step: "RECAP",
+    closed: room.phase === "CLOSED",
+    topics: rounds[rounds.length - 1].themes.map((theme) => {
+      const leaders = new Set(topQualified(theme.ideas).map((idea) => idea.id));
+      return {
+        ...topicOf(theme),
+        ideas: theme.ideas.map((idea) => ({
+          id: idea.id,
+          content: idea.content,
+          score: idea.score,
+          qualified: idea.qualified,
+          leading: leaders.has(idea.id),
+        })),
+      };
+    }),
+  };
+}

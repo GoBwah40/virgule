@@ -32,3 +32,11 @@ describe("Countdown", () => {
     expect(screen.getByRole("timer")).toHaveTextContent("Time's up");
   });
 });
+
+describe("Countdown, large", () => {
+  it("grows to the room screen size", () => {
+    renderUi(<Countdown endsAt={new Date(Date.now() + 60_000).toISOString()} labels={labels} size="lg" />);
+    expect(screen.getByRole("timer")).toHaveClass("stage-md");
+    expect(screen.getByRole("timer")).not.toHaveClass("text-sm");
+  });
+});

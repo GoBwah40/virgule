@@ -4,7 +4,7 @@ import { CardSkeleton } from "./card-skeleton";
 import { LoadingState } from "./loading-state";
 import { PageHeaderSkeleton } from "./page-header-skeleton";
 
-/** A full loading screen composition, like app/r/[slug]/ideas/loading.tsx. */
+/** A full loading screen composition, like app/r/[slug]/(session)/ideas/loading.tsx. */
 const meta = {
   title: "Loading/LoadingState",
   component: LoadingState,

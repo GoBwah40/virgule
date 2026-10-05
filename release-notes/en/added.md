@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.0 — 2026-10-05
+
+- Room screen for a group gathered in one place: the person hosting shows the session on a TV or a projector, with the code to join, the ideas arriving live without who suggested them, and the recap topic by topic.
+
 ## 0.10.0 — 2026-10-05
 
 - Each topic can limit the number of “for” votes per person, to help the best ideas stand out.
