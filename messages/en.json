@@ -262,7 +262,10 @@
     "backToThemesConfirm": "Go back to the topics?",
     "backToThemesHint": "Everyone goes back to the topics page. Ideas and votes are kept, but deleting a topic also deletes its ideas.",
     "finish": "See the recap",
-    "finishConfirm": "Close voting for everyone?"
+    "finishConfirm": "Close voting for everyone?",
+    "viewLabel": "Display",
+    "viewList": "List",
+    "viewBoard": "Board"
   },
   "recap": {
     "title": "The recap",

@@ -174,6 +174,7 @@ src/
   - anyone else opening `/r/<slug>/present` goes back to the session.
 
   It is a view of its own, built for the group (`getPresentationView`): never whose idea it is (the host's own page marks their ideas), no score nor vote while ideas are open, only how many people have voted, and in the recap the totals everyone already sees, one topic at a time (arrow keys, Page Up / Page Down or a presentation clicker to move, space to pause). Text sized to be read from across the room, always dark, no controls; it follows the session like the phones do, asks for full screen on the first click or key press and keeps the screen awake where the browser allows it.
+- **Ideas board**: from tablets up, the ideas page can be a list (two columns of cards) or a board (one column per topic, the latest ideas first, the input on top), picked by each person and kept in a cookie (`virgule_ideas_view`) read by the server, so the page comes back without a jump.
 - **Invitation**: link to copy, QR code to scan for a group gathered in the same place, and the phone's native sharing when the browser offers it.
 - **What's new**: a button in the home page header (version number, and a dot until the latest version has been viewed on this browser) opens the release notes in a panel that slides up from the bottom of the screen.
 - **Theme**: light or dark following the device, or chosen in the footer. The choice is kept in a cookie (`virgule_theme`) read by the root layout, which renders `data-theme` directly on `<html>`: no flash on load.

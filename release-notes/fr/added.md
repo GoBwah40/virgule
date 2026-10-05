@@ -5,6 +5,7 @@ Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Fo
 ## 0.11.0 — 2026-10-05
 
 - Écran de salle pour un groupe réuni au même endroit : la personne qui anime affiche la séance sur une télé ou un vidéoprojecteur en y tapant un code donné par son téléphone, qui garde la main ; l'écran montre le code pour rejoindre, les idées qui arrivent en direct sans dire qui les a proposées, et le bilan sujet par sujet.
+- Sur ordinateur ou tablette, la page des idées peut s'afficher en tableau, une colonne par sujet, comme l'écran de salle ; chacun choisit et la retrouve comme il l'a laissée.
 
 ## 0.10.0 — 2026-10-05
 

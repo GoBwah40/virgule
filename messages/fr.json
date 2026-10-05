@@ -262,7 +262,10 @@
     "backToThemesConfirm": "Revenir aux sujets ?",
     "backToThemesHint": "Tout le monde retourne sur la page des sujets. Les idées et les votes sont conservés, mais supprimer un sujet supprime aussi ses idées.",
     "finish": "Voir le bilan",
-    "finishConfirm": "Clore les votes pour tout le monde ?"
+    "finishConfirm": "Clore les votes pour tout le monde ?",
+    "viewLabel": "Affichage",
+    "viewList": "Liste",
+    "viewBoard": "Tableau"
   },
   "recap": {
     "title": "Le bilan",

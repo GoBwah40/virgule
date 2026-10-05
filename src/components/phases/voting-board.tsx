@@ -1,10 +1,11 @@
 "use client";
 
-import { ListChecks, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
+import { Columns3, LayoutList, ListChecks, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
 import { AmountField } from "@/components/amount-field";
+import { BoardColumns } from "@/components/board-columns";
 import { ConfirmButton } from "@/components/confirm-button";
 import { CountBadge } from "@/components/count-badge";
 import { DateField } from "@/components/date-field";
@@ -12,8 +13,10 @@ import { FormField } from "@/components/form-field";
 import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
 import { MapLink } from "@/components/map-link";
+import { MasonryColumns } from "@/components/masonry-columns";
 import { ScrollableList } from "@/components/scrollable-list";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
+import { SegmentedControl } from "@/components/segmented-control";
 import { VoteButtons } from "@/components/vote-buttons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,22 +27,77 @@ import { useAction } from "@/hooks/use-action";
 import { addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, stopTimer } from "@/lib/actions";
 import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
 import type { IdeaInput, ThemeKind } from "@/lib/idea-value";
+import { IDEAS_VIEW_COOKIE, type IdeasView } from "@/lib/ideas-view";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
-export function ThemeIdeas({
+const ONE_YEAR = 60 * 60 * 24 * 365;
+
+/**
+ * Every topic with its ideas, as a list (two columns of cards) or as a board (one column per
+ * topic, like the room screen). Each person picks, from tablets up; the choice is kept in a cookie
+ * read by the server, so the page comes back as left.
+ */
+export function IdeasBoard({
+  slug,
+  themes,
+  allowNewIdeas,
+  hostName,
+  initialView,
+}: {
+  slug: string;
+  themes: VotingTheme[];
+  allowNewIdeas: boolean;
+  hostName: string;
+  initialView: IdeasView;
+}) {
+  const t = useTranslations("ideas");
+  const [view, setView] = useState(initialView);
+  const choose = (next: IdeasView) => {
+    setView(next);
+    document.cookie = `${IDEAS_VIEW_COOKIE}=${next}; path=/; max-age=${ONE_YEAR}; samesite=lax`;
+  };
+  const blocks = themes.map((theme) => (
+    <ThemeIdeas key={theme.id} slug={slug} theme={theme} allowNewIdeas={allowNewIdeas} hostName={hostName} variant={view} />
+  ));
+
+  return (
+    <>
+      {/* Phones have room for one column only: the choice starts with tablets. */}
+      <SegmentedControl
+        className="mb-4 hidden justify-items-end md:grid"
+        name="ideas-view"
+        label={t("viewLabel")}
+        labelHidden
+        options={[
+          { value: "list", label: t("viewList"), icon: LayoutList },
+          { value: "board", label: t("viewBoard"), icon: Columns3 },
+        ]}
+        value={view}
+        onChange={choose}
+      />
+      {view === "board" ? <BoardColumns>{blocks}</BoardColumns> : <MasonryColumns>{blocks}</MasonryColumns>}
+    </>
+  );
+}
+
+function ThemeIdeas({
   slug,
   theme,
   allowNewIdeas,
   hostName,
+  variant = "list",
 }: {
   slug: string;
   theme: VotingTheme;
   allowNewIdeas: boolean;
   hostName: string;
+  /** `board`: a column of the board, idea input on top and the latest ideas first. */
+  variant?: IdeasView;
 }) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");
+  const board = variant === "board";
   // Single-answer list: the choice is held here so picking an idea un-picks the previous one at once.
   const [pending, run] = useAction();
   const [chosenId, setOptimisticChoice] = useOptimistic(theme.ideas.find((idea) => idea.myVote === true)?.id ?? null);
@@ -60,10 +118,22 @@ export function ThemeIdeas({
     ? [Math.min(votedIdeas, 1), Math.min(votable.length, 1)]
     : [votesLeft !== null && votesLeft <= 0 ? votable.length : votedIdeas, votable.length];
 
+  // Tiebreak round: we vote again on the tied ideas, with no new ideas.
+  // Closed list: we only vote on the host's options.
+  const composer =
+    allowNewIdeas && theme.acceptsIdeas ? (
+      <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
+    ) : (
+      <p className="text-sm text-muted-foreground">{allowNewIdeas ? t("optionsBy", { host: hostName }) : t("tiebreakNoComposer")}</p>
+    );
+  // On the board, the latest ideas first, right under the input: what was just suggested shows.
+  const ideas = board ? [...theme.ideas].reverse() : theme.ideas;
+
   return (
-    <Card>
+    <Card className={cn(board && "h-full")}>
       <CardHeader>
-        <CardTitle className="font-heading text-xl font-bold">{theme.title}</CardTitle>
+        {/* Breaks between words only: a narrow column never cuts a title in the middle of one. */}
+        <CardTitle className="font-heading text-xl font-bold wrap-break-word hyphens-auto">{theme.title}</CardTitle>
         {theme.description && <CardDescription>{theme.description}</CardDescription>}
         {(theme.kind !== "TEXT" || theme.ideas.length > 0 || votesLeft !== null) && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -88,12 +158,13 @@ export function ThemeIdeas({
         )}
         {theme.singleChoice && <p className="text-sm text-muted-foreground">{t("singleChoiceHint")}</p>}
       </CardHeader>
-      <CardContent>
-        {theme.ideas.length === 0 ? (
+      {board && <div className="border-y bg-muted/50 px-4 py-3">{composer}</div>}
+      <CardContent className={cn(board && "flex-1")}>
+        {ideas.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         ) : (
           <ScrollableList label={t("listLabel", { title: theme.title })}>
-            {theme.ideas.map((idea) => (
+            {ideas.map((idea) => (
               <IdeaItem
                 key={idea.id}
                 slug={slug}
@@ -109,17 +180,7 @@ export function ThemeIdeas({
           </ScrollableList>
         )}
       </CardContent>
-      {/* Tiebreak round: we vote again on the tied ideas, with no new ideas.
-          Closed list: we only vote on the host's options. */}
-      {allowNewIdeas && theme.acceptsIdeas ? (
-        <CardFooter className="border-t bg-muted/50 py-3">
-          <IdeaComposer slug={slug} themeId={theme.id} kind={theme.kind} />
-        </CardFooter>
-      ) : (
-        <CardFooter className="border-t bg-muted/50 py-3 text-sm text-muted-foreground">
-          {allowNewIdeas ? t("optionsBy", { host: hostName }) : t("tiebreakNoComposer")}
-        </CardFooter>
-      )}
+      {!board && <CardFooter className="border-t bg-muted/50 py-3">{composer}</CardFooter>}
     </Card>
   );
 }
