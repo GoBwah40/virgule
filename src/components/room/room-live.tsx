@@ -23,6 +23,7 @@ type Props = {
  * Keeps the page in sync with the other participants.
  * - Pusher configured: updates on every notification (+ slow fallback polling).
  * - Otherwise: polling every few seconds.
+ * - Back or forward in the history: an update straight away.
  * - Offline: no update until the device is back online, then one straight away. The step is
  *   always asked first, which also checks the server can be reached before refreshing.
  * On each update, the current step is checked first: if it has changed, we navigate
@@ -91,8 +92,10 @@ export function RoomLive({ slug, pusher, followPhase = true }: Props) {
         const path = phasePath(slug, phase);
         if (path !== pathnameRef.current) target = path;
       }
-      // Followed until it lands (`updating`), which frees the next round.
-      startUpdate(() => (target ? router.push(target) : router.refresh()));
+      // Followed until it lands (`updating`), which frees the next round. The step's page
+      // replaces the stale one in the history: going back then leaves past steps behind instead
+      // of landing on them again and again.
+      startUpdate(() => (target ? router.replace(target) : router.refresh()));
     };
 
     const schedule = () => {
@@ -109,6 +112,11 @@ export function RoomLive({ slug, pusher, followPhase = true }: Props) {
     document.addEventListener("visibilitychange", onVisible);
     // Back online: catch up at once on what the others did meanwhile.
     window.addEventListener("online", schedule);
+    // Back or forward in the history, or a page restored from the browser's cache: it shows what
+    // it showed then, possibly a past step.
+    window.addEventListener("popstate", schedule);
+    const onPageShow = (event: PageTransitionEvent) => event.persisted && schedule();
+    window.addEventListener("pageshow", onPageShow);
 
     let cancelled = false;
     let client: { disconnect: () => void } | undefined;
@@ -133,6 +141,8 @@ export function RoomLive({ slug, pusher, followPhase = true }: Props) {
       clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
       window.removeEventListener("online", schedule);
+      window.removeEventListener("popstate", schedule);
+      window.removeEventListener("pageshow", onPageShow);
       client?.disconnect();
     };
   }, [router, slug, pusherKey, pusherCluster, followPhase]);
