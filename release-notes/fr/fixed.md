@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.15 — 2026-10-05
+
+- Un mot long dans un sujet, comme un lien collé, ne pousse plus la page sur le côté, sur téléphone comme sur ordinateur : il passe à la ligne.
+
 ## 0.6.14 — 2026-10-05
 
 - Revenir en arrière dans ton navigateur n'affiche plus une étape terminée (jusqu'à 30 secondes avec les mises à jour en temps réel) : l'étape en cours revient aussitôt, et revenir en arrière quitte la séance au lieu de tourner en rond.
