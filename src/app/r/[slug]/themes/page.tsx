@@ -1,3 +1,4 @@
+import { Vote } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { IconBadge } from "@/components/icon-badge";
@@ -52,9 +53,10 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
                 key={theme.id}
                 tone="plain"
                 meta={
-                  (theme.description || theme.kind !== "TEXT") && (
+                  (theme.description || theme.kind !== "TEXT" || theme.maxVotes !== null) && (
                     <>
                       {theme.kind !== "TEXT" && <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={t(`kinds.${theme.kind}`)} />}
+                      {theme.maxVotes !== null && <IconBadge icon={Vote} label={t("voteLimitBadge", { count: theme.maxVotes })} />}
                       {theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}
                     </>
                   )

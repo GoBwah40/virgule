@@ -94,6 +94,8 @@ model Theme {
   allowOtherIdeas Boolean @default(false)
   /// CHOICE topics: each participant picks a single option (e.g. yes / no), with no "against" votes.
   singleChoice Boolean @default(false)
+  /// Maximum "for" votes per participant in this topic, per round (null = no limit).
+  maxVotes    Int?
   ideas       Idea[]
 
   @@index([roomId, position])

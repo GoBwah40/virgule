@@ -36,6 +36,9 @@ export const SAFETY_POLL_INTERVAL_MS = 30000;
 
 /** Durations offered for the ideas timer, in minutes. */
 export const IDEAS_TIMER_OPTIONS: readonly number[] = [3, 5, 10, 15];
+/** Limits offered for the "for" votes per participant in a topic (no limit by default). */
+export const VOTE_LIMIT_OPTIONS: readonly number[] = [1, 2, 3, 5];
+
 /** Time added by the host's "+2 min" button. */
 export const EXTEND_TIMER_MINUTES = 2;
 

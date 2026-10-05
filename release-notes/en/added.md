@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.10.0 — 2026-10-05
+
+- Each topic can limit the number of “for” votes per person, to help the best ideas stand out.
+
 ## 0.9.0 — 2026-10-05
 
 - When creating a session, you choose the size of the group: 4, 6, 8 or 12 people, and you can change it while preparing the topics.

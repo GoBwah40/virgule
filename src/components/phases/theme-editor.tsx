@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Pencil, Play, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Pencil, Play, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
-import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES } from "@/lib/config";
+import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 
 type Theme = {
@@ -30,6 +30,7 @@ type Theme = {
   options: string[];
   allowOtherIdeas: boolean;
   singleChoice: boolean;
+  maxVotes: number | null;
   ideaCount: number;
 };
 
@@ -40,6 +41,7 @@ type ThemeValues = {
   options: string[];
   allowOtherIdeas: boolean;
   singleChoice: boolean;
+  maxVotes: number | null;
 };
 
 /** Common topics offered in one tap (keys of the themes.suggestions namespace), with their answer kind. */
@@ -194,9 +196,10 @@ function ThemeRow({ slug, theme, isFirst, isLast }: { slug: string; theme: Theme
     <ListItem
       tone="plain"
       meta={
-        (theme.description || theme.kind !== "TEXT") && (
+        (theme.description || theme.kind !== "TEXT" || theme.maxVotes !== null) && (
           <>
             {theme.kind !== "TEXT" && <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={t(`kinds.${theme.kind}`)} />}
+            {theme.maxVotes !== null && <IconBadge icon={Vote} label={t("voteLimitBadge", { count: theme.maxVotes })} />}
             {theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}
           </>
         )
@@ -258,6 +261,9 @@ function ThemeForm({
   const [options, setOptions] = useState<string[]>(initial?.options ?? []);
   const [allowOtherIdeas, setAllowOtherIdeas] = useState(initial?.allowOtherIdeas ?? false);
   const [singleChoice, setSingleChoice] = useState(initial?.singleChoice ?? false);
+  const [maxVotes, setMaxVotes] = useState<number | null>(initial?.maxVotes ?? null);
+  // One answer per person is already a limit of one: no vote limit to choose.
+  const single = kind === "CHOICE" && singleChoice;
   const optionsMissing = kind === "CHOICE" && options.length < CHOICE_OPTIONS.min;
   const idPrefix = initial?.id ?? "new";
   // Ideas already exist: changing their kind would make them unreadable.
@@ -270,13 +276,14 @@ function ThemeForm({
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit({ title, description, kind, options, allowOtherIdeas, singleChoice }, () => {
+            onSubmit({ title, description, kind, options, allowOtherIdeas, singleChoice, maxVotes: single ? null : maxVotes }, () => {
               setTitle("");
               setDescription("");
               setKind("TEXT");
               setOptions([]);
               setAllowOtherIdeas(false);
               setSingleChoice(false);
+              setMaxVotes(null);
             });
           }}
         >
@@ -343,6 +350,19 @@ function ThemeForm({
                 onCheckedChange={setSingleChoice}
               />
             </div>
+          )}
+          {!single && (
+            <SegmentedControl
+              name={`${idPrefix}-max-votes`}
+              label={t("voteLimitLabel")}
+              hint={t("voteLimitHint")}
+              options={[
+                { value: "none", label: t("voteLimitNone") },
+                ...VOTE_LIMIT_OPTIONS.map((n) => ({ value: String(n), label: String(n) })),
+              ]}
+              value={maxVotes === null ? "none" : String(maxVotes)}
+              onChange={(value) => setMaxVotes(value === "none" ? null : Number(value))}
+            />
           )}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {onCancel && (

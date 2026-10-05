@@ -47,4 +47,18 @@ describe("VoteButtons", () => {
     await userEvent.click(screen.getByRole("button", { name: "Pick" }));
     expect(onChange).toHaveBeenLastCalledWith(null);
   });
+
+  it("can disable only the vote for, keeping an active vote removable", async () => {
+    const onChange = vi.fn();
+    const { rerender } = renderUi(
+      <VoteButtons value={null} onChange={onChange} labels={labels} upDisabledReason="No votes left" />,
+    );
+    expect(screen.getByRole("button", { name: "For" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Against" })).toBeEnabled();
+    expect(screen.getByLabelText("No votes left")).toBeInTheDocument();
+
+    rerender(<VoteButtons value={true} onChange={onChange} labels={labels} upDisabledReason="No votes left" />);
+    await userEvent.click(screen.getByRole("button", { name: "For" }));
+    expect(onChange).toHaveBeenLastCalledWith(null);
+  });
 });

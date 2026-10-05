@@ -20,6 +20,11 @@ type Props = {
   mode?: "upDown" | "pick";
   /** If set, the buttons are disabled and this text explains why. */
   disabledReason?: string;
+  /**
+   * If set, only "for" is disabled, with this text as the reason (e.g. no "for" votes left).
+   * An active "for" stays clickable, so the vote can still be removed.
+   */
+  upDisabledReason?: string;
   className?: string;
 };
 
@@ -28,14 +33,24 @@ const UP_PRESSED =
   "border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground dark:border-success dark:bg-success dark:hover:bg-success/90";
 
 /** Pair of ↑ / ↓ buttons (44 px), or a single ✓ in "pick" mode; the label is in the tooltip and the aria-label. */
-export function VoteButtons({ value, onChange, labels, mode = "upDown", disabledReason, className }: Props) {
+export function VoteButtons({
+  value,
+  onChange,
+  labels,
+  mode = "upDown",
+  disabledReason,
+  upDisabledReason,
+  className,
+}: Props) {
   const disabled = !!disabledReason;
+  const upBlocked = !disabled && !!upDisabledReason && value !== true;
   const buttons = (
     <div className={cn("flex shrink-0 gap-1.5", className)}>
       <VoteButton
         label={labels.up}
         pressed={value === true}
-        disabled={disabled}
+        disabled={disabled || upBlocked}
+        disabledReason={upBlocked ? upDisabledReason : undefined}
         onClick={() => onChange(value === true ? null : true)}
         pressedClassName={UP_PRESSED}
       >
@@ -71,11 +86,14 @@ function VoteButton({
   disabled,
   onClick,
   pressedClassName,
+  disabledReason,
   children,
 }: {
   label: string;
   pressed: boolean;
   disabled: boolean;
+  /** Reason shown on this button alone while it is disabled. */
+  disabledReason?: string;
   onClick: () => void;
   pressedClassName: string;
   children: React.ReactNode;
@@ -98,6 +116,15 @@ function VoteButton({
       {children}
     </Button>
   );
+  if (disabled && disabledReason) {
+    // A disabled button doesn't trigger a tooltip: a focusable wrapper explains why.
+    return (
+      <Tooltip>
+        <TooltipTrigger render={<span tabIndex={0} aria-label={disabledReason} className="rounded-md" />}>{button}</TooltipTrigger>
+        <TooltipContent>{disabledReason}</TooltipContent>
+      </Tooltip>
+    );
+  }
   if (disabled) return button;
   return (
     <Tooltip>
