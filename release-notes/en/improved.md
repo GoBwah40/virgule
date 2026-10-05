@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.16 — 2026-10-05
+
+- Long lists of ideas scroll inside their topic, so the page stays short and the other topics stay within reach.
+
 ## 0.6.6 — 2026-10-01
 
 - On phones, seats, topic buttons, suggestions, options, switches and the logo are easier to tap.

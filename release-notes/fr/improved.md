@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.16 — 2026-10-05
+
+- Les longues listes d'idées défilent à l'intérieur de leur sujet : la page reste courte et les autres sujets restent à portée.
+
 ## 0.6.6 — 2026-10-01
 
 - Sur téléphone, les places, les boutons des sujets, les suggestions, les options, les interrupteurs et le logo sont plus faciles à toucher.
