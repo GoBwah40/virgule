@@ -102,7 +102,7 @@ test("back after joining stays in the session", async ({ page, openAsGuest }) =>
 
   await newcomer.goBack();
   // Never the join form again, which would offer a second seat.
-  await expect(newcomer.getByText("Sam is preparing the topics. What comes next will show up here automatically.")).toBeVisible();
+  await expect(newcomer.getByText("Sam is preparing the topics, and you can suggest some. What comes next will show up here automatically.")).toBeVisible();
   await expect(newcomer.getByRole("button", { name: "Join the session" })).toHaveCount(0);
 });
 

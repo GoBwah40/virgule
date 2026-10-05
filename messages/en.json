@@ -107,7 +107,17 @@
   "themes": {
     "title": "What do we need to decide?",
     "hostSubtitle": "Add the topics to decide together, then start the ideas.",
-    "guestSubtitle": "{host} is preparing the topics. What comes next will show up here automatically.",
+    "guestSubtitle": "{host} is preparing the topics, and you can suggest some. What comes next will show up here automatically.",
+    "suggestTitle": "Suggest a topic to {host}",
+    "suggestHint": "Your suggestion stays anonymous: {host} decides whether to add it.",
+    "suggestSubmit": "Suggest",
+    "mySuggestions": "Your suggestions",
+    "suggestionPending": "Waiting",
+    "suggestionWithdraw": "Withdraw",
+    "suggestionsTitle": "Suggested topics",
+    "suggestionsHint": "Add them to the list or set them aside. Nobody knows who suggested what.",
+    "suggestionAccept": "Add",
+    "suggestionDismiss": "Set aside",
     "empty": "No topics yet.",
     "add": "Add the topic",
     "titleLabel": "Topic",
@@ -345,7 +355,10 @@
     "invalidOptions": "A list needs between 2 and 10 options, all different.",
     "choiceClosed": "This topic is a list: we vote on the options provided.",
     "tooManyRequests": "You're going a bit fast. Wait a moment, then try again.",
-    "hostCannotLeave": "Hand over hosting to someone else before leaving the session."
+    "hostCannotLeave": "Hand over hosting to someone else before leaving the session.",
+    "tooManySuggestions": "You already have several suggestions waiting: wait until some are handled.",
+    "duplicateTheme": "This topic is already in the list or already suggested.",
+    "suggestionNotFound": "This suggestion has already been handled."
   },
   "theme": {
     "label": "Theme",

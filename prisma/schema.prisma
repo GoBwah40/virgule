@@ -43,6 +43,7 @@ model Room {
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]
+  themeSuggestions ThemeSuggestion[]
 
   @@index([expiresAt])
 }
@@ -58,6 +59,7 @@ model Participant {
   createdAt DateTime @default(now())
   ideas     Idea[]
   votes     Vote[]
+  themeSuggestions ThemeSuggestion[]
 
   @@unique([roomId, pseudo])
 }
@@ -93,6 +95,22 @@ model Theme {
   ideas       Idea[]
 
   @@index([roomId, position])
+}
+
+/// Topic suggested by a participant during the THEMES phase, waiting for the host to add
+/// it (it then becomes a Theme) or dismiss it.
+model ThemeSuggestion {
+  id          String      @id @default(cuid())
+  roomId      String
+  room        Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  /// Never exposed to the host or the others: only used to show people their own suggestions.
+  authorId    String
+  author      Participant @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  createdAt   DateTime    @default(now())
+
+  @@index([roomId])
 }
 
 model Idea {

@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.8.0 — 2026-10-05
+
+- While the person hosting prepares the topics, everyone can suggest some: they choose whether to add them.
+
 ## 0.7.0 — 2026-10-05
 
 - "List" topics can ask for a single answer per person, for a yes or no question for example.
