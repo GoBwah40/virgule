@@ -6,6 +6,7 @@ import { useOptimistic, useState } from "react";
 
 import { AmountField } from "@/components/amount-field";
 import { ConfirmButton } from "@/components/confirm-button";
+import { CountBadge } from "@/components/count-badge";
 import { DateField } from "@/components/date-field";
 import { FormField } from "@/components/form-field";
 import { IconBadge } from "@/components/icon-badge";
@@ -39,14 +40,28 @@ export function ThemeIdeas({
 }) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");
+  // Only the ideas you can vote on count (not your own when self-voting is off).
+  const votable = theme.ideas.filter((idea) => idea.canVote);
+  const voted = votable.filter((idea) => idea.myVote !== null).length;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-heading text-xl font-bold">{theme.title}</CardTitle>
         {theme.description && <CardDescription>{theme.description}</CardDescription>}
-        {theme.kind !== "TEXT" && (
-          <IconBadge className="mt-1" icon={THEME_KIND_ICONS[theme.kind]} label={tThemes(`kinds.${theme.kind}`)} />
+        {(theme.kind !== "TEXT" || theme.ideas.length > 0) && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {theme.kind !== "TEXT" && (
+              <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={tThemes(`kinds.${theme.kind}`)} />
+            )}
+            {theme.ideas.length > 0 && <CountBadge label={t("ideaCount", { count: theme.ideas.length })} />}
+            {votable.length > 0 && (
+              <CountBadge
+                label={t("votedCount", { done: voted, total: votable.length })}
+                tone={voted === votable.length ? "complete" : "progress"}
+              />
+            )}
+          </div>
         )}
       </CardHeader>
       <CardContent>

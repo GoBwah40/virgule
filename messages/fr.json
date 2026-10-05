@@ -199,6 +199,8 @@
     "timerStop": "Arrêter le minuteur",
     "empty": "Pas encore d'idée ici. Qui commence ?",
     "listLabel": "Idées pour {title}",
+    "ideaCount": "{count, plural, one {# idée} other {# idées}}",
+    "votedCount": "{done}/{total} {done, plural, one {votée} other {votées}}",
     "placeholder": "Ton idée…",
     "date": "Date",
     "dateFrom": "Du",

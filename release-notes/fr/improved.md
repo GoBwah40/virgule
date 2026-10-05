@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.17 — 2026-10-05
+
+- Chaque sujet affiche son nombre d'idées et combien tu en as votées.
+
 ## 0.6.16 — 2026-10-05
 
 - Les longues listes d'idées défilent à l'intérieur de leur sujet : la page reste courte et les autres sujets restent à portée.

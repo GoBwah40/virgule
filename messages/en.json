@@ -199,6 +199,8 @@
     "timerStop": "Stop the timer",
     "empty": "No ideas here yet. Who goes first?",
     "listLabel": "Ideas for {title}",
+    "ideaCount": "{count, plural, one {# idea} other {# ideas}}",
+    "votedCount": "{done}/{total} voted",
     "placeholder": "Your idea…",
     "date": "Date",
     "dateFrom": "From",
