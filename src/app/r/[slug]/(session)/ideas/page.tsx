@@ -5,6 +5,7 @@ import { Countdown } from "@/components/countdown";
 import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
+import { ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { BackToThemesButton, FinishVotingButton, IdeasBoard, TimerControls } from "@/components/phases/voting-board";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
@@ -36,61 +37,65 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
 
   return (
     <PhaseTransition>
-      <PageHeader
-        title={t("title")}
-        subtitle={
-          room.tiebreak
-            ? t("tiebreakSubtitle", { round: room.round })
-            : room.round > 1
-              ? t("roundSubtitle", { round: room.round })
-              : t("subtitle")
-        }
-        actions={
-          me.isHost && (
+      <ViewProvider initialView={parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value)}>
+        <PageHeader
+          title={t("title")}
+          subtitle={
+            room.tiebreak
+              ? t("tiebreakSubtitle", { round: room.round })
+              : room.round > 1
+                ? t("roundSubtitle", { round: room.round })
+                : t("subtitle")
+          }
+          actions={
             <>
-              <FinishVotingButton slug={slug} />
-              <BackToThemesButton slug={slug} />
+              {me.isHost && (
+                <>
+                  <FinishVotingButton slug={slug} />
+                  <BackToThemesButton slug={slug} />
+                </>
+              )}
+              <ViewChoiceSwitch />
             </>
-          )
-        }
-      />
-      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-        {room.phaseEndsAt && (
-          <div className="flex flex-wrap items-center gap-2">
-            <Countdown
-              endsAt={room.phaseEndsAt.toISOString()}
-              labels={{ running: t("timerLabel"), expired: t("timerExpired") }}
+          }
+        />
+        <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+          {room.phaseEndsAt && (
+            <div className="flex flex-wrap items-center gap-2">
+              <Countdown
+                endsAt={room.phaseEndsAt.toISOString()}
+                labels={{ running: t("timerLabel"), expired: t("timerExpired") }}
+              />
+              {me.isHost && <TimerControls slug={slug} />}
+            </div>
+          )}
+          {progress && progress.total > 0 && (
+            <ProgressMeter
+              value={progress.done}
+              max={progress.total}
+              label={t("voteProgress", { done: progress.done, total: progress.total })}
+              completeLabel={t("voteProgressComplete")}
+              ariaLabel={t("voteProgressLabel")}
             />
-            {me.isHost && <TimerControls slug={slug} />}
-          </div>
-        )}
-        {progress && progress.total > 0 && (
-          <ProgressMeter
-            value={progress.done}
-            max={progress.total}
-            label={t("voteProgress", { done: progress.done, total: progress.total })}
-            completeLabel={t("voteProgressComplete")}
-            ariaLabel={t("voteProgressLabel")}
-          />
-        )}
-        {/* Gentle nudge: everyone sees what they have left, without knowing anything about the others. */}
-        {units.length > 0 && (
-          <ProgressMeter
-            value={voted}
-            max={units.length}
-            label={t("myVotesLeft", { count: units.length - voted })}
-            completeLabel={t("myVotesComplete")}
-            ariaLabel={t("myVotesLabel")}
-          />
-        )}
-      </div>
-      <IdeasBoard
-        slug={slug}
-        themes={themes}
-        allowNewIdeas={!room.tiebreak}
-        hostName={hostName(page.participants)}
-        initialView={parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value)}
-      />
+          )}
+          {/* Gentle nudge: everyone sees what they have left, without knowing anything about the others. */}
+          {units.length > 0 && (
+            <ProgressMeter
+              value={voted}
+              max={units.length}
+              label={t("myVotesLeft", { count: units.length - voted })}
+              completeLabel={t("myVotesComplete")}
+              ariaLabel={t("myVotesLabel")}
+            />
+          )}
+        </div>
+        <IdeasBoard
+          slug={slug}
+          themes={themes}
+          allowNewIdeas={!room.tiebreak}
+          hostName={hostName(page.participants)}
+        />
+      </ViewProvider>
     </PhaseTransition>
   );
 }
