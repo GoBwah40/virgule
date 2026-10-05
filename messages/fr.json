@@ -198,6 +198,7 @@
     "timerExtend": "+{count} min",
     "timerStop": "Arrêter le minuteur",
     "empty": "Pas encore d'idée ici. Qui commence ?",
+    "listLabel": "Idées pour {title}",
     "placeholder": "Ton idée…",
     "date": "Date",
     "dateFrom": "Du",

@@ -198,6 +198,7 @@
     "timerExtend": "+{count} min",
     "timerStop": "Stop the timer",
     "empty": "No ideas here yet. Who goes first?",
+    "listLabel": "Ideas for {title}",
     "placeholder": "Your idea…",
     "date": "Date",
     "dateFrom": "From",

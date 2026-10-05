@@ -11,6 +11,7 @@ import { FormField } from "@/components/form-field";
 import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
 import { MapLink } from "@/components/map-link";
+import { ScrollableList } from "@/components/scrollable-list";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { VoteButtons } from "@/components/vote-buttons";
 import { Badge } from "@/components/ui/badge";
@@ -52,11 +53,11 @@ export function ThemeIdeas({
         {theme.ideas.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         ) : (
-          <ul className="space-y-2">
+          <ScrollableList label={t("listLabel", { title: theme.title })}>
             {theme.ideas.map((idea) => (
               <IdeaItem key={idea.id} slug={slug} idea={idea} />
             ))}
-          </ul>
+          </ScrollableList>
         )}
       </CardContent>
       {/* Tiebreak round: we vote again on the tied ideas, with no new ideas.
