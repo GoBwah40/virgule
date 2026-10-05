@@ -30,7 +30,10 @@ type SeatMenu = {
 
 type Props = {
   seats: Seat[];
-  /** Total number of seats (an airplane row: 6 seats, aisle between C and D). */
+  /**
+   * Total number of seats, up to 12. Laid out like airplane rows of at most 6 seats, with the
+   * aisle in the middle: 8 seats make 2 rows of 4, 12 make 2 rows of 6.
+   */
   capacity: number;
   labels: { free: string; you: string; host: string; row: string };
   /** Action on a free seat, e.g. copying the invite link. */
@@ -40,7 +43,8 @@ type Props = {
   className?: string;
 };
 
-const LETTERS = "ABCDEFGHIJ";
+const LETTERS = "ABCDEFGHIJKL";
+const MAX_PER_ROW = 6;
 
 /** Seat button or tooltip trigger: a touch area of at least 44 × 44 px around the seat. The
     small seats (36 × 40) sit side by side in theirs, which makes the gap between them. */
@@ -53,11 +57,18 @@ const FOCUS_RING = "group-focus-visible/seat:ring-3 group-focus-visible/seat:rin
  * Printed, only the taken seats remain: a free seat means nothing on paper.
  */
 export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size = "sm", className }: Props) {
-  const aisle = Math.ceil(capacity / 2);
+  const perRow = capacity <= MAX_PER_ROW ? capacity : Math.ceil(capacity / Math.ceil(capacity / MAX_PER_ROW));
+  const aisle = Math.ceil(perRow / 2);
   const box = size === "md" ? "h-12 w-11 text-base" : "h-10 w-9 text-sm";
 
   return (
-    <ul aria-label={labels.row} className={cn("flex items-end", size === "md" && "gap-1.5", className)}>
+    <ul
+      aria-label={labels.row}
+      // Small seats touch through their 44 px areas (no gap); the row gap leaves room for the
+      // host's crown on a second row.
+      className={cn("grid w-fit items-end", size === "md" ? "gap-x-1.5 gap-y-3" : "gap-y-2", className)}
+      style={{ gridTemplateColumns: `repeat(${perRow}, auto)` }}
+    >
       {Array.from({ length: capacity }, (_, i) => {
         const seat = seats[i];
         const letter = LETTERS[i];
@@ -93,7 +104,7 @@ export function SeatRow({ seats, capacity, labels, onFreeSeatClick, menu, size =
           <li
             key={seat?.id ?? `free-${letter}`}
             // Small seats sit 2 px inside their touch area: same gap to the letter and crown.
-            className={cn("relative grid justify-items-center", size === "md" && "gap-0.5", i === aisle && "ml-2.5", !seat && "print:hidden")}
+            className={cn("relative grid justify-items-center", size === "md" && "gap-0.5", i % perRow === aisle && "ml-2.5", !seat && "print:hidden")}
           >
             {seat?.isHost && (
               // Crown sitting on the seat: no row reserved above each seat.

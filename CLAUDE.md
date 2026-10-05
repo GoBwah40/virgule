@@ -2,7 +2,7 @@
 
 # Virgule — guide for Claude
 
-Brainstorming and planning app for small groups (6 participants max per room, no account). How it works and its architecture are described in README.md, to read first.
+Brainstorming and planning app for small groups (up to 12 participants per room, 6 by default, no account). How it works and its architecture are described in README.md, to read first.
 
 ## Commands
 

@@ -8,12 +8,12 @@ import { LeaveRoomButton } from "@/components/room/leave-room-button";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
 import type { Phase } from "@/generated/prisma/enums";
-import { canRemoveParticipants, MAX_PARTICIPANTS } from "@/lib/config";
+import { canRemoveParticipants } from "@/lib/config";
 
 const STEPS: Phase[] = ["THEMES", "IDEAS", "RECAP"];
 
 type Props = {
-  room: { slug: string; name: string; phase: Phase; round: number; expiresAt: Date };
+  room: { slug: string; name: string; phase: Phase; round: number; expiresAt: Date; capacity: number };
   participants: { id: string; pseudo: string; isHost: boolean }[];
   meId: string;
 };
@@ -44,7 +44,7 @@ export async function RoomHeader({ room, participants, meId }: Props) {
             <InviteDialog
               invitePath={invitePath}
               roomName={room.name}
-              freeSeats={Math.max(0, MAX_PARTICIPANTS - participants.length)}
+              freeSeats={Math.max(0, room.capacity - participants.length)}
             />
             <CopyButton
               size="icon"
@@ -59,13 +59,14 @@ export async function RoomHeader({ room, participants, meId }: Props) {
           </div>
           <RoomSeats
             slug={room.slug}
+            capacity={room.capacity}
             canManage={isHost && room.phase !== "CLOSED"}
             canRemove={canRemoveParticipants(room)}
             className="order-last col-span-2 sm:order-none"
             invitePath={invitePath}
             seats={participants.map((p) => ({ id: p.id, name: p.pseudo, isHost: p.isHost, isMe: p.id === meId }))}
             labels={{
-              row: t("seats.row", { count: participants.length, max: MAX_PARTICIPANTS }),
+              row: t("seats.row", { count: participants.length, max: room.capacity }),
               free: t("seats.free"),
               you: t("you"),
               host: t("host"),

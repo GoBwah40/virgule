@@ -44,7 +44,7 @@ test("two people taking the last seat at once: one gets it, the other is told", 
   await expect.poll(async () => (await participantSecrets(link)).length).toBe(6);
   const joined = [];
   for (const p of [noe, zoe]) {
-    await expect(isIn(p).or(p.getByText("All 6 seats are taken."))).toBeVisible({ timeout: LIVE_TIMEOUT });
+    await expect(isIn(p).or(p.getByText("All the seats are taken."))).toBeVisible({ timeout: LIVE_TIMEOUT });
     joined.push(await isIn(p).isVisible());
   }
   expect(joined.filter(Boolean)).toHaveLength(1);

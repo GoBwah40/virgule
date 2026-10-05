@@ -40,6 +40,8 @@ model Room {
   phaseEndsAt      DateTime?
   /// Tiebreak round: only the ideas tied at the top are voted on again, with no new ideas.
   tiebreak         Boolean       @default(false)
+  /// Number of seats chosen by the host (null = the default size, see ROOM_SIZES in config.ts).
+  maxParticipants  Int?
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]

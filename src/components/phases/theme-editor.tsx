@@ -18,8 +18,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, startIdeasPhase, updateTheme } from "@/lib/actions";
-import { IDEAS_TIMER_OPTIONS, LIMITS } from "@/lib/config";
+import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
+import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 
 type Theme = {
@@ -58,11 +58,15 @@ export function ThemeEditor({
   themes,
   allowSelfVote,
   ideasTimerMinutes,
+  capacity,
+  participantCount,
 }: {
   slug: string;
   themes: Theme[];
   allowSelfVote: boolean;
   ideasTimerMinutes: number | null;
+  capacity: number;
+  participantCount: number;
 }) {
   const t = useTranslations("themes");
   const [pending, run] = useAction();
@@ -133,6 +137,19 @@ export function ThemeEditor({
               value={ideasTimerMinutes ? String(ideasTimerMinutes) : "off"}
               disabled={pending}
               onChange={(value) => run(() => setIdeasTimer(slug, value === "off" ? null : Number(value)))}
+            />
+            <SegmentedControl
+              name="room-size"
+              label={t("sizeLabel")}
+              hint={t("sizeHint", { count: participantCount })}
+              // Sizes below the people already seated are not offered.
+              options={ROOM_SIZES.filter((n) => n >= participantCount).map((n) => ({
+                value: String(n),
+                label: t("sizeOption", { count: n }),
+              }))}
+              value={String(capacity)}
+              disabled={pending}
+              onChange={(value) => run(() => setRoomSize(slug, Number(value)))}
             />
           </CardContent>
         </Card>

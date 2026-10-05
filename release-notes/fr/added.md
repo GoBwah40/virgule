@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.9.0 — 2026-10-05
+
+- À la création d'une séance, tu choisis la taille du groupe : 4, 6, 8 ou 12 personnes, et tu peux la changer pendant la préparation des sujets.
+
 ## 0.8.0 — 2026-10-05
 
 - Pendant que la personne qui anime prépare les sujets, tout le monde peut en proposer : elle choisit de les ajouter ou non.

@@ -50,9 +50,17 @@ export async function fillAndSubmit(fields: [Locator, string][], submit: Locator
   await submit.click();
 }
 
-/** Creates a session from the home page and returns its share link. */
-export async function createRoom(page: Page, { name, host }: { name: string; host: string }) {
+/** Creates a session from the home page (default size unless `size` is given) and returns its share link. */
+export async function createRoom(page: Page, { name, host, size }: { name: string; host: string; size?: number }) {
   await page.goto("/");
+  if (size) {
+    const option = page.getByRole("radio", { name: `${size} people` });
+    // The radio is visually hidden inside its pill: clicking the pill picks it.
+    await expect(async () => {
+      await page.getByText(`${size} people`, { exact: true }).click();
+      await expect(option).toBeChecked({ timeout: 1000 });
+    }).toPass();
+  }
   await fillAndSubmit(
     [
       [page.getByLabel("Session name"), name],

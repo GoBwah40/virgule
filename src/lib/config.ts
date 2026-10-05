@@ -1,6 +1,15 @@
 import type { Phase } from "@/generated/prisma/enums";
 
-export const MAX_PARTICIPANTS = 6;
+/**
+ * Room sizes the host can choose from. At least 3, or anonymous votes become guessable; at
+ * most 12, beyond which voting on every idea gets too long and seats no longer fit the header.
+ */
+export const ROOM_SIZES: readonly number[] = [4, 6, 8, 12];
+export const DEFAULT_ROOM_SIZE = 6;
+/** Largest room size (home page: "up to 12 participants"). */
+export const MAX_PARTICIPANTS = Math.max(...ROOM_SIZES);
+/** Seats in a room: the size chosen by the host, or the default one for older rooms. */
+export const roomCapacity = (room: { maxParticipants: number | null }) => room.maxParticipants ?? DEFAULT_ROOM_SIZE;
 export const ROOM_TTL_DAYS = 7;
 export const MAX_THEMES = 20;
 /** Topic suggestions a participant can have waiting for the host at the same time. */

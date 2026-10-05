@@ -12,10 +12,11 @@ import {
   canRemoveParticipants,
   EXTEND_TIMER_MINUTES,
   IDEAS_TIMER_OPTIONS,
+  DEFAULT_ROOM_SIZE,
   LIMITS,
-  MAX_PARTICIPANTS,
   MAX_PENDING_SUGGESTIONS,
   MAX_THEMES,
+  ROOM_SIZES,
   ROOM_TTL_DAYS,
 } from "@/lib/config";
 import { db } from "@/lib/db";
@@ -58,6 +59,7 @@ type ActionError =
   | "tooManySuggestions"
   | "duplicateTheme"
   | "suggestionNotFound"
+  | "sizeBelowParticipants"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -122,9 +124,14 @@ async function run(slug: string, fn: () => Promise<void>, goTo?: Phase): Promise
 
 // ─── Creation / access ─────────────────────────────────────────────────────
 
-const createSchema = z.object({ name: text(LIMITS.roomName), pseudo: text(LIMITS.pseudo) });
+const roomSizeSchema = z.number().refine((size) => ROOM_SIZES.includes(size));
+const createSchema = z.object({
+  name: text(LIMITS.roomName),
+  pseudo: text(LIMITS.pseudo),
+  size: roomSizeSchema.default(DEFAULT_ROOM_SIZE),
+});
 
-export async function createRoom(input: { name: string; pseudo: string }): Promise<ActionResult> {
+export async function createRoom(input: { name: string; pseudo: string; size?: number }): Promise<ActionResult> {
   const parsed = createSchema.safeParse(input);
   if (!parsed.success) return fail("invalidInput");
   if (await isRateLimited("createRoom")) return fail("tooManyRequests");
@@ -135,6 +142,7 @@ export async function createRoom(input: { name: string; pseudo: string }): Promi
     data: {
       slug,
       name: parsed.data.name,
+      maxParticipants: parsed.data.size,
       expiresAt: new Date(Date.now() + ROOM_TTL_DAYS * 24 * 60 * 60 * 1000),
       participants: { create: { pseudo: parsed.data.pseudo, token, isHost: true } },
     },
@@ -154,7 +162,7 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
   if (ctx.status === "expired") return fail("roomExpired");
   if (ctx.me) redirect(phasePath(slug, ctx.room.phase));
   if (ctx.room.phase === "CLOSED") return fail("roomClosed");
-  if (ctx.participants.length >= MAX_PARTICIPANTS) return fail("roomFull");
+  if (ctx.participants.length >= ctx.room.capacity) return fail("roomFull");
   if (await isRateLimited("joinRoom")) return fail("tooManyRequests");
   if (ctx.participants.some((p) => p.pseudo.toLowerCase() === pseudo.toLowerCase())) {
     return fail("pseudoTaken");
@@ -166,7 +174,7 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
       await tx.participant.create({ data: { roomId: ctx.room.id, pseudo, token } });
       // Recount after insert: guards against two people taking the last seat at the same time.
       const count = await tx.participant.count({ where: { roomId: ctx.room.id } });
-      if (count > MAX_PARTICIPANTS) throw new ActionFailure("roomFull");
+      if (count > ctx.room.capacity) throw new ActionFailure("roomFull");
     });
   } catch (error) {
     if (error instanceof ActionFailure) return fail(error.code);
@@ -389,6 +397,17 @@ export async function deleteThemeSuggestion(slug: string, suggestionId: string) 
     if (!suggestion) throw new ActionFailure("suggestionNotFound");
     if (!me.isHost && suggestion.authorId !== me.id) throw new ActionFailure("notAuthor");
     await db.themeSuggestion.delete({ where: { id: suggestion.id } });
+  });
+}
+
+/** Room size, chosen at creation; the host can change it while preparing the topics. */
+export async function setRoomSize(slug: string, size: number) {
+  if (!roomSizeSchema.safeParse(size).success) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "THEMES" });
+    const count = await db.participant.count({ where: { roomId: room.id } });
+    if (size < count) throw new ActionFailure("sizeBelowParticipants");
+    await db.room.update({ where: { id: room.id }, data: { maxParticipants: size } });
   });
 }
 
