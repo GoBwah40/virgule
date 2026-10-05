@@ -15,7 +15,6 @@ import { PresentationTopics } from "@/components/presentation-topics";
 import { RoomExpired } from "@/components/room/room-expired";
 import { RoomLive } from "@/components/room/room-live";
 import type { Phase } from "@/generated/prisma/enums";
-import { MAX_PARTICIPANTS } from "@/lib/config";
 import { pusherClientConfig } from "@/lib/realtime/server";
 import { getPresentationView, getRoomContext, hostName } from "@/lib/room";
 import { getScreenToken } from "@/lib/session";
@@ -59,14 +58,14 @@ export default async function PresentPage({ params }: PageProps<"/r/[slug]/prese
 
   const host = hostName(participants);
   const invitePath = `/r/${slug}`;
-  const canJoin = participants.length < MAX_PARTICIPANTS && room.phase !== "CLOSED";
+  const canJoin = participants.length < room.capacity && room.phase !== "CLOSED";
   const lobby = view.step === "THEMES" && view.topics.length === 0;
 
   const seats = (
     <PresentationSeats
       seats={participants.map((p) => ({ id: p.id, name: p.pseudo }))}
-      capacity={MAX_PARTICIPANTS}
-      label={canJoin ? t("seats", { count: participants.length, max: MAX_PARTICIPANTS }) : t("full")}
+      capacity={room.capacity}
+      label={canJoin ? t("seats", { count: participants.length, max: room.capacity }) : t("full")}
     />
   );
   const join = (size: "lg" | "sm") => <PresentationJoin path={invitePath} label={t("join")} qrLabel={tRoom("qrLabel")} size={size} />;
