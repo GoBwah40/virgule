@@ -14,7 +14,7 @@ export function PresentationSeats({ seats, capacity, label, className }: Props) 
   return (
     <div className={cn("flex flex-wrap items-center gap-x-[1em] gap-y-2 stage-sm", className)}>
       <p className="text-muted-foreground">{label}</p>
-      <ul className="flex gap-[0.4em]">
+      <ul className="flex flex-wrap gap-[0.4em]">
         {Array.from({ length: capacity }, (_, i) => {
           const seat = seats[i];
           return seat ? (

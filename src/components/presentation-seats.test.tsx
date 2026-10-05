@@ -25,3 +25,11 @@ describe("PresentationSeats", () => {
     expect(screen.getAllByRole("listitem").map((seat) => seat.textContent)).toEqual(["Ccamille", "NNoah"]);
   });
 });
+
+describe("PresentationSeats, a large group", () => {
+  it("wraps its 12 seats rather than overflowing a narrow screen", () => {
+    renderUi(<PresentationSeats capacity={12} label="1 seat out of 12 taken" seats={[{ id: "1", name: "Camille" }]} />);
+    expect(screen.getAllByRole("listitem", { hidden: true })).toHaveLength(12);
+    expect(screen.getAllByRole("list", { hidden: true })[0]).toHaveClass("flex-wrap");
+  });
+});

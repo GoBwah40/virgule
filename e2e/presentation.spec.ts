@@ -8,6 +8,7 @@ import {
   LIVE_TIMEOUT,
   openPresentation,
   pairScreen,
+  pick,
   screenCode,
   typeScreenCode,
   seeRecap,
@@ -178,4 +179,20 @@ test("the host disconnects the TV: it goes back to pairing", async ({ page, open
   await expect(tv).not.toHaveURL(/\/r\//);
   await expect(tv.getByRole("heading", { name: "Show a session on this screen" })).toBeVisible();
   expect((await tv.request.get(`${link}/phase`)).status()).toBe(404);
+});
+
+test("the room screen counts the seats of the session's own size", async ({ page, openAsGuest }) => {
+  const link = await createRoom(page, { name: "Big family", host: "Sam", size: 12 });
+  const screen = await openPresentation(page);
+  await expect(screen.getByText("1 seat out of 12 taken")).toBeVisible();
+  // The row of seats sits next to its label, at the bottom of the screen.
+  await expect(screen.getByText("1 seat out of 12 taken").locator("..").locator("li")).toHaveCount(12);
+
+  // Down to 4 while preparing: the screen follows, and says when the room is full.
+  await pick(page, "4");
+  await expect(screen.getByText("1 seat out of 4 taken")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  for (const name of ["Lea", "Noah", "Ines"]) await join(await openAsGuest(link), name);
+  await expect(screen.getByText("All seats are taken")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  // Nobody else can join: the code to scan is gone.
+  await expect(screen.getByRole("img", { name: "QR code for the invite link" })).toHaveCount(0);
 });

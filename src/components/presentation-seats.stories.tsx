@@ -36,3 +36,6 @@ export const Full: Story = {
     seats: ["Camille", "Sasha", "Ines", "Noah", "Leo", "Mia"].map((name, i) => ({ id: String(i), name })),
   },
 };
+export const TwelveSeats: Story = {
+  args: { capacity: 12, label: "5 seats out of 12 taken", seats: ["Camille", "Sasha", "Ines", "Noah", "Leo"].map((name, i) => ({ id: String(i), name })) },
+};
