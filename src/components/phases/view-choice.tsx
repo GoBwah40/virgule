@@ -27,7 +27,8 @@ export function useView() {
 export function ViewChoiceSwitch({ boardLabel = "board" }: { boardLabel?: "board" | "oneByOne" }) {
   const t = useTranslations("view");
   const [view, choose] = useView();
-  return <ViewSwitch value={view} onChange={choose} labels={{ label: t("label"), list: t("list"), board: t(boardLabel) }} />;
+  // Pushed to the right of the header actions, apart from the step's buttons.
+  return <ViewSwitch className="ml-auto" value={view} onChange={choose} labels={{ label: t("label"), list: t("list"), board: t(boardLabel) }} />;
 }
 
 /** A step rendered both ways by the server, shown as each person picked. */
