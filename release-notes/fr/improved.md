@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.1 — 2026-10-05
+
+- Le choix entre liste et tableau se trouve dans l'en-tête de la page, sur la même ligne que les boutons de l'étape.
+
 ## 0.6.17 — 2026-10-05
 
 - Chaque sujet affiche son nombre d'idées et combien tu en as votées.

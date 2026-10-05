@@ -11,6 +11,7 @@ import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
 import { OptionListField } from "@/components/option-list-field";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
+import { useView } from "@/components/phases/view-choice";
 import { SegmentedControl } from "@/components/segmented-control";
 import { SettingSwitch } from "@/components/setting-switch";
 import { SuggestionChips } from "@/components/suggestion-chips";
@@ -19,14 +20,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ViewSwitch } from "@/components/view-switch";
 import { useAction } from "@/hooks/use-action";
-import { useViewPreference } from "@/hooks/use-view-preference";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { cn } from "@/lib/utils";
-import type { ViewPreference } from "@/lib/view-preference";
 
 type Theme = {
   id: string;
@@ -68,7 +66,6 @@ export function ThemeEditor({
   ideasTimerMinutes,
   capacity,
   participantCount,
-  initialView,
 }: {
   slug: string;
   themes: Theme[];
@@ -76,12 +73,10 @@ export function ThemeEditor({
   ideasTimerMinutes: number | null;
   capacity: number;
   participantCount: number;
-  initialView: ViewPreference;
 }) {
   const t = useTranslations("themes");
-  const tView = useTranslations("view");
   const [pending, run] = useAction();
-  const [view, choose] = useViewPreference(initialView);
+  const [view] = useView();
   // Back from the ideas phase: we resume rather than start.
   const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
@@ -102,10 +97,7 @@ export function ThemeEditor({
         {themes.length === 0 ? (
           <p className="text-muted-foreground">{t("empty")}</p>
         ) : (
-          <>
-            <ViewSwitch value={view} onChange={choose} labels={{ label: tView("label"), list: tView("list"), board: tView("board") }} />
-            {view === "board" ? <BoardColumns as="ul">{rows}</BoardColumns> : <ul className="space-y-2">{rows}</ul>}
-          </>
+          view === "board" ? <BoardColumns as="ul">{rows}</BoardColumns> : <ul className="space-y-2">{rows}</ul>
         )}
 
         <SuggestionChips

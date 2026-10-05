@@ -14,8 +14,13 @@ export function PageHeader({
         <h2 className="text-[28px] leading-tight font-extrabold tracking-tight">{title}</h2>
         {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
       </div>
-      {/* Mobile: full-width stacked actions, within thumb reach. */}
-      {actions && <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap [&>*]:w-full sm:[&>*]:w-auto">{actions}</div>}
+      {/* Mobile: full-width stacked actions, within thumb reach. Hidden while every action is
+          (the list/board switch alone, below tablets), so it leaves no gap. */}
+      {actions && (
+        <div className="hidden flex-col gap-2 has-[>:not(.hidden)]:flex sm:flex-row sm:flex-wrap sm:items-center md:flex [&>*]:w-full sm:[&>*]:w-auto">
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

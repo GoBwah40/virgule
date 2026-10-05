@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.1 — 2026-10-05
+
+- The list or board switch sits in the page header, on the same line as the step's buttons.
+
 ## 0.6.17 — 2026-10-05
 
 - Each topic shows how many ideas it has and how many of them you have voted on.

@@ -7,7 +7,7 @@ import { PageHeader } from "@/components/page-header";
 import { PhaseTransition } from "@/components/phase-transition";
 import { ExportMenu, RecapHostControls } from "@/components/phases/recap-controls";
 import { RecapRoundSpotlight, RecapRoundView } from "@/components/phases/recap-round";
-import { ViewChoice } from "@/components/phases/view-choice";
+import { ViewChoice, ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,61 +48,62 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
 
   return (
     <PhaseTransition>
-      <PageHeader
-        title={closed ? t("closedTitle") : t("title")}
-        subtitle={t("summary", { qualified: current.qualifiedCount, total: current.ideaCount })}
-        actions={
-          <>
-            {closed && (
-              // Session over: back to the home page to create another one.
-              <Button nativeButton={false} render={<Link href="/" />} className="print:hidden">
-                <Plus data-icon="inline-start" />
-                {t("newSession")}
-              </Button>
-            )}
-            <ExportMenu slug={slug} />
-          </>
-        }
-      />
+      <ViewProvider initialView={parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value)}>
+        <PageHeader
+          title={closed ? t("closedTitle") : t("title")}
+          subtitle={t("summary", { qualified: current.qualifiedCount, total: current.ideaCount })}
+          actions={
+            <>
+              {closed && (
+                // Session over: back to the home page to create another one.
+                <Button nativeButton={false} render={<Link href="/" />} className="print:hidden">
+                  <Plus data-icon="inline-start" />
+                  {t("newSession")}
+                </Button>
+              )}
+              <ExportMenu slug={slug} />
+              <ViewChoiceSwitch boardLabel="oneByOne" />
+            </>
+          }
+        />
 
-      {closed && (
-        <Alert className="mb-6">
-          <AlertDescription>{t("closedBody")}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className={cn("grid gap-6", !closed && "lg:grid-cols-[1fr_300px]")}>
-        <div className="min-w-0">
-          {/* Printed, always the full list: "topic by topic" would print a single topic. */}
-          <ViewChoice
-            initialView={parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value)}
-            boardLabel="oneByOne"
-            list={byRound((round) => <RecapRoundView round={round} />)}
-            board={
-              <>
-                <div className="print:hidden">{byRound((round) => <RecapRoundSpotlight round={round} />)}</div>
-                <div className="hidden print:block">{byRound((round) => <RecapRoundView round={round} />)}</div>
-              </>
-            }
-          />
-        </div>
-
-        {!closed && (
-          <aside>
-            {me.isHost ? (
-              <RecapHostControls
-                slug={slug}
-                requireNetPositive={room.requireNetPositive}
-                nextRound={room.round + 1}
-                qualifiedCount={current.qualifiedCount}
-                tiedThemeCount={current.tiedThemeCount}
-              />
-            ) : (
-              <p className="text-muted-foreground">{t("waitingHost", { host: hostName(page.participants) })}</p>
-            )}
-          </aside>
+        {closed && (
+          <Alert className="mb-6">
+            <AlertDescription>{t("closedBody")}</AlertDescription>
+          </Alert>
         )}
-      </div>
+
+        <div className={cn("grid gap-6", !closed && "lg:grid-cols-[1fr_300px]")}>
+          <div className="min-w-0">
+            {/* Printed, always the full list: "topic by topic" would print a single topic. */}
+            <ViewChoice
+              list={byRound((round) => <RecapRoundView round={round} />)}
+              board={
+                <>
+                  <div className="print:hidden">{byRound((round) => <RecapRoundSpotlight round={round} />)}</div>
+                  <div className="hidden print:block">{byRound((round) => <RecapRoundView round={round} />)}</div>
+                </>
+              }
+            />
+          </div>
+
+          {!closed && (
+            <aside>
+              {me.isHost ? (
+                <RecapHostControls
+                  slug={slug}
+                  requireNetPositive={room.requireNetPositive}
+                  nextRound={room.round + 1}
+                  qualifiedCount={current.qualifiedCount}
+                  tiedThemeCount={current.tiedThemeCount}
+                />
+              ) : (
+                <p className="text-muted-foreground">{t("waitingHost", { host: hostName(page.participants) })}</p>
+              )}
+            </aside>
+          )}
+        </div>
+      </ViewProvider>
     </PhaseTransition>
   );
 }
