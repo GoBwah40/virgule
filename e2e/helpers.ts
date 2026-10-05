@@ -20,6 +20,16 @@ async function write(sql: string, args: string[]) {
   await db.execute({ sql, args });
 }
 
+/** What must never reach a browser: every participant's secret token and id in the session. */
+export async function participantSecrets(link: string) {
+  await ready;
+  const { rows } = await db.execute({
+    sql: 'SELECT p.token, p.id, p.pseudo FROM "Participant" p JOIN "Room" r ON r.id = p."roomId" WHERE r.slug = ?',
+    args: [slugOf(link)],
+  });
+  return rows.map((row) => ({ token: String(row.token), id: String(row.id), pseudo: String(row.pseudo) }));
+}
+
 /** Sessions with this name in the test database. */
 export async function countRooms(name: string) {
   await ready;
