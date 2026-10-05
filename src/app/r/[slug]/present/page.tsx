@@ -18,6 +18,7 @@ import type { Phase } from "@/generated/prisma/enums";
 import { MAX_PARTICIPANTS } from "@/lib/config";
 import { pusherClientConfig } from "@/lib/realtime/server";
 import { getPresentationView, getRoomContext, hostName } from "@/lib/room";
+import { getScreenToken } from "@/lib/session";
 
 const STEPS: Phase[] = ["THEMES", "IDEAS", "RECAP"];
 /** Ideas listed under the kept one in the recap: more would not be readable from across the room. */
@@ -29,8 +30,8 @@ export async function generateMetadata({ params }: PageProps<"/r/[slug]/present"
 }
 
 /**
- * Room screen (TV, projector), opened by the host on their own device: no extra link, no seat
- * taken. A view of its own, built for the group, never the host's page: that one marks the host's
+ * Room screen (TV, projector), opened by the host on their own device or on a screen paired with a
+ * code from their phone: no extra link, no seat taken. A view of its own, built for the group, never the host's page: that one marks the host's
  * ideas. It follows the session like the phones do, and changes step by itself.
  */
 export default async function PresentPage({ params }: PageProps<"/r/[slug]/present">) {
@@ -38,8 +39,12 @@ export default async function PresentPage({ params }: PageProps<"/r/[slug]/prese
   const ctx = await getRoomContext(slug);
   if (ctx.status === "not_found") notFound();
   if (ctx.status === "expired") return <RoomExpired />;
-  // Host only: anyone else goes back to the session (or to the join form).
-  if (!ctx.me?.isHost) redirect(`/r/${slug}`);
+  if (!ctx.me?.isHost && !ctx.isScreen) {
+    // A screen the host has disconnected (or replaced): back to pairing, not to the join form.
+    if (!ctx.me && (await getScreenToken(slug))) redirect("/present");
+    // Anyone else goes back to the session (or to the join form).
+    redirect(`/r/${slug}`);
+  }
 
   const { room, participants } = ctx;
   const view = await getPresentationView(room);

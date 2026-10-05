@@ -331,7 +331,26 @@
     "noneKept": "No idea kept on this topic",
     "votes": "{up} for, {down} against",
     "more": "{count, plural, one {+ # more idea} other {+ # more ideas}}",
-    "anonymous": "Nobody knows who voted what"
+    "anonymous": "Nobody knows who voted what",
+    "dialogTitle": "Show on a big screen",
+    "dialogDescription": "For a group in the same room: a TV or a projector shows the session, never who suggested what. It takes no seat.",
+    "step1": "On the big screen, open this address:",
+    "step2": "Type this code there:",
+    "codeLabel": "Pairing code",
+    "codeValid": "Code valid for",
+    "codeExpired": "Code expired",
+    "newCode": "New code",
+    "thisDevice": "Open on this device instead",
+    "paired": "A screen is showing the session",
+    "pairedHint": "It follows each step by itself. You keep the controls here.",
+    "unpair": "Disconnect the screen",
+    "another": "Use another screen"
+  },
+  "pair": {
+    "title": "Show a session on this screen",
+    "description": "On the phone of the person hosting, “Show on a big screen” gives a code. Type it here.",
+    "code": "Code",
+    "submit": "Show the session"
   },
   "export": {
     "button": "Export",
@@ -392,7 +411,8 @@
     "tooManySuggestions": "You already have several suggestions waiting: wait until some are handled.",
     "duplicateTheme": "This topic is already in the list or already suggested.",
     "suggestionNotFound": "This suggestion has already been handled.",
-    "voteLimitReached": "You've used all your “for” votes in this topic: remove one to vote for another idea."
+    "voteLimitReached": "You've used all your “for” votes in this topic: remove one to vote for another idea.",
+    "invalidScreenCode": "This code doesn't work: it may have expired. Ask for a new one."
   },
   "theme": {
     "label": "Theme",

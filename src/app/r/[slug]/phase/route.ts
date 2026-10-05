@@ -7,6 +7,7 @@ import { getRoomContext } from "@/lib/room";
  */
 export async function GET(_request: Request, { params }: RouteContext<"/r/[slug]/phase">) {
   const ctx = await getRoomContext((await params).slug);
-  if (ctx.status !== "ok" || !ctx.me) return new Response(null, { status: 404 });
+  // Participants, and the room screen paired by the host.
+  if (ctx.status !== "ok" || (!ctx.me && !ctx.isScreen)) return new Response(null, { status: 404 });
   return Response.json({ phase: ctx.room.phase }, { headers: { "Cache-Control": "no-store" } });
 }

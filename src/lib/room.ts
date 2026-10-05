@@ -11,7 +11,7 @@ import { phasePath } from "@/lib/phase-path";
 import { getIdeaFormat } from "@/lib/idea-format";
 import { describeIdea, readChoiceOptions, type ThemeKind } from "@/lib/idea-value";
 import { bestAmountOverlap, bestDateOverlap, type Overlap } from "@/lib/overview";
-import { getParticipantToken } from "@/lib/session";
+import { getParticipantToken, getScreenToken } from "@/lib/session";
 
 export type RoomContext =
   | { status: "not_found" }
@@ -32,10 +32,14 @@ export type RoomContext =
         tiebreak: boolean;
         /** Number of seats (size chosen by the host). */
         capacity: number;
+        /** A room screen is paired (its secret never leaves this module). */
+        screenPaired: boolean;
       };
       participants: { id: string; pseudo: string; isHost: boolean }[];
       /** Current participant (null if they have not joined the room yet). */
       me: { id: string; pseudo: string; isHost: boolean } | null;
+      /** This browser is the room screen paired by the host (not a participant). */
+      isScreen: boolean;
     };
 
 /** Room + current participant, cached for the duration of a request (layout + page). */
@@ -52,7 +56,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
   if (!room) return { status: "not_found" };
   if (room.expiresAt < new Date()) return { status: "expired" };
 
-  const token = await getParticipantToken(slug);
+  const [token, screenToken] = await Promise.all([getParticipantToken(slug), getScreenToken(slug)]);
   const meRow = token ? room.participants.find((p) => p.token === token) : undefined;
 
   return {
@@ -70,10 +74,12 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       phaseEndsAt: room.phaseEndsAt,
       tiebreak: room.tiebreak,
       capacity: roomCapacity(room),
+      screenPaired: room.screenToken !== null,
     },
     // Tokens never leave this module.
     participants: room.participants.map(({ id, pseudo, isHost }) => ({ id, pseudo, isHost })),
     me: meRow ? { id: meRow.id, pseudo: meRow.pseudo, isHost: meRow.isHost } : null,
+    isScreen: !!screenToken && screenToken === room.screenToken,
   };
 });
 
@@ -358,7 +364,7 @@ export async function loadPhasePage(slug: string, allowed: Phase[]) {
 }
 
 
-// ─── Presentation screen (host only, seen by the whole room) ────────────────
+// ─── Presentation screen (host or paired screen, seen by the whole room) ────
 
 type PresentationTopic = { id: string; title: string; description: string | null; kind: ThemeKind };
 

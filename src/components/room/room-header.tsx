@@ -1,5 +1,3 @@
-import { Presentation } from "lucide-react";
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 
 import { CopyButton } from "@/components/copy-button";
@@ -7,16 +5,16 @@ import { PhaseStepper } from "@/components/phase-stepper";
 import { Logo } from "@/components/logo";
 import { InviteDialog } from "@/components/room/invite-dialog";
 import { LeaveRoomButton } from "@/components/room/leave-room-button";
+import { PresentDialog } from "@/components/room/present-dialog";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
 import type { Phase } from "@/generated/prisma/enums";
 import { canRemoveParticipants } from "@/lib/config";
 
 const STEPS: Phase[] = ["THEMES", "IDEAS", "RECAP"];
 
 type Props = {
-  room: { slug: string; name: string; phase: Phase; round: number; expiresAt: Date; capacity: number };
+  room: { slug: string; name: string; phase: Phase; round: number; expiresAt: Date; capacity: number; screenPaired: boolean };
   participants: { id: string; pseudo: string; isHost: boolean }[];
   meId: string;
 };
@@ -25,7 +23,6 @@ export async function RoomHeader({ room, participants, meId }: Props) {
   const isHost = participants.some((p) => p.id === meId && p.isHost);
   const t = await getTranslations("room");
   const tApp = await getTranslations("app");
-  const tPresent = await getTranslations("present");
   const invitePath = `/r/${room.slug}`;
 
   return (
@@ -45,19 +42,7 @@ export async function RoomHeader({ room, participants, meId }: Props) {
         <div className="contents sm:col-start-2 sm:row-span-2 sm:row-start-1 sm:flex sm:flex-col sm:items-end sm:gap-4">
           {/* Invite and leave: screen-only, the printed recap keeps the name and the seats. */}
           <div className="flex shrink-0 gap-2 justify-self-end print:hidden">
-            {isHost && (
-              // Room screen in a tab of its own: the host keeps their controls in this one.
-              // A plain link (Base UI would give a rendered Button the "button" role).
-              <Link
-                href={`/r/${room.slug}/present`}
-                target="_blank"
-                aria-label={tPresent("open")}
-                title={tPresent("open")}
-                className={buttonVariants({ variant: "outline", size: "icon" })}
-              >
-                <Presentation />
-              </Link>
-            )}
+            {isHost && <PresentDialog slug={room.slug} screenPaired={room.screenPaired} />}
             <InviteDialog
               invitePath={invitePath}
               roomName={room.name}

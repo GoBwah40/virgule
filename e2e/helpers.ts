@@ -165,11 +165,38 @@ export async function voteAndSeeRecap(page: Page, guest: Page) {
   await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
 }
 
-/** Host: opens the room screen from the session header, in a tab of its own. */
+/** Host: opens the room screen on their own device, in a tab of its own (a second display). */
 export async function openPresentation(page: Page) {
-  const [screen] = await Promise.all([page.waitForEvent("popup"), page.getByRole("link", { name: "Show on a big screen" }).click()]);
+  await page.getByRole("button", { name: "Show on a big screen" }).click();
+  const [screen] = await Promise.all([page.waitForEvent("popup"), page.getByRole("link", { name: "Open on this device instead" }).click()]);
   await expect(screen).toHaveURL(/\/present$/, { timeout: REDIRECT_TIMEOUT });
+  await page.keyboard.press("Escape");
   return screen;
+}
+
+/** Host: the pairing code shown on their phone, from the "Show on a big screen" dialog. */
+export async function screenCode(page: Page) {
+  const dialog = page.getByRole("dialog");
+  if (!(await dialog.isVisible())) await page.getByRole("button", { name: "Show on a big screen" }).click();
+  const code = dialog.locator("p").filter({ hasText: /^Pairing code / });
+  await expect(code).toHaveText(/[2-9A-Z]{6}$/, { timeout: REDIRECT_TIMEOUT });
+  return (await code.textContent())!.slice(-6);
+}
+
+/** On a TV (a fresh browser, no seat): types the code on the pairing page. */
+export async function typeScreenCode(tv: Page, code: string) {
+  await fillAndSubmit([[tv.getByLabel("Code", { exact: true }), code]], tv.getByRole("button", { name: "Show the session" }));
+}
+
+/** Host pairs a TV with the code from their phone; returns the TV's page, on the room screen. */
+export async function pairScreen(page: Page, openAsGuest: OpenAsGuest) {
+  const code = await screenCode(page);
+  const tv = await openAsGuest(`${new URL(page.url()).origin}/present`);
+  await typeScreenCode(tv, code);
+  await expect(tv).toHaveURL(/\/r\/[^/]+\/present$/, { timeout: REDIRECT_TIMEOUT });
+  await expect(page.getByRole("dialog")).toContainText("A screen is showing the session", { timeout: LIVE_TIMEOUT });
+  await page.keyboard.press("Escape");
+  return tv;
 }
 
 /** Downloads an export from the recap menu ("Export" button, "Markdown" or "CSV" item). */
@@ -217,6 +244,18 @@ export async function setTopicKind(link: string, kind: string) {
 /** Ideas timer already run out (`createdAt` is in the past, in the same format as `phaseEndsAt`). */
 export async function elapseTimer(link: string) {
   await write("UPDATE Room SET phaseEndsAt = createdAt WHERE slug = ?", [slugOf(link)]);
+}
+
+/** The paired room screen's secret, as stored (null without a screen). */
+export async function screenSecret(link: string) {
+  await ready;
+  const { rows } = await db.execute({ sql: 'SELECT "screenToken" FROM "Room" WHERE slug = ?', args: [slugOf(link)] });
+  return rows[0].screenToken === null ? null : String(rows[0].screenToken);
+}
+
+/** Pairing code shown on the host's phone already run out (see `elapseTimer`). */
+export async function expireScreenCode(link: string) {
+  await write('UPDATE Room SET "screenCodeExpiresAt" = createdAt WHERE slug = ?', [slugOf(link)]);
 }
 
 export async function expireRoom(link: string) {

@@ -35,9 +35,15 @@ for (const [label, viewport, isMobile] of [
     test("long names and ideas never make the page scroll sideways", async ({ page, openAsGuest }) => {
       await page.goto("/");
       await expectNoSideScroll(page, "home");
+      await page.goto("/present");
+      await expectNoSideScroll(page, "screen pairing");
 
       const link = await createRoom(page, { name: NAME, host: PSEUDO });
       await expectNoSideScroll(page, "topics, empty");
+      await page.getByRole("button", { name: "Show on a big screen" }).click();
+      await expect(page.getByRole("dialog").locator("p").filter({ hasText: /^Pairing code / })).toHaveText(/[2-9A-Z]{6}$/);
+      await expectNoSideScroll(page, "big screen dialog");
+      await page.keyboard.press("Escape");
       const guest = await openAsGuest(link);
       await guest.setViewportSize(viewport);
       await expectNoSideScroll(guest, "join form");

@@ -32,6 +32,8 @@ const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
 async function expectAccessible(page: Page, screen: string) {
   // Elements fading in are measured mid-way (faint colours): wait until nothing moves.
   await expect.poll(() => page.evaluate(() => document.getAnimations().filter((a) => a.playState === "running").length)).toBe(0);
+  // Next.js streams the page title in: on a busy machine, axe could run before it lands.
+  await expect(page).toHaveTitle(/./);
   const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
   const found = violations.map((v) => `${v.id}: ${v.help} (${v.nodes.map((n) => n.target.join(" ")).join(", ")})`);
   expect(found, `accessibility violations on ${screen}`).toEqual([]);
@@ -63,6 +65,10 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expireRoom(link);
       await page.goto(link);
       await expectAccessible(page, "expired session");
+
+      await page.goto("/present");
+      await expect(page.getByRole("button", { name: "Show the session" })).toBeVisible();
+      await expectAccessible(page, "screen pairing");
 
       await page.goto("/");
       await choose(page, "Language", "Français");
@@ -150,6 +156,11 @@ for (const colorScheme of ["light", "dark"] as const) {
       await page.getByRole("button", { name: "Invite with a QR code" }).click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await expectAccessible(page, "invite dialog");
+      await page.keyboard.press("Escape");
+
+      await page.getByRole("button", { name: "Show on a big screen" }).click();
+      await expect(page.getByRole("dialog").locator("p").filter({ hasText: /^Pairing code / })).toHaveText(/[2-9A-Z]{6}$/);
+      await expectAccessible(page, "big screen dialog");
       await page.keyboard.press("Escape");
 
       await page.getByRole("button", { name: "Lea's seat: options" }).click();

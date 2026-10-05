@@ -2,10 +2,14 @@ import {
   addTopic,
   createRoom,
   expect,
+  expireScreenCode,
   idea,
   join,
   LIVE_TIMEOUT,
   openPresentation,
+  pairScreen,
+  screenCode,
+  typeScreenCode,
   seeRecap,
   setUpSession,
   startIdeas,
@@ -72,8 +76,8 @@ test("the host's room screen follows the session, step after step", async ({ pag
 
 test("only the host can open the room screen", async ({ page, openAsGuest }) => {
   const { link, guest } = await setUpSession(page, openAsGuest);
-  await expect(page.getByRole("link", { name: "Show on a big screen" })).toBeVisible();
-  await expect(guest.getByRole("link", { name: "Show on a big screen" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Show on a big screen" })).toBeVisible();
+  await expect(guest.getByRole("button", { name: "Show on a big screen" })).toHaveCount(0);
 
   // A guest typing the address goes back to their step.
   await guest.goto(`${link}/present`);
@@ -99,4 +103,79 @@ test("the room screen goes back to the session once hosting is handed over", asy
   await page.getByRole("alertdialog").getByRole("button", { name: "Hand over hosting" }).click();
   // Sam is now a guest: the screen leaves for his own page instead of showing the session.
   await expect(screen).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
+});
+
+// Pairing a TV with the host's phone: a one-time code shown on the phone, typed on the screen.
+// The screen takes no seat and is no participant; the host keeps the controls on their phone.
+
+test("the host pairs a TV with a code from their phone, without giving it a seat", async ({ page, openAsGuest }) => {
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  const code = await screenCode(page);
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toContainText(`${new URL(link).host}/present`);
+  await expect(dialog.getByRole("timer", { name: "Code valid for" })).toBeVisible();
+
+  const tv = await openAsGuest(`${new URL(link).origin}/present`);
+  await expect(tv.getByRole("heading", { level: 1, name: "Show a session on this screen" })).toBeVisible();
+  // Typed as people do: lowercase, with a space in the middle.
+  await typeScreenCode(tv, `${code.slice(0, 3).toLowerCase()} ${code.slice(3).toLowerCase()}`);
+  await expect(tv).toHaveURL(`${link}/present`);
+  await expect(tv.getByRole("heading", { name: "Dinner" })).toBeVisible();
+  await expect(tv.getByText("2 seats out of 6 taken")).toBeVisible();
+  await expect(dialog).toContainText("A screen is showing the session", { timeout: LIVE_TIMEOUT });
+
+  // The host drives from the phone, the TV follows.
+  await page.keyboard.press("Escape");
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(tv.getByRole("region", { name: "Dinner" })).toContainText("Pizza", { timeout: LIVE_TIMEOUT });
+  // The guests see no change: still two seats, the TV is nobody's.
+  await expect(guest.getByRole("list", { name: "2 participants out of 6" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+
+  // The TV is no participant: the session's own pages offer it to join, nothing more.
+  await tv.goto(link);
+  await expect(tv.getByRole("button", { name: "Join the session" })).toBeVisible();
+});
+
+test("a pairing code works once, and not once it has expired", async ({ page, openAsGuest }) => {
+  const { link } = await setUpSession(page, openAsGuest);
+  const pairing = `${new URL(link).origin}/present`;
+
+  const wrong = await openAsGuest(pairing);
+  await typeScreenCode(wrong, "ABC 234");
+  await expect(wrong.getByText("This code doesn't work: it may have expired. Ask for a new one.")).toBeVisible();
+  await expect(wrong).toHaveURL(pairing);
+
+  const code = await screenCode(page);
+  const first = await openAsGuest(pairing);
+  await typeScreenCode(first, code);
+  await expect(first).toHaveURL(`${link}/present`);
+  const second = await openAsGuest(pairing);
+  await typeScreenCode(second, code);
+  await expect(second.getByText(/^This code doesn't work/)).toBeVisible();
+  await expect(second).toHaveURL(pairing);
+
+  // A new code from the phone, left too long.
+  await page.getByRole("button", { name: "Disconnect the screen" }).click();
+  const late = await screenCode(page);
+  await expireScreenCode(link);
+  const third = await openAsGuest(pairing);
+  await typeScreenCode(third, late);
+  await expect(third.getByText(/^This code doesn't work/)).toBeVisible();
+});
+
+test("the host disconnects the TV: it goes back to pairing", async ({ page, openAsGuest }) => {
+  const { link } = await setUpSession(page, openAsGuest);
+  const tv = await pairScreen(page, openAsGuest);
+  expect((await tv.request.get(`${link}/phase`)).status()).toBe(200);
+
+  await page.getByRole("button", { name: "Show on a big screen" }).click();
+  await page.getByRole("button", { name: "Disconnect the screen" }).click();
+  // A new code at once, for another screen.
+  await expect(page.getByRole("dialog").locator("p").filter({ hasText: /^Pairing code / })).toHaveText(/[2-9A-Z]{6}$/);
+
+  await expect(tv).toHaveURL(/\/present$/, { timeout: LIVE_TIMEOUT });
+  await expect(tv).not.toHaveURL(/\/r\//);
+  await expect(tv.getByRole("heading", { name: "Show a session on this screen" })).toBeVisible();
+  expect((await tv.request.get(`${link}/phase`)).status()).toBe(404);
 });
