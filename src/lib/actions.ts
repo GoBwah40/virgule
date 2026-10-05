@@ -18,6 +18,7 @@ import {
   MAX_THEMES,
   ROOM_SIZES,
   ROOM_TTL_DAYS,
+  VOTE_LIMIT_OPTIONS,
 } from "@/lib/config";
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
@@ -60,6 +61,7 @@ type ActionError =
   | "duplicateTheme"
   | "suggestionNotFound"
   | "sizeBelowParticipants"
+  | "voteLimitReached"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -196,6 +198,11 @@ const themeSchema = z.object({
   options: z.array(z.string()).optional(),
   allowOtherIdeas: z.boolean().optional(),
   singleChoice: z.boolean().optional(),
+  maxVotes: z
+    .number()
+    .refine((n) => VOTE_LIMIT_OPTIONS.includes(n))
+    .nullable()
+    .optional(),
 });
 
 type ThemeInput = {
@@ -207,19 +214,24 @@ type ThemeInput = {
   allowOtherIdeas?: boolean;
   /** CHOICE topics: one option per person. */
   singleChoice?: boolean;
+  /** Maximum "for" votes per participant (null = no limit). */
+  maxVotes?: number | null;
 };
 
 /** Topic fields to save; options only exist for a list. */
 function themeFields(data: z.infer<typeof themeSchema>) {
-  const base = { title: data.title, description: data.description || null, kind: data.kind };
+  const base = { title: data.title, description: data.description || null, kind: data.kind, maxVotes: data.maxVotes ?? null };
   if (data.kind !== "CHOICE") return { ...base, options: null, allowOtherIdeas: false, singleChoice: false };
   const options = parseChoiceOptions(data.options);
   if (!options) throw new ActionFailure("invalidOptions");
+  const singleChoice = data.singleChoice ?? false;
   return {
     ...base,
     options: JSON.stringify(options),
     allowOtherIdeas: data.allowOtherIdeas ?? false,
-    singleChoice: data.singleChoice ?? false,
+    singleChoice,
+    // One answer per person is already a limit of one.
+    maxVotes: singleChoice ? null : base.maxVotes,
   };
 }
 
@@ -484,12 +496,22 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({
       where: { id: ideaId, roomId: room.id },
-      include: { theme: { select: { kind: true, singleChoice: true } } },
+      include: { theme: { select: { kind: true, singleChoice: true, maxVotes: true } } },
     });
     if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
     if (!room.allowSelfVote && idea.authorId === me.id && !idea.isOption) throw new ActionFailure("selfVoteForbidden");
     const single = idea.theme.kind === "CHOICE" && idea.theme.singleChoice;
     if (single && positive === false) throw new ActionFailure("invalidInput");
+    // Limited topic: a new "for" vote must fit in the participant's allowance for this round.
+    // A single-answer list replaces the previous pick instead.
+    if (positive === true && !single && idea.theme.maxVotes !== null) {
+      const mine = await db.vote.findMany({
+        where: { participantId: me.id, round: room.round, positive: true, idea: { themeId: idea.themeId } },
+        select: { ideaId: true, idea: { select: { createdRound: true, eliminatedRound: true } } },
+      });
+      const used = mine.filter((v) => v.ideaId !== ideaId && isActiveInRound(v.idea, room.round)).length;
+      if (used >= idea.theme.maxVotes) throw new ActionFailure("voteLimitReached");
+    }
 
     const where = { ideaId_participantId_round: { ideaId, participantId: me.id, round: room.round } };
     if (positive === null) {

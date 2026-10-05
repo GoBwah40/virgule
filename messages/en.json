@@ -157,6 +157,10 @@
     "singleChoice": "One answer per person",
     "singleChoiceHint": "Everyone picks a single option, as for a yes or no question.",
     "singleChoiceLocked": "Ideas have already been suggested: this setting can no longer change.",
+    "voteLimitLabel": "“For” votes per person",
+    "voteLimitNone": "No limit",
+    "voteLimitHint": "Helps the best ideas stand out when there are many: everyone gets the same number of “for” votes in this topic. “Against” votes stay unlimited.",
+    "voteLimitBadge": "{count, plural, one {# vote} other {# votes}} per person",
     "suggestionsLabel": "Topic ideas",
     "suggestions": {
       "goal": {
@@ -222,6 +226,8 @@
     "votedCount": "{done}/{total} voted",
     "singleChoiceHint": "One answer per person: pick the one you prefer.",
     "pick": "Pick this one",
+    "votesLeft": "{left, plural, =0 {All your “for” votes are used} one {# “for” vote left out of {max}} other {# “for” votes left out of {max}}}",
+    "voteLimitReached": "You've used all your “for” votes in this topic: remove one to vote for another idea.",
     "placeholder": "Your idea…",
     "date": "Date",
     "dateFrom": "From",
@@ -365,7 +371,8 @@
     "hostCannotLeave": "Hand over hosting to someone else before leaving the session.",
     "tooManySuggestions": "You already have several suggestions waiting: wait until some are handled.",
     "duplicateTheme": "This topic is already in the list or already suggested.",
-    "suggestionNotFound": "This suggestion has already been handled."
+    "suggestionNotFound": "This suggestion has already been handled.",
+    "voteLimitReached": "You've used all your “for” votes in this topic: remove one to vote for another idea."
   },
   "theme": {
     "label": "Theme",

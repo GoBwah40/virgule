@@ -22,11 +22,14 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
   ]);
 
   // What is left for you to vote on: one unit per idea, except a single-answer list,
-  // where picking one option is enough.
+  // where picking one option is enough. In a limited topic, once your "for" votes are used up,
+  // the remaining ideas no longer count as waiting for your vote.
   const units = themes.flatMap((th) => {
     const votable = th.ideas.filter((i) => i.canVote);
-    if (!th.singleChoice) return votable.map((i) => i.myVote !== null);
-    return votable.length > 0 ? [votable.some((i) => i.myVote !== null)] : [];
+    if (th.singleChoice) return votable.length > 0 ? [votable.some((i) => i.myVote !== null)] : [];
+    const used = th.ideas.filter((i) => i.myVote === true).length;
+    const exhausted = th.maxVotes !== null && used >= th.maxVotes;
+    return votable.map((i) => exhausted || i.myVote !== null);
   });
   const voted = units.filter(Boolean).length;
 

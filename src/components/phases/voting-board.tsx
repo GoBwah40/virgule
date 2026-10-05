@@ -1,6 +1,6 @@
 "use client";
 
-import { ListChecks, Plus, Tags, TimerOff, Trash2 } from "lucide-react";
+import { ListChecks, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useOptimistic, useState } from "react";
 
@@ -40,13 +40,6 @@ export function ThemeIdeas({
 }) {
   const t = useTranslations("ideas");
   const tThemes = useTranslations("themes");
-  // Only the ideas you can vote on count (not your own when self-voting is off). A single-answer
-  // list counts as one vote: picking one option is enough.
-  const votable = theme.ideas.filter((idea) => idea.canVote);
-  const votedIdeas = votable.filter((idea) => idea.myVote !== null).length;
-  const [voted, total] = theme.singleChoice
-    ? [Math.min(votedIdeas, 1), Math.min(votable.length, 1)]
-    : [votedIdeas, votable.length];
   // Single-answer list: the choice is held here so picking an idea un-picks the previous one at once.
   const [pending, run] = useAction();
   const [chosenId, setOptimisticChoice] = useOptimistic(theme.ideas.find((idea) => idea.myVote === true)?.id ?? null);
@@ -55,13 +48,24 @@ export function ThemeIdeas({
       setOptimisticChoice(next ? ideaId : null);
       return castVote(slug, ideaId, next);
     });
+  // Limited topic: "for" votes left to the current participant.
+  const votesLeft =
+    theme.maxVotes === null ? null : theme.maxVotes - theme.ideas.filter((idea) => idea.myVote === true).length;
+  // Only the ideas you can vote on count (not your own when self-voting is off). A single-answer
+  // list counts as one vote: picking one option is enough. Once a limited topic's "for" votes
+  // are used up, it counts as done, like the page meter.
+  const votable = theme.ideas.filter((idea) => idea.canVote);
+  const votedIdeas = votable.filter((idea) => idea.myVote !== null).length;
+  const [voted, total] = theme.singleChoice
+    ? [Math.min(votedIdeas, 1), Math.min(votable.length, 1)]
+    : [votesLeft !== null && votesLeft <= 0 ? votable.length : votedIdeas, votable.length];
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-heading text-xl font-bold">{theme.title}</CardTitle>
         {theme.description && <CardDescription>{theme.description}</CardDescription>}
-        {(theme.kind !== "TEXT" || theme.ideas.length > 0) && (
+        {(theme.kind !== "TEXT" || theme.ideas.length > 0 || votesLeft !== null) && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {theme.kind !== "TEXT" && (
               <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={tThemes(`kinds.${theme.kind}`)} />
@@ -71,6 +75,13 @@ export function ThemeIdeas({
               <CountBadge
                 label={t("votedCount", { done: voted, total })}
                 tone={voted === total ? "complete" : "progress"}
+              />
+            )}
+            {votesLeft !== null && theme.maxVotes !== null && (
+              <IconBadge
+                className={votesLeft <= 0 ? "border-highlight bg-highlight-soft text-highlight-foreground" : undefined}
+                icon={Vote}
+                label={t("votesLeft", { left: Math.max(0, votesLeft), max: theme.maxVotes })}
               />
             )}
           </div>
@@ -92,6 +103,7 @@ export function ThemeIdeas({
                     ? { chosen: chosenId === idea.id, pending, onChange: (next) => pick(idea.id, next) }
                     : undefined
                 }
+                upDisabledReason={votesLeft !== null && votesLeft <= 0 ? t("voteLimitReached") : undefined}
               />
             ))}
           </ScrollableList>
@@ -241,11 +253,14 @@ function IdeaItem({
   slug,
   idea,
   pick,
+  upDisabledReason,
 }: {
   slug: string;
   idea: VotingIdea;
   /** Single-answer list: the choice is handled by the topic, across its ideas. */
   pick?: { chosen: boolean; pending: boolean; onChange: (next: boolean | null) => void };
+  /** No "for" votes left in the topic. */
+  upDisabledReason?: string;
 }) {
   const t = useTranslations("ideas");
   const [pending, run] = useAction();
@@ -292,6 +307,7 @@ function IdeaItem({
             value={vote}
             labels={{ up: t("voteUp"), down: t("voteDown") }}
             disabledReason={idea.canVote ? undefined : t("selfVoteDisabled")}
+            upDisabledReason={upDisabledReason}
             onChange={(next) =>
               run(async () => {
                 setOptimisticVote(next);

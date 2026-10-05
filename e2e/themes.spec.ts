@@ -161,6 +161,40 @@ test("a list topic turns its options into ideas to vote on", async ({ page, open
   await vote(guest, "Seaside", "For");
 });
 
+test("a topic can cap the “for” votes, except a single-answer list", async ({ page, openAsGuest }) => {
+  const guest = await setUpEmpty(page, openAsGuest);
+  const limit = page.getByRole("group", { name: "“For” votes per person" });
+
+  // A single-answer list is already a limit of one: the setting goes away.
+  await page.getByLabel("Topic", { exact: true }).fill("Yes or no?");
+  await pick(page, "List");
+  await expect(limit).toBeVisible();
+  await page.getByRole("switch", { name: "One answer per person" }).click();
+  await expect(limit).toHaveCount(0);
+  await page.getByRole("switch", { name: "One answer per person" }).click();
+  await expect(limit).toBeVisible();
+  await pick(page, "Text");
+
+  await page.getByLabel("Topic", { exact: true }).fill("Dinner");
+  await limit.locator("label", { has: page.getByRole("radio", { name: "1", exact: true }) }).click();
+  await page.getByRole("button", { name: "Add the topic" }).click();
+  await expect(topic(page, "Dinner").getByText("1 vote per person")).toBeVisible();
+
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await suggestIdea(page, "Sushi");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await expect(idea(guest, "Sushi")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(guest.getByText("1 “for” vote left out of 1")).toBeVisible();
+
+  await vote(guest, "Pizza", "For");
+  await expect(guest.getByText("All your “for” votes are used")).toBeVisible();
+  await expect(idea(guest, "Sushi").getByRole("button", { name: "For" })).toBeDisabled();
+  // "Against" stays open, and the topic counts as done.
+  await expect(idea(guest, "Sushi").getByRole("button", { name: "Against" })).toBeEnabled();
+  await expect(guest.getByText("2/2 voted")).toBeVisible();
+});
+
 test("going back to the topics keeps the ideas, and locks their answer type", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
   await addTopic(page, "Dinner");

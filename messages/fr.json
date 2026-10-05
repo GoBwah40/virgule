@@ -157,6 +157,10 @@
     "singleChoice": "Une seule réponse par personne",
     "singleChoiceHint": "Chacun choisit une seule option, comme pour une question oui ou non.",
     "singleChoiceLocked": "Des idées ont déjà été proposées : ce réglage ne peut plus changer.",
+    "voteLimitLabel": "Votes « pour » par personne",
+    "voteLimitNone": "Sans limite",
+    "voteLimitHint": "Pour faire ressortir les meilleures idées quand il y en a beaucoup : chacun a le même nombre de votes « pour » dans ce sujet. Les votes « contre » restent illimités.",
+    "voteLimitBadge": "{count, plural, one {# vote} other {# votes}} par personne",
     "suggestionsLabel": "Idées de sujets",
     "suggestions": {
       "goal": {
@@ -222,6 +226,8 @@
     "votedCount": "{done}/{total} {done, plural, one {votée} other {votées}}",
     "singleChoiceHint": "Une seule réponse par personne : choisis celle que tu préfères.",
     "pick": "Choisir celle-ci",
+    "votesLeft": "{left, plural, =0 {Tes votes « pour » sont tous utilisés} one {Il te reste # vote « pour » sur {max}} other {Il te reste # votes « pour » sur {max}}}",
+    "voteLimitReached": "Tu as utilisé tous tes votes « pour » dans ce sujet : retires-en un pour voter pour une autre idée.",
     "placeholder": "Ton idée…",
     "date": "Date",
     "dateFrom": "Du",
@@ -365,7 +371,8 @@
     "hostCannotLeave": "Confie l'animation à quelqu'un d'autre avant de quitter la séance.",
     "tooManySuggestions": "Tu as déjà plusieurs propositions en attente : attends qu'elles soient traitées.",
     "duplicateTheme": "Ce sujet est déjà dans la liste ou déjà proposé.",
-    "suggestionNotFound": "Cette proposition a déjà été traitée."
+    "suggestionNotFound": "Cette proposition a déjà été traitée.",
+    "voteLimitReached": "Tu as utilisé tous tes votes « pour » dans ce sujet : retires-en un pour voter pour une autre idée."
   },
   "theme": {
     "label": "Thème",
