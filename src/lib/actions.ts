@@ -14,6 +14,7 @@ import {
   IDEAS_TIMER_OPTIONS,
   LIMITS,
   MAX_PARTICIPANTS,
+  MAX_PENDING_SUGGESTIONS,
   MAX_THEMES,
   ROOM_TTL_DAYS,
 } from "@/lib/config";
@@ -54,6 +55,9 @@ type ActionError =
   | "choiceClosed"
   | "tooManyRequests"
   | "hostCannotLeave"
+  | "tooManySuggestions"
+  | "duplicateTheme"
+  | "suggestionNotFound"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -313,6 +317,79 @@ export async function startIdeasPhase(slug: string) {
       }),
     ]);
   }, "IDEAS");
+}
+
+// ─── Phase 1: topic suggestions (participants → host) ──────────────────────
+
+const suggestionSchema = z.object({
+  title: text(LIMITS.themeTitle),
+  description: z.string().trim().max(LIMITS.themeDescription).optional(),
+});
+
+/** Same title as an existing topic or a suggestion still waiting (case and spaces ignored). */
+async function isTakenThemeTitle(roomId: string, title: string) {
+  const [themes, suggestions] = await Promise.all([
+    db.theme.findMany({ where: { roomId }, select: { title: true } }),
+    db.themeSuggestion.findMany({ where: { roomId }, select: { title: true } }),
+  ]);
+  const key = textKey(title);
+  return [...themes, ...suggestions].some((row) => textKey(row.title) === key);
+}
+
+/** A participant suggests a topic; the host adds it to the list or dismisses it. */
+export async function suggestTheme(slug: string, input: { title: string; description?: string }) {
+  const parsed = suggestionSchema.safeParse(input);
+  if (!parsed.success) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { phase: "THEMES" });
+    const pending = await db.themeSuggestion.count({ where: { roomId: room.id, authorId: me.id } });
+    if (pending >= MAX_PENDING_SUGGESTIONS) throw new ActionFailure("tooManySuggestions");
+    if (await isTakenThemeTitle(room.id, parsed.data.title)) throw new ActionFailure("duplicateTheme");
+    await db.themeSuggestion.create({
+      data: {
+        roomId: room.id,
+        authorId: me.id,
+        title: parsed.data.title,
+        description: parsed.data.description || null,
+      },
+    });
+  });
+}
+
+/** The host turns a suggestion into a topic (free text; they can edit it afterwards). */
+export async function acceptThemeSuggestion(slug: string, suggestionId: string) {
+  if (!isId(suggestionId)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "THEMES" });
+    const suggestion = await db.themeSuggestion.findFirst({ where: { id: suggestionId, roomId: room.id } });
+    if (!suggestion) throw new ActionFailure("suggestionNotFound");
+    const count = await db.theme.count({ where: { roomId: room.id } });
+    if (count >= MAX_THEMES) throw new ActionFailure("tooManyThemes");
+    const last = await db.theme.findFirst({ where: { roomId: room.id }, orderBy: { position: "desc" } });
+    await db.$transaction([
+      db.theme.create({
+        data: {
+          roomId: room.id,
+          title: suggestion.title,
+          description: suggestion.description,
+          position: (last?.position ?? -1) + 1,
+        },
+      }),
+      db.themeSuggestion.delete({ where: { id: suggestion.id } }),
+    ]);
+  });
+}
+
+/** The host dismisses a suggestion, or its author withdraws it. */
+export async function deleteThemeSuggestion(slug: string, suggestionId: string) {
+  if (!isId(suggestionId)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { phase: "THEMES" });
+    const suggestion = await db.themeSuggestion.findFirst({ where: { id: suggestionId, roomId: room.id } });
+    if (!suggestion) throw new ActionFailure("suggestionNotFound");
+    if (!me.isHost && suggestion.authorId !== me.id) throw new ActionFailure("notAuthor");
+    await db.themeSuggestion.delete({ where: { id: suggestion.id } });
+  });
 }
 
 /** Ideas phase timer (null = none), set before starting the ideas. */

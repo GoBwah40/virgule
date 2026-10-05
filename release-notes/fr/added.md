@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.8.0 — 2026-10-05
+
+- Pendant que la personne qui anime prépare les sujets, tout le monde peut en proposer : elle choisit de les ajouter ou non.
+
 ## 0.7.0 — 2026-10-05
 
 - Les sujets « Liste » peuvent demander une seule réponse par personne, pour une question oui ou non par exemple.

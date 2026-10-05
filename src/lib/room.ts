@@ -99,6 +99,20 @@ export async function getThemes(roomId: string) {
   }));
 }
 
+export type ThemeSuggestionView = { id: string; title: string; description: string | null };
+
+/**
+ * Topic suggestions waiting for the host: all of them for the host, only their own for
+ * the others. The author is never sent (the host sees the topic, not who suggested it).
+ */
+export async function getThemeSuggestions(roomId: string, me: { id: string; isHost: boolean }): Promise<ThemeSuggestionView[]> {
+  return db.themeSuggestion.findMany({
+    where: { roomId, ...(me.isHost ? {} : { authorId: me.id }) },
+    orderBy: { createdAt: "asc" },
+    select: { id: true, title: true, description: true },
+  });
+}
+
 // ─── "Ideas & votes" phase ─────────────────────────────────────────────────
 
 export type VotingIdea = {

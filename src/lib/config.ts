@@ -3,6 +3,8 @@ import type { Phase } from "@/generated/prisma/enums";
 export const MAX_PARTICIPANTS = 6;
 export const ROOM_TTL_DAYS = 7;
 export const MAX_THEMES = 20;
+/** Topic suggestions a participant can have waiting for the host at the same time. */
+export const MAX_PENDING_SUGGESTIONS = 5;
 /**
  * The host can remove someone only before the first recap: afterwards, their ideas and votes
  * (deleted with them) would disappear from results already seen, including past rounds.

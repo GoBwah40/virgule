@@ -26,7 +26,7 @@ test("the host hands over hosting and stays as a participant", async ({ page, op
   await dialog.getByRole("button", { name: "Hand over hosting" }).click();
 
   // Sam now waits like a guest, and may leave.
-  await expect(page.getByText("Lea is preparing the topics. What comes next will show up here automatically.")).toBeVisible();
+  await expect(page.getByText("Lea is preparing the topics, and you can suggest some. What comes next will show up here automatically.")).toBeVisible();
   await expect(page.getByLabel("Lea · is hosting")).toBeVisible();
   await expect(page.getByRole("button", { name: "Leave the session" })).toBeVisible();
 

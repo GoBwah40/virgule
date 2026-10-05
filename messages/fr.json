@@ -107,7 +107,17 @@
   "themes": {
     "title": "Sur quoi faut-il trancher ?",
     "hostSubtitle": "Ajoute les sujets à décider ensemble, puis lance les idées.",
-    "guestSubtitle": "{host} prépare les sujets. La suite s'affichera ici automatiquement.",
+    "guestSubtitle": "{host} prépare les sujets, et tu peux en proposer. La suite s'affichera ici automatiquement.",
+    "suggestTitle": "Proposer un sujet à {host}",
+    "suggestHint": "Ta proposition reste anonyme : {host} décide de l'ajouter ou non.",
+    "suggestSubmit": "Proposer",
+    "mySuggestions": "Tes propositions",
+    "suggestionPending": "En attente",
+    "suggestionWithdraw": "Retirer",
+    "suggestionsTitle": "Sujets proposés",
+    "suggestionsHint": "Ajoute-les à la liste ou mets-les de côté. Personne ne sait qui a proposé quoi.",
+    "suggestionAccept": "Ajouter",
+    "suggestionDismiss": "Écarter",
     "empty": "Pas encore de sujet.",
     "add": "Ajouter le sujet",
     "titleLabel": "Sujet",
@@ -345,7 +355,10 @@
     "invalidOptions": "Une liste demande entre 2 et 10 options, toutes différentes.",
     "choiceClosed": "Ce sujet est une liste : on vote sur les options proposées.",
     "tooManyRequests": "Tu vas un peu vite. Attends un instant, puis réessaie.",
-    "hostCannotLeave": "Confie l'animation à quelqu'un d'autre avant de quitter la séance."
+    "hostCannotLeave": "Confie l'animation à quelqu'un d'autre avant de quitter la séance.",
+    "tooManySuggestions": "Tu as déjà plusieurs propositions en attente : attends qu'elles soient traitées.",
+    "duplicateTheme": "Ce sujet est déjà dans la liste ou déjà proposé.",
+    "suggestionNotFound": "Cette proposition a déjà été traitée."
   },
   "theme": {
     "label": "Thème",

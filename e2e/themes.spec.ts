@@ -26,6 +26,36 @@ async function setUpEmpty(page: Page, openAsGuest: (link: string) => Promise<Pag
 /** A topic row on the host's topics page. */
 const topic = (page: Page, title: string) => page.getByRole("listitem").filter({ hasText: title });
 
+test("a guest suggests topics: the host adds one and sets the other aside, without knowing who", async ({ page, openAsGuest }) => {
+  const guest = await setUpEmpty(page, openAsGuest);
+  const suggest = async (title: string) => {
+    await guest.getByLabel("Topic", { exact: true }).fill(title);
+    await guest.getByRole("button", { name: "Suggest", exact: true }).click();
+    await expect(guest.getByRole("listitem").filter({ hasText: title })).toBeVisible();
+  };
+  await suggest("Who drives?");
+  await suggest("Saturday menu");
+  await expect(guest.getByText("Waiting", { exact: true })).toHaveCount(2);
+
+  // The same title again is refused.
+  await guest.getByLabel("Topic", { exact: true }).fill("who drives? ");
+  await guest.getByRole("button", { name: "Suggest", exact: true }).click();
+  await expect(guest.getByText("This topic is already in the list or already suggested.")).toBeVisible();
+
+  const card = page.locator("[data-slot=card]").filter({ hasText: "Suggested topics" });
+  const suggested = card.getByRole("listitem").filter({ hasText: "Who drives?" });
+  await expect(suggested).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(card).not.toContainText("Lea");
+  await suggested.getByRole("button", { name: "Add" }).click();
+  await page.getByRole("listitem").filter({ hasText: "Saturday menu" }).getByRole("button", { name: "Set aside" }).click();
+  await expect(page.getByText("Suggested topics")).toHaveCount(0, { timeout: LIVE_TIMEOUT });
+  await expect(topic(page, "Who drives?").getByRole("button", { name: "Edit" })).toBeVisible();
+
+  // On the guest's side: the topic is in the list, nothing is waiting anymore.
+  await expect(guest.getByText("Your suggestions")).toHaveCount(0, { timeout: LIVE_TIMEOUT });
+  await expect(guest.getByRole("listitem").filter({ hasText: "Who drives?" })).toBeVisible();
+});
+
 test("the ideas cannot start without a topic", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
 
@@ -34,10 +64,11 @@ test("the ideas cannot start without a topic", async ({ page, openAsGuest }) => 
   await expect(page.getByText("Add at least one topic to get started.")).toBeVisible();
   await expect(page.getByRole("button", { name: "Start the ideas" })).toBeDisabled();
 
-  // The guest only watches: no editor.
-  await expect(guest.getByText("Sam is preparing the topics. What comes next will show up here automatically.")).toBeVisible();
+  // The guest can only suggest: no editor, no start.
+  await expect(guest.getByText("Sam is preparing the topics, and you can suggest some. What comes next will show up here automatically.")).toBeVisible();
   await expect(guest.getByText("No topics yet.")).toBeVisible();
-  await expect(guest.getByLabel("Topic", { exact: true })).toHaveCount(0);
+  await expect(guest.getByRole("button", { name: "Add the topic" })).toHaveCount(0);
+  await expect(guest.getByRole("button", { name: "Start the ideas" })).toHaveCount(0);
 });
 
 test("a topic with details and an answer type shows up for the guest", async ({ page, openAsGuest }) => {
