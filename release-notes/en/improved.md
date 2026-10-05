@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.17 — 2026-10-05
+
+- Each topic shows how many ideas it has and how many of them you have voted on.
+
 ## 0.6.16 — 2026-10-05
 
 - Long lists of ideas scroll inside their topic, so the page stays short and the other topics stay within reach.
