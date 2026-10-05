@@ -1,6 +1,6 @@
 # Virgule
 
-Brainstorming and planning app for small groups (6 people maximum), with no account: you share a link, everyone gives their first name, suggests ideas and votes.
+Brainstorming and planning app for small groups (up to 12 people, 6 by default), with no account: you share a link, everyone gives their first name, suggests ideas and votes.
 
 ## How a session works
 

@@ -157,7 +157,7 @@ test.describe("keyboard", () => {
     await page.goto("/");
     await expect(page.getByRole("button", { name: "Create the session" })).toBeVisible();
 
-    // From the top of the page: the release notes, then the two fields, then the button.
+    // From the top of the page: the release notes, then the two fields, the group size, then the button.
     await page.keyboard.press("Tab");
     await page.keyboard.press("Tab");
     await expect(page.getByLabel("Session name")).toBeFocused();
@@ -166,12 +166,18 @@ test.describe("keyboard", () => {
     await page.keyboard.press("Tab");
     await expect(page.getByLabel("Your first name")).toBeFocused();
     await page.keyboard.type("Sam");
+    // One stop for the whole size group, on the selected size; the arrows pick another one.
+    await page.keyboard.press("Tab");
+    await expect(page.getByRole("radio", { name: "6 people" })).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect(page.getByRole("radio", { name: "8 people" })).toBeChecked();
     await page.keyboard.press("Tab");
     await expect(page.getByRole("button", { name: "Create the session" })).toBeFocused();
     expect(await focusRingShown(page)).toBe(true);
     await page.keyboard.press("Enter");
 
     await expect(page.getByRole("heading", { level: 1, name: "Keyboard club" })).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByRole("list", { name: "1 participant out of 8" })).toBeVisible();
   });
 
   test("votes work with the keyboard", async ({ page, openAsGuest }) => {

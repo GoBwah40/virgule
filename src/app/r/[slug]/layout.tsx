@@ -7,7 +7,6 @@ import { RoomExpired } from "@/components/room/room-expired";
 import { RoomHeader } from "@/components/room/room-header";
 import { RoomLive } from "@/components/room/room-live";
 import { SeatRow } from "@/components/seat-row";
-import { MAX_PARTICIPANTS } from "@/lib/config";
 import { pusherClientConfig } from "@/lib/realtime/server";
 import { getRoomContext, hostName } from "@/lib/room";
 
@@ -34,14 +33,15 @@ export default async function RoomLayout({ children, params }: LayoutProps<"/r/[
           roomName={ctx.room.name}
           hostName={hostName(ctx.participants)}
           seats={ctx.participants.length}
-          full={ctx.participants.length >= MAX_PARTICIPANTS}
+          capacity={ctx.room.capacity}
+          full={ctx.participants.length >= ctx.room.capacity}
           closed={ctx.room.phase === "CLOSED"}
           seatRow={
             <SeatRow
-              capacity={MAX_PARTICIPANTS}
+              capacity={ctx.room.capacity}
               seats={ctx.participants.map((p) => ({ id: p.id, name: p.pseudo, isHost: p.isHost }))}
               labels={{
-                row: t("seats.row", { count: ctx.participants.length, max: MAX_PARTICIPANTS }),
+                row: t("seats.row", { count: ctx.participants.length, max: ctx.room.capacity }),
                 free: t("seats.freeStatic"),
                 you: t("you"),
                 host: t("host"),

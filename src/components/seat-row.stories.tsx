@@ -36,6 +36,8 @@ export const ClickableSeats: Story = {
   args: { onFreeSeatClick: fn(), labels: { ...labels, free: "Free seat: tap to copy the invite link" } },
 };
 
+export const TwelveSeats: Story = { args: { capacity: 12, labels: { ...labels, row: "4 participants out of 12" } } };
+
 export const Large: Story = { args: { size: "md" } };
 
 export const SeatMenu: Story = {

@@ -10,20 +10,22 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { useAction } from "@/hooks/use-action";
 import { joinRoom } from "@/lib/actions";
-import { LIMITS, MAX_PARTICIPANTS } from "@/lib/config";
+import { LIMITS } from "@/lib/config";
 
 type Props = {
   slug: string;
   roomName: string;
   hostName: string;
   seats: number;
+  /** Number of seats in the session. */
+  capacity: number;
   full: boolean;
   closed: boolean;
   /** Row of seats, rendered by the layout. */
   seatRow: React.ReactNode;
 };
 
-export function JoinForm({ slug, roomName, hostName, seats, full, closed, seatRow }: Props) {
+export function JoinForm({ slug, roomName, hostName, seats, capacity, full, closed, seatRow }: Props) {
   const t = useTranslations("join");
   const [pseudo, setPseudo] = useState("");
   const [pending, run] = useAction();
@@ -43,13 +45,13 @@ export function JoinForm({ slug, roomName, hostName, seats, full, closed, seatRo
             {t("title", { host: hostName, name: roomName })}
           </CardTitle>
           {seatRow}
-          <CardDescription>{t("seats", { count: seats, max: MAX_PARTICIPANTS })}</CardDescription>
+          <CardDescription>{t("seats", { count: seats, max: capacity })}</CardDescription>
         </CardHeader>
         <CardContent>
           {blocked ? (
             <Alert variant="destructive">
               <AlertDescription>
-                {closed ? t("closed") : t("full", { max: MAX_PARTICIPANTS, host: hostName })}
+                {closed ? t("closed") : t("full", { max: capacity, host: hostName })}
               </AlertDescription>
             </Alert>
           ) : (

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
+import { roomCapacity } from "@/lib/config";
 import { db } from "@/lib/db";
 import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
@@ -29,6 +30,8 @@ export type RoomContext =
         ideasTimerMinutes: number | null;
         phaseEndsAt: Date | null;
         tiebreak: boolean;
+        /** Number of seats (size chosen by the host). */
+        capacity: number;
       };
       participants: { id: string; pseudo: string; isHost: boolean }[];
       /** Current participant (null if they have not joined the room yet). */
@@ -66,6 +69,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       ideasTimerMinutes: room.ideasTimerMinutes,
       phaseEndsAt: room.phaseEndsAt,
       tiebreak: room.tiebreak,
+      capacity: roomCapacity(room),
     },
     // Tokens never leave this module.
     participants: room.participants.map(({ id, pseudo, isHost }) => ({ id, pseudo, isHost })),

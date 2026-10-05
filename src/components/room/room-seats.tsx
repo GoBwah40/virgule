@@ -9,11 +9,11 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { type Seat, SeatRow } from "@/components/seat-row";
 import { useAction } from "@/hooks/use-action";
 import { leaveRoom, removeParticipant, transferHost } from "@/lib/actions";
-import { MAX_PARTICIPANTS } from "@/lib/config";
 
 type Props = {
   slug: string;
   seats: Seat[];
+  capacity: number;
   invitePath: string;
   labels: React.ComponentProps<typeof SeatRow>["labels"];
   successMessage: string;
@@ -37,7 +37,7 @@ const CONFIRM_KEYS = {
  * Row of session seats: tapping a free seat copies the invite link; for the host,
  * right-clicking or clicking a taken seat opens its options. A guest's own seat offers to leave.
  */
-export function RoomSeats({ slug, seats, invitePath, labels, successMessage, canManage, canRemove, className }: Props) {
+export function RoomSeats({ slug, seats, capacity, invitePath, labels, successMessage, canManage, canRemove, className }: Props) {
   const t = useTranslations("room.seats");
   const [, run] = useAction();
   const [pending, setPending] = useState<Pending>(null);
@@ -46,7 +46,7 @@ export function RoomSeats({ slug, seats, invitePath, labels, successMessage, can
     <>
       <SeatRow
         seats={seats}
-        capacity={MAX_PARTICIPANTS}
+        capacity={capacity}
         labels={labels}
         className={className}
         onFreeSeatClick={async () => {

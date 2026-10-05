@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.9.0 — 2026-10-05
+
+- When creating a session, you choose the size of the group: 4, 6, 8 or 12 people, and you can change it while preparing the topics.
+
 ## 0.8.0 — 2026-10-05
 
 - While the person hosting prepares the topics, everyone can suggest some: they choose whether to add them.

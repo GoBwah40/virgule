@@ -81,4 +81,17 @@ describe("SeatRow", () => {
     await userEvent.click(await screen.findByRole("menuitem", { name: "Leave the session" }));
     expect(onSelect).toHaveBeenCalledWith(seats[1], "leave");
   });
+
+  it("seats up to 12 people on two rows, lettered A to L", () => {
+    const { container } = renderUi(<SeatRow seats={seats} capacity={12} labels={labels} />);
+    const list = screen.getByRole("list", { name: labels.row });
+    expect(list.children).toHaveLength(12);
+    expect(list).toHaveStyle({ gridTemplateColumns: "repeat(6, auto)" });
+    expect(container).toHaveTextContent("L");
+  });
+
+  it("splits 8 seats into two rows of 4", () => {
+    renderUi(<SeatRow seats={seats} capacity={8} labels={labels} />);
+    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(4, auto)" });
+  });
 });

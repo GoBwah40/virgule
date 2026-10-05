@@ -52,6 +52,26 @@ test("nobody can join once the 6 seats are taken", async ({ page, openAsGuest })
   await expect(late.getByRole("button", { name: "Join the session" })).toHaveCount(0);
 });
 
+test("a session created for 4 is full with 4 people, and the host can make room", async ({ page, openAsGuest }) => {
+  const link = await createRoom(page, { name: "Small group", host: "Sam", size: 4 });
+  await expect(page.getByRole("list", { name: "1 participant out of 4" })).toBeVisible();
+  for (const pseudo of ["Lea", "Noe", "Ines"]) {
+    const guest = await openAsGuest(link);
+    await join(guest, pseudo);
+    await guest.context().close();
+  }
+
+  const late = await openAsGuest(link);
+  await expect(late.getByText("All 4 seats are taken. Ask Sam whether someone can give you theirs.")).toBeVisible();
+
+  // The host gives 4 more seats from the topic settings.
+  await page.reload();
+  await expect(page.getByRole("radio", { name: "4" })).toBeChecked();
+  await page.getByText("8", { exact: true }).click();
+  await expect(page.getByRole("list", { name: "4 participants out of 8" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(late.getByRole("button", { name: "Join the session" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+});
+
 test("nobody can join a session that is over", async ({ page, openAsGuest }) => {
   const link = await createRoom(page, { name: "Housewarming", host: "Sam" });
   await closeRoom(link);
