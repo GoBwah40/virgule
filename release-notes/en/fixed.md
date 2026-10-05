@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.6.15 — 2026-10-05
+
+- A long word in a topic, such as a pasted link, no longer pushes the page sideways on a phone or a computer: it wraps.
+
 ## 0.6.14 — 2026-10-05
 
 - Going back in your browser no longer shows a step that is over (up to 30 seconds with real-time updates on): the current step comes back at once, and going back leaves the session instead of going round in circles.

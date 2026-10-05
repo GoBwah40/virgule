@@ -43,7 +43,7 @@ export function ExpandableListItem({ children, meta, aside, details, tone = "neu
         className="flex w-full cursor-pointer flex-col gap-2.5 px-3.5 py-3 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/80 focus-visible:ring-inset sm:flex-row sm:items-center sm:justify-between sm:gap-3"
       >
         <span className="min-w-0 flex-1 space-y-1.5">
-          <span className="block text-[15px] font-medium break-words whitespace-pre-wrap">{children}</span>
+          <span className="block text-[15px] font-medium wrap-anywhere whitespace-pre-wrap">{children}</span>
           {meta && <span className="flex flex-wrap items-center gap-1.5">{meta}</span>}
         </span>
         <span className="flex shrink-0 items-center gap-2 self-end sm:self-center">

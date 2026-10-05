@@ -32,7 +32,7 @@ export function ListItem({ children, meta, actions, tone = "neutral", className 
       )}
     >
       <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="text-[15px] font-medium break-words whitespace-pre-wrap">{children}</div>
+        <div className="text-[15px] font-medium wrap-anywhere whitespace-pre-wrap">{children}</div>
         {meta && <div className="flex flex-wrap items-center gap-1.5">{meta}</div>}
       </div>
       {actions && <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">{actions}</div>}
