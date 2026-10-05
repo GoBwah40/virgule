@@ -165,6 +165,13 @@ export async function voteAndSeeRecap(page: Page, guest: Page) {
   await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
 }
 
+/** Host: opens the room screen from the session header, in a tab of its own. */
+export async function openPresentation(page: Page) {
+  const [screen] = await Promise.all([page.waitForEvent("popup"), page.getByRole("link", { name: "Show on a big screen" }).click()]);
+  await expect(screen).toHaveURL(/\/present$/, { timeout: REDIRECT_TIMEOUT });
+  return screen;
+}
+
 /** Downloads an export from the recap menu ("Export" button, "Markdown" or "CSV" item). */
 export async function downloadExport(page: Page, format: RegExp, button = "Export") {
   await page.getByRole("button", { name: button, exact: true }).click();

@@ -12,6 +12,7 @@ import {
   idea,
   join,
   LIVE_TIMEOUT,
+  openPresentation,
   pick,
   seeRecap,
   setPhase,
@@ -104,6 +105,42 @@ for (const colorScheme of ["light", "dark"] as const) {
       await clickAndConfirm(page, "End the session");
       await expect(page.getByRole("heading", { name: "It's decided" })).toBeVisible();
       await expectAccessible(page, "session over");
+    });
+
+    test("the room screen passes axe at every step", async ({ page, openAsGuest }) => {
+      test.slow();
+      const link = await createRoom(page, { name: "Friday night", host: "Sam" });
+      const screen = await openPresentation(page);
+      await screen.emulateMedia({ colorScheme });
+      await settle(page, screen);
+      await expect(screen.getByRole("img", { name: "QR code for the invite link" })).toBeVisible();
+      await expectAccessible(screen, "room screen, waiting");
+
+      const guest = await openAsGuest(link);
+      await join(guest, "Lea");
+      await addTopic(page, "Dinner");
+      await expect(screen.getByRole("heading", { name: "Dinner" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+      await expectAccessible(screen, "room screen, topics");
+
+      await pick(page, "5 min");
+      await startIdeas(page);
+      await suggestIdea(page, "Pizza");
+      await expect(screen.getByRole("timer")).toBeVisible({ timeout: LIVE_TIMEOUT });
+      await expect(screen.getByRole("region", { name: "Dinner" })).toContainText("Pizza", { timeout: LIVE_TIMEOUT });
+      await expectAccessible(screen, "room screen, ideas");
+
+      await elapseTimer(link);
+      await expect(screen.getByRole("timer")).toHaveText("Time's up", { timeout: LIVE_TIMEOUT });
+      await expectAccessible(screen, "room screen, time's up");
+
+      await vote(page, "Pizza", "For");
+      await seeRecap(page);
+      await expect(screen.getByText("Kept by the group")).toBeVisible({ timeout: LIVE_TIMEOUT });
+      await expectAccessible(screen, "room screen, recap");
+
+      await clickAndConfirm(page, "End the session");
+      await expect(screen.getByText(/^It's decided/)).toBeVisible({ timeout: LIVE_TIMEOUT });
+      await expectAccessible(screen, "room screen, session over");
     });
 
     test("dialogs and menus pass axe", async ({ page, openAsGuest }) => {

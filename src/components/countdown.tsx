@@ -9,6 +9,8 @@ type Props = {
   /** End of the countdown (ISO 8601). */
   endsAt: string;
   labels: { running: string; expired: string };
+  /** `lg`: the room screen, read from across the room. */
+  size?: "md" | "lg";
   className?: string;
 };
 
@@ -42,7 +44,7 @@ export function formatRemaining(seconds: number) {
  * Discreet countdown: neutral, then mango during the last minute, then the
  * expired label. Screen readers only read it once a minute.
  */
-export function Countdown({ endsAt, labels, className }: Props) {
+export function Countdown({ endsAt, labels, size = "md", className }: Props) {
   const now = useSyncExternalStore(subscribe, nowSeconds, nowSeconds);
   const remaining = Math.ceil(new Date(endsAt).getTime() / 1000) - now;
   const expired = remaining <= 0;
@@ -54,7 +56,8 @@ export function Countdown({ endsAt, labels, className }: Props) {
       role="timer"
       aria-label={labels.running}
       className={cn(
-        "inline-flex items-center gap-2 rounded-full border-[1.5px] px-3 py-1.5 text-sm font-semibold transition-colors duration-300",
+        "inline-flex items-center rounded-full border-[1.5px] font-semibold transition-colors duration-300",
+        size === "lg" ? "gap-[0.5em] px-[0.9em] py-[0.35em] stage-md" : "gap-2 px-3 py-1.5 text-sm",
         expired
           ? "border-destructive/40 bg-destructive/10 text-destructive"
           : lastMinute
@@ -63,7 +66,7 @@ export function Countdown({ endsAt, labels, className }: Props) {
         className,
       )}
     >
-      <Icon className={cn("size-4", !expired && "motion-safe:animate-pulse")} aria-hidden />
+      <Icon className={cn(size === "lg" ? "size-[1em]" : "size-4", !expired && "motion-safe:animate-pulse")} aria-hidden />
       {expired ? (
         <span aria-live="polite">{labels.expired}</span>
       ) : (

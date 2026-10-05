@@ -19,3 +19,13 @@ type Story = StoryObj<typeof meta>;
 export const Running: Story = {};
 export const LastMinute: Story = { args: { endsAt: inSeconds(42) } };
 export const Expired: Story = { args: { endsAt: inSeconds(-5) } };
+export const Large: Story = {
+  args: { size: "lg" },
+  decorators: [
+    (Story) => (
+      <div data-theme="dark" className="bg-background p-6 text-foreground">
+        <Story />
+      </div>
+    ),
+  ],
+};

@@ -313,6 +313,26 @@
     "closeConfirmHint": "Once the session is over, nobody can suggest or vote anymore.",
     "waitingHost": "{host} is choosing what's next: a new round, or we stop here."
   },
+  "present": {
+    "open": "Show on a big screen",
+    "fullscreenHint": "Click or press a key to go full screen",
+    "lobbyNote": "{host} is preparing the topics. Scan the code to join.",
+    "join": "Scan to join",
+    "seats": "{count, plural, one {# seat out of {max} taken} other {# seats out of {max} taken}}",
+    "full": "All seats are taken",
+    "topicsTitle": "What we need to decide",
+    "topicsNote": "The ideas start when {host} moves on",
+    "ideaCount": "{count, plural, =0 {No ideas yet} one {# idea} other {# ideas}}",
+    "waitingIdeas": "Waiting for the first idea",
+    "results": "Results by topic",
+    "topicPosition": "Topic {current} of {total}",
+    "kept": "Kept by the group",
+    "tied": "Tied for first",
+    "noneKept": "No idea kept on this topic",
+    "votes": "{up} for, {down} against",
+    "more": "{count, plural, one {+ # more idea} other {+ # more ideas}}",
+    "anonymous": "Nobody knows who voted what"
+  },
   "export": {
     "button": "Export",
     "markdown": "Markdown (.md)",
