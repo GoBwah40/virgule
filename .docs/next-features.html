@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Virgule, the next three</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap">
+<style>
+body { margin: 0; }
+/* Layout: a pitch page in Virgule's own brand. Each feature pairs its case (left) with a live phone mockup (right); stacks to one column on a phone. */
+:root {
+  --sand: #fff7f0;
+  --card: #ffffff;
+  --ink: #2a1a24;
+  --muted: #6f5a62;
+  --line: #eedccf;
+  --soft: #f7ebe1;
+  --action: #c2410c;
+  --action-fg: #ffffff;
+  --papaya: #f26a2e;
+  --mango: #ffc23d;
+  --mango-soft: #fff0c7;
+  --mango-fg: #2a1a24;
+  --olive: #1f7a4d;
+  --olive-fg: #ffffff;
+  --pomegranate: #b8283f;
+  --shadow: 0 1px 2px rgb(42 26 36 / 6%), 0 12px 32px -12px rgb(42 26 36 / 18%);
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Figtree", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sand: #1c1216; --card: #261a1f; --ink: #fbefe6; --muted: #b7a3aa; --line: #3d2c34; --soft: #30222a;
+    --action: #ff8a55; --action-fg: #1c1216; --papaya: #ff8a55; --mango: #ffc23d; --mango-soft: #4a3717; --mango-fg: #fbefe6;
+    --olive: #5cc98e; --olive-fg: #1c1216; --pomegranate: #ff6b81;
+    --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -12px rgb(0 0 0 / 60%);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --sand: #1c1216; --card: #261a1f; --ink: #fbefe6; --muted: #b7a3aa; --line: #3d2c34; --soft: #30222a;
+  --action: #ff8a55; --action-fg: #1c1216; --papaya: #ff8a55; --mango: #ffc23d; --mango-soft: #4a3717; --mango-fg: #fbefe6;
+  --olive: #5cc98e; --olive-fg: #1c1216; --pomegranate: #ff6b81;
+  --shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 12px 32px -12px rgb(0 0 0 / 60%);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--sand); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 1080px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 64px; display: grid; gap: 72px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: -0.02em; line-height: 1.05; text-wrap: balance; margin: 0; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+
+/* Hero */
+.hero { display: grid; gap: 20px; max-width: 760px; }
+.logo { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: -0.03em; display: inline-flex; align-items: baseline; }
+.logo i { color: var(--papaya); font-style: normal; }
+.hero h1 { font-size: clamp(38px, 6.4vw, 68px); }
+.hl { background: linear-gradient(transparent 62%, var(--mango) 62%, var(--mango) 92%, transparent 92%); padding-inline: 0.04em; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+:root[data-theme="dark"] .hl { background: linear-gradient(transparent 62%, var(--mango-soft) 62%, var(--mango-soft) 92%, transparent 92%); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .hl { background: linear-gradient(transparent 62%, var(--mango-soft) 62%, var(--mango-soft) 92%, transparent 92%); } }
+.lede { font-size: 19px; color: var(--muted); max-width: 62ch; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); background: var(--card); border-radius: 999px; padding: 6px 12px; font-size: 14px; font-weight: 600; }
+.chip b { font-family: var(--mono); font-weight: 500; color: var(--muted); }
+
+/* Feature sections */
+.feature { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 48px; align-items: start; }
+.feature.flip { grid-template-columns: 340px minmax(0, 1fr); }
+.feature.flip .case { order: 2; }
+.case { display: grid; gap: 18px; min-width: 0; }
+.case h2 { font-size: clamp(30px, 4vw, 44px); }
+.case .pitch { font-size: 18px; max-width: 58ch; }
+.why { display: grid; gap: 12px; margin: 4px 0 0; padding: 0; list-style: none; }
+.why li { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+.why li::before { content: ""; width: 28px; height: 28px; border-radius: 50%; background: var(--mango-soft); box-shadow: inset 0 0 0 7px var(--mango-soft), inset 0 0 0 14px var(--mango); }
+.why strong { font-weight: 700; }
+.quote { border-left: 3px solid var(--papaya); padding: 4px 0 4px 16px; color: var(--muted); font-size: 15px; }
+.quote b { color: var(--ink); }
+.rules { display: flex; flex-wrap: wrap; gap: 6px; }
+.rule { font-family: var(--mono); font-size: 12px; border: 1px dashed var(--line); border-radius: 8px; padding: 4px 8px; color: var(--muted); }
+
+/* Phone mockup */
+.phone { width: 100%; max-width: 340px; justify-self: center; background: var(--sand); border: 10px solid var(--ink); border-radius: 38px; box-shadow: var(--shadow); overflow: hidden; position: relative; }
+.phone .bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 6px; font-family: var(--mono); font-size: 11px; color: var(--muted); }
+.phone .head { padding: 4px 16px 12px; border-bottom: 1px solid var(--line); background: var(--card); }
+.phone .head .logo { font-size: 15px; }
+.phone .head h4 { font-family: var(--display); font-size: 19px; margin: 2px 0 6px; letter-spacing: -0.01em; }
+.steps { display: flex; gap: 6px; }
+.step { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--soft); color: var(--muted); }
+.step.on { background: var(--ink); color: var(--sand); }
+.screen { padding: 14px; display: grid; gap: 12px; min-height: 420px; align-content: start; }
+.topic { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 10px; }
+.topic h5 { font-family: var(--display); font-size: 17px; margin: 0; }
+.badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.badge.mango { background: var(--mango-soft); border-color: var(--mango); color: var(--mango-fg); }
+.badge.mine { background: var(--mango-soft); border-color: transparent; color: var(--mango-fg); }
+.idea { background: var(--soft); border-radius: 12px; padding: 10px 12px; display: grid; gap: 8px; }
+.idea-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.idea-row span { font-size: 14px; font-weight: 500; min-width: 0; }
+
+/* Points stepper */
+.stepper { display: inline-flex; align-items: center; border: 1.5px solid var(--line); border-radius: 12px; background: var(--card); flex-shrink: 0; }
+.stepper button { width: 44px; height: 44px; border: 0; background: transparent; color: var(--ink); font: 700 20px var(--body); cursor: pointer; border-radius: 10px; }
+.stepper button:disabled { color: var(--line); cursor: not-allowed; }
+.stepper button:focus-visible, .btn:focus-visible, .send:focus-visible, .x:focus-visible, .toggle:focus-visible { outline: 3px solid var(--action); outline-offset: 2px; }
+.stepper output { min-width: 28px; text-align: center; font-family: var(--mono); font-size: 16px; font-variant-numeric: tabular-nums; }
+.stepper.has output { color: var(--action); font-weight: 600; }
+.dots { display: flex; gap: 5px; }
+.dot { width: 14px; height: 14px; border-radius: 50%; background: var(--mango); transition: background 200ms, transform 200ms; }
+.dot.used { background: var(--soft); box-shadow: inset 0 0 0 1.5px var(--line); }
+.note { font-size: 12px; color: var(--muted); }
+
+/* Comments */
+.comments { display: grid; gap: 6px; border-left: 2px solid var(--line); padding-left: 10px; }
+.comment { font-size: 13px; display: flex; gap: 6px; align-items: flex-start; justify-content: space-between; }
+.comment p { min-width: 0; }
+.comment .badge { flex-shrink: 0; }
+.x { border: 0; background: transparent; color: var(--muted); cursor: pointer; width: 32px; height: 32px; border-radius: 8px; margin: -6px -6px -6px 0; font-size: 16px; flex-shrink: 0; }
+.add { display: flex; gap: 6px; }
+.add input { flex: 1; min-width: 0; height: 40px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--card); color: var(--ink); padding: 0 10px; font: 14px var(--body); }
+.add input:focus-visible { outline: 3px solid var(--action); outline-offset: 1px; }
+.send { height: 40px; border: 0; border-radius: 10px; background: var(--action); color: var(--action-fg); font: 600 14px var(--body); padding: 0 12px; cursor: pointer; }
+.send:disabled { opacity: 0.45; cursor: not-allowed; }
+.count { font-family: var(--mono); font-size: 11px; color: var(--muted); text-align: right; }
+.vote { display: flex; gap: 6px; }
+.vote span { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--line); display: grid; place-items: center; font-weight: 700; color: var(--muted); background: var(--card); }
+.vote span.up { background: var(--olive); border-color: var(--olive); color: var(--olive-fg); }
+
+/* Nudge */
+.trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.mini { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 14px; display: grid; gap: 10px; align-content: start; min-height: 230px; position: relative; overflow: hidden; }
+.who { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+.seat { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font: 600 13px var(--mono); background: var(--mango); color: var(--mango-fg); }
+.seat.b { background: var(--soft); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.meter { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; width: fit-content; }
+.meter.done { border-color: color-mix(in srgb, var(--olive) 40%, transparent); color: var(--olive); }
+.btn { min-height: 44px; border: 0; border-radius: 12px; background: var(--action); color: var(--action-fg); font: 600 15px var(--body); padding: 0 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.toast { position: absolute; left: 10px; right: 10px; bottom: 10px; background: var(--ink); color: var(--sand); border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.4; transform: translateY(140%); transition: transform 280ms cubic-bezier(.2,.8,.2,1); }
+.toast.show { transform: translateY(0); }
+.silent { position: absolute; left: 10px; right: 10px; bottom: 10px; font-size: 12px; color: var(--muted); text-align: center; opacity: 0; transition: opacity 280ms; }
+.silent.show { opacity: 1; }
+.host-say { font-size: 13px; color: var(--muted); }
+.cooldown { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+
+/* Shipped strip */
+.shipped { display: grid; gap: 20px; }
+.shipped h2 { font-size: clamp(26px, 3.4vw, 36px); }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 12px; }
+.ship { border: 1px solid var(--line); background: var(--card); border-radius: 16px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+.ship .v { font-family: var(--mono); font-size: 12px; color: var(--papaya); }
+.ship h3 { font-family: var(--body); font-weight: 700; font-size: 16px; letter-spacing: 0; line-height: 1.3; }
+.ship p { font-size: 14px; color: var(--muted); }
+
+/* Decisions */
+.decide { background: var(--card); border: 1.5px solid var(--line); border-radius: 24px; padding: 28px; display: grid; gap: 18px; }
+.decide h2 { font-size: clamp(24px, 3vw, 32px); }
+.qs { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.qs li { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 14px; padding-block: 12px; border-top: 1px dashed var(--line); }
+.qs li:first-child { border-top: 0; }
+.qs .f { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-top: 3px; }
+.qs p { font-size: 15px; }
+.qs em { font-style: normal; font-weight: 700; }
+.pause { display: inline-flex; align-items: center; gap: 8px; background: var(--mango-soft); color: var(--mango-fg); border-radius: 999px; padding: 6px 12px; font-size: 13px; font-weight: 600; width: fit-content; }
+.pause::before { content: ""; width: 10px; height: 10px; border-left: 3px solid currentColor; border-right: 3px solid currentColor; }
+
+@media (max-width: 860px) {
+  .feature, .feature.flip { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .feature.flip .case { order: 0; }
+  .trio { grid-template-columns: minmax(0, 1fr); }
+  .qs li { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast, .silent, .dot { transition: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="logo">virgule<i>,</i></span>
+    <p class="eyebrow">Next version · validated on October 6, 2026</p>
+    <h1>Decide better, <span class="hl">without giving up anonymity</span></h1>
+    <p class="lede">Three features for the moments when “for / against” is not enough: saying how much you care about an idea, asking a question before voting, and reminding those who lag behind without pointing at anyone.</p>
+    <div class="chips">
+      <span class="chip">Points voting <b>0.18</b></span>
+      <span class="chip">Anonymous comments <b>0.17</b></span>
+      <span class="chip">Anonymous reminder <b>0.16</b></span>
+    </div>
+  </header>
+
+  <!-- Points -->
+  <section class="feature" aria-labelledby="f-points">
+    <div class="case">
+      <p class="eyebrow">Per-topic option</p>
+      <h2 id="f-points">Points voting</h2>
+      <p class="pitch">Today, Lea who loves the cottage and Tom who finds it “fine” weigh the same: one “for” each. With points, everyone gets 5 points per topic and spreads them as they like. The recap ranks ideas by total: you finally see enthusiasm, not just agreement.</p>
+      <ul class="why">
+        <li><span><strong>Intensity counts.</strong> Put everything on one idea, or split between two good options.</span></li>
+        <li><span><strong>Fewer ties.</strong> 5 points each separate ideas better than “for” votes adding up.</span></li>
+        <li><span><strong>Nothing changes for other topics.</strong> The host picks topic by topic; “for / against” stays the default.</span></li>
+      </ul>
+      <p class="quote">During the vote, everyone only sees <b>their own points</b>. Totals only show in the recap, as votes do today.</p>
+      <div class="rules"><span class="rule">budget 3 · 5 · 10</span><span class="rule">locked once ideas exist</span><span class="rule">kept from 1 point</span><span class="rule">CSV export in points</span></div>
+    </div>
+
+    <div class="phone" aria-label="Mockup: points voting on a phone">
+      <div class="bar"><span>9:41</span><span>●●● 5G</span></div>
+      <div class="head">
+        <span class="logo">virgule<i>,</i></span>
+        <h4>Weekend in Annecy</h4>
+        <div class="steps"><span class="step">Topics</span><span class="step on">Ideas</span><span class="step">Recap</span></div>
+      </div>
+      <div class="screen">
+        <div class="topic">
+          <h5>Where do we sleep?</h5>
+          <div class="badges"><span class="badge">3 ideas</span><span class="badge mango" id="left-badge">5 points left out of 5</span></div>
+          <div class="dots" id="dots" aria-hidden="true"></div>
+          <div id="point-ideas"></div>
+          <p class="note">Try it: − and + spread your 5 points.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comments -->
+  <section class="feature flip" aria-labelledby="f-comments">
+    <div class="case">
+      <p class="eyebrow">During the ideas</p>
+      <h2 id="f-comments">Anonymous comments</h2>
+      <p class="pitch">“Camping, fine, but are there showers?” Today this question goes to WhatsApp and the idea gets voted on without the answer. Now you ask it under the idea, in one line, and the group votes knowing the details.</p>
+      <ul class="why">
+        <li><span><strong>No names, like ideas.</strong> Everyone sees “Your comment” on their own; nobody knows who wrote the rest.</span></li>
+        <li><span><strong>Short by design.</strong> 140 characters, 3 per idea and per person: no endless debate.</span></li>
+        <li><span><strong>The host stays in control.</strong> They can remove an out-of-place comment, after confirming. Authors remove their own.</span></li>
+      </ul>
+      <p class="quote">Comments stay in the session: <b>never on the room screen</b>, nor in the shared recap, nor in exports.</p>
+      <div class="rules"><span class="rule">140 characters</span><span class="rule">3 per idea</span><span class="rule">50 per session</span><span class="rule">shown in the recap</span></div>
+    </div>
+
+    <div class="phone" aria-label="Mockup: comments on an idea">
+      <div class="bar"><span>9:41</span><span>●●● 5G</span></div>
+      <div class="head">
+        <span class="logo">virgule<i>,</i></span>
+        <h4>Weekend in Annecy</h4>
+        <div class="steps"><span class="step">Topics</span><span class="step on">Ideas</span><span class="step">Recap</span></div>
+      </div>
+      <div class="screen">
+        <div class="topic">
+          <h5>Where do we sleep?</h5>
+          <div class="idea">
+            <div class="idea-row"><span>Lakeside campsite</span><div class="vote"><span class="up">↑</span><span>↓</span></div></div>
+            <div class="badges"><span class="badge" id="c-count">2 comments</span></div>
+            <div class="comments" id="comments"></div>
+            <form class="add" id="c-form" autocomplete="off">
+              <label for="c-input" class="sr" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Your comment</label>
+              <input id="c-input" maxlength="140" placeholder="A detail, a question…">
+              <button class="send" id="c-send" disabled>Send</button>
+            </form>
+            <p class="count" id="c-left">140</p>
+          </div>
+          <div class="idea"><div class="idea-row"><span>Lakeside cottage</span><div class="vote"><span>↑</span><span>↓</span></div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Nudge -->
+  <section class="feature" aria-labelledby="f-nudge" style="grid-template-columns:minmax(0,1fr)">
+    <div class="case">
+      <p class="eyebrow">For the host, during the ideas</p>
+      <h2 id="f-nudge">Anonymous reminder</h2>
+      <p class="pitch">Sam sees that 3 people out of 6 haven't finished voting, but not who. No need to ask out loud “who hasn't voted?”. He taps “Remind the group”, and only those who still have ideas without their vote get a reminder.</p>
+      <ul class="why">
+        <li><span><strong>Nobody is singled out.</strong> Neither Sam nor the group know who got the reminder.</span></li>
+        <li><span><strong>No noise for those who are done.</strong> Their screen doesn't change.</span></li>
+        <li><span><strong>No nagging.</strong> One reminder a minute at most.</span></li>
+      </ul>
+    </div>
+
+    <div class="trio" aria-label="Mockup: anonymous reminder, seen by Sam, Lea and Tom">
+      <div class="mini">
+        <div class="who"><span class="seat">S</span>Sam · is hosting</div>
+        <span class="meter">3 people out of 6 have voted</span>
+        <p class="host-say">Sam doesn't know who is left.</p>
+        <button class="btn" id="nudge">Remind the group</button>
+        <p class="cooldown" id="cool" aria-live="polite"></p>
+      </div>
+      <div class="mini">
+        <div class="who"><span class="seat b">L</span>Lea</div>
+        <span class="meter">2 ideas left without your vote</span>
+        <div class="idea"><div class="idea-row"><span>Mountain chalet</span><div class="vote"><span>↑</span><span>↓</span></div></div></div>
+        <div class="toast" id="toast-lea" role="status">Sam reminds the group: you still have ideas to vote on.</div>
+      </div>
+      <div class="mini">
+        <div class="who"><span class="seat b">T</span>Tom</div>
+        <span class="meter done">You voted on every idea</span>
+        <div class="idea"><div class="idea-row"><span>Mountain chalet</span><div class="vote"><span class="up">↑</span><span>↓</span></div></div></div>
+        <p class="silent" id="silent-tom">Nothing shows: Tom has voted on everything.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shipped -->
+  <section class="shipped" aria-labelledby="f-shipped">
+    <p class="eyebrow">Live since October 6, 2026</p>
+    <h2 id="f-shipped">What shipped just before</h2>
+    <div class="grid">
+      <article class="ship"><span class="v">0.12.0</span><h3>Automatic recap</h3><p>The timer ends and the session moves to the recap by itself, even if the host's phone is asleep.</p></article>
+      <article class="ship"><span class="v">0.12.0</span><h3>Change your idea</h3><p>2 minutes to fix a typo; the idea shows “Changed” and its votes start over.</p></article>
+      <article class="ship"><span class="v">0.13.0</span><h3>Shared recap</h3><p>A read-only link for people who weren't there: no seat taken, no names shown.</p></article>
+      <article class="ship"><span class="v">0.14.0</span><h3>Add to calendar</h3><p>The common slot of a date topic, as an .ics file for Apple, Google or Outlook.</p></article>
+      <article class="ship"><span class="v">0.15.0</span><h3>Start again with these topics</h3><p>A finished session starts again with the same topics and settings, ideas and votes at zero.</p></article>
+    </div>
+  </section>
+
+  <!-- Decisions -->
+  <section class="decide" aria-labelledby="f-decide">
+    <span class="pause">Validated, in development</span>
+    <h2 id="f-decide">Choices made, validated on October 6, 2026</h2>
+    <ul class="qs">
+      <li><span class="f">Points</span><p>A budget of <em>5 points</em> per topic (or 3 or 10), several points allowed on one idea, an idea is <em>kept from 1 point</em>. Not combined with single-answer lists or the “for” vote limit.</p></li>
+      <li><span class="f">Comments</span><p><em>Anonymous</em>, 140 characters, removable by their author and by <em>the host</em>. Shown in the session and its recap, never on the room screen or in exports.</p></li>
+      <li><span class="f">Reminder</span><p>Sent <em>only</em> to people who still have ideas without their vote, <em>once a minute</em> at most, with no count sent to the host.</p></li>
+      <li><span class="f">Order</span><p>Shipped one by one: reminder, then comments, then points (the largest, touching results and exports).</p></li>
+    </ul>
+  </section>
+
+</div>
+
+<script>
+(() => {
+  // Points: a budget of 5, spread with − / +.
+  const BUDGET = 5;
+  const ideas = [
+    { name: "Lakeside cottage", pts: 0 },
+    { name: "Lakeside campsite", pts: 0 },
+    { name: "Mountain chalet", pts: 0 },
+  ];
+  const list = document.getElementById("point-ideas");
+  const dots = document.getElementById("dots");
+  const badge = document.getElementById("left-badge");
+  list.style.display = "grid";
+  list.style.gap = "8px";
+  const used = () => ideas.reduce((sum, i) => sum + i.pts, 0);
+
+  function render() {
+    const left = BUDGET - used();
+    badge.textContent = left === 0 ? "All your points are given" : `${left} point${left === 1 ? "" : "s"} left out of ${BUDGET}`;
+    dots.replaceChildren(...Array.from({ length: BUDGET }, (_, k) => {
+      const d = document.createElement("span");
+      d.className = "dot" + (k >= left ? " used" : "");
+      return d;
+    }));
+    list.replaceChildren(...ideas.map((idea, index) => {
+      const row = document.createElement("div");
+      row.className = "idea";
+      const line = document.createElement("div");
+      line.className = "idea-row";
+      const label = document.createElement("span");
+      label.textContent = idea.name;
+      const stepper = document.createElement("div");
+      stepper.className = "stepper" + (idea.pts > 0 ? " has" : "");
+      stepper.setAttribute("role", "group");
+      stepper.setAttribute("aria-label", `Points for ${idea.name}`);
+      const minus = document.createElement("button");
+      minus.type = "button"; minus.textContent = "−"; minus.setAttribute("aria-label", "Remove a point");
+      minus.disabled = idea.pts === 0;
+      minus.addEventListener("click", () => { idea.pts--; render(); focusAfter(index, 0); });
+      const out = document.createElement("output");
+      out.textContent = String(idea.pts);
+      const plus = document.createElement("button");
+      plus.type = "button"; plus.textContent = "+"; plus.setAttribute("aria-label", "Add a point");
+      plus.disabled = left === 0;
+      plus.addEventListener("click", () => { idea.pts++; render(); focusAfter(index, 2); });
+      stepper.append(minus, out, plus);
+      line.append(label, stepper);
+      row.append(line);
+      return row;
+    }));
+  }
+  // Keep keyboard focus on the same control after a re-render.
+  function focusAfter(index, child) {
+    const btn = list.children[index]?.querySelector(".stepper")?.children[child];
+    if (btn && !btn.disabled) btn.focus();
+  }
+  ideas[0].pts = 3; ideas[2].pts = 1;
+  render();
+
+  // Comments: anonymous one-liners, yours marked and removable.
+  const comments = [
+    { text: "Are there hot showers?", mine: false },
+    { text: "Yes, and it's a 5-minute walk from the lake.", mine: false },
+  ];
+  const box = document.getElementById("comments");
+  const form = document.getElementById("c-form");
+  const input = document.getElementById("c-input");
+  const send = document.getElementById("c-send");
+  const left = document.getElementById("c-left");
+  const count = document.getElementById("c-count");
+  function renderComments() {
+    count.textContent = `${comments.length} comment${comments.length === 1 ? "" : "s"}`;
+    box.replaceChildren(...comments.map((c, i) => {
+      const row = document.createElement("div");
+      row.className = "comment";
+      const p = document.createElement("p");
+      p.textContent = c.text;
+      row.append(p);
+      if (c.mine) {
+        const tag = document.createElement("span");
+        tag.className = "badge mine"; tag.textContent = "Your comment";
+        const x = document.createElement("button");
+        x.type = "button"; x.className = "x"; x.textContent = "×"; x.setAttribute("aria-label", "Remove my comment");
+        x.addEventListener("click", () => { comments.splice(i, 1); renderComments(); input.focus(); });
+        row.append(tag, x);
+      }
+      return row;
+    }));
+    const mine = comments.filter((c) => c.mine).length;
+    input.disabled = mine >= 3;
+    input.placeholder = mine >= 3 ? "You have reached 3 comments here" : "A detail, a question…";
+  }
+  input.addEventListener("input", () => {
+    send.disabled = !input.value.trim();
+    left.textContent = String(140 - input.value.length);
+  });
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    comments.push({ text, mine: true });
+    input.value = ""; send.disabled = true; left.textContent = "140";
+    renderComments();
+  });
+  renderComments();
+
+  // Nudge: only Lea, who still has votes left, gets it; nobody learns who.
+  const nudge = document.getElementById("nudge");
+  const cool = document.getElementById("cool");
+  const toast = document.getElementById("toast-lea");
+  const silent = document.getElementById("silent-tom");
+  let timer;
+  nudge.addEventListener("click", () => {
+    toast.classList.add("show");
+    silent.classList.add("show");
+    nudge.disabled = true;
+    nudge.textContent = "Reminder sent";
+    let s = 60;
+    cool.textContent = `Next reminder possible in ${s} s`;
+    clearInterval(timer);
+    timer = setInterval(() => {
+      s -= 1;
+      if (s === 55) { toast.classList.remove("show"); silent.classList.remove("show"); }
+      if (s <= 0) {
+        clearInterval(timer);
+        nudge.disabled = false;
+        nudge.textContent = "Remind the group";
+        cool.textContent = "";
+      } else {
+        cool.textContent = `Next reminder possible in ${s} s`;
+      }
+    }, 1000);
+  });
+})();
+</script>
+
+</body>
+</html>
