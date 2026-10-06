@@ -209,6 +209,8 @@
     "settings": "Réglages",
     "allowSelfVote": "Voter sur ses propres idées",
     "allowSelfVoteHint": "Si c'est désactivé, personne ne peut voter pour ou contre les idées qu'il a proposées, et ces votes déjà donnés sont retirés.",
+    "allowComments": "Commentaires sur les idées",
+    "allowCommentsHint": "Si c'est activé, chacun peut laisser un court commentaire anonyme sur une idée avant de voter ; tu peux retirer n'importe lequel.",
     "timerLabel": "Minuteur des idées",
     "timerHint": "Le temps démarre au lancement des idées. À la fin, rien n'est bloqué : c'est un repère pour garder le rythme.",
     "timerOff": "Aucun",
@@ -510,7 +512,8 @@
     "commentNotFound": "Ce commentaire a déjà été retiré.",
     "notCommentAuthor": "Tu ne peux retirer que tes propres commentaires.",
     "tooManyComments": "Tu as déjà laissé le maximum de commentaires sur cette idée.",
-    "roomCommentLimit": "Cette séance a atteint son nombre maximum de commentaires."
+    "roomCommentLimit": "Cette séance a atteint son nombre maximum de commentaires.",
+    "commentsOff": "Les commentaires sont désactivés dans cette séance."
   },
   "theme": {
     "label": "Thème",

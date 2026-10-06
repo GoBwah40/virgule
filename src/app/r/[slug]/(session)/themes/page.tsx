@@ -39,6 +39,7 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
             slug={slug}
             themes={themes}
             allowSelfVote={page.room.allowSelfVote}
+            allowComments={page.room.allowComments}
             ideasTimerMinutes={page.room.ideasTimerMinutes}
             autoRecap={page.room.autoRecap}
             capacity={page.room.capacity}

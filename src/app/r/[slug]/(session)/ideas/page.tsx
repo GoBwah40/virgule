@@ -21,7 +21,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
   const t = await getTranslations("ideas");
   const { room, me } = page;
   const [themes, progress] = await Promise.all([
-    getVotingView(room.id, room.round, me, room.allowSelfVote),
+    getVotingView(room.id, room.round, me, room.allowSelfVote, room.allowComments),
     // Host only: know whether everyone has voted before closing.
     me.isHost ? getVoteProgress(room.id, room.round, room.allowSelfVote) : null,
   ]);

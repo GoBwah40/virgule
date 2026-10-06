@@ -113,6 +113,13 @@ export async function pick(page: Page, name: string) {
   await expect(radio).toBeChecked();
 }
 
+/** Host, on the topics page: turns on comments on ideas (off by default). */
+export async function turnOnComments(page: Page) {
+  const setting = page.getByRole("switch", { name: "Comments on ideas" });
+  await setting.click();
+  await expect(setting).toBeChecked();
+}
+
 /** Host: starts the ideas phase; the guests' pages follow by themselves. */
 export async function startIdeas(page: Page) {
   await page.getByRole("button", { name: "Start the ideas" }).click();

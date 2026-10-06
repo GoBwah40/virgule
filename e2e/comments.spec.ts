@@ -13,6 +13,7 @@ import {
   suggestIdea,
   suggestPizzaAndSushi,
   test,
+  turnOnComments,
 } from "./helpers";
 
 // Short anonymous comments on ideas, while ideas are open: everyone sees them, nobody knows
@@ -40,8 +41,16 @@ async function addComment(page: Page, content: string, text: string) {
   await expect(comment(page, content, text)).toBeVisible();
 }
 
+test("comments are off until the host turns them on", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await expect(page.getByRole("switch", { name: "Comments on ideas" })).not.toBeChecked();
+  await suggestPizzaAndSushi(page, guest);
+  for (const p of [page, guest]) await expect(toggle(p, "Sushi")).toHaveCount(0);
+});
+
 test("a comment shows to everyone without its author, who alone can remove it", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
+  await turnOnComments(page);
   await suggestPizzaAndSushi(page, guest);
 
   await addComment(page, "Sushi", "Is it far from the station?");
@@ -65,6 +74,7 @@ test("a comment shows to everyone without its author, who alone can remove it", 
 
 test("the host removes someone else's comment, after confirming", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
+  await turnOnComments(page);
   await suggestPizzaAndSushi(page, guest);
   await addComment(guest, "Pizza", "Too heavy for a weeknight");
   await addComment(page, "Pizza", "Thin crust then");
@@ -84,6 +94,7 @@ test("the host removes someone else's comment, after confirming", async ({ page,
 
 test("three comments per person on an idea, fifty in a session", async ({ page, openAsGuest }) => {
   const { link, guest } = await setUpSession(page, openAsGuest);
+  await turnOnComments(page);
   await suggestPizzaAndSushi(page, guest);
   for (const text of ["First thought", "Second thought", "Third thought"]) await addComment(guest, "Sushi", text);
   const field = idea(guest, "Sushi").getByLabel("Your comment on this idea");
@@ -105,6 +116,7 @@ test("three comments per person on an idea, fifty in a session", async ({ page, 
 test("comments stay in the session's recap, read-only, and nowhere else", async ({ page, openAsGuest }) => {
   test.slow();
   const { link, guest } = await setUpSession(page, openAsGuest);
+  await turnOnComments(page);
   const screen = await openPresentation(page);
   await suggestPizzaAndSushi(page, guest);
   await addComment(guest, "Sushi", "They deliver too");
@@ -148,6 +160,7 @@ test("comments stay in the session's recap, read-only, and nowhere else", async 
 
 test("comments are kept when voting reopens", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
+  await turnOnComments(page);
   await suggestPizzaAndSushi(page, guest);
   await addComment(guest, "Pizza", "With a salad");
   await seeRecap(page);

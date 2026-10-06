@@ -15,6 +15,7 @@ import {
   startIdeas,
   suggestIdea,
   test,
+  turnOnComments,
   vote,
 } from "./helpers";
 
@@ -82,6 +83,7 @@ test("no page ever receives a participant's token or who suggested an idea", asy
 test("a comment reaches the pages without its author, nor anyone's token", async ({ page, openAsGuest }) => {
   test.slow();
   const { link, guest } = await setUpSession(page, openAsGuest);
+  await turnOnComments(page);
   const screen = await openPresentation(page);
   const guestAnswers = await recordAnswers(guest);
   const hostAnswers = await recordAnswers(page);

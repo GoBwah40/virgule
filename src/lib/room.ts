@@ -26,6 +26,8 @@ export type RoomContext =
         phase: Phase;
         round: number;
         allowSelfVote: boolean;
+        /** Comments on ideas are turned on. */
+        allowComments: boolean;
         requireNetPositive: boolean;
         expiresAt: Date;
         ideasTimerMinutes: number | null;
@@ -75,6 +77,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       phase: room.phase,
       round: room.round,
       allowSelfVote: room.allowSelfVote,
+      allowComments: room.allowComments,
       requireNetPositive: room.requireNetPositive,
       expiresAt: room.expiresAt,
       ideasTimerMinutes: room.ideasTimerMinutes,
@@ -183,7 +186,8 @@ export type VotingIdea = {
   edited: boolean;
   /** Own idea still in its edit window: its raw value, and until when (ISO 8601). */
   edit: { until: string; value: IdeaFields } | null;
-  comments: CommentView[];
+  /** Null while comments are turned off: nothing to show, nothing to add. */
+  comments: CommentView[] | null;
   /** The current participant can still comment on it (MAX_COMMENTS_PER_IDEA). */
   canComment: boolean;
 };
@@ -213,6 +217,7 @@ export async function getVotingView(
   round: number,
   me: { id: string; isHost: boolean },
   allowSelfVote: boolean,
+  allowComments: boolean,
 ): Promise<VotingTheme[]> {
   const meId = me.id;
   const themes = await db.theme.findMany({
@@ -264,8 +269,8 @@ export async function getVotingView(
           mapQuery: theme.kind === "PLACE" ? idea.content : null,
           edited: idea.editedAt !== null,
           edit: isMine && isNew && ideaEditableUntil(idea.createdAt) > now ? editOf(idea) : null,
-          comments: commentViews(idea.comments, me, true),
-          canComment: idea.comments.filter((comment) => comment.authorId === meId).length < MAX_COMMENTS_PER_IDEA,
+          comments: allowComments ? commentViews(idea.comments, me, true) : null,
+          canComment: allowComments && idea.comments.filter((comment) => comment.authorId === meId).length < MAX_COMMENTS_PER_IDEA,
         };
       }),
   }));
@@ -412,7 +417,13 @@ export async function getRecap(
  * Comments by idea, read-only, for the session recap of a participant. Never for the room screen,
  * the shared recap or the exports, which call `getRecap` alone.
  */
-export async function getRecapComments(roomId: string, meId: string): Promise<Record<string, CommentView[]>> {
+export async function getRecapComments(
+  room: { id: string; allowComments: boolean },
+  meId: string,
+): Promise<Record<string, CommentView[]>> {
+  // Turned off: those written while they were on stay hidden, like on the ideas page.
+  if (!room.allowComments) return {};
+  const roomId = room.id;
   const comments = await db.comment.findMany({
     where: { roomId },
     orderBy: [...commentsOrder],

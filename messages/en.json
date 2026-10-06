@@ -209,6 +209,8 @@
     "settings": "Settings",
     "allowSelfVote": "Vote on your own ideas",
     "allowSelfVoteHint": "When off, nobody can vote for or against the ideas they suggested, and such votes already cast are removed.",
+    "allowComments": "Comments on ideas",
+    "allowCommentsHint": "When on, everyone can leave a short anonymous comment on an idea before voting; you can remove any of them.",
     "timerLabel": "Ideas timer",
     "timerHint": "The timer starts when the ideas start. When it ends, nothing is locked: it's a cue to keep the pace.",
     "timerOff": "None",
@@ -510,7 +512,8 @@
     "commentNotFound": "This comment has already been removed.",
     "notCommentAuthor": "You can only remove your own comments.",
     "tooManyComments": "You've already left as many comments as you can on this idea.",
-    "roomCommentLimit": "This session has reached its maximum number of comments."
+    "roomCommentLimit": "This session has reached its maximum number of comments.",
+    "commentsOff": "Comments are turned off in this session."
   },
   "theme": {
     "label": "Theme",
