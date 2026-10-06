@@ -133,3 +133,24 @@ test("a link to a step that does not exist shows the not-found page", async ({ p
   expect(response?.status()).toBe(404);
   await expect(page.getByRole("heading", { name: "Session not found" })).toBeVisible();
 });
+
+test("a step page whose reveal animation the browser skips shows no error", async ({ page }) => {
+  const link = await createRoom(page, { name: "Friday night", host: "Sam" });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto(`${link}/themes`);
+  await expect(page.getByRole("button", { name: "Add the topic" })).toBeVisible();
+
+  // What React's streaming script does to reveal a loading page: a view transition whose `ready`
+  // promise is chained without a catch. The browser skips it when it cannot capture the page (a
+  // background tab; here the viewport resizing, as a phone's address bar does while loading).
+  await page.evaluate(() => {
+    const transition = document.startViewTransition(() => new Promise((done) => setTimeout(done, 1000)));
+    void transition.ready.finally(() => {});
+  });
+  const viewport = page.viewportSize()!;
+  await page.setViewportSize({ width: viewport.width, height: viewport.height - 100 });
+  // Any other unhandled rejection still shows.
+  await page.evaluate(() => new Promise((done) => setTimeout(done, 1500)).then(() => void Promise.reject(new Error("unrelated"))));
+  await expect.poll(() => errors).toEqual(["unrelated"]);
+});

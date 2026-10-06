@@ -12,6 +12,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { defaultLocale } from "@/i18n/config";
 import { isLocale } from "@/i18n/locale";
 import { REPO_URL } from "@/lib/config";
+import { IGNORE_SKIPPED_VIEW_TRANSITIONS_SCRIPT } from "@/lib/ignore-skipped-view-transitions";
 import { RELOAD_WHEN_BACK_ONLINE_SCRIPT } from "@/lib/reload-when-online";
 import { parseThemePreference, THEME_COOKIE } from "@/lib/theme";
 
@@ -44,6 +45,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <head>
         {/* First in the page, to see the scripts and styles that fail while loading. */}
         <script dangerouslySetInnerHTML={{ __html: RELOAD_WHEN_BACK_ONLINE_SCRIPT }} />
+        {/* Before React's streaming scripts, whose skipped view transitions it silences. */}
+        <script dangerouslySetInnerHTML={{ __html: IGNORE_SKIPPED_VIEW_TRANSITIONS_SCRIPT }} />
       </head>
       <body className="flex min-h-full flex-col text-base">
         <NextIntlClientProvider>
