@@ -9,7 +9,7 @@ Brainstorming and planning app for small groups (up to 12 people, 6 by default),
 3. **Recap**: ideas are ranked by score. The host chooses the qualification rule (by default, *positive score*: more "for" than "against"; otherwise, a single "for" is enough). They can then:
    - **start a new round**: only the kept ideas remain, votes are reset and new ideas can be suggested;
    - **reopen voting** for the current round;
-   - **end the session**: the room becomes read-only.
+   - **end the session**: the room becomes read-only. Anyone in it can then **start again with the same topics** and settings, in a new session they host.
 
 The host drives the phases, and all participants follow automatically. The recap keeps the history of each round and can be exported as **Markdown**, **CSV** (Excel-compatible) or **PDF** (through the browser's print dialog). The host can also share a **read-only link** to the recap with people who were not there: no seat taken, no names shown. A date or period topic can be added to a calendar (`.ics` file): the common slot of the kept periods, or the date in the lead.
 

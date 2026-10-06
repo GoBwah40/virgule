@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Equal, Eye, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
+import { Copy, Download, Equal, Eye, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSyncExternalStore } from "react";
 
@@ -32,6 +32,7 @@ import {
   disableShareLink,
   enableShareLink,
   reopenVoting,
+  reuseTopics,
   setRequireNetPositive,
   startNextRound,
   startTiebreakRound,
@@ -135,6 +136,26 @@ export function RecapHostControls({
  * Host: a read-only link to the recap, for people who were not there. They take no seat and see
  * no names; the link stops working when the session goes offline, or when the host turns it off.
  */
+/** Session over: a new one with the same topics and settings, hosted by whoever taps it. */
+export function ReuseTopicsButton({ slug }: { slug: string }) {
+  const t = useTranslations("recap");
+  const [pending, run] = useAction();
+  return (
+    <ConfirmButton
+      variant="outline"
+      className="print:hidden"
+      disabled={pending}
+      title={t("reuseConfirm")}
+      description={t("reuseConfirmHint")}
+      confirmLabel={t("reuse")}
+      onConfirm={() => run(() => reuseTopics(slug))}
+    >
+      <Copy data-icon="inline-start" />
+      {t("reuse")}
+    </ConfirmButton>
+  );
+}
+
 const noop = () => () => {};
 
 export function ShareRecapButton({ slug, sharePath, roomName }: { slug: string; sharePath: string | null; roomName: string }) {
