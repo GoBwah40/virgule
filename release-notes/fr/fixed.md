@@ -2,6 +2,11 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.12.1 — 2026-10-06
+
+- L'export Markdown montre les prénoms, les sujets et les idées tels qu'ils ont été tapés : des caractères comme * ou [ ne se transforment plus en mise en forme ou en liens, et le nom du fichier porte le même jour que la date indiquée dedans.
+- Quand deux personnes agissent au même instant, la séance ne peut plus se retrouver avec deux personnes qui animent, plus de monde que de places, deux fois la même idée ou deux fois le même prénom ; et un souci du serveur au moment de rejoindre ne dit plus que ton prénom est déjà pris.
+
 ## 0.11.3 — 2026-10-06
 
 - Sur une tablette tenue à la verticale, un tableau choisi plus tôt laisse place à la liste, faute de bouton pour y revenir.

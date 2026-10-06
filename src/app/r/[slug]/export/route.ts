@@ -1,4 +1,4 @@
-import { getFormatter, getLocale, getTranslations } from "next-intl/server";
+import { getFormatter, getLocale, getTimeZone, getTranslations } from "next-intl/server";
 
 import { exportFileName, toCsv, toMarkdown, type ExportLabels } from "@/lib/export";
 import { getOverviewText } from "@/lib/overview-format";
@@ -62,7 +62,7 @@ export async function GET(request: Request, { params }: RouteContext<"/r/[slug]/
   return new Response(body, {
     headers: {
       "Content-Type": contentType,
-      "Content-Disposition": `attachment; filename="${exportFileName(ctx.room.name, now)}.${format}"`,
+      "Content-Disposition": `attachment; filename="${exportFileName(ctx.room.name, now, await getTimeZone())}.${format}"`,
       "Cache-Control": "no-store",
     },
   });

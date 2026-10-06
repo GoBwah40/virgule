@@ -2,6 +2,11 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.12.1 — 2026-10-06
+
+- The Markdown export shows names, topics and ideas exactly as typed: characters such as * or [ no longer turn into formatting or links, and the file name carries the same day as the date inside the file.
+- When two people act at the very same moment, the session can no longer end up with two people hosting, more people than seats, the same idea twice, or two people with the same first name; and a problem with the server while joining no longer says your first name is taken.
+
 ## 0.11.3 — 2026-10-06
 
 - On a tablet turned upright, a board picked earlier gives way to the list, which had no way back there.

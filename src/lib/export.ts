@@ -26,16 +26,28 @@ export type ExportLabels = {
 
 export type ExportData = { participants: string[]; rounds: RecapRound[] };
 
-/** Escapes characters that would break a Markdown table. */
-const mdCell = (value: string) => value.replace(/\|/g, "\\|").replace(/\r?\n/g, "<br>");
+/**
+ * Text typed by participants (names, topics, ideas), shown as plain text: Markdown and HTML
+ * characters are escaped, so nobody can slip emphasis, a link or a tag into the shared file.
+ * Line breaks become spaces, so nothing typed can start a line (a heading, a list…): "#" and
+ * "!" stay as they are, French punctuation included.
+ */
+const mdText = (value: string) => value.replace(/[\\`*_[\]<>|~]/g, "\\$&").replace(/\s*\r?\n\s*/g, " ");
+
+/** Same, in a table cell, where a line break is kept as <br>. */
+const mdCell = (value: string) =>
+  value
+    .split(/\r?\n/)
+    .map(mdText)
+    .join("<br>");
 
 export function toMarkdown(data: ExportData, l: ExportLabels): string {
   const lines: string[] = [
-    `# ${l.title}`,
+    `# ${mdText(l.title)}`,
     "",
     `_${l.generatedOn}_`,
     "",
-    `- **${l.participants}**${l.colon}${data.participants.join(", ")}`,
+    `- **${l.participants}**${l.colon}${data.participants.map(mdText).join(", ")}`,
     `- **${l.rules}**${l.colon}${l.rule}`,
     "",
   ];
@@ -44,11 +56,11 @@ export function toMarkdown(data: ExportData, l: ExportLabels): string {
   for (const round of [...data.rounds].reverse()) {
     lines.push(`## ${l.roundTitle(round.round)}`, "", l.summary(round.qualifiedCount, round.ideaCount), "");
     for (const theme of round.themes) {
-      lines.push(`### ${theme.title}`, "");
-      if (theme.description) lines.push(`> ${theme.description.replace(/\r?\n/g, " ")}`, "");
+      lines.push(`### ${mdText(theme.title)}`, "");
+      if (theme.description) lines.push(`> ${mdText(theme.description)}`, "");
       if (theme.overview) {
         const { summary, detail } = l.overview(theme.overview);
-        lines.push(`**${summary}**. ${detail}`, "");
+        lines.push(`**${mdText(summary)}**. ${mdText(detail)}`, "");
       }
       if (theme.ideas.length === 0) {
         lines.push(`_${l.empty}_`, "");
@@ -103,8 +115,11 @@ export function toCsv(data: ExportData, l: ExportLabels): string {
   return "﻿" + rows.map((r) => r.map(csvCell).join(l.csvSeparator)).join("\r\n") + "\r\n";
 }
 
-/** Safe file name: "virgule-product-offsite-q4-2026-09-28". */
-export function exportFileName(roomName: string, date: Date): string {
+/**
+ * Safe file name: "virgule-product-offsite-q4-2026-09-28". The day is taken in `timeZone`, the
+ * one of "Generated on" inside the file, so both agree around midnight.
+ */
+export function exportFileName(roomName: string, date: Date, timeZone: string): string {
   const slug = roomName
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
@@ -112,5 +127,7 @@ export function exportFileName(roomName: string, date: Date): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 50);
-  return `virgule-${slug || "recap"}-${date.toISOString().slice(0, 10)}`;
+  // en-CA writes dates as YYYY-MM-DD.
+  const day = new Intl.DateTimeFormat("en-CA", { timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  return `virgule-${slug || "recap"}-${day}`;
 }
