@@ -5,8 +5,10 @@ import { Countdown } from "@/components/countdown";
 import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
+import { VoteReminder } from "@/components/vote-reminder";
 import { ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
-import { AutoRecap, BackToThemesButton, FinishVotingButton, IdeasBoard, TimerControls } from "@/components/phases/voting-board";
+import { AutoRecap, BackToThemesButton, FinishVotingButton, IdeasBoard, NudgeButton, TimerControls } from "@/components/phases/voting-board";
+import { isRecentNudge, nextNudgeAt } from "@/lib/config";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
 
@@ -34,6 +36,8 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
     return votable.map((i) => exhausted || i.myVote !== null);
   });
   const voted = units.filter(Boolean).length;
+  const nudgedAt = room.nudgedAt ? new Date(room.nudgedAt) : null;
+  const host = hostName(page.participants);
 
   return (
     <PhaseTransition>
@@ -79,6 +83,9 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
               ariaLabel={t("voteProgressLabel")}
             />
           )}
+          {me.isHost && progress && progress.total > 0 && (
+            <NudgeButton slug={slug} availableAt={nextNudgeAt(nudgedAt)?.toISOString() ?? null} />
+          )}
           {/* Gentle nudge: everyone sees what they have left, without knowing anything about the others. */}
           {units.length > 0 && (
             <ProgressMeter
@@ -90,12 +97,16 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
             />
           )}
         </div>
-        <IdeasBoard
-          slug={slug}
-          themes={themes}
-          allowNewIdeas={!room.tiebreak}
-          hostName={hostName(page.participants)}
-        />
+        {/* The host's reminder: each page decides for its own participant, the server never knows who. */}
+        {!me.isHost && (
+          <VoteReminder
+            sentAt={isRecentNudge(nudgedAt) ? room.nudgedAt : null}
+            storageKey={`virgule:nudge:${slug}`}
+            concerned={voted < units.length}
+            message={t("nudgeReceived", { host })}
+          />
+        )}
+        <IdeasBoard slug={slug} themes={themes} allowNewIdeas={!room.tiebreak} hostName={host} />
       </ViewProvider>
     </PhaseTransition>
   );

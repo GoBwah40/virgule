@@ -18,6 +18,7 @@ import {
   LIMITS,
   MAX_PENDING_SUGGESTIONS,
   MAX_THEMES,
+  NUDGE_COOLDOWN_SECONDS,
   roomCapacity,
   ROOM_SIZES,
   ROOM_TTL_DAYS,
@@ -72,6 +73,7 @@ type ActionError =
   | "voteLimitBelowUsed"
   | "editWindowOver"
   | "timerRunning"
+  | "nudgeTooSoon"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -730,6 +732,27 @@ export async function stopTimer(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
     await db.room.update({ where: { id: room.id }, data: { phaseEndsAt: null } });
+  });
+}
+
+/**
+ * Anonymous reminder to vote: each page shows it to its participant only if they still have
+ * ideas left without their vote, so nobody, the host included, learns who received it.
+ * At most one per NUDGE_COOLDOWN_SECONDS: the conditional update lets only one request through.
+ */
+export async function nudgeVoters(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "IDEAS" });
+    const now = new Date();
+    const claimed = await db.room.updateMany({
+      where: {
+        id: room.id,
+        phase: "IDEAS",
+        OR: [{ nudgedAt: null }, { nudgedAt: { lte: new Date(now.getTime() - NUDGE_COOLDOWN_SECONDS * 1000) } }],
+      },
+      data: { nudgedAt: now },
+    });
+    if (claimed.count === 0) throw new ActionFailure("nudgeTooSoon");
   });
 }
 

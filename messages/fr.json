@@ -225,6 +225,9 @@
     "timerExtend": "+{count} min",
     "timerStop": "Arrêter le minuteur",
     "autoRecapNotice": "À la fin du temps, on passe au bilan.",
+    "nudge": "Rappeler au groupe de voter",
+    "nudgeSent": "Rappel envoyé",
+    "nudgeReceived": "{host} rappelle au groupe : il te reste des idées à voter.",
     "empty": "Pas encore d'idée ici. Qui commence ?",
     "listLabel": "Idées pour {title}",
     "ideaCount": "{count, plural, one {# idée} other {# idées}}",
@@ -469,7 +472,8 @@
     "themeInPastRounds": "Ce sujet figure dans les bilans des tours précédents : on ne peut plus le supprimer.",
     "voteLimitBelowUsed": "Certaines personnes ont déjà donné plus de votes « pour » que ça dans ce sujet : choisis une limite plus haute.",
     "editWindowOver": "Cette idée ne peut plus être modifiée : tu peux la retirer et en proposer une autre.",
-    "timerRunning": "Le minuteur n'est pas encore terminé."
+    "timerRunning": "Le minuteur n'est pas encore terminé.",
+    "nudgeTooSoon": "Un rappel vient d'être envoyé : attends une minute avant d'en renvoyer un."
   },
   "theme": {
     "label": "Thème",

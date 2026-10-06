@@ -35,6 +35,8 @@ export type RoomContext =
         recapSeen: boolean;
         /** The session moves to the recap by itself when the ideas timer runs out. */
         autoRecap: boolean;
+        /** Last reminder to vote sent by the host (ISO string, null = none). */
+        nudgedAt: string | null;
         /** Number of seats (size chosen by the host). */
         capacity: number;
         /** A room screen is paired (its secret never leaves this module). */
@@ -80,6 +82,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       tiebreak: room.tiebreak,
       recapSeen: room.recapSeen,
       autoRecap: room.autoRecap,
+      nudgedAt: room.nudgedAt?.toISOString() ?? null,
       capacity: roomCapacity(room),
       screenPaired: room.screenToken !== null,
     },

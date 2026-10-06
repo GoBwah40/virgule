@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.16.0 — 2026-10-06
+
+- During the votes, the person hosting can remind the group to vote: only the people who still have ideas to vote on see it, and nobody knows who.
+
 ## 0.15.0 — 2026-10-06
 
 - Once a session is over, anyone in it can start again with the same topics and settings: a new session that they host, with ideas and votes starting from zero.

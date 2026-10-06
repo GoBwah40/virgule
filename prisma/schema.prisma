@@ -56,6 +56,9 @@ model Room {
   /// Secret of the read-only recap link the host shares with people who were not there
   /// (null = no link). Only the host reads it, to show the link.
   shareToken       String?       @unique
+  /// Last anonymous reminder to vote sent by the host (null = none). At most one per minute
+  /// (NUDGE_COOLDOWN_SECONDS); nobody learns who received it.
+  nudgedAt         DateTime?
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]

@@ -1,12 +1,13 @@
 "use client";
 
-import { ListChecks, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
+import { BellRing, ListChecks, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { AmountField } from "@/components/amount-field";
 import { BoardColumns } from "@/components/board-columns";
 import { ConfirmButton } from "@/components/confirm-button";
+import { CooldownButton } from "@/components/cooldown-button";
 import { CountBadge } from "@/components/count-badge";
 import { DateField } from "@/components/date-field";
 import { FormField } from "@/components/form-field";
@@ -24,7 +25,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { type ActionResult, addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, goToRecapOnTimer, stopTimer, updateIdea } from "@/lib/actions";
+import { type ActionResult, addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, goToRecapOnTimer, nudgeVoters, stopTimer, updateIdea } from "@/lib/actions";
 import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
 import type { IdeaFields, IdeaInput, ThemeKind } from "@/lib/idea-value";
 import { isBadServerResponse, isNetworkError } from "@/lib/network-error";
@@ -544,6 +545,22 @@ export function TimerControls({ slug }: { slug: string }) {
         <TimerOff />
       </Button>
     </div>
+  );
+}
+
+/** Host: reminds whoever still has ideas left without their vote, without knowing who. */
+export function NudgeButton({ slug, availableAt }: { slug: string; availableAt: string | null }) {
+  const t = useTranslations("ideas");
+  const [pending, run] = useAction();
+  return (
+    <CooldownButton
+      icon={BellRing}
+      label={t("nudge")}
+      doneLabel={t("nudgeSent")}
+      availableAt={availableAt}
+      pending={pending}
+      onClick={() => run(() => nudgeVoters(slug))}
+    />
   );
 }
 

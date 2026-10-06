@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.16.0 — 2026-10-06
+
+- Pendant les votes, la personne qui anime peut rappeler au groupe de voter : seules les personnes à qui il reste des idées à voter le voient, et personne ne sait qui.
+
 ## 0.15.0 — 2026-10-06
 
 - Une fois la séance terminée, toute personne qui y a participé peut relancer une séance avec les mêmes sujets et réglages, et l'animer ; idées et votes repartent de zéro.

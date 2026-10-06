@@ -270,3 +270,8 @@ export async function expireRoom(link: string) {
   // `createdAt` is in the past and stored in the same format as `expiresAt`.
   await write("UPDATE Room SET expiresAt = createdAt WHERE slug = ?", [slugOf(link)]);
 }
+
+/** The host's last reminder to vote sent long ago: past the wait before the next one. */
+export async function ageNudge(link: string) {
+  await write('UPDATE Room SET "nudgedAt" = ? WHERE slug = ?', ["2000-01-01T00:00:00.000+00:00", slugOf(link)]);
+}
