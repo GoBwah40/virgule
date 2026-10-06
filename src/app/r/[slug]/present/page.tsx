@@ -145,13 +145,17 @@ export default async function PresentPage({ params }: PageProps<"/r/[slug]/prese
           topic={topic.title}
           winners={winners}
           verdict={winners.length === 0 ? t("noneKept") : winners.length > 1 ? t("tied") : t("kept")}
+          pointsMax={topic.pointsBudget !== null ? (topic.ideas[0]?.score.up ?? 0) : undefined}
           ideas={topic.ideas.slice(0, RANKED_IDEAS).map((idea) => ({
             id: idea.id,
             content: idea.content,
             up: idea.score.up,
             down: idea.score.down,
             qualified: idea.qualified,
-            votesLabel: t("votes", { up: idea.score.up, down: idea.score.down }),
+            votesLabel:
+              topic.pointsBudget !== null
+                ? t("points", { count: idea.score.up })
+                : t("votes", { up: idea.score.up, down: idea.score.down }),
             statusLabel: idea.qualified ? tRecap("qualified") : tRecap("notQualified"),
           }))}
           moreLabel={topic.ideas.length > RANKED_IDEAS ? t("more", { count: topic.ideas.length - RANKED_IDEAS }) : undefined}

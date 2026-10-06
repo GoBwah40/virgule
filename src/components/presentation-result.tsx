@@ -20,6 +20,11 @@ type Props = {
   }[];
   /** Ideas left out of the ranking (e.g. "+ 3 more ideas"). */
   moreLabel?: string;
+  /**
+   * Points topic: `up` holds each idea's points, and the bars are measured against this total
+   * (the leading idea's), with no "against" share.
+   */
+  pointsMax?: number;
   /** `stage`: the room screen, sized on the window; `page`: the recap "topic by topic", in a card. */
   variant?: "stage" | "page";
   className?: string;
@@ -64,7 +69,7 @@ const STYLES = {
 } as const;
 
 /** Recap of one topic: the kept idea in large, then the votes, never who cast them. */
-export function PresentationResult({ topic, winners, verdict, ideas, moreLabel, variant = "stage", className }: Props) {
+export function PresentationResult({ topic, winners, verdict, ideas, moreLabel, pointsMax, variant = "stage", className }: Props) {
   const s = STYLES[variant];
   // Tied ideas share the space, a long one needs it: a size down, or two, so that they all fit.
   const longest = Math.max(0, ...winners.map((winner) => winner.length));
@@ -89,7 +94,7 @@ export function PresentationResult({ topic, winners, verdict, ideas, moreLabel, 
         <div className={cn("min-w-0", s.ranking)}>
           <ol className={s.rows}>
             {ideas.map((idea) => {
-              const total = idea.up + idea.down;
+              const total = pointsMax !== undefined ? Math.max(pointsMax, idea.up) : idea.up + idea.down;
               return (
                 <li key={idea.id} className="grid grid-cols-[1fr_auto] items-baseline gap-x-[1em] gap-y-[0.5em]">
                   <span
@@ -108,7 +113,9 @@ export function PresentationResult({ topic, winners, verdict, ideas, moreLabel, 
                     {total > 0 && (
                       <>
                         <span className="bg-success" style={{ width: `${(idea.up / total) * 100}%` }} />
-                        <span className="bg-destructive" style={{ width: `${(idea.down / total) * 100}%` }} />
+                        {pointsMax === undefined && (
+                          <span className="bg-destructive" style={{ width: `${(idea.down / total) * 100}%` }} />
+                        )}
                       </>
                     )}
                   </span>

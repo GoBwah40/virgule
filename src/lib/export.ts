@@ -21,7 +21,8 @@ export type ExportLabels = {
   overview: (overview: RecapOverview) => { summary: string; detail: string };
   /** Status of the overview row in the CSV. */
   overviewStatus: string;
-  columns: { round: string; theme: string; idea: string; up: string; down: string; net: string; status: string };
+  /** `points`: total points, for points topics (whose for / against / score cells stay empty). */
+  columns: { round: string; theme: string; idea: string; up: string; down: string; net: string; points: string; status: string };
 };
 
 export type ExportData = { participants: string[]; rounds: RecapRound[] };
@@ -67,10 +68,17 @@ export function toMarkdown(data: ExportData, l: ExportLabels): string {
         continue;
       }
       const c = l.columns;
-      lines.push(`| ${c.idea} | ${c.up} | ${c.down} | ${c.net} | ${c.status} |`, "| --- | ---: | ---: | ---: | --- |");
+      const points = theme.pointsBudget !== null;
+      // Points topic: the total points alone, there is no "against".
+      lines.push(
+        ...(points
+          ? [`| ${c.idea} | ${c.points} | ${c.status} |`, "| --- | ---: | --- |"]
+          : [`| ${c.idea} | ${c.up} | ${c.down} | ${c.net} | ${c.status} |`, "| --- | ---: | ---: | ---: | --- |"]),
+      );
       for (const idea of theme.ideas) {
         const status = idea.qualified ? `✅ ${l.qualified}` : l.notQualified;
-        lines.push(`| ${mdCell(idea.content)} | ${idea.score.up} | ${idea.score.down} | ${idea.score.net} | ${status} |`);
+        const scores = points ? `${idea.score.up}` : `${idea.score.up} | ${idea.score.down} | ${idea.score.net}`;
+        lines.push(`| ${mdCell(idea.content)} | ${scores} | ${status} |`);
       }
       lines.push("");
     }
@@ -91,24 +99,19 @@ function csvCell(value: string | number): string {
  */
 export function toCsv(data: ExportData, l: ExportLabels): string {
   const c = l.columns;
-  const rows: (string | number)[][] = [[c.round, c.theme, c.idea, c.up, c.down, c.net, c.status]];
+  const rows: (string | number)[][] = [[c.round, c.theme, c.idea, c.up, c.down, c.net, c.points, c.status]];
   for (const round of data.rounds) {
     for (const theme of round.themes) {
       // Overview at the top of the topic, without a score: one readable row in the spreadsheet.
       if (theme.overview) {
         const { summary, detail } = l.overview(theme.overview);
-        rows.push([round.round, theme.title, `${summary}. ${detail}`, "", "", "", l.overviewStatus]);
+        rows.push([round.round, theme.title, `${summary}. ${detail}`, "", "", "", "", l.overviewStatus]);
       }
+      const points = theme.pointsBudget !== null;
       for (const idea of theme.ideas) {
-        rows.push([
-          round.round,
-          theme.title,
-          idea.content,
-          idea.score.up,
-          idea.score.down,
-          idea.score.net,
-          idea.qualified ? l.qualified : l.notQualified,
-        ]);
+        // Points topic: only the points column, for / against would read as votes nobody cast.
+        const scores = points ? ["", "", "", idea.score.up] : [idea.score.up, idea.score.down, idea.score.net, ""];
+        rows.push([round.round, theme.title, idea.content, ...scores, idea.qualified ? l.qualified : l.notQualified]);
       }
     }
   }

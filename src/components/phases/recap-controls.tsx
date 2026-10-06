@@ -44,9 +44,12 @@ export function RecapHostControls({
   nextRound,
   qualifiedCount,
   tiedThemeCount,
+  hasPointsTopics = false,
 }: {
   slug: string;
   requireNetPositive: boolean;
+  /** Some topics use points: the rule does not change anything for them, which the hint says. */
+  hasPointsTopics?: boolean;
   nextRound: number;
   qualifiedCount: number;
   tiedThemeCount: number;
@@ -63,7 +66,7 @@ export function RecapHostControls({
         <SettingSwitch
           id="net-positive"
           label={t("requireNetPositive")}
-          hint={t("requireNetPositiveHint")}
+          hint={hasPointsTopics ? `${t("requireNetPositiveHint")} ${t("requireNetPositivePointsHint")}` : t("requireNetPositiveHint")}
           checked={requireNetPositive}
           disabled={pending}
           onCheckedChange={(checked) => run(() => setRequireNetPositive(slug, checked))}

@@ -62,3 +62,24 @@ describe("toIcs", () => {
     expect(lines.map((line, i) => (i === 0 ? line : line.slice(1))).join("")).toBe(`SUMMARY:${"é".repeat(60)}`);
   });
 });
+
+describe("decidedDates, points topic", () => {
+  const points = (total: number, dateStart: string) => ({
+    score: { up: total, down: 0, net: total },
+    qualified: total > 0,
+    dateStart,
+    dateEnd: null,
+  });
+
+  it("takes the date with the most points", () => {
+    expect(decidedDates("DATE", null, [points(4, "2027-06-12"), points(7, "2027-06-19"), points(0, "2027-06-26")])).toEqual({
+      start: "2027-06-19",
+      end: "2027-06-19",
+    });
+  });
+
+  it("gives nothing for a tie on points, or when no date got a point", () => {
+    expect(decidedDates("DATE", null, [points(5, "2027-06-12"), points(5, "2027-06-19")])).toBeNull();
+    expect(decidedDates("DATE", null, [points(0, "2027-06-12")])).toBeNull();
+  });
+});

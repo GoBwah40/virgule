@@ -113,6 +113,9 @@ model Theme {
   singleChoice Boolean @default(false)
   /// Maximum "for" votes per participant in this topic, per round (null = no limit).
   maxVotes    Int?
+  /// Points voting: each participant spreads this many points across the ideas, per round
+  /// (null = for / against votes). Incompatible with a single answer and with `maxVotes`.
+  pointsBudget Int?
   ideas       Idea[]
 
   @@index([roomId, position])
@@ -177,9 +180,12 @@ model Vote {
   participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   /// Votes are reset each round: history is kept per round.
   round         Int
-  /// true = for, false = against.
+  /// true = for, false = against. Always true for a points vote.
   positive      Boolean
   updatedAt     DateTime    @updatedAt
+  // Columns added after creation (at the end of the list: ALTER TABLE without a rebuild).
+  /// Points topics: points given to the idea, at least 1 (no row for 0). Null for a for / against vote.
+  points        Int?
 
   @@unique([ideaId, participantId, round])
   @@index([participantId])

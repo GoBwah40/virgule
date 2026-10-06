@@ -56,3 +56,14 @@ export const InRecapPage: Story = {
   args: { variant: "page" },
   decorators: [(Story) => <div className="bg-background p-6"><Story /></div>],
 };
+/** Points topic: totals of points, the bars measured against the leading idea. */
+export const Points: Story = {
+  args: {
+    pointsMax: 12,
+    ideas: [
+      { ...idea("1", "Annecy", 12, 0, true), votesLabel: "12 points" },
+      { ...idea("2", "A cottage in the Beaujolais", 6, 0, true), votesLabel: "6 points" },
+      { ...idea("3", "Chamonix", 0, 0, false), votesLabel: "0 points" },
+    ],
+  },
+};

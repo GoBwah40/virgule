@@ -79,3 +79,24 @@ describe("PresentationResult, in the recap page", () => {
     expect(screen.getByText("Annecy")).not.toHaveClass("stage-xl");
   });
 });
+
+describe("PresentationResult, points topic", () => {
+  it("measures the bars against the leading idea, with no share against", () => {
+    const { container } = renderUi(
+      <PresentationResult
+        topic="Where to?"
+        winners={["Annecy"]}
+        verdict="Kept by the group"
+        pointsMax={8}
+        ideas={[
+          { ...idea("1", "Annecy", 8, 0, true), votesLabel: "8 points" },
+          { ...idea("2", "Chamonix", 2, 0, true), votesLabel: "2 points" },
+        ]}
+      />,
+    );
+    expect(screen.getByText("2 points")).toBeVisible();
+    expect(container.querySelector('[style*="width: 100%"]')).not.toBeNull();
+    expect(container.querySelector('[style*="width: 25%"]')).not.toBeNull();
+    expect(container.querySelector(".bg-destructive")).toBeNull();
+  });
+});

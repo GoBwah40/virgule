@@ -110,6 +110,7 @@ export async function getThemes(roomId: string, round: number) {
       allowOtherIdeas: true,
       singleChoice: true,
       maxVotes: true,
+      pointsBudget: true,
       _count: { select: { ideas: true } },
       ideas: { where: { createdRound: { lt: round } }, select: { id: true }, take: 1 },
     },
@@ -146,6 +147,8 @@ export type VotingIdea = {
   /** Submitted during the current round (otherwise: carried over from a previous round). */
   isNew: boolean;
   myVote: boolean | null;
+  /** Points topics: the points the current participant gave this idea (0 = none). */
+  myPoints: number;
   canVote: boolean;
   /** Removable by the current participant (their own idea this round, or an option if hosting). */
   canDelete: boolean;
@@ -170,6 +173,8 @@ export type VotingTheme = {
   singleChoice: boolean;
   /** Maximum "for" votes per participant in this topic (null = no limit). */
   maxVotes: number | null;
+  /** Points voting: each participant's budget in this topic (null = for / against). */
+  pointsBudget: number | null;
   ideas: VotingIdea[];
 };
 
@@ -190,7 +195,7 @@ export async function getVotingView(
     include: {
       ideas: {
         orderBy: { createdAt: "asc" },
-        include: { votes: { where: { round, participantId: meId }, select: { positive: true } } },
+        include: { votes: { where: { round, participantId: meId }, select: { positive: true, points: true } } },
       },
     },
   });
@@ -209,6 +214,7 @@ export async function getVotingView(
     acceptsIdeas: theme.kind !== "CHOICE" || theme.allowOtherIdeas,
     singleChoice: theme.kind === "CHOICE" && theme.singleChoice,
     maxVotes: theme.maxVotes,
+    pointsBudget: theme.pointsBudget,
     ideas: theme.ideas
       .filter((idea) => isActiveInRound(idea, round))
       .map((idea) => {
@@ -222,6 +228,7 @@ export async function getVotingView(
           isMine,
           isNew,
           myVote: idea.votes[0]?.positive ?? null,
+          myPoints: idea.votes[0]?.points ?? 0,
           canVote: allowSelfVote || !isMine,
           canDelete: isNew && (idea.isOption ? me.isHost : isMine),
           isOption: idea.isOption,
@@ -278,6 +285,8 @@ type RecapTheme = {
   title: string;
   description: string | null;
   kind: ThemeKind;
+  /** Points topic: scores are totals of points (null = for / against). */
+  pointsBudget: number | null;
   overview: RecapOverview | null;
   /** "Date" and "Period" topics: what the group settled on, to add to a calendar (null = nothing clear). */
   calendar: CalendarDates | null;
@@ -308,7 +317,7 @@ export async function getRecap(
     include: {
       ideas: {
         orderBy: { createdAt: "asc" },
-        include: { votes: { select: { round: true, positive: true } } },
+        include: { votes: { select: { round: true, positive: true, points: true } } },
       },
     },
   });
@@ -353,6 +362,7 @@ export async function getRecap(
         title: theme.title,
         description: theme.description,
         kind: theme.kind,
+        pointsBudget: theme.pointsBudget,
         overview,
         calendar: decidedDates(
           theme.kind,
@@ -412,6 +422,8 @@ export type PresentationView =
       step: "RECAP";
       closed: boolean;
       topics: (PresentationTopic & {
+        /** Points topic: scores are totals of points (null = for / against). */
+        pointsBudget: number | null;
         ideas: { id: string; content: string; score: Score; qualified: boolean; leading: boolean }[];
       })[];
     };
@@ -528,6 +540,7 @@ export async function getPresentationView(room: {
       const leaders = new Set(topQualified(theme.ideas).map((idea) => idea.id));
       return {
         ...topicOf(theme),
+        pointsBudget: theme.pointsBudget,
         ideas: theme.ideas.map((idea) => ({
           id: idea.id,
           content: idea.content,

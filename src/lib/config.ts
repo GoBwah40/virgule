@@ -42,6 +42,9 @@ export const SCREEN_CODE_TTL_MINUTES = 10;
 export const IDEAS_TIMER_OPTIONS: readonly number[] = [3, 5, 10, 15];
 /** Limits offered for the "for" votes per participant in a topic (no limit by default). */
 export const VOTE_LIMIT_OPTIONS: readonly number[] = [1, 2, 3, 5];
+/** Points each participant spreads across a points topic's ideas, per round. */
+export const POINTS_BUDGET_OPTIONS: readonly number[] = [3, 5, 10];
+export const DEFAULT_POINTS_BUDGET = 5;
 
 /** Time added by the host's "+2 min" button. */
 export const EXTEND_TIMER_MINUTES = 2;

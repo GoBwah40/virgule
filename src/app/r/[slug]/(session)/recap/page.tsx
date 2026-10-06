@@ -86,6 +86,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
                   nextRound={room.round + 1}
                   qualifiedCount={current.qualifiedCount}
                   tiedThemeCount={current.tiedThemeCount}
+                  hasPointsTopics={current.themes.some((theme) => theme.pointsBudget !== null)}
                 />
               ) : (
                 <p className="text-muted-foreground">{t("waitingHost", { host: hostName(page.participants) })}</p>

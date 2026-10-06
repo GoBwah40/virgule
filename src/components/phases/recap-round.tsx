@@ -81,14 +81,24 @@ export async function RecapRoundView({ round, calendarHref }: { round: RecapRoun
                     details={
                       <div className="space-y-2">
                         {idea.mapQuery && <MapLink query={idea.mapQuery} label={tIdeas("mapLink")} />}
-                        <VoteSummary
-                        up={idea.score.up}
-                        down={idea.score.down}
-                        labels={{
-                          up: t("votesUp", { count: idea.score.up }),
-                          down: t("votesDown", { count: idea.score.down }),
-                        }}
-                      />
+                        {theme.pointsBudget !== null ? (
+                          // Points topic: the total alone, against the leading idea's.
+                          <VoteSummary
+                            up={idea.score.up}
+                            down={0}
+                            max={theme.ideas[0]?.score.up}
+                            labels={{ up: t("points", { count: idea.score.up }) }}
+                          />
+                        ) : (
+                          <VoteSummary
+                            up={idea.score.up}
+                            down={idea.score.down}
+                            labels={{
+                              up: t("votesUp", { count: idea.score.up }),
+                              down: t("votesDown", { count: idea.score.down }),
+                            }}
+                          />
+                        )}
                       </div>
                     }
                   >
@@ -171,13 +181,17 @@ export async function RecapRoundSpotlight({ round, calendarHref }: { round: Reca
               topic={theme.title}
               winners={winners}
               verdict={winners.length === 0 ? t("noneKept") : winners.length > 1 ? t("tied") : t("kept")}
+              pointsMax={theme.pointsBudget !== null ? (theme.ideas[0]?.score.up ?? 0) : undefined}
               ideas={theme.ideas.map((idea) => ({
                 id: idea.id,
                 content: idea.content,
                 up: idea.score.up,
                 down: idea.score.down,
                 qualified: idea.qualified,
-                votesLabel: t("votes", { up: idea.score.up, down: idea.score.down }),
+                votesLabel:
+                  theme.pointsBudget !== null
+                    ? t("points", { count: idea.score.up })
+                    : t("votes", { up: idea.score.up, down: idea.score.down }),
                 statusLabel: idea.qualified ? tRecap("qualified") : tRecap("notQualified"),
               }))}
             />

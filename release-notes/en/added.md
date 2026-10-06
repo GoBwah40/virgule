@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.17.0 — 2026-10-06
+
+- A topic can be voted with points: everyone spreads 3, 5 or 10 points across its ideas, several on the same one if they like, and the recap ranks the ideas by their total.
+
 ## 0.16.0 — 2026-10-06
 
 - During the votes, the person hosting can remind the group to vote: only the people who still have ideas to vote on see it, and nobody knows who.

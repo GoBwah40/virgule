@@ -9,6 +9,7 @@ import { VoteReminder } from "@/components/vote-reminder";
 import { ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { AutoRecap, BackToThemesButton, FinishVotingButton, IdeasBoard, NudgeButton, TimerControls } from "@/components/phases/voting-board";
 import { isRecentNudge, nextNudgeAt } from "@/lib/config";
+import { pointsLeft } from "@/lib/results";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
 
@@ -27,9 +28,13 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
 
   // What is left for you to vote on: one unit per idea, except a single-answer list,
   // where picking one option is enough. In a limited topic, once your "for" votes are used up,
-  // the remaining ideas no longer count as waiting for your vote.
+  // the remaining ideas no longer count as waiting for your vote. A points topic is one unit too,
+  // done once every point is given.
   const units = themes.flatMap((th) => {
     const votable = th.ideas.filter((i) => i.canVote);
+    if (th.pointsBudget !== null) {
+      return votable.length > 0 ? [pointsLeft(th.pointsBudget, th.ideas.map((i) => i.myPoints)) === 0] : [];
+    }
     if (th.singleChoice) return votable.length > 0 ? [votable.some((i) => i.myVote !== null)] : [];
     const used = th.ideas.filter((i) => i.myVote === true).length;
     const exhausted = th.maxVotes !== null && used >= th.maxVotes;

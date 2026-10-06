@@ -1,6 +1,6 @@
 "use client";
 
-import { BellRing, ListChecks, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
+import { BellRing, Coins, ListChecks, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 
@@ -15,6 +15,7 @@ import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
 import { MapLink } from "@/components/map-link";
 import { MasonryColumns } from "@/components/masonry-columns";
+import { PointsStepper } from "@/components/points-stepper";
 import { ScrollableList } from "@/components/scrollable-list";
 import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { useView } from "@/components/phases/view-choice";
@@ -25,9 +26,23 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { type ActionResult, addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, goToRecapOnTimer, nudgeVoters, stopTimer, updateIdea } from "@/lib/actions";
+import {
+  type ActionResult,
+  addIdea,
+  backToThemes,
+  castVote,
+  deleteIdea,
+  extendTimer,
+  goToRecap,
+  goToRecapOnTimer,
+  nudgeVoters,
+  setPoints,
+  stopTimer,
+  updateIdea,
+} from "@/lib/actions";
 import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
 import type { IdeaFields, IdeaInput, ThemeKind } from "@/lib/idea-value";
+import { pointsLeft } from "@/lib/results";
 import { isBadServerResponse, isNetworkError } from "@/lib/network-error";
 import type { ViewPreference } from "@/lib/view-preference";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
@@ -81,6 +96,18 @@ function ThemeIdeas({
       setOptimisticChoice(next ? ideaId : null);
       return castVote(slug, ideaId, next);
     });
+  // Points topic: held here too, so the points left move as soon as one idea gets or loses one.
+  const [myPoints, setOptimisticPoints] = useOptimistic(
+    Object.fromEntries(theme.ideas.map((idea) => [idea.id, idea.myPoints])),
+    (state: Record<string, number>, change: { ideaId: string; points: number }) => ({ ...state, [change.ideaId]: change.points }),
+  );
+  const budget = theme.pointsBudget;
+  const left = budget === null ? null : pointsLeft(budget, Object.values(myPoints));
+  const givePoints = (ideaId: string, points: number) =>
+    run(async () => {
+      setOptimisticPoints({ ideaId, points });
+      return setPoints(slug, ideaId, points);
+    });
   // Limited topic: "for" votes left to the current participant.
   const votesLeft =
     theme.maxVotes === null ? null : theme.maxVotes - theme.ideas.filter((idea) => idea.myVote === true).length;
@@ -89,7 +116,10 @@ function ThemeIdeas({
   // are used up, it counts as done, like the page meter.
   const votable = theme.ideas.filter((idea) => idea.canVote);
   const votedIdeas = votable.filter((idea) => idea.myVote !== null).length;
-  const [voted, total] = theme.singleChoice
+  // A points topic has no "voted" count: its points left say it (see below).
+  const [voted, total] = budget !== null
+    ? [0, 0]
+    : theme.singleChoice
     ? [Math.min(votedIdeas, 1), Math.min(votable.length, 1)]
     : [votesLeft !== null && votesLeft <= 0 ? votable.length : votedIdeas, votable.length];
 
@@ -110,7 +140,7 @@ function ThemeIdeas({
         {/* Breaks between words only: a narrow column never cuts a title in the middle of one. */}
         <CardTitle className="font-heading text-xl font-bold wrap-break-word hyphens-auto">{theme.title}</CardTitle>
         {theme.description && <CardDescription>{theme.description}</CardDescription>}
-        {(theme.kind !== "TEXT" || theme.ideas.length > 0 || votesLeft !== null) && (
+        {(theme.kind !== "TEXT" || theme.ideas.length > 0 || votesLeft !== null || budget !== null) && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {theme.kind !== "TEXT" && (
               <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={tThemes(`kinds.${theme.kind}`)} />
@@ -129,9 +159,17 @@ function ThemeIdeas({
                 label={t("votesLeft", { left: Math.max(0, votesLeft), max: theme.maxVotes })}
               />
             )}
+            {left !== null && budget !== null && (
+              <IconBadge
+                className={left <= 0 ? "border-highlight bg-highlight-soft text-highlight-foreground" : undefined}
+                icon={Coins}
+                label={t("pointsLeft", { left, max: budget })}
+              />
+            )}
           </div>
         )}
         {theme.singleChoice && <p className="text-sm text-muted-foreground">{t("singleChoiceHint")}</p>}
+        {budget !== null && <p className="text-sm text-muted-foreground">{t("pointsHint", { count: budget })}</p>}
       </CardHeader>
       {board && <div className="border-y bg-muted/50 px-4 py-3">{composer}</div>}
       <CardContent className={cn(board && "flex-1")}>
@@ -148,6 +186,16 @@ function ThemeIdeas({
                 pick={
                   theme.singleChoice
                     ? { chosen: chosenId === idea.id, pending, onChange: (next) => pick(idea.id, next) }
+                    : undefined
+                }
+                points={
+                  left !== null
+                    ? {
+                        value: myPoints[idea.id] ?? 0,
+                        max: (myPoints[idea.id] ?? 0) + left,
+                        pending,
+                        onChange: (next) => givePoints(idea.id, next),
+                      }
                     : undefined
                 }
                 upDisabledReason={votesLeft !== null && votesLeft <= 0 ? t("voteLimitReached") : undefined}
@@ -367,6 +415,7 @@ function IdeaItem({
   kind,
   idea,
   pick,
+  points,
   upDisabledReason,
 }: {
   slug: string;
@@ -374,6 +423,8 @@ function IdeaItem({
   idea: VotingIdea;
   /** Single-answer list: the choice is handled by the topic, across its ideas. */
   pick?: { chosen: boolean; pending: boolean; onChange: (next: boolean | null) => void };
+  /** Points topic: the points are handled by the topic, which holds the budget. */
+  points?: { value: number; max: number; pending: boolean; onChange: (next: number) => void };
   /** No "for" votes left in the topic. */
   upDisabledReason?: string;
 }) {
@@ -412,7 +463,7 @@ function IdeaItem({
 
   return (
     <ListItem
-      className={pending || pick?.pending ? "opacity-80" : undefined}
+      className={pending || pick?.pending || points?.pending ? "opacity-80" : undefined}
       meta={
         (idea.isMine || !idea.isNew || idea.edited || idea.canDelete || idea.mapQuery) && (
           <>
@@ -461,7 +512,21 @@ function IdeaItem({
         )
       }
       actions={
-        pick ? (
+        points ? (
+          <PointsStepper
+            value={points.value}
+            max={points.max}
+            labels={{
+              decrease: t("pointsLess"),
+              increase: t("pointsMore"),
+              value: t("pointsValue", { count: points.value }),
+              group: t("pointsGroup"),
+            }}
+            disabledReason={idea.canVote ? undefined : t("selfVoteDisabled")}
+            increaseDisabledReason={t("pointsBudgetReached")}
+            onChange={points.onChange}
+          />
+        ) : pick ? (
           <VoteButtons
             mode="pick"
             value={pick.chosen || null}
