@@ -4,7 +4,7 @@ New features, visible to the people using Virgule. Format and rules: [VERSIONS.m
 
 ## 0.18.0 — 2026-10-06
 
-- While ideas are open, you can leave a short anonymous comment on an idea to clarify it or raise a point before voting; you can remove yours, and the person hosting can remove any of them.
+- The person hosting can turn on comments: while ideas are open, everyone can then leave a short anonymous comment on an idea to clarify it or raise a point before voting; you can remove yours, and the person hosting can remove any of them.
 
 ## 0.17.0 — 2026-10-06
 

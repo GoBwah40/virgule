@@ -514,21 +514,24 @@ function IdeaItem({
             </span>
           )}
           {/* Comments stay folded: the count shows, the list and the input open on demand. */}
-          <Button
-            variant="ghost"
-            size="xs"
-            className="touch-target ms-1.5 text-muted-foreground"
-            aria-expanded={commentsOpen}
-            aria-controls={commentsOpen ? commentsId : undefined}
-            onClick={() => setCommentsOpen((open) => !open)}
-          >
-            <MessageSquare data-icon="inline-start" />
-            {t("comments.toggle", { count: idea.comments.length })}
-          </Button>
+          {idea.comments && (
+            <Button
+              variant="ghost"
+              size="xs"
+              className="touch-target ms-1.5 text-muted-foreground"
+              aria-expanded={commentsOpen}
+              aria-controls={commentsOpen ? commentsId : undefined}
+              onClick={() => setCommentsOpen((open) => !open)}
+            >
+              <MessageSquare data-icon="inline-start" />
+              {t("comments.toggle", { count: idea.comments.length })}
+            </Button>
+          )}
         </>
       }
       below={
-        commentsOpen && (
+        commentsOpen &&
+        idea.comments && (
           <div id={commentsId}>
             <CommentThread
               comments={idea.comments}

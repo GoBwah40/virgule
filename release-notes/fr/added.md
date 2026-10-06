@@ -4,7 +4,7 @@ Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Fo
 
 ## 0.18.0 — 2026-10-06
 
-- Pendant les idées, tu peux laisser un court commentaire anonyme sur une idée pour la préciser ou soulever un point avant de voter ; tu peux retirer les tiens, et la personne qui anime peut retirer n'importe lequel.
+- La personne qui anime peut activer les commentaires : pendant les idées, chacun peut alors laisser un court commentaire anonyme sur une idée pour la préciser ou soulever un point avant de voter ; tu peux retirer les tiens, et la personne qui anime peut retirer n'importe lequel.
 
 ## 0.17.0 — 2026-10-06
 

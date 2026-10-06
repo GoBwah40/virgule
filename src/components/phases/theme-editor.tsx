@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setAutoRecap, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
+import { addTheme, deleteTheme, moveTheme, setAllowComments, setAllowSelfVote, setAutoRecap, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { DEFAULT_POINTS_BUDGET, IDEAS_TIMER_OPTIONS, LIMITS, POINTS_BUDGET_OPTIONS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { cn } from "@/lib/utils";
@@ -66,6 +66,7 @@ export function ThemeEditor({
   slug,
   themes,
   allowSelfVote,
+  allowComments,
   ideasTimerMinutes,
   autoRecap,
   capacity,
@@ -74,6 +75,7 @@ export function ThemeEditor({
   slug: string;
   themes: Theme[];
   allowSelfVote: boolean;
+  allowComments: boolean;
   ideasTimerMinutes: number | null;
   autoRecap: boolean;
   capacity: number;
@@ -137,6 +139,14 @@ export function ThemeEditor({
               checked={allowSelfVote}
               disabled={pending}
               onCheckedChange={(checked) => run(() => setAllowSelfVote(slug, checked))}
+            />
+            <SettingSwitch
+              id="comments"
+              label={t("allowComments")}
+              hint={t("allowCommentsHint")}
+              checked={allowComments}
+              disabled={pending}
+              onCheckedChange={(checked) => run(() => setAllowComments(slug, checked))}
             />
             <SegmentedControl
               name="ideas-timer"

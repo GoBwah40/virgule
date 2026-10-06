@@ -21,7 +21,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
 
   const t = await getTranslations("recap");
   const { room, me } = page;
-  const [rounds, comments] = await Promise.all([getRecap(room, me.id), getRecapComments(room.id, me.id)]);
+  const [rounds, comments] = await Promise.all([getRecap(room, me.id), getRecapComments(room, me.id)]);
   const current = rounds[rounds.length - 1];
   const closed = room.phase === "CLOSED";
   const byRound = (render: (round: (typeof rounds)[number]) => React.ReactNode) => <RecapByRound rounds={rounds} render={render} />;

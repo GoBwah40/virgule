@@ -82,6 +82,7 @@ type ActionError =
   | "notCommentAuthor"
   | "tooManyComments"
   | "roomCommentLimit"
+  | "commentsOff"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -193,6 +194,7 @@ export async function reuseTopics(slug: string): Promise<ActionResult> {
         name: source.name,
         maxParticipants: source.maxParticipants,
         allowSelfVote: source.allowSelfVote,
+        allowComments: source.allowComments,
         requireNetPositive: source.requireNetPositive,
         ideasTimerMinutes: source.ideasTimerMinutes,
         autoRecap: source.autoRecap,
@@ -411,6 +413,15 @@ export async function moveTheme(slug: string, themeId: string, direction: "up" |
       db.theme.update({ where: { id: a.id }, data: { position: b.position } }),
       db.theme.update({ where: { id: b.id }, data: { position: a.position } }),
     ]);
+  });
+}
+
+/** Short anonymous comments on ideas, off by default; turned off, the ones written stay hidden. */
+export async function setAllowComments(slug: string, value: boolean) {
+  if (!isBoolean(value)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "THEMES" });
+    await db.room.update({ where: { id: room.id }, data: { allowComments: value } });
   });
 }
 
@@ -674,6 +685,7 @@ export async function addComment(slug: string, ideaId: string, content: string) 
   if (!parsed.success || !isId(ideaId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room, me } = await guard(slug, { phase: "IDEAS" });
+    if (!room.allowComments) throw new ActionFailure("commentsOff");
     const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
     if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
     // Counted after the insert, in the same transaction: comments sent at once cannot all pass a
