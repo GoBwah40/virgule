@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.15.0 — 2026-10-06
+
+- Une fois la séance terminée, toute personne qui y a participé peut relancer une séance avec les mêmes sujets et réglages, et l'animer ; idées et votes repartent de zéro.
+
 ## 0.14.0 — 2026-10-06
 
 - Dans le bilan, un sujet de date ou de période s'ajoute à ton calendrier : le créneau commun des périodes retenues, ou la date en tête, depuis la séance comme depuis le bilan partagé.

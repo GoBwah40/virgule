@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/page-header";
 import { PhaseTransition } from "@/components/phase-transition";
-import { ExportMenu, RecapHostControls, ShareRecapButton } from "@/components/phases/recap-controls";
+import { ExportMenu, RecapHostControls, ReuseTopicsButton, ShareRecapButton } from "@/components/phases/recap-controls";
 import { RecapByRound, RecapRoundSpotlight, RecapRoundView } from "@/components/phases/recap-round";
 import { ViewChoice, ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -39,11 +39,14 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
           actions={
             <>
               {closed && (
-                // Session over: back to the home page to create another one.
-                <Button nativeButton={false} render={<Link href="/" />} className="print:hidden">
-                  <Plus data-icon="inline-start" />
-                  {t("newSession")}
-                </Button>
+                // Session over: back to the home page to create another one, or the same topics again.
+                <>
+                  <Button nativeButton={false} render={<Link href="/" />} className="print:hidden">
+                    <Plus data-icon="inline-start" />
+                    {t("newSession")}
+                  </Button>
+                  <ReuseTopicsButton slug={slug} />
+                </>
               )}
               {me.isHost && <ShareRecapButton slug={slug} sharePath={sharePath} roomName={room.name} />}
               <ExportMenu slug={slug} />

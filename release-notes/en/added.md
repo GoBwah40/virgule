@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.15.0 — 2026-10-06
+
+- Once a session is over, anyone in it can start again with the same topics and settings: a new session that they host, with ideas and votes starting from zero.
+
 ## 0.14.0 — 2026-10-06
 
 - In the recap, a date or period topic can be added to your calendar: the common slot of the kept periods, or the date in the lead, from the session as from the shared recap.

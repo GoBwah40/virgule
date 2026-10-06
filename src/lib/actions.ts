@@ -163,6 +163,54 @@ export async function createRoom(input: { name: string; pseudo: string; size?: n
   redirect(`/r/${slug}/themes`);
 }
 
+/**
+ * A session that is over starts again with the same topics and settings, as a new session hosted
+ * by whoever asks: same name and size, no ideas, no votes, no one else seated yet.
+ */
+export async function reuseTopics(slug: string): Promise<ActionResult> {
+  const newRoomSlug = newSlug();
+  const token = newToken();
+  try {
+    const { room, me } = await guard(slug, { phase: "CLOSED" });
+    if (await isRateLimited("createRoom")) throw new ActionFailure("tooManyRequests");
+    const source = await db.room.findUniqueOrThrow({
+      where: { id: room.id },
+      include: { themes: { orderBy: { position: "asc" } } },
+    });
+    await db.room.create({
+      data: {
+        slug: newRoomSlug,
+        name: source.name,
+        maxParticipants: source.maxParticipants,
+        allowSelfVote: source.allowSelfVote,
+        requireNetPositive: source.requireNetPositive,
+        ideasTimerMinutes: source.ideasTimerMinutes,
+        autoRecap: source.autoRecap,
+        expiresAt: new Date(Date.now() + ROOM_TTL_DAYS * 24 * 60 * 60 * 1000),
+        participants: { create: { pseudo: me.pseudo, token, isHost: true } },
+        themes: {
+          create: source.themes.map((theme, position) => ({
+            title: theme.title,
+            description: theme.description,
+            kind: theme.kind,
+            options: theme.options,
+            allowOtherIdeas: theme.allowOtherIdeas,
+            singleChoice: theme.singleChoice,
+            maxVotes: theme.maxVotes,
+            position,
+          })),
+        },
+      },
+    });
+  } catch (error) {
+    if (error instanceof ActionFailure) return fail(error.code);
+    console.error("[action]", error);
+    return fail("unknown");
+  }
+  await setParticipantToken(newRoomSlug, token);
+  redirect(`/r/${newRoomSlug}/themes`);
+}
+
 export async function joinRoom(slug: string, input: { pseudo: string }): Promise<ActionResult> {
   if (!isId(slug)) return fail("invalidInput");
   const parsed = z.object({ pseudo: text(LIMITS.pseudo) }).safeParse(input);

@@ -120,3 +120,28 @@ test("ending the session freezes the recap for everyone", async ({ page, openAsG
   await guest.getByRole("button", { name: "Start a new session" }).click();
   await expect(guest.getByRole("button", { name: "Create the session" })).toBeVisible();
 });
+
+test("a session that is over starts again with the same topics, hosted by whoever asks", async ({ page, openAsGuest }) => {
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  // A setting of the topic that must come along: at most 2 "for" votes.
+  await page.getByRole("listitem").filter({ hasText: "Dinner" }).getByRole("button", { name: "Edit" }).click();
+  const limit = page.getByRole("group", { name: "“For” votes per person" }).first();
+  await limit.locator("label", { has: page.getByRole("radio", { name: "2", exact: true }) }).click();
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("2 votes per person")).toBeVisible();
+  await voteAndSeeRecap(page, guest);
+  await clickAndConfirm(page, "End the session");
+  await expect(guest.getByRole("heading", { name: "It's decided" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+
+  // Lea starts it again: she hosts the new session, alone, with the same topic and no ideas.
+  await clickAndConfirm(guest, "Start again with these topics");
+  await expect(guest).toHaveURL(/\/r\/[^/]+\/themes$/, { timeout: LIVE_TIMEOUT });
+  expect(guest.url()).not.toContain(new URL(link).pathname);
+  await expect(guest.getByRole("button", { name: "Add the topic" })).toBeVisible();
+  await expect(guest.getByRole("listitem").filter({ hasText: "Dinner" }).getByText("2 votes per person")).toBeVisible();
+  await expect(guest.getByRole("list", { name: "1 participant out of 6" })).toBeVisible();
+
+  // The session that is over stays as it was.
+  await page.reload();
+  await expect(idea(page, "Sushi").getByText("Kept")).toBeVisible();
+});
