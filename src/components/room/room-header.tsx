@@ -55,6 +55,7 @@ export async function RoomHeader({ room, participants, meId }: Props) {
               absolute
               label={t("copyLink")}
               successMessage={t("linkCopied")}
+              errorMessage={t("linkCopyFailed")}
               hideLabelOnMobile
             />
             {!isHost && canRemoveParticipants(room) && <LeaveRoomButton slug={room.slug} />}
@@ -74,6 +75,7 @@ export async function RoomHeader({ room, participants, meId }: Props) {
               host: t("host"),
             }}
             successMessage={t("linkCopied")}
+            errorMessage={t("linkCopyFailed")}
           />
         </div>
 

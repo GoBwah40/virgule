@@ -10,6 +10,7 @@ const meta = {
     absolute: true,
     label: "Copy the invite link",
     successMessage: "Link copied, you can share it with the group",
+    errorMessage: "Couldn't copy the link: copy it from the address bar.",
   },
 } satisfies Meta<typeof CopyButton>;
 

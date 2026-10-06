@@ -17,6 +17,8 @@ type Props = {
   invitePath: string;
   labels: React.ComponentProps<typeof SeatRow>["labels"];
   successMessage: string;
+  /** When the browser refuses to copy. */
+  errorMessage: string;
   /** The host can hand over hosting (seat menu); the others can leave from their own seat. */
   canManage: boolean;
   /** Seats can be freed (only before the first recap): the host removes someone, the others leave. */
@@ -37,7 +39,7 @@ const CONFIRM_KEYS = {
  * Row of session seats: tapping a free seat copies the invite link; for the host,
  * right-clicking or clicking a taken seat opens its options. A guest's own seat offers to leave.
  */
-export function RoomSeats({ slug, seats, capacity, invitePath, labels, successMessage, canManage, canRemove, className }: Props) {
+export function RoomSeats({ slug, seats, capacity, invitePath, labels, successMessage, errorMessage, canManage, canRemove, className }: Props) {
   const t = useTranslations("room.seats");
   const [, run] = useAction();
   const [pending, setPending] = useState<Pending>(null);
@@ -50,8 +52,12 @@ export function RoomSeats({ slug, seats, capacity, invitePath, labels, successMe
         labels={labels}
         className={className}
         onFreeSeatClick={async () => {
-          await navigator.clipboard.writeText(`${window.location.origin}${invitePath}`);
-          toast.success(successMessage);
+          try {
+            await navigator.clipboard.writeText(`${window.location.origin}${invitePath}`);
+            toast.success(successMessage);
+          } catch {
+            toast.error(errorMessage);
+          }
         }}
         menu={{
           label: (seat) => t("manage", { name: seat.name }),

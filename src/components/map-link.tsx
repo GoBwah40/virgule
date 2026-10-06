@@ -24,7 +24,7 @@ export function MapLink({ query, label, className }: Props) {
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex min-h-8 items-center gap-1 rounded-md text-sm font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/80",
+        "touch-target inline-flex min-h-8 items-center gap-1 rounded-md text-sm font-semibold text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-3 focus-visible:ring-ring/80",
         className,
       )}
     >

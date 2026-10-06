@@ -90,7 +90,10 @@ test("a budget range is in whole euros, the second amount at least the first", a
   await expect(budget.getByLabel(/^Between/)).toHaveValue("500");
   await budget.getByLabel(/^And/).fill("100");
   await expect(add).toBeDisabled();
+  // Said, not only shown by a disabled button.
+  await expect(budget.getByLabel(/^And/)).toHaveAccessibleDescription("The second amount must be greater than or equal to the first.");
   await budget.getByLabel(/^And/).fill("1200");
+  await expect(budget.getByText("The second amount must be greater than or equal to the first.")).toHaveCount(0);
   await add.click();
 
   await expect(idea(guest, "From €500 to €1,200")).toBeVisible();

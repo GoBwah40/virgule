@@ -5,6 +5,7 @@ test("a guest joins the session and the host sees them arrive", async ({ page, o
 
   const guest = await openAsGuest(link);
   await expect(guest.getByText("1 participant out of 6")).toBeVisible();
+  await expect(guest.getByRole("heading", { level: 1 })).toContainText("Weekend away");
   await join(guest, "Lea");
 
   await expect(guest.getByRole("heading", { level: 1, name: "Weekend away" })).toBeVisible();

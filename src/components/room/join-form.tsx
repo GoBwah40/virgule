@@ -41,8 +41,9 @@ export function JoinForm({ slug, roomName, hostName, seats, capacity, full, clos
         className="flex flex-col gap-5"
       >
         <CardHeader className="gap-3">
-          <CardTitle className="font-heading text-2xl leading-tight font-extrabold">
-            {t("title", { host: hostName, name: roomName })}
+          {/* CardTitle is a div: the page heading goes inside, as on the pairing screen. */}
+          <CardTitle>
+            <h1 className="font-heading text-2xl leading-tight font-extrabold">{t("title", { host: hostName, name: roomName })}</h1>
           </CardTitle>
           {seatRow}
           <CardDescription>{t("seats", { count: seats, max: capacity })}</CardDescription>

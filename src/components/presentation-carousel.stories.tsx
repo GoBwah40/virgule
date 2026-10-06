@@ -21,6 +21,7 @@ const meta = {
     slides: [slide("Annecy"), slide("June 4 – 5"), slide("From €150 to €250")],
     positions: ["Topic 1 of 3", "Topic 2 of 3", "Topic 3 of 3"],
     intervalMs: 4000,
+    pausedLabel: "Paused: space bar to resume",
   },
 } satisfies Meta<typeof PresentationCarousel>;
 

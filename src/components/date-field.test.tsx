@@ -20,6 +20,14 @@ describe("DateField", () => {
     expect(screen.getByLabelText("To")).toHaveAttribute("min", "2027-06-12");
   });
 
+  it("period: explains an end typed before the start, on the end field", () => {
+    renderUi(
+      <DateField mode="range" idPrefix="t" labels={labels} value={{ start: "2027-06-14", end: "2027-06-12" }} onChange={() => {}} error="Too early" />,
+    );
+    expect(screen.getByLabelText("To")).toHaveAccessibleDescription("Too early");
+    expect(screen.getByLabelText("To")).toHaveAttribute("aria-invalid", "true");
+  });
+
   it("single date: one field only", () => {
     renderUi(<DateField mode="single" idPrefix="t" labels={labels} value={{ start: "", end: "" }} onChange={() => {}} />);
     expect(screen.getByLabelText("Date")).toHaveAttribute("type", "date");

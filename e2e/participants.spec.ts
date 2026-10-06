@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import {
+  clickAndConfirm,
   expect,
   idea,
   join,
@@ -128,7 +129,7 @@ test("reopening the vote after the recap keeps the seats frozen", async ({ page,
   await vote(guest, "Pizza", "For");
   await seeRecap(page);
 
-  await page.getByRole("button", { name: "Reopen voting" }).click();
+  await clickAndConfirm(page, "Reopen voting");
   for (const p of [page, guest]) await expect(p).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
 
   // Still round 1, but the results were seen: nobody leaves, nobody is removed.

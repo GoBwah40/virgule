@@ -31,6 +31,16 @@ describe("Countdown", () => {
     act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByRole("timer")).toHaveTextContent("Time's up");
   });
+
+  it("gives screen readers the time left once a minute, not every second", () => {
+    const { container } = renderUi(<Countdown endsAt="2027-06-12T10:02:00Z" labels={labels} />);
+    const live = () => container.querySelector("[aria-live]");
+    expect(live()).toHaveTextContent("Time left 2:00");
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(live()).toHaveTextContent("Time left 2:00");
+    act(() => vi.advanceTimersByTime(30_000));
+    expect(live()).toHaveTextContent("Time left 1:00");
+  });
 });
 
 describe("Countdown, large", () => {

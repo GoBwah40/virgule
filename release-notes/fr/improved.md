@@ -2,6 +2,13 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.3 — 2026-10-06
+
+- Retirer ton idée, rouvrir les votes et déconnecter l'écran de la salle demandent maintenant confirmation.
+- Une plage saisie à l'envers, de dates ou de montants, dit pourquoi on ne peut pas l'ajouter.
+- Le code pour l'écran de la salle se renouvelle tout seul quand il expire, et l'écran de la salle montre quand son défilement est en pause.
+- Les lecteurs d'écran entendent le temps restant une fois par minute, trouvent un titre sur la page pour rejoindre une séance, et entendent « Fermer » dans la langue de l'app.
+
 ## 0.11.1 — 2026-10-05
 
 - Le choix entre liste et tableau se trouve dans l'en-tête de la page, sur la même ligne que les boutons de l'étape.

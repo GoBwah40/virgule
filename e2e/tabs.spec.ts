@@ -71,6 +71,7 @@ test("an idea suggested in one tab shows in the other as one's own", async ({ pa
 
   // Removed from the other tab, gone from the first.
   await tacos.getByRole("button", { name: "Remove my idea" }).click();
+  await other.getByRole("alertdialog").getByRole("button", { name: "Remove my idea" }).click();
   await expect(idea(tab, "Tacos")).toHaveCount(0, { timeout: LIVE_TIMEOUT });
 });
 

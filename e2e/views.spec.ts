@@ -53,6 +53,20 @@ test.describe("on a computer", () => {
     await expect(idea(page, "Pizza")).toBeVisible();
   });
 
+  test("a board picked on a wide screen gives way to the list once it narrows", async ({ page, openAsGuest }) => {
+    await setUpSession(page, openAsGuest);
+    await pick(page, "Board");
+    const card = page.getByRole("heading", { name: "Dinner", level: 3 });
+    await expect(card).toBeVisible();
+
+    // A tablet turned upright: no switch there, so no board either.
+    await page.setViewportSize({ width: 700, height: 1000 });
+    await expect(card).toHaveCount(0);
+    await expect(page.getByRole("group", { name: "Display" })).toBeHidden();
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect(card).toBeVisible();
+  });
+
   test("printed, the recap is the full list, even topic by topic", async ({ page, openAsGuest }) => {
     const { guest } = await setUpSession(page, openAsGuest);
     await addTopic(page, "Drinks");

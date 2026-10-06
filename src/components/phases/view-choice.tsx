@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { createContext, use } from "react";
+import { createContext, use, useSyncExternalStore } from "react";
 
 import { ViewSwitch } from "@/components/view-switch";
 import { useViewPreference } from "@/hooks/use-view-preference";
@@ -17,10 +17,25 @@ export function ViewProvider({ initialView, children }: { initialView: ViewPrefe
   return <ViewContext value={useViewPreference(initialView)}>{children}</ViewContext>;
 }
 
+// Same breakpoint as the switch (`md`): below it, there is no switch to come back to the list.
+const WIDE = "(min-width: 48rem)";
+const subscribeWide = (onChange: () => void) => {
+  const query = window.matchMedia(WIDE);
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+};
+
+/**
+ * The layout to show. Below tablet width (a tablet turned upright), always the list, whatever was
+ * picked: the switch is hidden there. The server cannot know the width: it follows the choice,
+ * the browser adjusts.
+ */
 export function useView() {
   const state = use(ViewContext);
+  const wide = useSyncExternalStore(subscribeWide, () => window.matchMedia(WIDE).matches, () => true);
   if (!state) throw new Error("useView must be used within a ViewProvider");
-  return state;
+  const [view, choose] = state;
+  return [wide ? view : "list", choose] as const;
 }
 
 /** List or board, from tablets up (`boardLabel` names the board, "Topic by topic" in the recap). */

@@ -32,8 +32,8 @@ export function VoteSummary({ up, down, labels, className }: Props) {
       <div className="flex h-2 overflow-hidden rounded-full bg-border" aria-hidden>
         {total > 0 && (
           <>
-            <span className="bg-success transition-[width] duration-300" style={{ width: `${upShare}%` }} />
-            <span className="bg-destructive transition-[width] duration-300" style={{ width: `${100 - upShare}%` }} />
+            <span className="bg-success motion-safe:transition-[width] motion-safe:duration-300" style={{ width: `${upShare}%` }} />
+            <span className="bg-destructive motion-safe:transition-[width] motion-safe:duration-300" style={{ width: `${100 - upShare}%` }} />
           </>
         )}
       </div>

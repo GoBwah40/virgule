@@ -26,4 +26,7 @@ export const Range: Story = {
     return <AmountField {...args} value={value} onChange={setValue} />;
   },
 };
+export const InvalidRange: Story = {
+  args: { value: { min: "500", max: "300" }, error: "The second amount must be greater than or equal to the first." },
+};
 export const SingleAmount: Story = { args: { mode: "single", value: { min: "250", max: "" } } };

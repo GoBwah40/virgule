@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 
+import { ConfirmButton } from "@/components/confirm-button";
 import { Countdown } from "@/components/countdown";
 import { PairingCode } from "@/components/pairing-code";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -28,12 +29,13 @@ type Props = { slug: string; screenPaired: boolean };
  */
 export function PresentDialog({ slug, screenPaired }: Props) {
   const t = useTranslations("present");
+  const tCommon = useTranslations("common");
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="outline" size="icon" aria-label={t("open")} title={t("open")} />}>
         <Presentation />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm" closeLabel={tCommon("close")}>
         <DialogHeader>
           <DialogTitle className="font-heading text-xl font-bold">{t("dialogTitle")}</DialogTitle>
           <DialogDescription>{t("dialogDescription")}</DialogDescription>
@@ -71,6 +73,12 @@ function ScreenCode({ slug }: { slug: string }) {
     drawRef.current = draw;
   });
   useEffect(() => drawRef.current(), []);
+  // An expired code is replaced by itself while the dialog stays open: nobody has to tap "New code".
+  useEffect(() => {
+    if (!code) return;
+    const timer = setTimeout(() => drawRef.current(), Math.max(0, new Date(code.expiresAt).getTime() - Date.now()));
+    return () => clearTimeout(timer);
+  }, [code]);
 
   return (
     <ol className="space-y-4 text-sm">
@@ -107,9 +115,18 @@ function PairedScreen({ slug }: { slug: string }) {
         <p className="font-heading text-lg font-bold">{t("paired")}</p>
         <p className="text-sm text-muted-foreground">{t("pairedHint")}</p>
       </div>
-      <Button variant="outline" className="text-destructive" onClick={() => run(() => unpairScreen(slug))} disabled={pending}>
+      <ConfirmButton
+        variant="outline"
+        className="text-destructive"
+        disabled={pending}
+        title={t("unpairConfirm")}
+        description={t("unpairConfirmHint")}
+        confirmLabel={t("unpair")}
+        destructive
+        onConfirm={() => run(() => unpairScreen(slug))}
+      >
         {t("unpair")}
-      </Button>
+      </ConfirmButton>
     </div>
   );
 }

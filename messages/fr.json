@@ -10,7 +10,8 @@
   "common": {
     "cancel": "Annuler",
     "confirm": "Confirmer",
-    "backHome": "Retour à l'accueil"
+    "backHome": "Retour à l'accueil",
+    "close": "Fermer"
   },
   "loading": {
     "themes": "Chargement des sujets…",
@@ -76,6 +77,7 @@
     "you": "toi",
     "copyLink": "Copier le lien d'invitation",
     "linkCopied": "Lien copié, tu peux le partager au groupe",
+    "linkCopyFailed": "Impossible de copier le lien : copie-le depuis la barre d'adresse.",
     "invite": "Inviter avec un QR code",
     "inviteTitle": "Invite le groupe",
     "inviteDescription": "{count, plural, one {Il reste # place. Scanne le QR code ou envoie le lien.} other {Il reste # places. Scanne le QR code ou envoie le lien.}}",
@@ -251,6 +253,8 @@
     "voteUp": "Pour",
     "voteDown": "Contre",
     "delete": "Retirer mon idée",
+    "deleteConfirm": "Retirer ton idée ?",
+    "deleteConfirmHint": "Les votes déjà donnés dessus partent avec elle.",
     "selfVoteDisabled": "Le vote sur tes propres idées est désactivé.",
     "myVotesLeft": "{count, plural, one {Il te reste # idée sans vote} other {Il te reste # idées sans vote}}",
     "myVotesComplete": "Tu as voté sur toutes les idées",
@@ -270,7 +274,7 @@
     "closedBody": "La séance est terminée. Tu peux revoir et exporter le bilan tant qu'elle reste en ligne.",
     "newSession": "Lancer une nouvelle séance",
     "roundTab": "Tour {round}",
-    "summary": "{qualified} idée(s) retenue(s) sur {total}",
+    "summary": "{qualified, plural, one {# idée retenue} other {# idées retenues}} sur {total}",
     "qualified": "Retenue",
     "notQualified": "Écartée",
     "tied": "Ex æquo",
@@ -299,6 +303,8 @@
     "requireNetPositive": "Exiger un score positif",
     "requireNetPositiveHint": "Activé : une idée est retenue si elle a plus de « pour » que de « contre ». Désactivé : un seul « pour » suffit.",
     "reopen": "Rouvrir les votes",
+    "reopenConfirm": "Rouvrir les votes ?",
+    "reopenConfirmHint": "Tout le monde revient aux idées, avec ses votes, et peut les changer.",
     "nextRound": "On repart pour un tour",
     "nextRoundHint": "{count, plural, =0 {Aucune idée retenue : seules les nouvelles idées seront au vote.} one {# idée retenue repasse au vote, et chacun peut en proposer de nouvelles.} other {# idées retenues repassent au vote, et chacun peut en proposer de nouvelles.}}",
     "nextRoundConfirm": "On lance le tour {round} ?",
@@ -334,6 +340,7 @@
     "waitingIdeas": "En attente de la première idée",
     "results": "Résultats par sujet",
     "topicPosition": "Sujet {current} sur {total}",
+    "paused": "En pause : barre d'espace pour reprendre",
     "kept": "Gardée par le groupe",
     "tied": "À égalité en tête",
     "noneKept": "Aucune idée gardée sur ce sujet",
@@ -352,6 +359,8 @@
     "paired": "Un écran affiche la séance",
     "pairedHint": "Il suit chaque étape tout seul. Tu gardes la main ici.",
     "unpair": "Déconnecter l'écran",
+    "unpairConfirm": "Déconnecter l'écran ?",
+    "unpairConfirmHint": "Il revient à l'écran du code : tu pourras le reconnecter avec un nouveau code.",
     "another": "Utiliser un autre écran"
   },
   "pair": {

@@ -42,7 +42,7 @@ export function formatRemaining(seconds: number) {
 
 /**
  * Discreet countdown: neutral, then mango during the last minute, then the
- * expired label. Screen readers only read it once a minute.
+ * expired label. Screen readers hear the time left once a minute, not every second.
  */
 export function Countdown({ endsAt, labels, size = "md", className }: Props) {
   const now = useSyncExternalStore(subscribe, nowSeconds, nowSeconds);
@@ -50,6 +50,8 @@ export function Countdown({ endsAt, labels, size = "md", className }: Props) {
   const expired = remaining <= 0;
   const lastMinute = !expired && remaining <= 60;
   const Icon = expired ? TimerOff : Hourglass;
+  // Whole minutes left: the live region below only changes, and is only read, once a minute.
+  const announced = formatRemaining(Math.ceil(remaining / 60) * 60);
 
   return (
     <div
@@ -71,10 +73,15 @@ export function Countdown({ endsAt, labels, size = "md", className }: Props) {
         <span aria-live="polite">{labels.expired}</span>
       ) : (
         <>
-          <span className="sr-only sm:not-sr-only sm:text-muted-foreground">{labels.running}</span>
+          <span className="sr-only sm:not-sr-only sm:text-muted-foreground" aria-hidden>
+            {labels.running}
+          </span>
           {/* Server and browser clocks differ slightly: no hydration warning. */}
-          <span className="font-mono tabular-nums" suppressHydrationWarning>
+          <span className="font-mono tabular-nums" aria-hidden suppressHydrationWarning>
             {formatRemaining(remaining)}
+          </span>
+          <span className="sr-only" aria-live="polite" suppressHydrationWarning>
+            {`${labels.running} ${announced}`}
           </span>
         </>
       )}

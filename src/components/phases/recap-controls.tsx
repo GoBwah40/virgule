@@ -82,10 +82,18 @@ export function RecapHostControls({
             </p>
           </div>
         )}
-        <Button variant="outline" className="w-full" disabled={pending} onClick={() => run(() => reopenVoting(slug))}>
+        <ConfirmButton
+          variant="outline"
+          className="w-full"
+          disabled={pending}
+          title={t("reopenConfirm")}
+          description={t("reopenConfirmHint")}
+          confirmLabel={t("reopen")}
+          onConfirm={() => run(() => reopenVoting(slug))}
+        >
           <Undo2 data-icon="inline-start" />
           {t("reopen")}
-        </Button>
+        </ConfirmButton>
         <ConfirmButton
           variant="destructive"
           className="w-full"

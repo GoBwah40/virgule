@@ -163,6 +163,7 @@ export default async function PresentPage({ params }: PageProps<"/r/[slug]/prese
         label={t("results")}
         slides={slides}
         positions={view.topics.map((_, i) => t("topicPosition", { current: i + 1, total: view.topics.length }))}
+        pausedLabel={t("paused")}
       />
     );
     footer = (

@@ -39,14 +39,18 @@ function DialogOverlay({
   )
 }
 
+/** The close button needs a translated name: the primitives hold no copy. */
+type CloseButtonProps =
+  | { showCloseButton?: true; closeLabel: string }
+  | { showCloseButton: false; closeLabel?: never }
+
 function DialogContent({
   className,
   children,
   showCloseButton = true,
+  closeLabel,
   ...props
-}: DialogPrimitive.Popup.Props & {
-  showCloseButton?: boolean
-}) {
+}: DialogPrimitive.Popup.Props & CloseButtonProps) {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -65,14 +69,14 @@ function DialogContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-2 right-2"
+                className="touch-target absolute top-2 right-2"
                 size="icon-sm"
               />
             }
           >
             <XIcon
             />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{closeLabel}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>

@@ -22,12 +22,13 @@ type Props = { invitePath: string; roomName: string; freeSeats: number };
 /** Invitation for a group gathered in one place: QR code to scan, native share, link copy. */
 export function InviteDialog({ invitePath, roomName, freeSeats }: Props) {
   const t = useTranslations("room");
+  const tCommon = useTranslations("common");
   return (
     <Dialog>
       <DialogTrigger render={<Button variant="outline" size="icon" aria-label={t("invite")} title={t("invite")} />}>
         <QrCodeIcon />
       </DialogTrigger>
-      <DialogContent className="sm:max-w-sm">
+      <DialogContent className="sm:max-w-sm" closeLabel={tCommon("close")}>
         <DialogHeader>
           <DialogTitle className="font-heading text-xl font-bold">{t("inviteTitle")}</DialogTitle>
           <DialogDescription>
@@ -37,7 +38,7 @@ export function InviteDialog({ invitePath, roomName, freeSeats }: Props) {
         <InviteCode invitePath={invitePath} label={t("qrLabel")} />
         <DialogFooter className="gap-2 sm:justify-center">
           <ShareButton path={invitePath} title={roomName} text={t("shareText", { name: roomName })} label={t("share")} />
-          <CopyButton value={invitePath} absolute label={t("copyLink")} successMessage={t("linkCopied")} />
+          <CopyButton value={invitePath} absolute label={t("copyLink")} successMessage={t("linkCopied")} errorMessage={t("linkCopyFailed")} />
         </DialogFooter>
       </DialogContent>
     </Dialog>

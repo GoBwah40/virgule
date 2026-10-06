@@ -36,15 +36,20 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
   )
 }
 
+/** The close button needs a translated name: the primitives hold no copy. */
+type CloseButtonProps =
+  | { showCloseButton?: true; closeLabel: string }
+  | { showCloseButton: false; closeLabel?: never }
+
 function SheetContent({
   className,
   children,
   side = "right",
   showCloseButton = true,
+  closeLabel,
   ...props
-}: SheetPrimitive.Popup.Props & {
+}: SheetPrimitive.Popup.Props & CloseButtonProps & {
   side?: "top" | "right" | "bottom" | "left"
-  showCloseButton?: boolean
 }) {
   return (
     <SheetPortal>
@@ -65,14 +70,14 @@ function SheetContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-3 right-3"
+                className="touch-target absolute top-3 right-3"
                 size="icon-sm"
               />
             }
           >
             <XIcon
             />
-            <span className="sr-only">Close</span>
+            <span className="sr-only">{closeLabel}</span>
           </SheetPrimitive.Close>
         )}
       </SheetPrimitive.Popup>

@@ -10,7 +10,8 @@
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "close": "Close"
   },
   "loading": {
     "themes": "Loading topics…",
@@ -76,6 +77,7 @@
     "you": "you",
     "copyLink": "Copy the invite link",
     "linkCopied": "Link copied, you can share it with the group",
+    "linkCopyFailed": "Couldn't copy the link: copy it from the address bar.",
     "invite": "Invite with a QR code",
     "inviteTitle": "Invite the group",
     "inviteDescription": "{count, plural, one {# seat left. Scan the QR code or send the link.} other {# seats left. Scan the QR code or send the link.}}",
@@ -251,6 +253,8 @@
     "voteUp": "For",
     "voteDown": "Against",
     "delete": "Remove my idea",
+    "deleteConfirm": "Remove your idea?",
+    "deleteConfirmHint": "The votes already cast on it go with it.",
     "selfVoteDisabled": "Voting on your own ideas is turned off.",
     "myVotesLeft": "{count, plural, one {# idea left without your vote} other {# ideas left without your vote}}",
     "myVotesComplete": "You voted on every idea",
@@ -299,6 +303,8 @@
     "requireNetPositive": "Require a positive score",
     "requireNetPositiveHint": "On: an idea is kept if it has more “for” than “against” votes. Off: a single “for” is enough.",
     "reopen": "Reopen voting",
+    "reopenConfirm": "Reopen voting?",
+    "reopenConfirmHint": "Everyone goes back to the ideas, with their votes, and can change them.",
     "nextRound": "Go for another round",
     "nextRoundHint": "{count, plural, =0 {No idea kept: only new ideas will be up for a vote.} one {# idea kept goes back to the vote, and everyone can suggest new ones.} other {# ideas kept go back to the vote, and everyone can suggest new ones.}}",
     "nextRoundConfirm": "Start round {round}?",
@@ -334,6 +340,7 @@
     "waitingIdeas": "Waiting for the first idea",
     "results": "Results by topic",
     "topicPosition": "Topic {current} of {total}",
+    "paused": "Paused: space bar to resume",
     "kept": "Kept by the group",
     "tied": "Tied for first",
     "noneKept": "No idea kept on this topic",
@@ -352,6 +359,8 @@
     "paired": "A screen is showing the session",
     "pairedHint": "It follows each step by itself. You keep the controls here.",
     "unpair": "Disconnect the screen",
+    "unpairConfirm": "Disconnect the screen?",
+    "unpairConfirmHint": "It goes back to the code screen: you can pair it again with a new code.",
     "another": "Use another screen"
   },
   "pair": {

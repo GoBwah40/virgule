@@ -26,4 +26,7 @@ export const Period: Story = {
     return <DateField {...args} value={value} onChange={setValue} />;
   },
 };
+export const InvalidPeriod: Story = {
+  args: { value: { start: "2027-06-14", end: "2027-06-12" }, error: "The end date must be the same day as the start date or later." },
+};
 export const SingleDate: Story = { args: { mode: "single", value: { start: "2027-06-12", end: "2027-06-12" } } };
