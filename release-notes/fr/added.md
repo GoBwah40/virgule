@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.13.0 — 2026-10-06
+
+- La personne qui anime peut partager le bilan avec les absents : un lien en lecture seule, qui ne prend aucune place et ne montre aucun prénom, marche tant que la séance reste en ligne et peut être désactivé.
+
 ## 0.12.0 — 2026-10-06
 
 - Avec un minuteur sur les idées, la personne qui anime peut choisir de passer au bilan tout seul à la fin du temps, même si son téléphone est en veille.

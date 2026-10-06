@@ -279,6 +279,19 @@
   "recap": {
     "title": "Le bilan",
     "closedTitle": "C'est décidé",
+    "share": {
+      "button": "Partager le bilan",
+      "title": "Partager le bilan",
+      "description": "Pour les personnes absentes : elles voient le bilan, en lecture seule, sans prendre de place ni voir aucun prénom. Le lien marche tant que la séance reste en ligne.",
+      "enable": "Créer le lien",
+      "copy": "Copier le lien",
+      "copied": "Lien copié : envoie-le à qui a besoin du bilan",
+      "shareVia": "Partager",
+      "shareText": "Le bilan de « {name} » sur Virgule",
+      "disable": "Désactiver le lien",
+      "disableConfirm": "Désactiver le lien ?",
+      "disableConfirmHint": "Il ne marchera plus pour personne. Tu pourras en créer un nouveau."
+    },
     "closedBody": "La séance est terminée. Tu peux revoir et exporter le bilan tant qu'elle reste en ligne.",
     "newSession": "Lancer une nouvelle séance",
     "roundTab": "Tour {round}",
@@ -376,6 +389,13 @@
     "description": "Sur le téléphone de la personne qui anime, « Afficher en grand » donne un code. Tape-le ici.",
     "code": "Code",
     "submit": "Afficher la séance"
+  },
+  "sharedRecap": {
+    "byline": "Partagé par {host} · En ligne jusqu'au {date, date, long}",
+    "note": "Lecture seule : le bilan tel que le groupe l'a voté",
+    "waitingTitle": "Pas encore décidé",
+    "waitingBody": "Le groupe est encore en train de voter. Le bilan s'affiche ici dès que {host} le montre au groupe.",
+    "anonymous": "Personne ne sait qui a voté quoi."
   },
   "export": {
     "button": "Exporter",

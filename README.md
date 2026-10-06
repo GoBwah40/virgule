@@ -11,7 +11,7 @@ Brainstorming and planning app for small groups (up to 12 people, 6 by default),
    - **reopen voting** for the current round;
    - **end the session**: the room becomes read-only.
 
-The host drives the phases, and all participants follow automatically. The recap keeps the history of each round and can be exported as **Markdown**, **CSV** (Excel-compatible) or **PDF** (through the browser's print dialog).
+The host drives the phases, and all participants follow automatically. The recap keeps the history of each round and can be exported as **Markdown**, **CSV** (Excel-compatible) or **PDF** (through the browser's print dialog). The host can also share a **read-only link** to the recap with people who were not there: no seat taken, no names shown.
 
 A room expires **7 days** after it is created; a daily scheduled job then deletes it.
 
@@ -136,6 +136,7 @@ src/
     r/[slug]/(session)/themes|ideas|recap/page.tsx   One page per phase
     r/[slug]/present/page.tsx       Room screen (host or paired screen), outside the session header
     present/page.tsx                Pairing a TV or a projector with the code from the host's phone
+    recap/[token]/page.tsx          Read-only recap behind the link the host shares (no seat, no names)
     r/[slug]/export/route.ts               Markdown / CSV export
     api/cron/purge/route.ts                Purge of expired rooms
   components/*.tsx          Reusable global components (+ .stories.tsx and .test.tsx)

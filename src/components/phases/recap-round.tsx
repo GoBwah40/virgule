@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { VoteSummary } from "@/components/vote-summary";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getOverviewText } from "@/lib/overview-format";
 import { topQualified } from "@/lib/results";
 import type { RecapOverview, RecapRound } from "@/lib/room";
@@ -164,5 +165,28 @@ export async function RecapRoundSpotlight({ round }: { round: RecapRound }) {
         );
       })}
     />
+  );
+}
+
+/** One round: its recap; several: a tab each, the latest one open. */
+export async function RecapByRound({ rounds, render }: { rounds: RecapRound[]; render: (round: RecapRound) => React.ReactNode }) {
+  const t = await getTranslations("recap");
+  const current = rounds[rounds.length - 1];
+  if (rounds.length === 1) return render(current);
+  return (
+    <Tabs defaultValue={String(current.round)}>
+      <TabsList className="mb-4">
+        {rounds.map((r) => (
+          <TabsTrigger key={r.round} value={String(r.round)}>
+            {t("roundTab", { round: r.round })}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      {rounds.map((r) => (
+        <TabsContent key={r.round} value={String(r.round)} className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
+          {render(r)}
+        </TabsContent>
+      ))}
+    </Tabs>
   );
 }

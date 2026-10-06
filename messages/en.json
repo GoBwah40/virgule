@@ -279,6 +279,19 @@
   "recap": {
     "title": "The recap",
     "closedTitle": "It's decided",
+    "share": {
+      "button": "Share the recap",
+      "title": "Share the recap",
+      "description": "For people who weren't there: they see the recap, read-only, without taking a seat or seeing anyone's name. The link works while the session stays online.",
+      "enable": "Create the link",
+      "copy": "Copy the link",
+      "copied": "Link copied: send it to whoever needs the recap",
+      "shareVia": "Share",
+      "shareText": "The recap of “{name}” on Virgule",
+      "disable": "Turn off the link",
+      "disableConfirm": "Turn off the link?",
+      "disableConfirmHint": "It stops working for everyone who has it. You can create a new one."
+    },
     "closedBody": "The session is over. You can review and export the recap while it stays online.",
     "newSession": "Start a new session",
     "roundTab": "Round {round}",
@@ -376,6 +389,13 @@
     "description": "On the phone of the person hosting, “Show on a big screen” gives a code. Type it here.",
     "code": "Code",
     "submit": "Show the session"
+  },
+  "sharedRecap": {
+    "byline": "Shared by {host} · Online until {date, date, long}",
+    "note": "Read-only: the recap as the group voted it",
+    "waitingTitle": "Not decided yet",
+    "waitingBody": "The group is still voting. The recap shows up here once {host} shows it to the group.",
+    "anonymous": "Nobody knows who voted what."
   },
   "export": {
     "button": "Export",

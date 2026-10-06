@@ -1,12 +1,24 @@
 "use client";
 
-import { Download, Equal, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
+import { Download, Equal, Eye, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useSyncExternalStore } from "react";
 
 import { ConfirmButton } from "@/components/confirm-button";
+import { CopyButton } from "@/components/copy-button";
+import { ShareButton } from "@/components/share-button";
 import { SettingSwitch } from "@/components/setting-switch";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +27,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useAction } from "@/hooks/use-action";
-import { closeSession, reopenVoting, setRequireNetPositive, startNextRound, startTiebreakRound } from "@/lib/actions";
+import {
+  closeSession,
+  disableShareLink,
+  enableShareLink,
+  reopenVoting,
+  setRequireNetPositive,
+  startNextRound,
+  startTiebreakRound,
+} from "@/lib/actions";
 
 export function RecapHostControls({
   slug,
@@ -108,6 +128,61 @@ export function RecapHostControls({
         </ConfirmButton>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * Host: a read-only link to the recap, for people who were not there. They take no seat and see
+ * no names; the link stops working when the session goes offline, or when the host turns it off.
+ */
+const noop = () => () => {};
+
+export function ShareRecapButton({ slug, sharePath, roomName }: { slug: string; sharePath: string | null; roomName: string }) {
+  const t = useTranslations("recap.share");
+  const tCommon = useTranslations("common");
+  const tRoom = useTranslations("room");
+  const [pending, run] = useAction();
+  // The full address, as people will receive it (unknown on the server).
+  const origin = useSyncExternalStore(noop, () => window.location.origin, () => "");
+
+  return (
+    <Dialog>
+      <DialogTrigger render={<Button variant="outline" className="print:hidden" />}>
+        <Eye data-icon="inline-start" />
+        {t("button")}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-sm" closeLabel={tCommon("close")}>
+        <DialogHeader>
+          <DialogTitle className="font-heading text-xl font-bold">{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
+        </DialogHeader>
+        {sharePath ? (
+          <>
+            <p className="text-sm font-semibold break-all">{`${origin}${sharePath}`}</p>
+            <DialogFooter className="gap-2 sm:flex-col sm:items-stretch">
+              <ShareButton path={sharePath} title={roomName} text={t("shareText", { name: roomName })} label={t("shareVia")} />
+              <CopyButton value={sharePath} absolute label={t("copy")} successMessage={t("copied")} errorMessage={tRoom("linkCopyFailed")} />
+              <ConfirmButton
+                variant="ghost"
+                className="text-destructive"
+                disabled={pending}
+                title={t("disableConfirm")}
+                description={t("disableConfirmHint")}
+                confirmLabel={t("disable")}
+                destructive
+                onConfirm={() => run(() => disableShareLink(slug))}
+              >
+                {t("disable")}
+              </ConfirmButton>
+            </DialogFooter>
+          </>
+        ) : (
+          <Button disabled={pending} onClick={() => run(() => enableShareLink(slug))}>
+            {t("enable")}
+          </Button>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 
