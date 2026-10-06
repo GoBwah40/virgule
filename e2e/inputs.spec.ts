@@ -34,7 +34,7 @@ test("text that looks like code is shown as written, and never runs", async ({ p
 
   const guest = await openAsGuest(link);
   noDialogs(guest);
-  await expect(guest.getByText(`<img src=x onerror=alert(2)> invites you to “${name}”`)).toBeVisible();
+  await expect(guest.getByRole("heading", { level: 1, name: `<img src=x onerror=alert(2)> invites you to “${name}”` })).toBeVisible();
   await join(guest, "Lea");
   await addTopic(page, "<i>Dinner</i>");
   await startIdeas(page);

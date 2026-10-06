@@ -51,6 +51,8 @@ model Room {
   /// The group has seen a recap: from then on, nobody can leave or be removed (their votes
   /// would vanish from results already seen), even after voting is reopened.
   recapSeen        Boolean       @default(false)
+  /// When the ideas timer runs out, the session moves to the recap by itself (set with the timer).
+  autoRecap        Boolean       @default(false)
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]
@@ -152,6 +154,9 @@ model Idea {
   /// Option of a CHOICE topic (created when ideas start): belongs to no one in
   /// particular, so anyone can vote on it and the host can remove it.
   isOption         Boolean     @default(false)
+  /// Last change by its author, within the edit window after its creation (see config.ts) (null = never edited).
+  /// Votes cast before the change are removed with it.
+  editedAt         DateTime?
   votes            Vote[]
 
   @@index([roomId])

@@ -246,6 +246,14 @@ export async function elapseTimer(link: string) {
   await write("UPDATE Room SET phaseEndsAt = createdAt WHERE slug = ?", [slugOf(link)]);
 }
 
+/** Every idea of the session suggested long ago: past the window to change it. */
+export async function ageIdeas(link: string) {
+  await write('UPDATE Idea SET "createdAt" = ? WHERE roomId = (SELECT id FROM Room WHERE slug = ?)', [
+    "2000-01-01T00:00:00.000+00:00",
+    slugOf(link),
+  ]);
+}
+
 /** The paired room screen's secret, as stored (null without a screen). */
 export async function screenSecret(link: string) {
   await ready;

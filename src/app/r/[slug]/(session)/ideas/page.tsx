@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/page-header";
 import { ProgressMeter } from "@/components/progress-meter";
 import { PhaseTransition } from "@/components/phase-transition";
 import { ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
-import { BackToThemesButton, FinishVotingButton, IdeasBoard, TimerControls } from "@/components/phases/voting-board";
+import { AutoRecap, BackToThemesButton, FinishVotingButton, IdeasBoard, TimerControls } from "@/components/phases/voting-board";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 import { getVoteProgress, getVotingView, hostName, loadPhasePage } from "@/lib/room";
 
@@ -67,6 +67,7 @@ export default async function IdeasPage({ params }: PageProps<"/r/[slug]/ideas">
                 labels={{ running: t("timerLabel"), expired: t("timerExpired") }}
               />
               {me.isHost && <TimerControls slug={slug} />}
+              {room.autoRecap && <AutoRecap slug={slug} endsAt={room.phaseEndsAt.toISOString()} />}
             </div>
           )}
           {progress && progress.total > 0 && (

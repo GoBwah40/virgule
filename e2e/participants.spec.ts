@@ -54,7 +54,7 @@ test("a removed participant loses their ideas and can come back with the link", 
   await expect(idea(page, "Pizza")).toBeVisible();
 
   // Lea's page sends her back to the join form, from which she can take a seat again.
-  await expect(guest.getByText("Sam invites you to “Friday night”")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(guest.getByRole("heading", { level: 1, name: "Sam invites you to “Friday night”" })).toBeVisible({ timeout: LIVE_TIMEOUT });
   await join(guest, "Lea");
   await expect(guest).toHaveURL(/\/ideas$/);
   await expect(seats(page, 2)).toBeVisible({ timeout: LIVE_TIMEOUT });

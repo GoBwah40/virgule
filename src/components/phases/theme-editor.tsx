@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
+import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setAutoRecap, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { cn } from "@/lib/utils";
@@ -65,6 +65,7 @@ export function ThemeEditor({
   themes,
   allowSelfVote,
   ideasTimerMinutes,
+  autoRecap,
   capacity,
   participantCount,
 }: {
@@ -72,6 +73,7 @@ export function ThemeEditor({
   themes: Theme[];
   allowSelfVote: boolean;
   ideasTimerMinutes: number | null;
+  autoRecap: boolean;
   capacity: number;
   participantCount: number;
 }) {
@@ -146,6 +148,16 @@ export function ThemeEditor({
               disabled={pending}
               onChange={(value) => run(() => setIdeasTimer(slug, value === "off" ? null : Number(value)))}
             />
+            {ideasTimerMinutes !== null && (
+              <SettingSwitch
+                id="auto-recap"
+                label={t("autoRecap")}
+                hint={t("autoRecapHint")}
+                checked={autoRecap}
+                disabled={pending}
+                onCheckedChange={(checked) => run(() => setAutoRecap(slug, checked))}
+              />
+            )}
             <SegmentedControl
               name="room-size"
               label={t("sizeLabel")}

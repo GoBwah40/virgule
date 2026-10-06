@@ -1,8 +1,8 @@
 "use client";
 
-import { ListChecks, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
+import { ListChecks, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useOptimistic, useState } from "react";
+import { useEffect, useOptimistic, useState, useTransition } from "react";
 
 import { AmountField } from "@/components/amount-field";
 import { BoardColumns } from "@/components/board-columns";
@@ -24,9 +24,10 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
-import { addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, stopTimer } from "@/lib/actions";
+import { type ActionResult, addIdea, backToThemes, castVote, deleteIdea, extendTimer, goToRecap, goToRecapOnTimer, stopTimer, updateIdea } from "@/lib/actions";
 import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
-import type { IdeaInput, ThemeKind } from "@/lib/idea-value";
+import type { IdeaFields, IdeaInput, ThemeKind } from "@/lib/idea-value";
+import { isBadServerResponse, isNetworkError } from "@/lib/network-error";
 import type { ViewPreference } from "@/lib/view-preference";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
 import { cn } from "@/lib/utils";
@@ -141,6 +142,7 @@ function ThemeIdeas({
               <IdeaItem
                 key={idea.id}
                 slug={slug}
+                kind={theme.kind}
                 idea={idea}
                 pick={
                   theme.singleChoice
@@ -161,14 +163,58 @@ function ThemeIdeas({
 const EMPTY_DATES = { start: "", end: "" };
 const EMPTY_AMOUNTS = { min: "", max: "" };
 
-/** Idea input matching the topic kind: text, date, period, amount or range. */
+/** Adds an idea to a topic. */
 function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; kind: ThemeKind }) {
   const t = useTranslations("ideas");
-  const tErrors = useTranslations("errors");
   const [pending, run] = useAction();
-  const [content, setContent] = useState("");
-  const [dates, setDates] = useState(EMPTY_DATES);
-  const [amounts, setAmounts] = useState(EMPTY_AMOUNTS);
+  return (
+    <IdeaForm
+      idPrefix={`idea-${themeId}`}
+      kind={kind}
+      pending={pending}
+      submitLabel={t("add")}
+      onSubmit={(input, reset) => run(() => addIdea(slug, themeId, input), reset)}
+    />
+  );
+}
+
+/** Raw values of an idea → the fields' text. */
+const formValues = (value: IdeaFields | undefined) => ({
+  content: value?.content ?? "",
+  dates: value?.dateStart ? { start: value.dateStart, end: value.dateEnd ?? "" } : EMPTY_DATES,
+  amounts: value?.amountMin != null ? { min: String(value.amountMin), max: value.amountMax != null ? String(value.amountMax) : "" } : EMPTY_AMOUNTS,
+});
+
+/** Idea input matching the topic kind: text, date, period, amount or range. */
+function IdeaForm({
+  idPrefix,
+  kind,
+  initial,
+  pending,
+  submitLabel,
+  onSubmit,
+  onCancel,
+  hint,
+  fieldLabel,
+}: {
+  idPrefix: string;
+  kind: ThemeKind;
+  /** Changing an idea: its current value. */
+  initial?: IdeaFields;
+  pending: boolean;
+  submitLabel: string;
+  onSubmit: (input: IdeaInput, reset: () => void) => void;
+  /** Changing an idea: a way back without saving. */
+  onCancel?: { label: string; run: () => void };
+  hint?: string;
+  /** Name of the text field (its placeholder by default). */
+  fieldLabel?: string;
+}) {
+  const t = useTranslations("ideas");
+  const tErrors = useTranslations("errors");
+  const [content, setContent] = useState(() => formValues(initial).content);
+  const [dates, setDates] = useState(() => formValues(initial).dates);
+  const [amounts, setAmounts] = useState(() => formValues(initial).amounts);
 
   // Client-side validation to enable the button; the server validates again (parseIdeaInput).
   const input: IdeaInput | null = (() => {
@@ -202,27 +248,40 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
 
   const submit = () => {
     if (!input) return;
-    run(
-      () => addIdea(slug, themeId, input),
-      () => {
-        setContent("");
-        setDates(EMPTY_DATES);
-        setAmounts(EMPTY_AMOUNTS);
-      },
-    );
+    onSubmit(input, () => {
+      setContent("");
+      setDates(EMPTY_DATES);
+      setAmounts(EMPTY_AMOUNTS);
+    });
   };
 
-  const button = (
+  const submitButton = (
     <Button type="submit" disabled={pending || !input} className="sm:self-end">
-      {t("add")}
+      {submitLabel}
     </Button>
   );
+  // Changing an idea: the buttons go under the field, which keeps its full width.
+  const stacked = onCancel !== undefined;
+  const button = onCancel ? (
+    <div className="flex justify-end gap-2">
+      <Button type="button" variant="ghost" disabled={pending} onClick={onCancel.run}>
+        {onCancel.label}
+      </Button>
+      {submitButton}
+    </div>
+  ) : (
+    submitButton
+  );
 
-  return (
+  const form = (
     <form
       className={cn(
         "flex w-full gap-2",
-        kind === "TEXT" || kind === "CHOICE" ? "items-end" : kind !== "PLACE" && "flex-col sm:flex-row sm:items-end",
+        stacked
+          ? "flex-col"
+          : kind === "TEXT" || kind === "CHOICE"
+            ? "items-end"
+            : kind !== "PLACE" && "flex-col sm:flex-row sm:items-end",
       )}
       onSubmit={(e) => {
         e.preventDefault();
@@ -231,14 +290,14 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
     >
       {kind === "PLACE" && (
         <FormField
-          id={`idea-${themeId}-place`}
+          id={`${idPrefix}-place`}
           label={t("place")}
           hint={t("placeHint")}
-          action={button}
+          action={stacked ? undefined : button}
           className="min-w-0 flex-1"
         >
           <Input
-            id={`idea-${themeId}-place`}
+            id={`${idPrefix}-place`}
             value={content}
             onChange={(e) => setContent(e.target.value)}
             placeholder={t("placePlaceholder")}
@@ -258,8 +317,9 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
               submit();
             }
           }}
-          aria-label={t("placeholder")}
+          aria-label={fieldLabel ?? t("placeholder")}
           placeholder={t("placeholder")}
+          autoFocus={initial !== undefined}
           maxLength={LIMITS.idea}
           rows={1}
           className="min-h-11"
@@ -269,7 +329,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
         <div className="min-w-0 flex-1">
           <DateField
             mode={kind === "DATE" ? "single" : "range"}
-            idPrefix={`idea-${themeId}`}
+            idPrefix={idPrefix}
             value={dates}
             onChange={setDates}
             labels={{ date: t("date"), from: t("dateFrom"), to: t("dateTo") }}
@@ -281,7 +341,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
         <div className="min-w-0 flex-1">
           <AmountField
             mode={kind === "AMOUNT" ? "single" : "range"}
-            idPrefix={`idea-${themeId}`}
+            idPrefix={idPrefix}
             value={amounts}
             onChange={setAmounts}
             labels={{ amount: t("amount"), min: t("amountMin"), max: t("amountMax"), currency: t("currency") }}
@@ -289,18 +349,27 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
           />
         </div>
       )}
-      {kind !== "PLACE" && button}
+      {(kind !== "PLACE" || stacked) && button}
     </form>
+  );
+  if (!hint) return form;
+  return (
+    <div className="w-full space-y-2">
+      {form}
+      <p className="text-sm text-muted-foreground">{hint}</p>
+    </div>
   );
 }
 
 function IdeaItem({
   slug,
+  kind,
   idea,
   pick,
   upDisabledReason,
 }: {
   slug: string;
+  kind: ThemeKind;
   idea: VotingIdea;
   /** Single-answer list: the choice is handled by the topic, across its ideas. */
   pick?: { chosen: boolean; pending: boolean; onChange: (next: boolean | null) => void };
@@ -311,33 +380,81 @@ function IdeaItem({
   const [pending, run] = useAction();
   // Shows the vote immediately; reverts to the server value on error.
   const [vote, setOptimisticVote] = useOptimistic(idea.myVote);
+  const [editing, setEditing] = useState(false);
+  // The edit window closes on its own, page open or not (the server checks it again).
+  const [windowOver, setWindowOver] = useState<string | null>(null);
+  const until = idea.edit?.until;
+  useEffect(() => {
+    if (!until) return;
+    const timer = setTimeout(() => setWindowOver(until), Math.max(0, new Date(until).getTime() - Date.now()));
+    return () => clearTimeout(timer);
+  }, [until]);
+  const edit = idea.edit && windowOver !== idea.edit.until ? idea.edit : null;
+
+  if (editing && edit) {
+    return (
+      <li className="py-3">
+        <IdeaForm
+          idPrefix={`edit-${idea.id}`}
+          kind={kind}
+          initial={edit.value}
+          pending={pending}
+          submitLabel={t("editSave")}
+          fieldLabel={t("edit")}
+          hint={t("editHint")}
+          onCancel={{ label: t("editCancel"), run: () => setEditing(false) }}
+          onSubmit={(input) => run(() => updateIdea(slug, idea.id, input), () => setEditing(false))}
+        />
+      </li>
+    );
+  }
 
   return (
     <ListItem
       className={pending || pick?.pending ? "opacity-80" : undefined}
       meta={
-        (idea.isMine || !idea.isNew || idea.canDelete || idea.mapQuery) && (
+        (idea.isMine || !idea.isNew || idea.edited || idea.canDelete || idea.mapQuery) && (
           <>
             {idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{t("mine")}</Badge>}
             {!idea.isNew && <Badge variant="outline">{t("carriedOver")}</Badge>}
+            {/* Votes were reset with the change: everyone sees why theirs is gone. */}
+            {idea.edited && <Badge variant="outline">{t("edited")}</Badge>}
             {idea.mapQuery && <MapLink query={idea.mapQuery} label={t("mapLink")} />}
-            {idea.canDelete && (
-              // Its votes go with it: asked first, like a topic with ideas.
-              <ConfirmButton
-                variant="ghost"
-                size="icon-xs"
-                // Small next to the badges, 44 px to tap.
-                className="touch-target"
-                aria-label={t("delete")}
-                disabled={pending}
-                title={t("deleteConfirm")}
-                description={t("deleteConfirmHint")}
-                confirmLabel={t("delete")}
-                destructive
-                onConfirm={() => run(() => deleteIdea(slug, idea.id))}
-              >
-                <Trash2 />
-              </ConfirmButton>
+            {(edit || idea.canDelete) && (
+              // 20 px apart: the 44 px touch areas of the two small buttons do not overlap.
+              <span className="inline-flex gap-5">
+                {edit && (
+                  <Button
+                    variant="ghost"
+                    size="icon-xs"
+                    className="touch-target"
+                    aria-label={t("edit")}
+                    title={t("edit")}
+                    disabled={pending}
+                    onClick={() => setEditing(true)}
+                  >
+                    <Pencil />
+                  </Button>
+                )}
+                {idea.canDelete && (
+                  // Its votes go with it: asked first, like a topic with ideas.
+                  <ConfirmButton
+                    variant="ghost"
+                    size="icon-xs"
+                    // Small next to the badges, 44 px to tap.
+                    className="touch-target"
+                    aria-label={t("delete")}
+                    disabled={pending}
+                    title={t("deleteConfirm")}
+                    description={t("deleteConfirmHint")}
+                    confirmLabel={t("delete")}
+                    destructive
+                    onConfirm={() => run(() => deleteIdea(slug, idea.id))}
+                  >
+                    <Trash2 />
+                  </ConfirmButton>
+                )}
+              </span>
             )}
           </>
         )
@@ -428,4 +545,42 @@ export function TimerControls({ slug }: { slug: string }) {
       </Button>
     </div>
   );
+}
+
+// Errors worth asking again for: this browser's clock a little ahead of the server's, or a
+// server too busy to answer. Any other one (the step already changed…) ends it.
+const RETRY_ERRORS = new Set(["timerRunning", "tooManyRequests", "unknown"]);
+const MAX_ATTEMPTS = 5;
+
+/**
+ * The host chose to move on when time is up: says so, and asks the server once the timer runs
+ * out. Every page asks, so the session moves on even if the host's phone is asleep; the server
+ * checks its own clock and only the first request changes the step.
+ */
+export function AutoRecap({ slug, endsAt }: { slug: string; endsAt: string }) {
+  const t = useTranslations("ideas");
+  const [, startTransition] = useTransition();
+
+  useEffect(() => {
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout>;
+    const ask = () =>
+      startTransition(async () => {
+        let result: ActionResult | void | null;
+        try {
+          result = await goToRecapOnTimer(slug);
+        } catch (error) {
+          if (navigator.onLine && !isNetworkError(error) && !isBadServerResponse(error)) throw error;
+          result = null;
+        }
+        // Nothing back: the action redirected to the recap.
+        const again = result === null || (result && !result.ok && RETRY_ERRORS.has(result.error));
+        if (again && ++attempts < MAX_ATTEMPTS) timer = setTimeout(ask, 3000);
+      });
+    // Up to a second and a half later: not every page at the same instant.
+    timer = setTimeout(ask, Math.max(0, new Date(endsAt).getTime() - Date.now()) + Math.random() * 1500);
+    return () => clearTimeout(timer);
+  }, [slug, endsAt]);
+
+  return <p className="text-sm text-muted-foreground">{t("autoRecapNotice")}</p>;
 }
