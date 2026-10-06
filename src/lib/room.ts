@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
+import { type CalendarDates, decidedDates } from "@/lib/calendar";
 import { ideaEditableUntil, roomCapacity } from "@/lib/config";
 import { db } from "@/lib/db";
 import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
@@ -275,6 +276,8 @@ type RecapTheme = {
   description: string | null;
   kind: ThemeKind;
   overview: RecapOverview | null;
+  /** "Date" and "Period" topics: what the group settled on, to add to a calendar (null = nothing clear). */
+  calendar: CalendarDates | null;
   ideas: RecapIdea[];
 };
 
@@ -341,12 +344,18 @@ export async function getRecap(
         tiedThemeCount++;
         for (const idea of top) idea.tied = true;
       }
+      const overview = overviewOf(theme.kind, ideas.filter((idea) => idea.qualified).map((idea) => idea.fields));
       return {
         id: theme.id,
         title: theme.title,
         description: theme.description,
         kind: theme.kind,
-        overview: overviewOf(theme.kind, ideas.filter((idea) => idea.qualified).map((idea) => idea.fields)),
+        overview,
+        calendar: decidedDates(
+          theme.kind,
+          overview?.type === "dates" ? overview.best : null,
+          ideas.map((idea) => ({ ...idea, dateStart: idea.fields.dateStart, dateEnd: idea.fields.dateEnd })),
+        ),
         ideas: ideas.map(({ fields: _, ...idea }) => idea),
       };
     });

@@ -35,6 +35,7 @@ const data: ExportData = {
           description: null,
           kind: "TEXT",
           overview: null,
+          calendar: null,
           ideas: [
             { id: "i1", content: "Video | tutorial\nin 2 min", score: { up: 2, down: 0, net: 2 }, qualified: true, tied: false, isMine: false, mapQuery: null },
             { id: "i2", content: '=HYPERLINK("x"); test', score: { up: 0, down: 1, net: -1 }, qualified: false, tied: false, isMine: false, mapQuery: null },

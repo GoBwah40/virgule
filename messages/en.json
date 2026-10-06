@@ -279,6 +279,7 @@
   "recap": {
     "title": "The recap",
     "closedTitle": "It's decided",
+    "addToCalendar": "Add to calendar",
     "share": {
       "button": "Share the recap",
       "title": "Share the recap",
@@ -396,6 +397,10 @@
     "waitingTitle": "Not decided yet",
     "waitingBody": "The group is still voting. The recap shows up here once {host} shows it to the group.",
     "anonymous": "Nobody knows who voted what."
+  },
+  "calendar": {
+    "title": "{name}: {topic}",
+    "description": "“{topic}”, decided together on Virgule."
   },
   "export": {
     "button": "Export",

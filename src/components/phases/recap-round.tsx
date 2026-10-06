@@ -1,4 +1,4 @@
-import { Equal } from "lucide-react";
+import { CalendarPlus, Equal } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { AmountOverview } from "@/components/amount-overview";
@@ -11,13 +11,30 @@ import { PresentationResult } from "@/components/presentation-result";
 import { StatusBadge } from "@/components/status-badge";
 import { VoteSummary } from "@/components/vote-summary";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getOverviewText } from "@/lib/overview-format";
 import { topQualified } from "@/lib/results";
 import type { RecapOverview, RecapRound } from "@/lib/room";
+import { cn } from "@/lib/utils";
 
-export async function RecapRoundView({ round }: { round: RecapRound }) {
+/** Link to a topic's calendar file; only given for the latest round, the one that counts. */
+type CalendarHref = (themeId: string) => string;
+
+/** Downloads the decided date or period of a topic, to add it to a calendar. */
+async function AddToCalendar({ href }: { href: string }) {
+  const t = await getTranslations("recap");
+  return (
+    // A link to a file, not an action: an <a> styled as a button.
+    <a href={href} download className={cn(buttonVariants({ variant: "outline" }), "self-start print:hidden")}>
+      <CalendarPlus data-icon="inline-start" />
+      {t("addToCalendar")}
+    </a>
+  );
+}
+
+export async function RecapRoundView({ round, calendarHref }: { round: RecapRound; calendarHref?: CalendarHref }) {
   const t = await getTranslations("recap");
   const tIdeas = await getTranslations("ideas");
 
@@ -31,6 +48,7 @@ export async function RecapRoundView({ round }: { round: RecapRound }) {
           </CardHeader>
           <CardContent className="space-y-4">
             {theme.overview && <ThemeOverview overview={theme.overview} />}
+            {theme.calendar && calendarHref && <AddToCalendar href={calendarHref(theme.id)} />}
             {theme.ideas.length === 0 ? (
               <p className="text-sm text-muted-foreground">{t("empty")}</p>
             ) : (
@@ -132,7 +150,7 @@ async function ThemeOverview({ overview }: { overview: RecapOverview }) {
  * The recap "topic by topic", as on the room screen: the kept idea in large, then every idea with
  * its votes. On someone's own device, so with previous / next buttons rather than moving on alone.
  */
-export async function RecapRoundSpotlight({ round }: { round: RecapRound }) {
+export async function RecapRoundSpotlight({ round, calendarHref }: { round: RecapRound; calendarHref?: CalendarHref }) {
   const t = await getTranslations("present");
   const tRecap = await getTranslations("recap");
   const tView = await getTranslations("view");
@@ -146,22 +164,25 @@ export async function RecapRoundSpotlight({ round }: { round: RecapRound }) {
       slides={round.themes.map((theme) => {
         const winners = topQualified(theme.ideas).map((idea) => idea.content);
         return (
-          <PresentationResult
-            key={theme.id}
-            variant="page"
-            topic={theme.title}
-            winners={winners}
-            verdict={winners.length === 0 ? t("noneKept") : winners.length > 1 ? t("tied") : t("kept")}
-            ideas={theme.ideas.map((idea) => ({
-              id: idea.id,
-              content: idea.content,
-              up: idea.score.up,
-              down: idea.score.down,
-              qualified: idea.qualified,
-              votesLabel: t("votes", { up: idea.score.up, down: idea.score.down }),
-              statusLabel: idea.qualified ? tRecap("qualified") : tRecap("notQualified"),
-            }))}
-          />
+          // A slide fills the carousel: the result grows, the button stays under it.
+          <div key={theme.id} className="flex min-h-0 flex-1 flex-col gap-4">
+            <PresentationResult
+              variant="page"
+              topic={theme.title}
+              winners={winners}
+              verdict={winners.length === 0 ? t("noneKept") : winners.length > 1 ? t("tied") : t("kept")}
+              ideas={theme.ideas.map((idea) => ({
+                id: idea.id,
+                content: idea.content,
+                up: idea.score.up,
+                down: idea.score.down,
+                qualified: idea.qualified,
+                votesLabel: t("votes", { up: idea.score.up, down: idea.score.down }),
+                statusLabel: idea.qualified ? tRecap("qualified") : tRecap("notQualified"),
+              }))}
+            />
+            {theme.calendar && calendarHref && <AddToCalendar href={calendarHref(theme.id)} />}
+          </div>
         );
       })}
     />

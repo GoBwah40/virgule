@@ -20,7 +20,8 @@ export async function generateMetadata({ params }: PageProps<"/recap/[token]">):
  * cookie, no names, nothing to change. Reloading shows the latest recap.
  */
 export default async function SharedRecapPage({ params }: PageProps<"/recap/[token]">) {
-  const shared = await getSharedRecap((await params).token);
+  const { token } = await params;
+  const shared = await getSharedRecap(token);
   if (shared.status === "not_found") notFound();
   if (shared.status === "expired") return <RoomExpired />;
 
@@ -43,7 +44,15 @@ export default async function SharedRecapPage({ params }: PageProps<"/recap/[tok
               title={room.closed ? tRecap("closedTitle") : tRecap("title")}
               subtitle={`${tRecap("summary", { qualified: current.qualifiedCount, total: current.ideaCount })} · ${t("anonymous")}`}
             />
-            <RecapByRound rounds={rounds} render={(round) => <RecapRoundView round={round} />} />
+            <RecapByRound
+              rounds={rounds}
+              render={(round) => (
+                <RecapRoundView
+                  round={round}
+                  calendarHref={round.round === current.round ? (themeId) => `/recap/${token}/calendar?theme=${themeId}` : undefined}
+                />
+              )}
+            />
           </>
         ) : (
           <StatusPage size="section" icon={Hourglass} title={t("waitingTitle")} body={t("waitingBody", { host: shared.hostName })} />

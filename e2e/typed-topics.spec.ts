@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+
 import type { Page } from "@playwright/test";
 
 import {
@@ -174,4 +176,40 @@ test("each person reads dates and amounts in their own language", async ({ page,
   await expect(idea(guest, "De 500")).toHaveText(/De 500\s€ à 1\s200\s€/);
   // Sam still reads English.
   await expect(idea(page, "June 1")).toHaveText(/June 1\s–\s14, 2027/);
+});
+
+test("the common slot goes into a calendar, from the session and from the shared recap", async ({ page, openAsGuest }) => {
+  const guest = await setUp(page, openAsGuest);
+  await addSuggestedTopic(page, "Dates");
+  await addSuggestedTopic(page, "Budget");
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await suggestPeriod(page, "2027-06-10", "2027-06-20");
+  await suggestPeriod(guest, "2027-06-15", "2027-06-25");
+  await suggestRange(page, "500", "1000");
+  await expect(card(page, "Dates").getByRole("listitem")).toHaveCount(2, { timeout: LIVE_TIMEOUT });
+  for (const content of ["June 10", "June 15", "€500"]) await vote(page, content, "For");
+  await seeRecap(page);
+  await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+
+  // Only the topic with dates offers it.
+  await expect(card(page, "Budget").getByRole("link", { name: "Add to calendar" })).toHaveCount(0);
+  const download = async (p: Page) => {
+    const [file] = await Promise.all([p.waitForEvent("download"), card(p, "Dates").getByRole("link", { name: "Add to calendar" }).click()]);
+    expect(file.suggestedFilename()).toMatch(/^virgule-holidays-\d{4}-\d{2}-\d{2}\.ics$/);
+    return readFile(await file.path(), "utf8");
+  };
+  // The common slot, June 15 to 20: an all-day event ends the day after.
+  const ics = await download(guest);
+  expect(ics).toContain("DTSTART;VALUE=DATE:20270615\r\n");
+  expect(ics).toContain("DTEND;VALUE=DATE:20270621\r\n");
+  expect(ics).toContain("SUMMARY:Holidays: Dates\r\n");
+
+  // Someone who was not there gets the same, from the link Sam shares.
+  await page.getByRole("button", { name: "Share the recap" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Create the link" }).click();
+  const shared = page.getByRole("dialog").getByText(/\/recap\/[\w-]+$/);
+  await expect(shared).toBeVisible();
+  const visitor = await openAsGuest((await shared.innerText()).trim());
+  expect(await download(visitor)).toContain("DTSTART;VALUE=DATE:20270615\r\n");
 });
