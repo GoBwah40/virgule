@@ -54,5 +54,18 @@ const IDEA_EDIT_MINUTES = 2;
 /** End of the window to change an idea. */
 export const ideaEditableUntil = (createdAt: Date) => new Date(createdAt.getTime() + IDEA_EDIT_MINUTES * 60_000);
 
+/** Shortest gap between two reminders to vote sent by the host (enforced by the server). */
+export const NUDGE_COOLDOWN_SECONDS = 60;
+/** When the host can send the next reminder to vote (null: right away). */
+export const nextNudgeAt = (nudgedAt: Date | null) =>
+  nudgedAt ? new Date(nudgedAt.getTime() + NUDGE_COOLDOWN_SECONDS * 1000) : null;
+/**
+ * A reminder is shown only while it is recent: someone opening the page later (another tab,
+ * the next round) is not reminded of something said minutes ago.
+ */
+const NUDGE_SHOWN_MINUTES = 5;
+export const isRecentNudge = (nudgedAt: Date | null, now = new Date()) =>
+  nudgedAt !== null && now.getTime() - nudgedAt.getTime() < NUDGE_SHOWN_MINUTES * 60_000;
+
 /** Public repository of the project, linked from the footer. */
 export const REPO_URL = "https://github.com/GoBwah40/virgule";

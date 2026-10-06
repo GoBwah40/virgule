@@ -225,6 +225,9 @@
     "timerExtend": "+{count} min",
     "timerStop": "Stop the timer",
     "autoRecapNotice": "When time is up, we move on to the recap.",
+    "nudge": "Remind the group to vote",
+    "nudgeSent": "Reminder sent",
+    "nudgeReceived": "{host} reminds the group: you still have ideas to vote on.",
     "empty": "No ideas here yet. Who goes first?",
     "listLabel": "Ideas for {title}",
     "ideaCount": "{count, plural, one {# idea} other {# ideas}}",
@@ -469,7 +472,8 @@
     "themeInPastRounds": "This topic is in the recaps of earlier rounds: it can no longer be deleted.",
     "voteLimitBelowUsed": "Some people have already cast more “for” votes than that in this topic: choose a higher limit.",
     "editWindowOver": "This idea can no longer be changed: you can remove it and suggest another one.",
-    "timerRunning": "The timer isn't over yet."
+    "timerRunning": "The timer isn't over yet.",
+    "nudgeTooSoon": "A reminder was just sent: wait a minute before sending another."
   },
   "theme": {
     "label": "Theme",
