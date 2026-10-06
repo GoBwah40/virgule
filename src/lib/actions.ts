@@ -16,6 +16,8 @@ import {
   IDEAS_TIMER_OPTIONS,
   DEFAULT_ROOM_SIZE,
   LIMITS,
+  MAX_COMMENTS_PER_IDEA,
+  MAX_COMMENTS_PER_ROOM,
   MAX_PENDING_SUGGESTIONS,
   MAX_THEMES,
   NUDGE_COOLDOWN_SECONDS,
@@ -76,6 +78,10 @@ type ActionError =
   | "editWindowOver"
   | "timerRunning"
   | "nudgeTooSoon"
+  | "commentNotFound"
+  | "notCommentAuthor"
+  | "tooManyComments"
+  | "roomCommentLimit"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -656,6 +662,43 @@ export async function deleteIdea(slug: string, ideaId: string) {
     const owner = idea.isOption ? me.isHost : idea.authorId === me.id;
     if (!owner || idea.createdRound !== room.round) throw new ActionFailure("notAuthor");
     await db.idea.delete({ where: { id: idea.id } });
+  });
+}
+
+/**
+ * A short comment on an idea still in the running, to clarify it or raise a point before voting.
+ * Anonymous like the ideas: only its author is told it is theirs. Tiebreak rounds included.
+ */
+export async function addComment(slug: string, ideaId: string, content: string) {
+  const parsed = text(LIMITS.comment).safeParse(content);
+  if (!parsed.success || !isId(ideaId)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { phase: "IDEAS" });
+    const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id } });
+    if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
+    // Counted after the insert, in the same transaction: comments sent at once cannot all pass a
+    // count made before any of them was written.
+    await db.$transaction(async (tx) => {
+      await tx.comment.create({ data: { roomId: room.id, ideaId, authorId: me.id, content: parsed.data } });
+      const [mine, total] = await Promise.all([
+        tx.comment.count({ where: { ideaId, authorId: me.id } }),
+        tx.comment.count({ where: { roomId: room.id } }),
+      ]);
+      if (mine > MAX_COMMENTS_PER_IDEA) throw new ActionFailure("tooManyComments");
+      if (total > MAX_COMMENTS_PER_ROOM) throw new ActionFailure("roomCommentLimit");
+    });
+  });
+}
+
+/** Its author removes their comment, or the host removes anyone's (moderation). */
+export async function deleteComment(slug: string, commentId: string) {
+  if (!isId(commentId)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { phase: "IDEAS" });
+    const comment = await db.comment.findFirst({ where: { id: commentId, roomId: room.id } });
+    if (!comment) throw new ActionFailure("commentNotFound");
+    if (!me.isHost && comment.authorId !== me.id) throw new ActionFailure("notCommentAuthor");
+    await db.comment.deleteMany({ where: { id: comment.id } });
   });
 }
 

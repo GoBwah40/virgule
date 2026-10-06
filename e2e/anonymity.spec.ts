@@ -1,7 +1,9 @@
 import type { Page } from "@playwright/test";
 
 import {
+  commentRows,
   expect,
+  fillAndSubmit,
   idea,
   LIVE_TIMEOUT,
   openPresentation,
@@ -71,6 +73,66 @@ test("no page ever receives a participant's token or who suggested an idea", asy
     expect(containing(hostAnswers, token), `${pseudo}'s token in Sam's pages`).toEqual([]);
   }
   // Ideas say whether they are one's own, never whose they are.
+  for (const field of ['"authorId"', '"participantId"', '"token"']) {
+    expect(containing(guestAnswers, field), field).toEqual([]);
+    expect(containing(hostAnswers, field), field).toEqual([]);
+  }
+});
+
+test("a comment reaches the pages without its author, nor anyone's token", async ({ page, openAsGuest }) => {
+  test.slow();
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  const screen = await openPresentation(page);
+  const guestAnswers = await recordAnswers(guest);
+  const hostAnswers = await recordAnswers(page);
+  const screenAnswers = await recordAnswers(screen);
+
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  for (const [who, text] of [[guest, "Lea thinks it is too far"], [page, "Sam booked already"]] as const) {
+    await idea(who, "Pizza").getByRole("button", { name: /^(Comment|\d+ comments?)$/ }).click();
+    const row = idea(who, "Pizza");
+    await fillAndSubmit([[row.getByLabel("Your comment on this idea"), text]], row.getByRole("button", { name: "Send" }));
+    await expect(row.getByText(text)).toBeVisible();
+  }
+  await expect(idea(guest, "Pizza").getByText("Sam booked already")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await seeRecap(page);
+  await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+  await guest.reload();
+  await page.reload();
+  await screen.reload();
+
+  const rows = await commentRows(link);
+  expect(rows).toHaveLength(2);
+  // The recording does see the comments, in both pages.
+  for (const { content } of rows) {
+    expect(containing(guestAnswers, content).length, `${content} in Lea's pages`).toBeGreaterThan(0);
+    expect(containing(hostAnswers, content).length, `${content} in Sam's pages`).toBeGreaterThan(0);
+    // Never on the room screen.
+    expect(containing(screenAnswers, content), `${content} on the room screen`).toEqual([]);
+  }
+  // Wherever a comment goes, it is exactly its id, its text and whether it is one's own: nothing
+  // more, so no field can carry who wrote it.
+  const exact = /\{"id":"([^"]+)","content":"[^"]*","isMine":(true|false),"canDelete":(true|false)\}/g;
+  for (const [who, answers] of [["Lea", guestAnswers], ["Sam", hostAnswers]] as const) {
+    for (const { id, content } of rows) {
+      for (const answer of answers.filter((a) => a.body.includes(content))) {
+        // A first page load carries the same data in a script, its quotes escaped.
+        const body = answer.body.replaceAll('\\"', '"');
+        const occurrences = body.split(`"id":"${id}"`).length - 1;
+        expect(occurrences, `${content} in ${who}'s ${answer.url}`).toBeGreaterThan(0);
+        const shapes = [...body.matchAll(exact)].filter((match) => match[1] === id).length;
+        expect(shapes, `${content} in ${who}'s ${answer.url}`).toBe(occurrences);
+      }
+    }
+  }
+  for (const { token, id, pseudo } of await participantSecrets(link)) {
+    for (const [who, answers] of [["Lea", guestAnswers], ["Sam", hostAnswers], ["the room screen", screenAnswers]] as const) {
+      expect(containing(answers, token), `${pseudo}'s token in ${who}'s pages`).toEqual([]);
+      expect(containing(answers, `"authorId":"${id}"`), `${pseudo}'s comments in ${who}'s pages`).toEqual([]);
+    }
+  }
   for (const field of ['"authorId"', '"participantId"', '"token"']) {
     expect(containing(guestAnswers, field), field).toEqual([]);
     expect(containing(hostAnswers, field), field).toEqual([]);

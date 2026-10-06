@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.18.0 — 2026-10-06
+
+- While ideas are open, you can leave a short anonymous comment on an idea to clarify it or raise a point before voting; you can remove yours, and the person hosting can remove any of them.
+
 ## 0.17.0 — 2026-10-06
 
 - A topic can be voted with points: everyone spreads 3, 5 or 10 points across its ideas, several on the same one if they like, and the recap ranks the ideas by their total.

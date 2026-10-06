@@ -63,6 +63,7 @@ model Room {
   themes           Theme[]
   ideas            Idea[]
   themeSuggestions ThemeSuggestion[]
+  comments         Comment[]
 
   @@index([expiresAt])
 }
@@ -79,6 +80,7 @@ model Participant {
   ideas     Idea[]
   votes     Vote[]
   themeSuggestions ThemeSuggestion[]
+  comments  Comment[]
 
   @@unique([roomId, pseudo])
 }
@@ -167,6 +169,7 @@ model Idea {
   /// Votes cast before the change are removed with it.
   editedAt         DateTime?
   votes            Vote[]
+  comments         Comment[]
 
   @@index([roomId])
   @@index([themeId])
@@ -189,4 +192,22 @@ model Vote {
 
   @@unique([ideaId, participantId, round])
   @@index([participantId])
+}
+
+/// Short comment on an idea, during the IDEAS phase: to clarify it or raise a point before voting.
+model Comment {
+  id        String      @id @default(cuid())
+  roomId    String
+  room      Room        @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  ideaId    String
+  idea      Idea        @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  /// Never exposed: only used to mark people's own comments and to let them remove them.
+  authorId  String
+  author    Participant @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime    @default(now())
+
+  @@index([roomId])
+  @@index([ideaId])
+  @@index([authorId])
 }

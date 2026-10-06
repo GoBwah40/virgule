@@ -2,6 +2,8 @@ import { CalendarPlus, Equal } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 
 import { AmountOverview } from "@/components/amount-overview";
+import { CommentThread } from "@/components/comment-thread";
+import { CountBadge } from "@/components/count-badge";
 import { DateOverview } from "@/components/date-overview";
 import { ExpandableListItem } from "@/components/expandable-list-item";
 import { MapLink } from "@/components/map-link";
@@ -16,7 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getOverviewText } from "@/lib/overview-format";
 import { topQualified } from "@/lib/results";
-import type { RecapOverview, RecapRound } from "@/lib/room";
+import type { CommentView, RecapOverview, RecapRound } from "@/lib/room";
 import { cn } from "@/lib/utils";
 
 /** Link to a topic's calendar file; only given for the latest round, the one that counts. */
@@ -34,7 +36,16 @@ async function AddToCalendar({ href }: { href: string }) {
   );
 }
 
-export async function RecapRoundView({ round, calendarHref }: { round: RecapRound; calendarHref?: CalendarHref }) {
+export async function RecapRoundView({
+  round,
+  calendarHref,
+  comments,
+}: {
+  round: RecapRound;
+  calendarHref?: CalendarHref;
+  /** Comments by idea, read-only: the session's own recap only, never the shared one. */
+  comments?: Record<string, CommentView[]>;
+}) {
   const t = await getTranslations("recap");
   const tIdeas = await getTranslations("ideas");
 
@@ -59,7 +70,7 @@ export async function RecapRoundView({ round, calendarHref }: { round: RecapRoun
                     // Zero score: neutral row, whatever the status.
                     tone={idea.score.net === 0 ? "neutral" : idea.qualified ? "positive" : "negative"}
                     meta={
-                      (idea.isMine || idea.tied) && (
+                      (idea.isMine || idea.tied || comments?.[idea.id]) && (
                         <>
                           {idea.tied && (
                             <Badge variant="outline" className="border-highlight text-foreground">
@@ -68,6 +79,9 @@ export async function RecapRoundView({ round, calendarHref }: { round: RecapRoun
                             </Badge>
                           )}
                           {idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{tIdeas("mine")}</Badge>}
+                          {comments?.[idea.id] && (
+                            <CountBadge label={tIdeas("comments.toggle", { count: comments[idea.id].length })} />
+                          )}
                         </>
                       )
                     }
@@ -97,6 +111,12 @@ export async function RecapRoundView({ round, calendarHref }: { round: RecapRoun
                               up: t("votesUp", { count: idea.score.up }),
                               down: t("votesDown", { count: idea.score.down }),
                             }}
+                          />
+                        )}
+                        {comments?.[idea.id] && (
+                          <CommentThread
+                            comments={comments[idea.id]}
+                            labels={{ list: tIdeas("comments.list", { idea: idea.content }), mine: tIdeas("comments.mine") }}
                           />
                         )}
                       </div>

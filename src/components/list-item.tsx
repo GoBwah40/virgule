@@ -6,6 +6,8 @@ type Props = {
   meta?: React.ReactNode;
   /** Actions on the right (votes, status…). */
   actions?: React.ReactNode;
+  /** Full-width content under the row (e.g. comments revealed on demand). */
+  below?: React.ReactNode;
   /** Background tint: positive (green), negative (red), neutral (sand) or plain (card). */
   tone?: "plain" | "neutral" | "positive" | "negative";
   className?: string;
@@ -20,22 +22,25 @@ export const LIST_ITEM_TONES = {
 } as const;
 
 /** List row (idea, topic…): content, metadata and actions, stacked on mobile. */
-export function ListItem({ children, meta, actions, tone = "neutral", className }: Props) {
+export function ListItem({ children, meta, actions, below, tone = "neutral", className }: Props) {
   return (
     <li
       className={cn(
-        "flex flex-col gap-2.5 rounded-xl border-[1.5px] px-3.5 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3",
+        "rounded-xl border-[1.5px] px-3.5 py-3",
         // A row arriving (including another participant's) and the tint changing at the recap.
         "transition-colors duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2",
         LIST_ITEM_TONES[tone],
         className,
       )}
     >
-      <div className="min-w-0 flex-1 space-y-1.5">
-        <div className="text-[15px] font-medium wrap-anywhere whitespace-pre-wrap">{children}</div>
-        {meta && <div className="flex flex-wrap items-center gap-1.5">{meta}</div>}
+      <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="text-[15px] font-medium wrap-anywhere whitespace-pre-wrap">{children}</div>
+          {meta && <div className="flex flex-wrap items-center gap-1.5">{meta}</div>}
+        </div>
+        {actions && <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">{actions}</div>}
       </div>
-      {actions && <div className="flex shrink-0 items-center gap-2 self-end sm:self-center">{actions}</div>}
+      {below && <div className="mt-3">{below}</div>}
     </li>
   );
 }

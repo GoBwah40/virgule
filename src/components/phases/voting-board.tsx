@@ -1,11 +1,12 @@
 "use client";
 
-import { BellRing, Coins, ListChecks, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
+import { BellRing, Coins, ListChecks, MessageSquare, Pencil, Plus, Tags, TimerOff, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useOptimistic, useState, useTransition } from "react";
+import { useEffect, useId, useOptimistic, useState, useTransition } from "react";
 
 import { AmountField } from "@/components/amount-field";
 import { BoardColumns } from "@/components/board-columns";
+import { CommentThread } from "@/components/comment-thread";
 import { ConfirmButton } from "@/components/confirm-button";
 import { CooldownButton } from "@/components/cooldown-button";
 import { CountBadge } from "@/components/count-badge";
@@ -28,9 +29,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import {
   type ActionResult,
+  addComment,
   addIdea,
   backToThemes,
   castVote,
+  deleteComment,
   deleteIdea,
   extendTimer,
   goToRecap,
@@ -40,7 +43,7 @@ import {
   stopTimer,
   updateIdea,
 } from "@/lib/actions";
-import { EXTEND_TIMER_MINUTES, LIMITS } from "@/lib/config";
+import { EXTEND_TIMER_MINUTES, LIMITS, MAX_COMMENTS_PER_IDEA } from "@/lib/config";
 import type { IdeaFields, IdeaInput, ThemeKind } from "@/lib/idea-value";
 import { pointsLeft } from "@/lib/results";
 import { isBadServerResponse, isNetworkError } from "@/lib/network-error";
@@ -430,9 +433,12 @@ function IdeaItem({
 }) {
   const t = useTranslations("ideas");
   const [pending, run] = useAction();
+  const [commentPending, runComment] = useAction();
   // Shows the vote immediately; reverts to the server value on error.
   const [vote, setOptimisticVote] = useOptimistic(idea.myVote);
   const [editing, setEditing] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const commentsId = useId();
   // The edit window closes on its own, page open or not (the server checks it again).
   const [windowOver, setWindowOver] = useState<string | null>(null);
   const until = idea.edit?.until;
@@ -465,50 +471,85 @@ function IdeaItem({
     <ListItem
       className={pending || pick?.pending || points?.pending ? "opacity-80" : undefined}
       meta={
-        (idea.isMine || !idea.isNew || idea.edited || idea.canDelete || idea.mapQuery) && (
-          <>
-            {idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{t("mine")}</Badge>}
-            {!idea.isNew && <Badge variant="outline">{t("carriedOver")}</Badge>}
-            {/* Votes were reset with the change: everyone sees why theirs is gone. */}
-            {idea.edited && <Badge variant="outline">{t("edited")}</Badge>}
-            {idea.mapQuery && <MapLink query={idea.mapQuery} label={t("mapLink")} />}
-            {(edit || idea.canDelete) && (
-              // 20 px apart: the 44 px touch areas of the two small buttons do not overlap.
-              <span className="inline-flex gap-5">
-                {edit && (
-                  <Button
-                    variant="ghost"
-                    size="icon-xs"
-                    className="touch-target"
-                    aria-label={t("edit")}
-                    title={t("edit")}
-                    disabled={pending}
-                    onClick={() => setEditing(true)}
-                  >
-                    <Pencil />
-                  </Button>
-                )}
-                {idea.canDelete && (
-                  // Its votes go with it: asked first, like a topic with ideas.
-                  <ConfirmButton
-                    variant="ghost"
-                    size="icon-xs"
-                    // Small next to the badges, 44 px to tap.
-                    className="touch-target"
-                    aria-label={t("delete")}
-                    disabled={pending}
-                    title={t("deleteConfirm")}
-                    description={t("deleteConfirmHint")}
-                    confirmLabel={t("delete")}
-                    destructive
-                    onConfirm={() => run(() => deleteIdea(slug, idea.id))}
-                  >
-                    <Trash2 />
-                  </ConfirmButton>
-                )}
-              </span>
-            )}
-          </>
+        <>
+          {idea.isMine && <Badge className="bg-highlight-soft text-highlight-foreground">{t("mine")}</Badge>}
+          {!idea.isNew && <Badge variant="outline">{t("carriedOver")}</Badge>}
+          {/* Votes were reset with the change: everyone sees why theirs is gone. */}
+          {idea.edited && <Badge variant="outline">{t("edited")}</Badge>}
+          {idea.mapQuery && <MapLink query={idea.mapQuery} label={t("mapLink")} />}
+          {(edit || idea.canDelete) && (
+            // 20 px apart: the 44 px touch areas of the two small buttons do not overlap.
+            <span className="inline-flex gap-5">
+              {edit && (
+                <Button
+                  variant="ghost"
+                  size="icon-xs"
+                  className="touch-target"
+                  aria-label={t("edit")}
+                  title={t("edit")}
+                  disabled={pending}
+                  onClick={() => setEditing(true)}
+                >
+                  <Pencil />
+                </Button>
+              )}
+              {idea.canDelete && (
+                // Its votes go with it: asked first, like a topic with ideas.
+                <ConfirmButton
+                  variant="ghost"
+                  size="icon-xs"
+                  // Small next to the badges, 44 px to tap.
+                  className="touch-target"
+                  aria-label={t("delete")}
+                  disabled={pending}
+                  title={t("deleteConfirm")}
+                  description={t("deleteConfirmHint")}
+                  confirmLabel={t("delete")}
+                  destructive
+                  onConfirm={() => run(() => deleteIdea(slug, idea.id))}
+                >
+                  <Trash2 />
+                </ConfirmButton>
+              )}
+            </span>
+          )}
+          {/* Comments stay folded: the count shows, the list and the input open on demand. */}
+          <Button
+            variant="ghost"
+            size="xs"
+            className="touch-target ms-1.5 text-muted-foreground"
+            aria-expanded={commentsOpen}
+            aria-controls={commentsOpen ? commentsId : undefined}
+            onClick={() => setCommentsOpen((open) => !open)}
+          >
+            <MessageSquare data-icon="inline-start" />
+            {t("comments.toggle", { count: idea.comments.length })}
+          </Button>
+        </>
+      }
+      below={
+        commentsOpen && (
+          <div id={commentsId}>
+            <CommentThread
+              comments={idea.comments}
+              labels={{
+                list: t("comments.list", { idea: idea.content }),
+                mine: t("comments.mine"),
+                remove: t("comments.remove"),
+                moderate: { button: t("comments.moderate"), title: t("comments.moderateConfirm"), description: t("comments.moderateHint") },
+              }}
+              onDelete={(commentId) => runComment(() => deleteComment(slug, commentId))}
+              form={{
+                label: t("comments.label"),
+                placeholder: t("comments.placeholder"),
+                submit: t("comments.submit"),
+                maxLength: LIMITS.comment,
+                pending: commentPending,
+                disabledReason: idea.canComment ? undefined : t("comments.limitReached", { max: MAX_COMMENTS_PER_IDEA }),
+                onSubmit: (content, reset) => runComment(() => addComment(slug, idea.id, content), reset),
+              }}
+            />
+          </div>
         )
       }
       actions={

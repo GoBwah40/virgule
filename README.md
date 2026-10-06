@@ -124,7 +124,7 @@ release-notes/fr/           Same notes in French (same versions and number of li
 DEPLOYMENT.md               Step-by-step deployment on Vercel + Turso
 messages/en.json            English UI copy (reference, typed keys)
 messages/fr.json            French UI copy (same keys)
-prisma/schema.prisma        Model: Room, Participant, Theme, Idea, Vote
+prisma/schema.prisma        Model: Room, Participant, Theme, Idea, Vote, Comment
 scripts/migrate-turso.mts   Applies migrations on Turso
 scripts/reset-turso.mts     Empties a Turso database (schema kept)
 scripts/preprod.sh          Local preproduction (production build + preview database)
@@ -167,6 +167,7 @@ src/
   - **List**: the person hosting sets 2 to 10 options, which become ideas to vote on at launch; other suggestions can be allowed (disabled by default).
   - **In the recap**, a "Period" topic shows the slot shared by the kept periods ("Common slot: June 12 – 14, 2027", or failing that the most shared one), as a day strip or a calendar; a "Range" topic shows the compatible budget on a single scale.
 - **Points voting** (per topic, set with the topics, locked once ideas exist): instead of for / against, everyone spreads a budget of 3, 5 or 10 points (5 by default) across the topic's ideas, several on the same one if they like. No "against", no single answer, no "for" vote limit. An idea's score is its total points; it is kept with at least one point, whichever qualification rule is chosen (both come down to that without "against"). Points reset each round, and only your own points show until the recap.
+- **Comments**: while ideas are open (tiebreak rounds included), anyone can leave a short comment on an idea (140 characters), to clarify it or raise a point before voting. Anonymous like the ideas: only their author sees "Your comment". At most 3 per person on an idea and 50 in a session. The author removes their own, the person hosting can remove any of them (after a confirmation). They stay folded under each idea (a count, then the list and the input on demand), are kept when the step changes, and show read-only in the session's recap; never on the room screen, in the shared recap or in the exports.
 - **Duplicates**: an idea identical to another one still in the running in the same topic is refused (text compared ignoring case, accents, punctuation and spaces; identical values for typed topics).
 - **Ties**: in the recap, kept ideas tied for first in a topic carry a "Tied" badge. The person hosting can start a **tiebreak round**: in each topic, only the leading ideas remain (the tied ones, or the winner), votes start from zero and no idea can be added.
 - **Timer** (optional, set with the topics: 3, 5, 10 or 15 min): it starts when ideas open and at each new round. Everyone sees the remaining time; the person hosting can add 2 minutes or stop it. When it ends, nothing is blocked.

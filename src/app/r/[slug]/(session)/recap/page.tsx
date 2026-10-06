@@ -10,7 +10,7 @@ import { RecapByRound, RecapRoundSpotlight, RecapRoundView } from "@/components/
 import { ViewChoice, ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { getRecap, getSharePath, hostName, loadPhasePage } from "@/lib/room";
+import { getRecap, getRecapComments, getSharePath, hostName, loadPhasePage } from "@/lib/room";
 import { cn } from "@/lib/utils";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 
@@ -21,7 +21,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
 
   const t = await getTranslations("recap");
   const { room, me } = page;
-  const rounds = await getRecap(room, me.id);
+  const [rounds, comments] = await Promise.all([getRecap(room, me.id), getRecapComments(room.id, me.id)]);
   const current = rounds[rounds.length - 1];
   const closed = room.phase === "CLOSED";
   const byRound = (render: (round: (typeof rounds)[number]) => React.ReactNode) => <RecapByRound rounds={rounds} render={render} />;
@@ -65,7 +65,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
           <div className="min-w-0">
             {/* Printed, always the full list: "topic by topic" would print a single topic. */}
             <ViewChoice
-              list={byRound((round) => <RecapRoundView round={round} calendarHref={calendarHref(round)} />)}
+              list={byRound((round) => <RecapRoundView round={round} calendarHref={calendarHref(round)} comments={comments} />)}
               board={
                 <>
                   <div className="print:hidden">
