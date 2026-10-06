@@ -6,3 +6,8 @@ allowBuilds:
   prisma: true
   sharp: false
   unrs-resolver: false
+
+overrides:
+  # The Prisma adapter asks for ^0.17.0. 0.18 rolls back a transaction left open when its
+  # connection goes back to the pool: see src/lib/db.ts.
+  '@prisma/adapter-libsql>@libsql/client': ^0.18.0
