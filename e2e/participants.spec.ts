@@ -121,3 +121,20 @@ test("the invite dialog says when every seat is taken", async ({ page, openAsGue
   await page.getByRole("button", { name: "Invite with a QR code" }).click();
   await expect(page.getByText("All seats are taken: nobody else can join the session.")).toBeVisible();
 });
+
+test("reopening the vote after the recap keeps the seats frozen", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await suggestPizzaAndSushi(page, guest);
+  await vote(guest, "Pizza", "For");
+  await seeRecap(page);
+
+  await page.getByRole("button", { name: "Reopen voting" }).click();
+  for (const p of [page, guest]) await expect(p).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  // Still round 1, but the results were seen: nobody leaves, nobody is removed.
+  await page.getByRole("button", { name: "Lea's seat: options" }).click();
+  await expect(page.getByRole("menuitem", { name: "Hand over hosting" })).toBeVisible();
+  await expect(page.getByRole("menuitem", { name: "Remove from the session" })).toHaveCount(0);
+  await page.keyboard.press("Escape");
+  await expect(guest.getByRole("button", { name: "Leave the session" })).toHaveCount(0);
+});

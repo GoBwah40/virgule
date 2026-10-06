@@ -21,7 +21,7 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
   if (!page) return null;
 
   const t = await getTranslations("themes");
-  const [themes, suggestions] = await Promise.all([getThemes(page.room.id), getThemeSuggestions(page.room.id, page.me)]);
+  const [themes, suggestions] = await Promise.all([getThemes(page.room.id, page.room.round), getThemeSuggestions(page.room.id, page.me)]);
   const host = hostName(page.participants);
   const initialView = parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value);
 

@@ -17,9 +17,10 @@ export const MAX_PENDING_SUGGESTIONS = 5;
 /**
  * The host can remove someone only before the first recap: afterwards, their ideas and votes
  * (deleted with them) would disappear from results already seen, including past rounds.
+ * `recapSeen` covers voting reopened from the recap, which stays in round 1.
  */
-export const canRemoveParticipants = (room: { phase: Phase; round: number }) =>
-  room.round === 1 && (room.phase === "THEMES" || room.phase === "IDEAS");
+export const canRemoveParticipants = (room: { phase: Phase; round: number; recapSeen: boolean }) =>
+  room.round === 1 && !room.recapSeen && (room.phase === "THEMES" || room.phase === "IDEAS");
 
 export const LIMITS = {
   roomName: 80,

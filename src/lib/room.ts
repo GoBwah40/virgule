@@ -30,6 +30,8 @@ export type RoomContext =
         ideasTimerMinutes: number | null;
         phaseEndsAt: Date | null;
         tiebreak: boolean;
+        /** A recap has been shown (stays true when voting is reopened). */
+        recapSeen: boolean;
         /** Number of seats (size chosen by the host). */
         capacity: number;
         /** A room screen is paired (its secret never leaves this module). */
@@ -73,6 +75,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       ideasTimerMinutes: room.ideasTimerMinutes,
       phaseEndsAt: room.phaseEndsAt,
       tiebreak: room.tiebreak,
+      recapSeen: room.recapSeen,
       capacity: roomCapacity(room),
       screenPaired: room.screenToken !== null,
     },
@@ -87,7 +90,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
 export const hostName = (participants: { pseudo: string; isHost: boolean }[]) =>
   participants.find((p) => p.isHost)?.pseudo ?? "";
 
-export async function getThemes(roomId: string) {
+export async function getThemes(roomId: string, round: number) {
   const themes = await db.theme.findMany({
     where: { roomId },
     orderBy: { position: "asc" },
@@ -101,12 +104,15 @@ export async function getThemes(roomId: string) {
       singleChoice: true,
       maxVotes: true,
       _count: { select: { ideas: true } },
+      ideas: { where: { createdRound: { lt: round } }, select: { id: true }, take: 1 },
     },
   });
-  return themes.map(({ _count, options, ...theme }) => ({
+  return themes.map(({ _count, ideas, options, ...theme }) => ({
     ...theme,
     options: readChoiceOptions(options),
     ideaCount: _count.ideas,
+    /** Has ideas in recaps already seen: it can no longer be deleted. */
+    inPastRounds: ideas.length > 0,
   }));
 }
 
@@ -405,7 +411,7 @@ export async function getPresentationView(room: {
   });
 
   if (room.phase === "THEMES") {
-    return { step: "THEMES", topics: (await getThemes(room.id)).map(topicOf) };
+    return { step: "THEMES", topics: (await getThemes(room.id, room.round)).map(topicOf) };
   }
 
   if (room.phase === "IDEAS") {

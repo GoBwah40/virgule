@@ -36,6 +36,7 @@ type Theme = {
   singleChoice: boolean;
   maxVotes: number | null;
   ideaCount: number;
+  inPastRounds: boolean;
 };
 
 type ThemeValues = {
@@ -221,7 +222,7 @@ function ThemeRow({
       <Button variant="ghost" size="icon" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>
         <Pencil />
       </Button>
-      {theme.ideaCount > 0 ? (
+      {theme.inPastRounds ? null : theme.ideaCount > 0 ? (
         <ConfirmButton
           variant="ghost"
           size="icon"

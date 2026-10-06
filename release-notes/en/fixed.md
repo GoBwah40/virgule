@@ -2,6 +2,13 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.2 — 2026-10-06
+
+- In a topic that limits “for” votes, tapping several ideas very quickly no longer lets you go past the limit.
+- Once the recap has been seen, nobody can leave or be removed anymore, even after voting is reopened: the results already seen stay as they were.
+- A topic from earlier rounds can no longer be deleted when going back to the topics, which erased it from the recaps already seen and from the exports.
+- Lowering a topic's vote limit, or turning off voting on your own ideas, now applies to votes already cast; starting the ideas twice by mistake no longer shows the options of a list twice.
+
 ## 0.6.15 — 2026-10-05
 
 - A long word in a topic, such as a pasted link, no longer pushes the page sideways on a phone or a computer: it wraps.

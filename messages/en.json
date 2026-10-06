@@ -198,7 +198,7 @@
     "moveDown": "Move down",
     "settings": "Settings",
     "allowSelfVote": "Vote on your own ideas",
-    "allowSelfVoteHint": "When off, nobody can vote for or against the ideas they suggested.",
+    "allowSelfVoteHint": "When off, nobody can vote for or against the ideas they suggested, and such votes already cast are removed.",
     "timerLabel": "Ideas timer",
     "timerHint": "The timer starts when the ideas start. When it ends, nothing is locked: it's a cue to keep the pace.",
     "timerOff": "None",
@@ -420,7 +420,9 @@
     "duplicateTheme": "This topic is already in the list or already suggested.",
     "suggestionNotFound": "This suggestion has already been handled.",
     "voteLimitReached": "You've used all your “for” votes in this topic: remove one to vote for another idea.",
-    "invalidScreenCode": "This code doesn't work: it may have expired. Ask for a new one."
+    "invalidScreenCode": "This code doesn't work: it may have expired. Ask for a new one.",
+    "themeInPastRounds": "This topic is in the recaps of earlier rounds: it can no longer be deleted.",
+    "voteLimitBelowUsed": "Some people have already cast more “for” votes than that in this topic: choose a higher limit."
   },
   "theme": {
     "label": "Theme",
