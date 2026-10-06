@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where release notes go</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Mono:wght@500&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: three phone mockups side by side (one per option), Virgule brand guidelines used as is. */
+:root {
+  --bg: #fff7f0; --fg: #2a1a24; --card: #ffffff; --primary: #c2410c; --primary-fg: #ffffff;
+  --muted: #f7ebe1; --muted-fg: #6f5a62; --border: #eedccf; --brand: #f26a2e;
+  --highlight: #ffc23d; --highlight-soft: #fff0c7; --success: #1f7a4d; --destructive: #b8283f;
+  --scrim: rgba(42, 26, 36, .45); --canvas: #f3e6db;
+  --heading: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --body: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --mono: "DM Mono", ui-monospace, Menlo, monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #1c1216; --fg: #fbefe6; --card: #261a1f; --primary: #ff8a55; --primary-fg: #1c1216;
+  --muted: #30222a; --muted-fg: #b7a3aa; --border: #3d2c34; --brand: #ff8a55;
+  --highlight-soft: #4a3717; --success: #5cc98e; --destructive: #ff6b81;
+  --scrim: rgba(0,0,0,.55); --canvas: #140d10; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #1c1216; --fg: #fbefe6; --card: #261a1f; --primary: #ff8a55; --primary-fg: #1c1216;
+  --muted: #30222a; --muted-fg: #b7a3aa; --border: #3d2c34; --brand: #ff8a55;
+  --highlight-soft: #4a3717; --success: #5cc98e; --destructive: #ff6b81;
+  --scrim: rgba(0,0,0,.55); --canvas: #140d10; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { margin: 0; background: var(--canvas); color: var(--fg); font: 15px/1.5 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 40px 64px; display: grid; gap: 32px }
+header.intro { max-width: 68ch; display: grid; gap: 10px }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--primary) }
+h1 { font: 800 clamp(30px, 5vw, 44px)/1.05 var(--heading); letter-spacing: -.02em; margin: 0; text-wrap: balance }
+.intro p { margin: 0; color: var(--muted-fg) }
+.options { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; align-items: start }
+.option { display: grid; gap: 14px; min-width: 0 }
+.option h2 { font: 700 20px/1.2 var(--heading); margin: 0; display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap }
+.tag { font: 600 12px/1 var(--body); padding: 5px 9px; border-radius: 999px; background: var(--highlight-soft); color: var(--fg) }
+.option > p { margin: 0; color: var(--muted-fg); font-size: 14px }
+.pros { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 14px }
+.pros li { display: grid; grid-template-columns: 18px 1fr; gap: 6px }
+.pros .y { color: var(--success); font-weight: 700 } .pros .n { color: var(--destructive); font-weight: 700 }
+
+/* Phone */
+.phone { position: relative; width: 100%; max-width: 340px; aspect-ratio: 340 / 690; border-radius: 34px; border: 8px solid var(--fg);
+  background: var(--bg); overflow: hidden; justify-self: center; box-shadow: 0 18px 40px -24px rgba(42,26,36,.5) }
+.screen { position: absolute; inset: 0; overflow: hidden; display: flex; flex-direction: column; padding: 22px 18px 14px; gap: 14px }
+.brand { font-size: 10px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--primary) }
+.hero { font: 800 26px/1.02 var(--heading); letter-spacing: -.02em; margin: 0 }
+.sub { font-size: 13px; color: var(--muted-fg); margin: 0 }
+.form { background: var(--card); border: 1px solid var(--border); border-radius: var(--r); padding: 14px; display: grid; gap: 10px }
+.form b { font: 700 15px var(--heading) }
+.field { height: 36px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg) }
+.btn { height: 40px; border-radius: 10px; background: var(--primary); color: var(--primary-fg); display: grid; place-items: center; font-weight: 600; font-size: 13px }
+.foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; gap: 8px }
+.seg { display: flex; border: 1px solid var(--border); border-radius: 999px; padding: 2px; gap: 2px }
+.seg span { width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; font-size: 11px; color: var(--muted-fg) }
+.seg span:first-child { background: var(--muted); color: var(--fg) }
+button.trigger { font: 500 12px var(--body); color: var(--muted-fg); background: none; border: 1px solid transparent; border-radius: 999px;
+  min-height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer }
+button.trigger:hover { color: var(--fg); border-color: var(--border) }
+button.trigger:focus-visible, .close:focus-visible, .chip:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px }
+.ver { font-family: var(--mono); font-size: 11px }
+.dot { width: 7px; height: 7px; border-radius: 99px; background: var(--brand) }
+.ring { outline: 2px dashed var(--highlight); outline-offset: 3px }
+
+/* Overlays */
+.scrim { position: absolute; inset: 0; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .2s }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 82%; background: var(--card); border-radius: 22px 22px 0 0;
+  transform: translateY(100%); transition: transform .25s ease-out; display: flex; flex-direction: column }
+.dialog { position: absolute; left: 12px; right: 12px; top: 50%; max-height: 78%; background: var(--card); border-radius: 18px;
+  transform: translateY(-46%) scale(.96); opacity: 0; transition: transform .2s ease-out, opacity .2s; pointer-events: none; display: flex; flex-direction: column }
+.open .scrim { opacity: 1; pointer-events: auto }
+.open .sheet { transform: none }
+.open .dialog { transform: translateY(-50%); opacity: 1; pointer-events: auto }
+@media (prefers-reduced-motion: reduce) { .sheet, .dialog, .scrim { transition: none } }
+.grab { width: 36px; height: 4px; border-radius: 9px; background: var(--border); margin: 8px auto 0 }
+.panel-head { padding: 12px 16px 10px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border) }
+.panel-head b { font: 700 17px var(--heading) }
+.close { width: 32px; height: 32px; border-radius: 99px; border: 1px solid var(--border); background: none; color: var(--fg); cursor: pointer; font-size: 16px }
+.notes { overflow-y: auto; padding: 4px 16px 16px; display: grid; gap: 16px }
+
+/* Notes content */
+.release { display: grid; gap: 8px; padding-top: 12px }
+.release + .release { border-top: 1px dashed var(--border) }
+.rel-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap }
+.rel-head .ver { font-size: 13px; color: var(--fg); background: var(--muted); padding: 2px 7px; border-radius: 6px }
+.rel-head .date { font-size: 12px; color: var(--muted-fg) }
+.rel-head .new { font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; background: var(--highlight); color: #2a1a24; padding: 2px 6px; border-radius: 5px }
+.cat { display: grid; gap: 4px }
+.cat h4 { margin: 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; display: flex; align-items: center; gap: 6px }
+.cat h4 i { width: 8px; height: 8px; border-radius: 2px; display: inline-block }
+.c-add i { background: var(--brand) } .c-imp i { background: var(--highlight) } .c-fix i { background: var(--success) }
+.cat ul { margin: 0; padding-left: 14px; font-size: 13px; line-height: 1.45; display: grid; gap: 2px }
+
+/* Option C: dedicated page */
+.page { padding: 18px 16px 14px; gap: 12px; overflow-y: auto }
+.back { font-size: 12px; color: var(--muted-fg) }
+.chips { display: flex; gap: 6px; flex-wrap: wrap }
+.chip { font: 600 11px var(--body); padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: none; color: var(--fg); cursor: pointer }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg) }
+
+.hint { font-size: 12px; color: var(--muted-fg); text-align: center }
+.note-box { background: var(--bg); border: 1px solid var(--border); border-radius: var(--r); padding: 16px 18px; max-width: 80ch; font-size: 14px; display: grid; gap: 6px }
+.note-box b { font-family: var(--heading) }
+.note-box p { margin: 0 }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="intro">
+    <span class="eyebrow">Virgule · home page</span>
+    <h1>Where should the release notes go?</h1>
+    <p>Three layouts for the same content. Tap the "What's new" link at the bottom of each phone to open it. The versions shown are examples taken from the git history, not the real notes yet.</p>
+  </header>
+
+  <section class="options">
+    <article class="option">
+      <h2>A. Bottom sheet <span class="tag">Recommended</span></h2>
+      <p>A discreet "v0.3.0 · What's new" link in the footer, next to the theme picker. It opens a panel that slides up from the bottom of the screen.</p>
+      <div class="phone" data-kind="sheet"></div>
+      <ul class="pros">
+        <li><span class="y">+</span>A natural gesture on a phone, you stay on the home page</li>
+        <li><span class="y">+</span>Orange dot until you have seen the latest version</li>
+        <li><span class="n">−</span>No address to share pointing to a specific version</li>
+      </ul>
+    </article>
+
+    <article class="option">
+      <h2>B. Centered dialog</h2>
+      <p>Same button, but the content opens in a window in the middle of the screen (shadcn Dialog).</p>
+      <div class="phone" data-kind="dialog"></div>
+      <ul class="pros">
+        <li><span class="y">+</span>Component already in the shadcn base</li>
+        <li><span class="y">+</span>Good on a computer</li>
+        <li><span class="n">−</span>Narrower and less comfortable for the thumb</li>
+      </ul>
+    </article>
+
+    <article class="option">
+      <h2>C. Dedicated page</h2>
+      <p>The button leads to <span class="ver">/whats-new</span>, a real page with a filter by type of change.</p>
+      <div class="phone" data-kind="page"></div>
+      <ul class="pros">
+        <li><span class="y">+</span>Shareable, indexable link, room for a long history</li>
+        <li><span class="y">+</span>Added / Improved / Fixed filter</li>
+        <li><span class="n">−</span>One more route, loading.tsx and error page</li>
+      </ul>
+    </article>
+  </section>
+
+  <div class="note-box">
+    <b>In all three cases</b>
+    <p>The notes come from the files in the <span class="ver">release-notes/</span> folder, read server-side: no hard-coded string in the UI, the category titles go through <span class="ver">messages/fr.json</span>. The number shown is the one from <span class="ver">package.json</span>.</p>
+  </div>
+</div>
+
+<script>
+const RELEASES = [
+  { v: "0.3.0", date: "Sep 30, 2026", latest: true,
+    add: ["Duplicate ideas within a topic are refused", "Invite with a QR code and the phone's sharing", "Light or dark theme picker"],
+    imp: ["The person hosting sees how many participants have voted"],
+    fix: ["Votes and dotted lines readable in dark mode"] },
+  { v: "0.2.0", date: "Sep 30, 2026",
+    add: ["Typed topics: date, period, amount, range"],
+    imp: ["Periods shown as \"June 1 – 14\", ranges as \"From €300 to €500\"", "Votes visible in the recap by expanding the row"],
+    fix: [] },
+  { v: "0.1.0", date: "Sep 28, 2026",
+    add: ["First version: topics, ideas, anonymous votes and recap", "Markdown, CSV and PDF export"],
+    imp: ["Transitions between the steps", "Loading screens sized like the content"],
+    fix: [] },
+];
+const CATS = [["add", "Added", "c-add"], ["imp", "Improved", "c-imp"], ["fix", "Fixed", "c-fix"]];
+
+function notesHtml(filter) {
+  return RELEASES.map(r => {
+    const cats = CATS.filter(([k]) => (!filter || filter === k) && r[k].length).map(([k, label, cls]) =>
+      `<div class="cat ${cls}"><h4><i></i>${label}</h4><ul>${r[k].map(x => `<li>${x}</li>`).join("")}</ul></div>`).join("");
+    if (!cats) return "";
+    return `<section class="release"><div class="rel-head"><span class="ver">v${r.v}</span><span class="date">${r.date}</span>${r.latest ? '<span class="new">Latest</span>' : ""}</div>${cats}</section>`;
+  }).join("");
+}
+
+const home = (kind) => `
+  <span class="brand">Virgule</span>
+  <p class="hero">Every idea, one shared decision.</p>
+  <p class="sub">Up to 6 participants, one link to share, no account to create.</p>
+  <div class="form"><b>New session</b><div class="field"></div><div class="field"></div><div class="btn">Create the session</div></div>
+  <div class="foot">
+    <button class="trigger ring" id="t-${kind}" type="button" aria-haspopup="dialog"><span class="dot"></span><span class="ver">v0.3.0</span> What's new</button>
+    <div class="seg" aria-hidden="true"><span>◐</span><span>☀</span><span>☾</span></div>
+  </div>`;
+
+document.querySelectorAll(".phone").forEach(phone => {
+  const kind = phone.dataset.kind;
+  if (kind === "page") {
+    phone.innerHTML = `<div class="screen" data-view="home">${home(kind)}</div>`;
+    const screen = phone.firstElementChild;
+    const showPage = (filter) => {
+      screen.className = "screen page";
+      screen.innerHTML = `<span class="back">← Home</span><span class="brand">Virgule</span>
+        <p class="hero" style="font-size:24px">What's new</p>
+        <div class="chips">${[["", "All"], ...CATS.map(([k, l]) => [k, l])].map(([k, l]) =>
+          `<button type="button" class="chip" data-f="${k}" aria-pressed="${(filter || "") === k}">${l}</button>`).join("")}</div>
+        <div class="notes" style="padding:0;overflow:visible">${notesHtml(filter)}</div>`;
+      screen.querySelector(".back").onclick = showHome;
+      screen.querySelector(".back").style.cursor = "pointer";
+      screen.querySelectorAll(".chip").forEach(c => c.onclick = () => showPage(c.dataset.f));
+    };
+    const showHome = () => { screen.className = "screen"; screen.innerHTML = home(kind); screen.querySelector(".trigger").onclick = () => showPage(""); };
+    showHome();
+    return;
+  }
+  const panelCls = kind === "sheet" ? "sheet" : "dialog";
+  phone.innerHTML = `<div class="screen">${home(kind)}</div>
+    <div class="scrim"></div>
+    <div class="${panelCls}" role="dialog" aria-label="What's new">
+      ${kind === "sheet" ? '<div class="grab"></div>' : ""}
+      <div class="panel-head"><b>What's new</b><button class="close" type="button" aria-label="Close">×</button></div>
+      <div class="notes">${notesHtml()}</div>
+    </div>`;
+  const toggle = (on) => {
+    phone.classList.toggle("open", on);
+    if (!on) phone.querySelector(".dot")?.remove();
+  };
+  phone.querySelector(".trigger").onclick = () => toggle(true);
+  phone.querySelector(".scrim").onclick = () => toggle(false);
+  phone.querySelector(".close").onclick = () => toggle(false);
+  if (kind === "sheet") toggle(true); // the recommended option is shown open
+});
+</script>
+
+</body>
+</html>

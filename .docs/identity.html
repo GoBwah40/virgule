@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Virgule identity</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Mono:wght@500&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Brand sheet: one column of sections (logo, favicon, home), each
+   specimen set on the sand background; the home page is shown in a browser and a phone. */
+:root {
+  --background: #fff7f0;
+  --foreground: #2a1a24;
+  --card: #ffffff;
+  --primary: #c2410c;
+  --primary-foreground: #ffffff;
+  --muted: #f7ebe1;
+  --muted-foreground: #6f5a62;
+  --border: #eedccf;
+  --brand: #f26a2e;
+  --highlight: #ffc23d;
+  --highlight-soft: #fff0c7;
+  --success: #1f7a4d;
+  --ink: #2a1a24;
+  --radius: 0.875rem;
+  --font-heading: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --font-sans: "Figtree", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SF Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --background: #1c1216; --foreground: #fbefe6; --card: #261a1f;
+    --primary: #ff8a55; --primary-foreground: #1c1216; --muted: #30222a;
+    --muted-foreground: #b7a3aa; --border: #3d2c34; --brand: #ff8a55;
+    --highlight: #ffc23d; --highlight-soft: #4a3717; --success: #5cc98e;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #1c1216; --foreground: #fbefe6; --card: #261a1f;
+  --primary: #ff8a55; --primary-foreground: #1c1216; --muted: #30222a;
+  --muted-foreground: #b7a3aa; --border: #3d2c34; --brand: #ff8a55;
+  --highlight: #ffc23d; --highlight-soft: #4a3717; --success: #5cc98e;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--background); color: var(--foreground);
+  font: 16px/1.55 var(--font-sans);
+  padding: 0 16px; margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { font-family: var(--font-heading); text-wrap: balance; margin: 0; letter-spacing: -0.02em; }
+p { margin: 0; }
+.wrap { max-width: 68rem; margin: 0 auto; padding-block: 28px 64px; display: flex; flex-direction: column; gap: 72px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 6px; }
+
+/* ─── Top bar ─── */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--primary); }
+.seg { display: inline-flex; background: var(--muted); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; padding: 8px 14px; min-height: 36px; border-radius: 999px; font-size: 14px; font-weight: 600; color: var(--muted-foreground); }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--foreground); box-shadow: 0 1px 2px rgb(42 26 36 / 0.12); }
+
+/* ─── Wordmark ─── */
+.wordmark { font-family: var(--font-heading); font-weight: 800; letter-spacing: -0.035em; line-height: 1; display: inline-flex; align-items: baseline; white-space: nowrap; }
+.wordmark svg { width: 0.36em; height: 0.72em; margin-left: 0.03em; transform: translateY(0.2em); flex: none; }
+.mark-fill { fill: var(--brand); }
+
+.hero-sheet { display: grid; gap: 28px; }
+.hero-sheet .wordmark { font-size: clamp(64px, 15vw, 168px); }
+.hero-sheet .lede { max-width: 38rem; font-size: 18px; color: var(--muted-foreground); }
+.hero-sheet .lede strong { color: var(--foreground); font-weight: 600; }
+
+section.block { display: grid; gap: 24px; }
+.block-head { display: grid; gap: 8px; max-width: 42rem; }
+.block-head h2 { font-size: clamp(28px, 4vw, 36px); font-weight: 800; }
+.block-head p { color: var(--muted-foreground); }
+
+.grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
+.tile { border-radius: calc(var(--radius) * 1.4); padding: 28px 20px; display: grid; place-items: center; gap: 14px; min-height: 13rem; min-width: 0; border: 1px solid var(--border); background: var(--card); }
+.tile .cap { font-size: 13px; color: var(--muted-foreground); text-align: center; }
+.tile.on-brand { background: #f26a2e; border-color: transparent; }
+.tile.on-brand .cap { color: #2a1a24; }
+.tile.on-ink { background: #2a1a24; border-color: transparent; }
+.tile.on-ink .cap { color: #b7a3aa; }
+.tile.on-sand { background: #fff7f0; }
+.tile.on-sand .cap { color: #6f5a62; }
+.tile .wordmark { font-size: 56px; }
+
+/* Construction of the comma */
+.construct { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); align-items: center; }
+.construct figure { margin: 0; background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) * 1.4); padding: 20px; }
+.construct svg { width: 100%; height: auto; display: block; }
+.guide { fill: none; stroke: var(--muted-foreground); stroke-width: 0.35; stroke-dasharray: 1.2 1.2; }
+.guide-label { font: 500 3px var(--font-mono); fill: var(--muted-foreground); }
+.rules { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.rules li { display: grid; grid-template-columns: 8.5rem 1fr; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+.rules li:last-child { border-bottom: 0; }
+.rules dt, .rules .k { font-weight: 700; }
+.rules .v { color: var(--muted-foreground); min-width: 0; }
+
+.swatches { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr)); }
+.sw { border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; background: var(--card); }
+.sw i { display: block; height: 64px; }
+.sw div { padding: 10px 12px; font-size: 13px; display: grid; }
+.sw b { font-size: 14px; }
+.sw code { font-family: var(--font-mono); color: var(--muted-foreground); font-size: 12px; }
+
+/* ─── Favicon ─── */
+.fav-row { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-end; }
+.fav-row figure { margin: 0; display: grid; gap: 8px; justify-items: center; }
+.fav-row figcaption { font: 500 12px var(--font-mono); color: var(--muted-foreground); font-variant-numeric: tabular-nums; }
+.fav-row img, .fav-row svg { display: block; }
+.tabs-mock { background: var(--muted); border-radius: var(--radius); padding: 10px 10px 0; display: flex; gap: 4px; overflow: hidden; }
+.tab { display: flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 10px 10px 0 0; font-size: 13px; white-space: nowrap; color: var(--muted-foreground); min-width: 0; }
+.tab.active { background: var(--card); color: var(--foreground); }
+.tab .dot { width: 16px; height: 16px; border-radius: 4px; background: var(--border); flex: none; }
+.code-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.code-card header { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; flex-wrap: wrap; }
+.code-card header code { font-family: var(--font-mono); }
+.code-card pre { margin: 0; padding: 14px 16px; overflow-x: auto; font: 500 12px/1.6 var(--font-mono); color: var(--muted-foreground); }
+.btn-ghost { border: 1px solid var(--border); background: var(--background); border-radius: 999px; padding: 6px 14px; min-height: 36px; font-size: 13px; font-weight: 600; }
+
+/* ─── Home page mockup ─── */
+.devices { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1000px) { .devices { grid-template-columns: minmax(0, 1fr) 22rem; } }
+.browser { border: 1px solid var(--border); border-radius: calc(var(--radius) * 1.4); overflow: hidden; background: var(--background); box-shadow: 0 24px 48px -28px rgb(42 26 36 / 0.35); min-width: 0; }
+.browser-bar { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--muted); border-bottom: 1px solid var(--border); }
+.lights { display: flex; gap: 6px; }
+.lights i { width: 10px; height: 10px; border-radius: 50%; background: var(--border); }
+.url { flex: 1; min-width: 0; background: var(--background); border-radius: 999px; padding: 5px 12px; font: 500 12px var(--font-mono); color: var(--muted-foreground); display: flex; align-items: center; gap: 8px; overflow: hidden; white-space: nowrap; }
+.url svg { width: 14px; height: 14px; flex: none; }
+.phone { border: 10px solid var(--foreground); border-radius: 40px; overflow: hidden; background: var(--background); max-width: 22rem; width: 100%; margin: 0 auto; box-shadow: 0 24px 48px -28px rgb(42 26 36 / 0.45); }
+.phone .notch { height: 26px; display: grid; place-items: center; }
+.phone .notch i { width: 90px; height: 6px; border-radius: 99px; background: var(--border); }
+.device-cap { font-size: 13px; color: var(--muted-foreground); text-align: center; margin-top: 10px; }
+
+.app { container-type: inline-size; font-size: 16px; }
+.app-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; max-width: 64rem; margin: 0 auto; }
+.app-header .wordmark { font-size: 26px; }
+.icon-btn { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--border); background: var(--card); display: grid; place-items: center; }
+.icon-btn svg { width: 18px; height: 18px; }
+.app-main { max-width: 64rem; margin: 0 auto; padding: 16px 20px 40px; display: grid; gap: 36px; }
+.app-hero { display: grid; gap: 22px; }
+.app-hero h1 { font-size: 40px; line-height: 1.02; font-weight: 800; letter-spacing: -0.03em; }
+.app-hero h1 .hl { background: linear-gradient(transparent 62%, var(--highlight) 62%, var(--highlight) 92%, transparent 92%); padding: 0 0.04em; }
+.app-hero .sub { font-size: 18px; color: var(--muted-foreground); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.steps li { display: flex; gap: 12px; align-items: flex-start; }
+.steps .ic { width: 36px; height: 36px; border-radius: 12px; background: var(--highlight-soft); color: var(--primary); display: grid; place-items: center; flex: none; }
+.steps .ic svg { width: 20px; height: 20px; }
+.steps span:last-child { padding-top: 6px; }
+
+.form-side { position: relative; min-width: 0; }
+.rosette { position: absolute; width: 170px; height: 170px; right: -42px; top: -62px; z-index: 0; }
+.card { position: relative; z-index: 1; background: var(--card); border: 1px solid var(--border); border-radius: calc(var(--radius) * 1.4); padding: 24px; display: grid; gap: 18px; box-shadow: 0 1px 2px rgb(42 26 36 / 0.05); }
+.card h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.01em; }
+.card .hint { font-size: 14px; color: var(--muted-foreground); margin-top: 4px; }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 14px; font-weight: 600; }
+.field input { font: inherit; font-size: 16px; min-height: 44px; padding: 0 12px; border-radius: calc(var(--radius) * 0.8); border: 1px solid var(--border); background: transparent; color: var(--foreground); width: 100%; }
+.field input::placeholder { color: var(--muted-foreground); opacity: 0.8; }
+.field input:focus { outline: 3px solid color-mix(in srgb, var(--primary) 30%, transparent); border-color: var(--primary); }
+.cta { min-height: 48px; border: 0; border-radius: calc(var(--radius) * 0.8); background: var(--primary); color: var(--primary-foreground); font-weight: 700; font-size: 16px; width: 100%; transition: filter 150ms; }
+.cta:disabled { opacity: 0.5; cursor: not-allowed; }
+@media (prefers-reduced-motion: no-preference) { .cta:not(:disabled):hover { filter: brightness(1.08); } }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 22px; padding-top: 18px; border-top: 1px dashed var(--border); font-size: 14px; color: var(--muted-foreground); }
+.facts b { font-family: var(--font-mono); font-weight: 500; color: var(--foreground); font-variant-numeric: tabular-nums; }
+
+@container (min-width: 720px) {
+  .app-main { grid-template-columns: 1fr 1fr; align-items: center; gap: 48px; padding: 40px 20px 56px; }
+  .app-hero h1 { font-size: 58px; }
+  .facts { grid-column: 1 / -1; }
+  .rosette { width: 220px; height: 220px; right: -70px; top: -90px; }
+}
+
+.notes { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; max-width: 46rem; }
+.notes li { padding-left: 22px; position: relative; color: var(--muted-foreground); }
+.notes li b { color: var(--foreground); font-weight: 600; }
+.notes li::before { content: ""; position: absolute; left: 0; top: 0.5em; width: 8px; height: 8px; border-radius: 50%; background: var(--brand); }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- The comma: a round head (circle r = 14) extended by a tail that tapers to the left. -->
+    <symbol id="comma" viewBox="0 0 64 64">
+      <path d="M46 28C46 44 37 54 21 59L19 54C25 51 28.5 47 29.6 41.8A14 14 0 1 1 46 28Z"/>
+    </symbol>
+    <symbol id="favicon" viewBox="0 0 64 64">
+      <rect width="64" height="64" rx="15" fill="#f26a2e"/>
+      <g transform="translate(-2 -9) scale(1.12)"><path fill="#fff" d="M46 28C46 44 37 54 21 59L19 54C25 51 28.5 47 29.6 41.8A14 14 0 1 1 46 28Z"/></g>
+    </symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5" fill="currentColor"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+    <symbol id="i-checks" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <div class="top">
+    <span class="eyebrow">Brand guidelines · logo, favicon, home</span>
+    <div class="seg" role="group" aria-label="Sheet theme">
+      <button type="button" data-set="light" aria-pressed="false">Light</button>
+      <button type="button" data-set="dark" aria-pressed="false">Dark</button>
+      <button type="button" data-set="system" aria-pressed="true">Device</button>
+    </div>
+  </div>
+
+  <header class="hero-sheet">
+    <div class="wordmark" aria-label="virgule">virgule<svg aria-hidden="true"><use href="#comma" class="mark-fill"/></svg></div>
+    <p class="lede">The brand is the punctuation mark it is named after ("virgule" is French for comma). A comma marks a pause in the sentence: <strong>the moment when the group stops, listens to everyone, then decides.</strong> It closes the wordmark as if the sentence went on, because we often go for another round.</p>
+  </header>
+
+  <!-- ─── Logo ─── -->
+  <section class="block" aria-labelledby="h-logo">
+    <div class="block-head">
+      <h2 id="h-logo">The logo</h2>
+      <p>Bricolage Grotesque in extra bold, lowercase, with a comma drawn in papaya in place of the typographic sign. The symbol alone is used wherever the word does not fit.</p>
+    </div>
+    <div class="grid">
+      <div class="tile on-sand">
+        <div class="wordmark" style="color:#2a1a24">virgule<svg aria-hidden="true"><use href="#comma" fill="#f26a2e"/></svg></div>
+        <span class="cap">Main: fig ink and papaya on sand</span>
+      </div>
+      <div class="tile on-ink">
+        <div class="wordmark" style="color:#fbefe6">virgule<svg aria-hidden="true"><use href="#comma" fill="#ff8a55"/></svg></div>
+        <span class="cap">Dark mode: lightened papaya</span>
+      </div>
+      <div class="tile on-brand">
+        <div class="wordmark" style="color:#2a1a24">virgule<svg aria-hidden="true"><use href="#comma" fill="#ffffff"/></svg></div>
+        <span class="cap">On solid papaya: white comma</span>
+      </div>
+    </div>
+
+    <div class="construct">
+      <figure>
+        <svg viewBox="0 0 64 64" role="img" aria-label="Construction of the comma: a circle and a tail">
+          <circle class="guide" cx="32" cy="28" r="14"/>
+          <line class="guide" x1="4" y1="42" x2="60" y2="42"/>
+          <line class="guide" x1="32" y1="6" x2="32" y2="50"/>
+          <use href="#comma" class="mark-fill" opacity="0.92"/>
+          <text class="guide-label" x="47" y="17">r = 14</text>
+          <text class="guide-label" x="44" y="46">baseline</text>
+          <text class="guide-label" x="4" y="62">tail: 2 curves, tip at 5</text>
+        </svg>
+      </figure>
+      <ul class="rules">
+        <li><span class="k">Construction</span><span class="v">A round head of radius 14 on a 64 grid, sitting on the baseline, and a tail that goes down to the left. No outline, a single solid fill.</span></li>
+        <li><span class="k">Clear space</span><span class="v">Leave at least the height of the comma's head around the logo.</span></li>
+        <li><span class="k">Minimum size</span><span class="v">Wordmark: 72 px wide. Symbol alone: 16 px (favicon).</span></li>
+        <li><span class="k">Avoid</span><span class="v">Changing the comma's color to olive or pomegranate: these two shades stay reserved for vote results.</span></li>
+      </ul>
+    </div>
+
+    <div class="swatches" aria-label="Brand colors used by the logo">
+      <div class="sw"><i style="background:#f26a2e"></i><div><b>Papaya</b><code>brand · #f26a2e</code></div></div>
+      <div class="sw"><i style="background:#c2410c"></i><div><b>Burnt papaya</b><code>primary · #c2410c</code></div></div>
+      <div class="sw"><i style="background:#ffc23d"></i><div><b>Mango</b><code>highlight · #ffc23d</code></div></div>
+      <div class="sw"><i style="background:#fff7f0"></i><div><b>Sand</b><code>background · #fff7f0</code></div></div>
+      <div class="sw"><i style="background:#2a1a24"></i><div><b>Fig ink</b><code>foreground · #2a1a24</code></div></div>
+    </div>
+  </section>
+
+  <!-- ─── Favicon ─── -->
+  <section class="block" aria-labelledby="h-fav">
+    <div class="block-head">
+      <h2 id="h-fav">The favicon</h2>
+      <p>The white comma, enlarged to stay sharp at 16 px, in a papaya square with rounded corners. The same file in light and dark: the solid papaya stands out on both tab bars.</p>
+    </div>
+    <div class="fav-row">
+      <figure><svg width="16" height="16"><use href="#favicon"/></svg><figcaption>16</figcaption></figure>
+      <figure><svg width="32" height="32"><use href="#favicon"/></svg><figcaption>32</figcaption></figure>
+      <figure><svg width="64" height="64"><use href="#favicon"/></svg><figcaption>64</figcaption></figure>
+      <figure><svg width="120" height="120" style="border-radius:26px"><use href="#favicon"/></svg><figcaption>180 · apple-icon</figcaption></figure>
+    </div>
+    <div class="tabs-mock" aria-hidden="true">
+      <div class="tab"><span class="dot"></span>Inbox</div>
+      <div class="tab active"><svg width="16" height="16"><use href="#favicon"/></svg>Lea's birthday · Virgule</div>
+      <div class="tab"><span class="dot"></span>Calendar</div>
+    </div>
+    <div class="code-card">
+      <header><code>src/app/icon.svg</code><button type="button" class="btn-ghost" data-copy="fav">Copy the SVG</button></header>
+      <pre id="code-fav"></pre>
+    </div>
+  </section>
+
+  <!-- ─── Home ─── -->
+  <section class="block" aria-labelledby="h-home">
+    <div class="block-head">
+      <h2 id="h-home">The home page</h2>
+      <p>The same content as today, with a clearer hierarchy: the wordmark replaces the small "Virgule" label, the end of the title is highlighted in mango, and the rosette of six commas (one per seat) spills out behind the form. The moon button in the header really switches the theme.</p>
+    </div>
+    <div class="devices">
+      <div>
+        <div class="browser">
+          <div class="browser-bar"><span class="lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="url"><svg><use href="#i-lock"/></svg>virgule.vercel.app</span></div>
+          <div class="app" data-mock="desktop"></div>
+        </div>
+        <p class="device-cap">Computer, from 720 px wide</p>
+      </div>
+      <div>
+        <div class="phone"><div class="notch" aria-hidden="true"><i></i></div><div class="app" data-mock="phone"></div></div>
+        <p class="device-cap">Phone: the rosette goes behind the top of the card</p>
+      </div>
+    </div>
+    <ul class="notes">
+      <li><b>New strings</b> in <code>messages/fr.json</code> for the row of key figures: "6 seats", "1 link to share", "7 days online".</li>
+      <li><b>New global components</b>, with story and tests: <code>Logo</code> (wordmark or symbol alone) and <code>Rosette</code> (decoration, <code>aria-hidden</code>).</li>
+      <li><b>Favicon</b>: <code>src/app/icon.svg</code> replaces <code>favicon.ico</code>, plus a 180 px <code>apple-icon.png</code> exported from the same drawing.</li>
+    </ul>
+  </section>
+</div>
+
+<template id="app-tpl">
+  <div class="app-header">
+    <div class="wordmark" aria-label="virgule">virgule<svg aria-hidden="true"><use href="#comma" class="mark-fill"/></svg></div>
+    <button type="button" class="icon-btn" data-toggle aria-label="Change theme"><svg><use href="#i-moon"/></svg></button>
+  </div>
+  <div class="app-main">
+    <div class="app-hero">
+      <h1>Every idea, <span class="hl">one shared decision.</span></h1>
+      <p class="sub">Up to 6 participants, one link to share, no account to create.</p>
+      <ul class="steps">
+        <li><span class="ic"><svg><use href="#i-tag"/></svg></span><span>You pick the topics to settle: goal, dates, budget…</span></li>
+        <li><span class="ic"><svg><use href="#i-bulb"/></svg></span><span>Everyone suggests ideas and votes for or against, without anyone knowing who voted what.</span></li>
+        <li><span class="ic"><svg><use href="#i-checks"/></svg></span><span>The recap keeps the ideas the group agrees on, and we go for another round if needed.</span></li>
+      </ul>
+    </div>
+    <div class="form-side">
+      <svg class="rosette" viewBox="-50 -50 100 100" aria-hidden="true"></svg>
+      <form class="card">
+        <div>
+          <h2>New session</h2>
+          <p class="hint">You're hosting: you pick the topics and move the session forward.</p>
+        </div>
+        <div class="field"><label data-for="room">Session name</label><input data-id="room" placeholder="E.g. Lea's birthday" maxlength="60"></div>
+        <div class="field"><label data-for="pseudo">Your first name</label><input data-id="pseudo" placeholder="E.g. Camille" maxlength="30" autocomplete="given-name"></div>
+        <button type="submit" class="cta" disabled>Create the session</button>
+      </form>
+    </div>
+    <p class="facts"><span><b>6</b> seats</span><span><b>1</b> link to share</span><span><b>7</b> days online</span><span><b>0</b> accounts to create</span></p>
+  </div>
+</template>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var COMMA = 'M46 28C46 44 37 54 21 59L19 54C25 51 28.5 47 29.6 41.8A14 14 0 1 1 46 28Z';
+
+  // Rosette: six commas rotated by 60°, brand colors (never olive or pomegranate).
+  var fills = ['var(--brand)', 'var(--highlight)', 'var(--primary)', 'var(--brand)', 'var(--highlight)', 'var(--primary)'];
+  function rosette() {
+    var s = '';
+    for (var i = 0; i < 6; i++) {
+      s += '<g transform="rotate(' + (i * 60) + ')"><g transform="translate(-14 -52) scale(0.56)"><path fill="' + fills[i] + '" d="' + COMMA + '"/></g></g>';
+    }
+    return s;
+  }
+
+  var tpl = document.getElementById('app-tpl');
+  document.querySelectorAll('.app').forEach(function (host) {
+    var node = tpl.content.cloneNode(true);
+    var key = host.getAttribute('data-mock');
+    node.querySelectorAll('[data-id]').forEach(function (el) { el.id = key + '-' + el.getAttribute('data-id'); });
+    node.querySelectorAll('[data-for]').forEach(function (el) { el.htmlFor = key + '-' + el.getAttribute('data-for'); });
+    node.querySelector('.rosette').innerHTML = rosette();
+    host.appendChild(node);
+    var form = host.querySelector('form');
+    var inputs = form.querySelectorAll('input');
+    var cta = form.querySelector('.cta');
+    inputs.forEach(function (el) {
+      el.addEventListener('input', function () {
+        cta.disabled = !Array.prototype.every.call(inputs, function (i) { return i.value.trim(); });
+      });
+    });
+    form.addEventListener('submit', function (e) { e.preventDefault(); cta.textContent = 'Session created (mockup)'; });
+  });
+
+  // Theme: same logic as the app (light, dark, or the device setting).
+  var segBtns = document.querySelectorAll('.seg button');
+  function setTheme(v) {
+    if (v === 'system') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', v);
+    segBtns.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-set') === v)); });
+  }
+  segBtns.forEach(function (b) { b.addEventListener('click', function () { setTheme(b.getAttribute('data-set')); }); });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('[data-toggle]')) return;
+    var dark = root.getAttribute('data-theme') === 'dark' ||
+      (!root.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme: dark)').matches);
+    setTheme(dark ? 'light' : 'dark');
+  });
+
+  // Favicon code, ready to copy.
+  var favSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">\n' +
+    '  <rect width="64" height="64" rx="15" fill="#f26a2e"/>\n' +
+    '  <path fill="#fff" transform="translate(-2 -9) scale(1.12)"\n' +
+    '        d="' + COMMA + '"/>\n</svg>';
+  var pre = document.getElementById('code-fav');
+  pre.textContent = favSvg;
+  document.querySelector('[data-copy="fav"]').addEventListener('click', function (e) {
+    var btn = e.currentTarget;
+    var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy the SVG'; }, 1600); };
+    try {
+      navigator.clipboard.writeText(favSvg).then(done, function () { select(); });
+    } catch (err) { select(); }
+    function select() { var r = document.createRange(); r.selectNodeContents(pre); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Text selected'; }
+  });
+})();
+</script>
+
+</body>
+</html>

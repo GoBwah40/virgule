@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recap scores</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #FFF7F0; --card: #FFFFFF; --muted: #F7EBE1; --fg: #2A1A24; --fg-2: #6F5A62; --line: #EEDCCF;
+    --primary: #C2410C; --ok: #1F7A4D; --ok-fg: #FFFFFF; --ko: #B8283F; --ko-fg: #FFFFFF; --soft: #FFF0C7;
+    --display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+    --text: "Figtree", "Avenir Next", system-ui, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --bg: #1C1216; --card: #261A1F; --muted: #30222A; --fg: #FBEFE6; --fg-2: #B7A3AA; --line: #3D2C34;
+      --primary: #FF8A55; --ok: #5CC98E; --ok-fg: #1C1216; --ko: #FF6B81; --ko-fg: #1C1216; --soft: #4A3717;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #1C1216; --card: #261A1F; --muted: #30222A; --fg: #FBEFE6; --fg-2: #B7A3AA; --line: #3D2C34;
+    --primary: #FF8A55; --ok: #5CC98E; --ok-fg: #1C1216; --ko: #FF6B81; --ko-fg: #1C1216; --soft: #4A3717;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--text); font-size: 16px; line-height: 1.5; padding-inline: 16px; padding-block: 28px 72px; }
+  .page { max-width: 1120px; margin-inline: auto; display: grid; gap: 40px; }
+  h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.05; font-weight: 800; }
+  h2 { font-size: 22px; font-weight: 700; }
+  p { margin: 0; }
+  .muted { color: var(--fg-2); }
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--primary); }
+  header.intro { display: grid; gap: 10px; max-width: 64ch; }
+
+  .options { display: grid; gap: 28px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); align-items: start; }
+  .option { display: grid; gap: 14px; align-content: start; }
+  .option-head { display: grid; gap: 4px; }
+  .tag { justify-self: start; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; background: var(--soft); }
+  .tag.reco { background: var(--ok); color: var(--ok-fg); }
+  .pros { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: 14px; color: var(--fg-2); }
+  .pros b { color: var(--fg); font-weight: 600; }
+
+  .phone { width: 100%; max-width: 340px; margin-inline: auto; background: var(--bg); border: 1px solid var(--line); border-radius: 34px; padding: 16px 14px 20px; display: grid; gap: 12px; }
+  .phone-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .phone-title { font-family: var(--display); font-weight: 800; font-size: 22px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 14px; display: grid; gap: 8px; }
+  .card-title { font-family: var(--display); font-weight: 700; font-size: 17px; }
+  ul.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+  .row { position: relative; border-radius: 14px; border: 1.5px solid transparent; background: var(--muted); overflow: hidden; }
+  .row.ok { background: color-mix(in oklch, var(--ok) 10%, var(--card)); border-color: color-mix(in oklch, var(--ok) 35%, var(--card)); }
+  .row.ko { background: color-mix(in oklch, var(--ko) 9%, var(--card)); border-color: color-mix(in oklch, var(--ko) 32%, var(--card)); }
+  .row-main { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px; min-height: 52px; }
+  .idea { font-size: 15px; font-weight: 500; }
+  .status { flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+  .ok .status { background: var(--ok); color: var(--ok-fg); }
+  .ko .status { color: var(--ko); border: 1.5px solid color-mix(in oklch, var(--ko) 50%, var(--card)); }
+  .nul .status { background: var(--ok); color: var(--ok-fg); }
+
+  .score { display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .up { color: var(--ok); } .down { color: var(--ko); }
+  .net { margin-left: auto; font-weight: 700; }
+
+  /* A — Swipe */
+  .swipe .reveal { position: absolute; inset: 0; display: flex; align-items: center; justify-content: flex-end; padding: 0 14px; gap: 12px; }
+  .swipe .row-main { position: relative; background: inherit; transition: transform .22s cubic-bezier(.22,1,.36,1); touch-action: pan-y; cursor: grab; }
+  .swipe .row { background: var(--muted); }
+  .swipe .row.ok .row-main { background: color-mix(in oklch, var(--ok) 10%, var(--card)); }
+  .swipe .row.ko .row-main { background: color-mix(in oklch, var(--ko) 9%, var(--card)); }
+  .swipe .row.nul .row-main { background: var(--muted); }
+  .swipe .row .reveal { background: var(--card); }
+  .swipe .row.open .row-main { transform: translateX(-150px); }
+  .hint { font-size: 12px; color: var(--fg-2); display: flex; align-items: center; gap: 6px; }
+
+  /* B — Tap to expand */
+  .expand .row-main { width: 100%; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+  .expand .chev { width: 18px; height: 18px; color: var(--fg-2); transition: transform .2s; flex-shrink: 0; }
+  .expand .row.open .chev { transform: rotate(180deg); }
+  .expand .details { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s ease; }
+  .expand .row.open .details { grid-template-rows: 1fr; }
+  .expand .details > div { overflow: hidden; }
+  .expand .details-inner { padding: 0 12px 12px; display: grid; gap: 8px; }
+
+  /* C — Switch + bar */
+  .toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; font-size: 14px; font-weight: 600; }
+  .switch { width: 44px; height: 26px; border-radius: 999px; border: 0; background: var(--line); position: relative; cursor: pointer; flex-shrink: 0; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--card); transition: transform .18s; box-shadow: 0 1px 2px rgb(0 0 0 / .2); }
+  .switch[aria-checked="true"] { background: var(--primary); }
+  .switch[aria-checked="true"]::after { transform: translateX(18px); }
+  .bars .bar-wrap { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s ease; }
+  .bars.on .bar-wrap { grid-template-rows: 1fr; }
+  .bars .bar-wrap > div { overflow: hidden; }
+  .bar-inner { padding: 0 12px 12px; display: grid; gap: 6px; }
+  .bar { display: flex; height: 8px; border-radius: 999px; overflow: hidden; background: var(--line); }
+  .bar .b-up { background: var(--ok); }
+  .bar .b-down { background: var(--ko); }
+
+  button:focus-visible, .row-main:focus-visible { outline: 2.5px solid var(--primary); outline-offset: 2px; }
+  .decision { background: var(--soft); border-radius: 22px; padding: 22px; display: grid; gap: 10px; max-width: 72ch; }
+  .decision ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="page">
+  <header class="intro">
+    <span class="eyebrow">Virgule · recap on mobile</span>
+    <h1>Seeing the scores in the recap</h1>
+    <p class="muted">On a phone, there is no hover tooltip: today, the scores cannot be reached there. Three ways to show them, to try out directly (with a finger or a mouse). The examples follow your device's light or dark theme.</p>
+  </header>
+
+  <div class="options">
+    <!-- A -->
+    <section class="option">
+      <div class="option-head">
+        <span class="tag">A · Swipe</span>
+        <h2>Swipe the row</h2>
+        <p class="muted">Your proposal: you swipe an idea to the left, and the score appears underneath.</p>
+      </div>
+      <div class="phone swipe" data-demo="swipe">
+        <div class="phone-top"><span class="phone-title">The recap</span></div>
+        <p class="hint">← Swipe an idea to see its votes</p>
+        <div class="card"><div class="card-title">Place</div><ul class="rows" data-rows></ul></div>
+      </div>
+      <ul class="pros">
+        <li><b>+</b> A natural gesture on mobile, a very clean screen.</li>
+        <li><b>−</b> Invisible until you know about it: it needs an instruction.</li>
+        <li><b>−</b> Nothing equivalent with the keyboard or the mouse without adding something else.</li>
+      </ul>
+    </section>
+
+    <!-- B -->
+    <section class="option">
+      <div class="option-head">
+        <span class="tag reco">B · Tap · recommended</span>
+        <h2>Tap to expand</h2>
+        <p class="muted">Each row becomes a button: one tap expands the votes under the idea, a second tap collapses them.</p>
+      </div>
+      <div class="phone expand" data-demo="expand">
+        <div class="phone-top"><span class="phone-title">The recap</span></div>
+        <div class="card"><div class="card-title">Place</div><ul class="rows" data-rows></ul></div>
+      </div>
+      <ul class="pros">
+        <li><b>+</b> The chevron shows there is something to see.</li>
+        <li><b>+</b> Same gesture with a finger, a mouse and the keyboard; read by screen readers.</li>
+        <li><b>+</b> Keeps the current spirit: details only when you ask for them.</li>
+      </ul>
+    </section>
+
+    <!-- C -->
+    <section class="option">
+      <div class="option-head">
+        <span class="tag">C · Show everything</span>
+        <h2>"Show the votes" switch</h2>
+        <p class="muted">A setting at the top of the recap shows, all at once, a for/against bar and the numbers under each idea.</p>
+      </div>
+      <div class="phone bars" data-demo="bars">
+        <div class="phone-top"><span class="phone-title">The recap</span></div>
+        <div class="toggle"><span>Show the votes</span><button class="switch" type="button" role="switch" aria-checked="false" aria-label="Show the votes"></button></div>
+        <div class="card"><div class="card-title">Place</div><ul class="rows" data-rows></ul></div>
+      </div>
+      <ul class="pros">
+        <li><b>+</b> Ideal for discussing together: everyone sees everything at the same time.</li>
+        <li><b>+</b> The bars compare at a glance between ideas.</li>
+        <li><b>−</b> A busier screen once turned on.</li>
+      </ul>
+    </section>
+  </div>
+
+  <section class="decision">
+    <h2>My recommendation</h2>
+    <ul>
+      <li><b>B (tap to expand)</b> as the default behavior: discoverable, accessible, the same everywhere.</li>
+      <li>As a possible addition, <b>the bar from C</b> in the expanded details, to read the for/against ratio without counting.</li>
+      <li>A is pleasant but too hidden; I do not recommend it on its own.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  const IDEAS = [
+    { text: "The neighborhood hall", up: 4, down: 1, tone: "ok" },
+    { text: "Sacha's garden", up: 2, down: 2, tone: "nul" },
+    { text: "Italian restaurant", up: 1, down: 4, tone: "ko" },
+  ];
+  const statusLabel = (t) => (t === "ko" ? "✕ Dropped" : "✓ Kept");
+  const signed = (n) => (n > 0 ? "+" + n : n < 0 ? "−" + Math.abs(n) : "0");
+  const score = (i) => `<div class="score"><span class="up">↑ ${i.up} for</span><span class="down">↓ ${i.down} against</span><span class="net">Score ${signed(i.up - i.down)}</span></div>`;
+  const bar = (i) => { const total = i.up + i.down || 1; return `<div class="bar" aria-hidden="true"><span class="b-up" style="width:${(i.up / total) * 100}%"></span><span class="b-down" style="width:${(i.down / total) * 100}%"></span></div>`; };
+  const chev = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+
+  const renderers = {
+    swipe: (i) => `<li class="row ${i.tone}"><div class="reveal"><span class="up">↑ ${i.up}</span><span class="down">↓ ${i.down}</span><b>${signed(i.up - i.down)}</b></div><div class="row-main" tabindex="0" aria-label="${i.text}, swipe to see the votes"><span class="idea">${i.text}</span><span class="status">${statusLabel(i.tone)}</span></div></li>`,
+    expand: (i, n) => `<li class="row ${i.tone}"><button class="row-main" type="button" aria-expanded="false" aria-controls="d-${n}"><span class="idea">${i.text}</span><span style="display:flex;align-items:center;gap:8px"><span class="status">${statusLabel(i.tone)}</span>${chev}</span></button><div class="details" id="d-${n}"><div><div class="details-inner">${score(i)}${bar(i)}</div></div></div></li>`,
+    bars: (i) => `<li class="row ${i.tone}"><div class="row-main"><span class="idea">${i.text}</span><span class="status">${statusLabel(i.tone)}</span></div><div class="bar-wrap"><div><div class="bar-inner">${bar(i)}${score(i)}</div></div></div></li>`,
+  };
+  document.querySelectorAll("[data-demo]").forEach((demo) => {
+    const kind = demo.dataset.demo;
+    demo.querySelector("[data-rows]").innerHTML = IDEAS.map((i, n) => renderers[kind](i, kind + n)).join("");
+  });
+
+  // A — swipe (pointer); click or Enter as a fallback to try it with a mouse / keyboard.
+  document.querySelectorAll(".swipe .row").forEach((row) => {
+    const main = row.querySelector(".row-main");
+    let startX = null;
+    main.addEventListener("pointerdown", (e) => { startX = e.clientX; main.setPointerCapture(e.pointerId); });
+    main.addEventListener("pointerup", (e) => {
+      if (startX === null) return;
+      const dx = e.clientX - startX; startX = null;
+      if (dx < -30) row.classList.add("open");
+      else if (dx > 30) row.classList.remove("open");
+      else row.classList.toggle("open");
+    });
+    main.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); row.classList.toggle("open"); } });
+  });
+
+  // B — expand
+  document.querySelectorAll(".expand .row-main").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const row = btn.closest(".row");
+      const open = row.classList.toggle("open");
+      btn.setAttribute("aria-expanded", String(open));
+    });
+  });
+
+  // C — switch
+  const sw = document.querySelector(".bars .switch");
+  sw.addEventListener("click", () => {
+    const on = sw.getAttribute("aria-checked") !== "true";
+    sw.setAttribute("aria-checked", String(on));
+    document.querySelector(".phone.bars").classList.toggle("on", on);
+  });
+</script>
+
+</body>
+</html>

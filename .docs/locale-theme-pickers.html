@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Language and theme pickers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Mono:wght@500&family=Figtree:wght@400;500;600&display=swap">
+<style>
+/* Layout: comparison page, one card per proposal; each card holds a preview
+   of the footer at mobile width (375 px) whose theme follows the choice made inside it.
+   Colors and fonts = Virgule brand guidelines (globals.css / fonts.ts). */
+:root, .stage[data-v="light"] {
+  --bg: #fff7f0; --fg: #2a1a24; --card: #ffffff; --muted: #f7ebe1; --muted-fg: #6f5a62;
+  --border: #eedccf; --primary: #c2410c; --brand: #f26a2e; --highlight-soft: #fff0c7;
+  --success: #1f7a4d; --shadow: 0 10px 30px -12px rgb(42 26 36 / .25);
+  --f-head: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --f-body: "Figtree", ui-sans-serif, system-ui, sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1c1216; --fg: #fbefe6; --card: #261a1f; --muted: #30222a; --muted-fg: #b7a3aa;
+    --border: #3d2c34; --primary: #ff8a55; --brand: #ff8a55; --highlight-soft: #4a3717;
+    --success: #5cc98e; --shadow: 0 10px 30px -12px rgb(0 0 0 / .6); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"], .stage[data-v="dark"] {
+  --bg: #1c1216; --fg: #fbefe6; --card: #261a1f; --muted: #30222a; --muted-fg: #b7a3aa;
+  --border: #3d2c34; --primary: #ff8a55; --brand: #ff8a55; --highlight-soft: #4a3717;
+  --success: #5cc98e; --shadow: 0 10px 30px -12px rgb(0 0 0 / .6); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--f-body); padding-inline: 16px; padding-block: 40px 64px; }
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; gap: 40px; }
+h1, h2, h3 { font-family: var(--f-head); text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 800; }
+h1 .comma { color: var(--brand); }
+h2 { font-size: 20px; font-weight: 700; }
+p { margin: 0; }
+.lead { max-width: 62ch; color: var(--muted-fg); font-size: 16px; }
+header { display: grid; gap: 14px; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--primary); }
+
+.global { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.switch { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; cursor: pointer; font-weight: 500; }
+.switch input { appearance: none; width: 40px; height: 24px; border-radius: 99px; background: var(--muted); border: 1px solid var(--border); position: relative; margin: 0; cursor: pointer; transition: background .2s; }
+.switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 2px rgb(0 0 0 / .25); transition: transform .2s; }
+.switch input:checked { background: var(--primary); border-color: var(--primary); }
+.switch input:checked::after { transform: translateX(16px); }
+.switch input:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 50%, transparent); outline-offset: 2px; }
+.hint { color: var(--muted-fg); font-size: 14px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 20px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.card.current { background: transparent; border-style: dashed; }
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.tag { font: 500 11px/1 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted-fg); white-space: nowrap; }
+.tag.rec { color: var(--success); }
+.desc { color: var(--muted-fg); font-size: 14px; max-width: 60ch; }
+
+.stage-frame { background: var(--muted); border-radius: 14px; padding: 14px; display: grid; justify-items: center; gap: 8px; }
+.stage { width: min(100%, 375px); background: var(--bg); color: var(--fg); border: 1px solid var(--border); border-radius: 12px; font-family: var(--f-body); transition: background-color .2s, color .2s; }
+.frame-note { font: 500 11px/1 var(--f-mono); color: var(--muted-fg); letter-spacing: .04em; }
+.mock { padding: 18px 16px 30px; display: grid; gap: 8px; }
+.mock i { display: block; height: 10px; border-radius: 99px; background: var(--muted); }
+.mock i:nth-child(1) { width: 55%; height: 14px; }
+.mock i:nth-child(2) { width: 90%; }
+.mock i:nth-child(3) { width: 72%; }
+.vfoot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 0 12px 12px; }
+.src { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 6px; color: var(--muted-fg); font-size: 13px; text-decoration: none; border-radius: 8px; }
+.ctrls { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; position: relative; }
+
+.meta { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--muted-fg); }
+.meta b { font: 500 13px var(--f-mono); color: var(--fg); font-variant-numeric: tabular-nums; }
+.pc { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 14px; }
+.pc h3 { font: 600 12px/1 var(--f-body); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+.pc .pro h3 { color: var(--success); }
+.pc .con h3 { color: var(--primary); }
+.pc ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+@media (max-width: 480px) { .pc { grid-template-columns: 1fr; } }
+
+/* ── Controls in the preview (mimic the Tailwind classes of the app) ── */
+svg.i { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible, .src:focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 50%, transparent); outline-offset: 1px; }
+.pill { display: inline-flex; align-items: center; border: 1px solid var(--border); background: var(--card); border-radius: 999px; padding: 2px; }
+.opt { display: inline-flex; align-items: center; justify-content: center; height: 44px; min-width: 44px; padding: 0 8px; border-radius: 999px; color: var(--muted-fg); transition: background-color .15s, color .15s; }
+.opt:hover { background: var(--muted); }
+.opt[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+.code { font: 500 12px var(--f-mono); }
+.sep { width: 1px; align-self: stretch; margin: 10px 3px; background: var(--border); }
+.btn { display: inline-flex; align-items: center; gap: 7px; height: 44px; padding: 0 14px; border: 1px solid var(--border); background: var(--card); border-radius: 999px; font-size: 14px; font-weight: 500; transition: background-color .15s; }
+.btn.sq { width: 44px; padding: 0; justify-content: center; }
+.btn:hover, .btn[aria-expanded="true"] { background: var(--muted); }
+.btn .chev { width: 14px; height: 14px; color: var(--muted-fg); }
+.menu { position: absolute; right: 0; bottom: calc(100% + 8px); z-index: 5; min-width: 210px; background: var(--card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 6px; display: grid; gap: 2px; }
+.menu.left { right: auto; left: 0; }
+.mi { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 10px; border-radius: 10px; font-size: 14px; text-align: left; width: 100%; }
+.mi:hover { background: var(--muted); }
+.mi .ck { margin-left: auto; color: var(--primary); }
+.mi[aria-checked="false"] .ck { visibility: hidden; }
+.pop { width: 260px; gap: 12px; padding: 12px; }
+.pop .lbl { font: 600 11px/1 var(--f-body); letter-spacing: .07em; text-transform: uppercase; color: var(--muted-fg); margin-bottom: 6px; }
+.segw { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--muted); border-radius: 12px; padding: 3px; gap: 2px; }
+.segw .opt { border-radius: 9px; font-size: 13px; gap: 5px; padding: 0 6px; }
+.segw .opt[aria-pressed="true"] { background: var(--card); color: var(--fg); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+.tl-group { display: inline-flex; align-items: center; }
+.tl { min-height: 44px; padding: 0 7px; font-size: 13px; color: var(--muted-fg); text-underline-offset: 5px; }
+.tl:hover { color: var(--fg); }
+.tl[aria-pressed="true"] { color: var(--fg); font-weight: 600; text-decoration: underline 2px var(--primary); }
+.dot { color: var(--border); font-size: 13px; user-select: none; }
+
+.reco { background: var(--highlight-soft); border-radius: 18px; padding: 22px; display: grid; gap: 10px; }
+.reco p { max-width: 68ch; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Virgule · footer</span>
+    <h1>Language and theme buttons<span class="comma">,</span> five options</h1>
+    <p class="lead">Each preview reproduces the footer at mobile width. Everything is clickable: the chosen theme applies to the preview (Auto follows your device) and the language changes the labels.</p>
+    <div class="global">
+      <label class="switch"><input type="checkbox" id="more-langs"> Simulate 4 languages</label>
+      <span class="hint">To see how each option copes with Spanish and German.</span>
+    </div>
+  </header>
+
+  <section class="grid" id="grid"></section>
+
+  <section class="reco">
+    <h2>My recommendation</h2>
+    <p><b>The single pill (A)</b> if we stay with two languages: it is the current design, calmer, with one outline instead of two; the choices stay visible and dark mode is one tap away. It only needs one new component that groups <code>LocaleToggle</code> and <code>ThemeToggle</code>.</p>
+    <p>If more languages are planned, <b>the two menus (D)</b>: they spell out the language name in full, which helps someone who does not understand the current language, and they keep the same width whatever the number of languages.</p>
+  </section>
+</div>
+
+<script>
+const ICONS = {
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>',
+  moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>',
+  system: '<rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8M12 17v4"/>',
+  globe: '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/>',
+  chev: '<path d="m6 15 6-6 6 6"/>',
+  check: '<path d="M20 6 9 17l-5-5"/>',
+  sliders: '<path d="M20 7h-9M14 17H5"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/>',
+  code: '<path d="m16 18 6-6-6-6M8 6l-6 6 6 6"/>',
+};
+const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n]}</svg>`;
+const THEME_ICON = { system: "system", light: "sun", dark: "moon" };
+const THEMES = ["system", "light", "dark"];
+
+const T = {
+  fr: { source: "Code source", system: "Auto", systemLong: "Comme l’appareil", light: "Clair", dark: "Sombre", lang: "Langue", theme: "Thème", prefs: "Préférences" },
+  en: { source: "Source code", system: "Auto", systemLong: "Match device", light: "Light", dark: "Dark", lang: "Language", theme: "Theme", prefs: "Preferences" },
+  es: { source: "Código fuente", system: "Auto", systemLong: "Como el dispositivo", light: "Claro", dark: "Oscuro", lang: "Idioma", theme: "Tema", prefs: "Preferencias" },
+  de: { source: "Quellcode", system: "Auto", systemLong: "Wie das Gerät", light: "Hell", dark: "Dunkel", lang: "Sprache", theme: "Design", prefs: "Einstellungen" },
+};
+const ALL_LANGS = [
+  { v: "en", short: "EN", name: "English" },
+  { v: "fr", short: "FR", name: "Français" },
+  { v: "es", short: "ES", name: "Español" },
+  { v: "de", short: "DE", name: "Deutsch" },
+];
+let moreLangs = false;
+const langs = () => (moreLangs ? ALL_LANGS : ALL_LANGS.slice(0, 2));
+
+const opt = (id, act, val, pressed, inner, title) =>
+  `<button class="opt" data-card="${id}" data-act="${act}" data-val="${val}" aria-pressed="${pressed}" title="${title}" aria-label="${title}">${inner}</button>`;
+const langOpts = (id, s) => langs().map(l => opt(id, "lang", l.v, s.lang === l.v, `<span class="code">${l.short}</span>`, l.name)).join("");
+const themeOpts = (id, s, t) => THEMES.map(th => opt(id, "theme", th, s.theme === th, icon(THEME_ICON[th]), th === "system" ? t.systemLong : t[th])).join("");
+
+const VARIANTS = [
+  {
+    id: "cur", name: "Current", tag: "In place", current: true,
+    desc: "Two pills side by side: language codes, then three theme icons.",
+    taps: "1 tap",
+    pro: ["Every choice visible", "Real radio buttons, keyboard arrows"],
+    con: ["Two outlines that repeat each other", "Screen icon says little about Auto", "Grows longer with each language"],
+    render: (id, s, t) => `<div class="pill">${langOpts(id, s)}</div><div class="pill">${themeOpts(id, s, t)}</div>`,
+  },
+  {
+    id: "a", name: "A · Single pill", tag: "Recommended", rec: true,
+    desc: "The same buttons grouped in a single outline, separated by a thin rule.",
+    taps: "1 tap",
+    pro: ["Calmer, reads as a single setting", "Same accessibility as the current one", "Minimal code change"],
+    con: ["Almost the same width", "Still poorly suited to more than 3 languages"],
+    render: (id, s, t) => `<div class="pill">${langOpts(id, s)}<span class="sep"></span>${themeOpts(id, s, t)}</div>`,
+  },
+  {
+    id: "b", name: "B · Two cycling buttons", tag: "Most compact",
+    desc: "One button per setting. Each tap moves to the next option; the icon shows the current state.",
+    taps: "2 taps",
+    pro: ["Only two 44 px buttons", "Leaves room for the source link"],
+    con: ["You don't see the other options", "You have to guess the cycle order", "Tedious beyond 2 languages"],
+    render: (id, s, t) => {
+      const l = langs().find(x => x.v === s.lang);
+      const next = THEMES[(THEMES.indexOf(s.theme) + 1) % 3];
+      return `<button class="btn" data-card="${id}" data-act="cycleLang" title="${t.lang}: ${l.name}">${icon("globe")}<span class="code">${l.short}</span></button>` +
+        `<button class="btn sq" data-card="${id}" data-act="cycleTheme" title="${t.theme}: ${s.theme === "system" ? t.systemLong : t[s.theme]} (→ ${next === "system" ? t.systemLong : t[next]})" aria-label="${t.theme}">${icon(THEME_ICON[s.theme])}</button>`;
+    },
+  },
+  {
+    id: "c", name: "C · Preferences button", tag: "Extensible",
+    desc: "A single button opens a panel with both settings, labels spelled out in full.",
+    taps: "2 taps",
+    pro: ["A single button in the footer", "Explicit labels, room for other settings"],
+    con: ["Settings hidden behind a tap", "One more popover component to maintain"],
+    render: (id, s, t) => {
+      const segL = langs().map(l => opt(id, "lang", l.v, s.lang === l.v, `<span class="code">${l.short}</span>`, l.name)).join("");
+      const segT = THEMES.map(th => opt(id, "theme", th, s.theme === th, icon(THEME_ICON[th]) + `<span>${t[th]}</span>`, th === "system" ? t.systemLong : t[th])).join("");
+      const panel = s.open === "prefs" ? `<div class="menu pop" role="dialog" aria-label="${t.prefs}">
+          <div><div class="lbl">${t.lang}</div><div class="segw">${segL}</div></div>
+          <div><div class="lbl">${t.theme}</div><div class="segw">${segT}</div></div></div>` : "";
+      const l = langs().find(x => x.v === s.lang);
+      return `<button class="btn" data-card="${id}" data-act="toggle" data-val="prefs" aria-expanded="${s.open === "prefs"}">${icon("sliders")}<span class="code">${l.short}</span>${icon(THEME_ICON[s.theme])}</button>${panel}`;
+    },
+  },
+  {
+    id: "d", name: "D · Two menus", tag: "If more languages",
+    desc: "Language spelled out and theme named, each in a small dropdown menu.",
+    taps: "2 taps",
+    pro: ["Language name readable by everyone", "Fixed width, whatever the number of languages", "Familiar convention"],
+    con: ["More text in the footer", "Two taps to change"],
+    render: (id, s, t) => {
+      const l = langs().find(x => x.v === s.lang);
+      const mi = (act, val, on, inner, lang) => `<button class="mi" role="menuitemradio" aria-checked="${on}" data-card="${id}" data-act="${act}" data-val="${val}"${lang ? ` lang="${lang}"` : ""}>${inner}${icon("check", "ck")}</button>`;
+      const langMenu = s.open === "lang" ? `<div class="menu left" role="menu">${langs().map(x => mi("lang", x.v, s.lang === x.v, `<span>${x.name}</span>`, x.v)).join("")}</div>` : "";
+      const themeMenu = s.open === "theme" ? `<div class="menu" role="menu">${THEMES.map(th => mi("theme", th, s.theme === th, icon(THEME_ICON[th]) + `<span>${th === "system" ? t.systemLong : t[th]}</span>`)).join("")}</div>` : "";
+      return `<button class="btn" data-card="${id}" data-act="toggle" data-val="lang" aria-expanded="${s.open === "lang"}">${icon("globe")}${l.name}${icon("chev", "chev")}</button>${langMenu}` +
+        `<button class="btn" data-card="${id}" data-act="toggle" data-val="theme" aria-expanded="${s.open === "theme"}">${icon(THEME_ICON[s.theme])}${t[s.theme]}${icon("chev", "chev")}</button>${themeMenu}`;
+    },
+  },
+  {
+    id: "e", name: "E · Text links", tag: "Most discreet",
+    desc: "Plain text, like an editorial footer. The active option is underlined in papaya.",
+    taps: "1 tap",
+    pro: ["Very discreet, nothing looks like a button", "Explicit labels, one tap"],
+    con: ["Takes two lines on mobile", "Less obvious that it is clickable"],
+    render: (id, s, t) => {
+      const tl = (act, val, on, label, lang) => `<button class="tl" data-card="${id}" data-act="${act}" data-val="${val}" aria-pressed="${on}"${lang ? ` lang="${lang}"` : ""}>${label}</button>`;
+      const dot = '<span class="dot" aria-hidden="true">·</span>';
+      return `<span class="tl-group">${langs().map(l => tl("lang", l.v, s.lang === l.v, l.name, l.v)).join(dot)}</span>` +
+        `<span class="tl-group">${THEMES.map(th => tl("theme", th, s.theme === th, t[th])).join(dot)}</span>`;
+    },
+  },
+];
+
+const state = Object.fromEntries(VARIANTS.map(v => [v.id, { lang: "en", theme: "system", open: null }]));
+const grid = document.getElementById("grid");
+
+grid.innerHTML = VARIANTS.map(v => `
+  <article class="card${v.current ? " current" : ""}" id="card-${v.id}">
+    <div class="card-head"><h2>${v.name}</h2><span class="tag${v.rec ? " rec" : ""}">${v.tag}</span></div>
+    <p class="desc">${v.desc}</p>
+    <div class="stage-frame">
+      <div class="stage" id="stage-${v.id}"><div class="mock" aria-hidden="true"><i></i><i></i><i></i></div>
+        <footer class="vfoot"><a class="src" href="#" data-noop>${icon("code")}<span class="src-label"></span></a><div class="ctrls" id="ctrls-${v.id}"></div></footer>
+      </div>
+      <span class="frame-note">375 px · mobile</span>
+    </div>
+    <div class="meta"><span>Controls width <b id="w-${v.id}">–</b></span><span>Auto → Dark <b>${v.taps}</b></span></div>
+    <div class="pc"><div class="pro"><h3>For</h3><ul>${v.pro.map(x => `<li>${x}</li>`).join("")}</ul></div>
+      <div class="con"><h3>Against</h3><ul>${v.con.map(x => `<li>${x}</li>`).join("")}</ul></div></div>
+  </article>`).join("");
+
+function render(id) {
+  const v = VARIANTS.find(x => x.id === id), s = state[id], t = T[s.lang];
+  if (!langs().some(l => l.v === s.lang)) s.lang = "en";
+  const stage = document.getElementById("stage-" + id);
+  stage.dataset.v = s.theme;
+  stage.setAttribute("lang", s.lang);
+  stage.querySelector(".src-label").textContent = T[s.lang].source;
+  const ctrls = document.getElementById("ctrls-" + id);
+  ctrls.innerHTML = v.render(id, s, T[s.lang]);
+  requestAnimationFrame(() => {
+    const kids = [...ctrls.children].filter(c => !c.classList.contains("menu"));
+    const r = kids.map(k => k.getBoundingClientRect());
+    const w = Math.max(...r.map(x => x.right)) - Math.min(...r.map(x => x.left));
+    const wrapped = new Set(r.map(x => Math.round(x.top))).size > 1 || Math.abs(ctrls.getBoundingClientRect().top - stage.querySelector(".src").getBoundingClientRect().top) > 20;
+    document.getElementById("w-" + id).textContent = Math.round(w) + " px" + (wrapped ? " · wraps" : "");
+  });
+}
+const renderAll = () => VARIANTS.forEach(v => render(v.id));
+
+document.addEventListener("click", e => {
+  if (e.target.closest("[data-noop]")) { e.preventDefault(); return; }
+  const b = e.target.closest("[data-act]");
+  if (!b) { VARIANTS.forEach(v => { if (state[v.id].open) { state[v.id].open = null; render(v.id); } }); return; }
+  const id = b.dataset.card, s = state[id], val = b.dataset.val;
+  const L = langs().map(l => l.v);
+  switch (b.dataset.act) {
+    case "lang": s.lang = val; if (id === "d") s.open = null; break;
+    case "theme": s.theme = val; if (id === "d") s.open = null; break;
+    case "cycleLang": s.lang = L[(L.indexOf(s.lang) + 1) % L.length]; break;
+    case "cycleTheme": s.theme = THEMES[(THEMES.indexOf(s.theme) + 1) % 3]; break;
+    case "toggle": s.open = s.open === val ? null : val; break;
+  }
+  VARIANTS.forEach(v => { if (v.id !== id) state[v.id].open = null; });
+  renderAll();
+  const again = document.querySelector(`#ctrls-${id} [data-act="${b.dataset.act}"]${val ? `[data-val="${val}"]` : ""}`);
+  if (again) again.focus({ preventScroll: true });
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { VARIANTS.forEach(v => (state[v.id].open = null)); renderAll(); }
+});
+document.getElementById("more-langs").addEventListener("change", e => { moreLangs = e.target.checked; renderAll(); });
+renderAll();
+</script>
+
+</body>
+</html>
