@@ -279,6 +279,7 @@
   "recap": {
     "title": "Le bilan",
     "closedTitle": "C'est décidé",
+    "addToCalendar": "Ajouter au calendrier",
     "share": {
       "button": "Partager le bilan",
       "title": "Partager le bilan",
@@ -396,6 +397,10 @@
     "waitingTitle": "Pas encore décidé",
     "waitingBody": "Le groupe est encore en train de voter. Le bilan s'affiche ici dès que {host} le montre au groupe.",
     "anonymous": "Personne ne sait qui a voté quoi."
+  },
+  "calendar": {
+    "title": "{name} : {topic}",
+    "description": "« {topic} », décidé ensemble sur Virgule."
   },
   "export": {
     "button": "Exporter",

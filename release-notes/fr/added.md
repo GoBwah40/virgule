@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.14.0 — 2026-10-06
+
+- Dans le bilan, un sujet de date ou de période s'ajoute à ton calendrier : le créneau commun des périodes retenues, ou la date en tête, depuis la séance comme depuis le bilan partagé.
+
 ## 0.13.0 — 2026-10-06
 
 - La personne qui anime peut partager le bilan avec les absents : un lien en lecture seule, qui ne prend aucune place et ne montre aucun prénom, marche tant que la séance reste en ligne et peut être désactivé.

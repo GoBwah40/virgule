@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.14.0 — 2026-10-06
+
+- In the recap, a date or period topic can be added to your calendar: the common slot of the kept periods, or the date in the lead, from the session as from the shared recap.
+
 ## 0.13.0 — 2026-10-06
 
 - The person hosting can share the recap with people who weren't there: a read-only link, which takes no seat and shows no names, works while the session stays online and can be turned off.

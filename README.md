@@ -11,7 +11,7 @@ Brainstorming and planning app for small groups (up to 12 people, 6 by default),
    - **reopen voting** for the current round;
    - **end the session**: the room becomes read-only.
 
-The host drives the phases, and all participants follow automatically. The recap keeps the history of each round and can be exported as **Markdown**, **CSV** (Excel-compatible) or **PDF** (through the browser's print dialog). The host can also share a **read-only link** to the recap with people who were not there: no seat taken, no names shown.
+The host drives the phases, and all participants follow automatically. The recap keeps the history of each round and can be exported as **Markdown**, **CSV** (Excel-compatible) or **PDF** (through the browser's print dialog). The host can also share a **read-only link** to the recap with people who were not there: no seat taken, no names shown. A date or period topic can be added to a calendar (`.ics` file): the common slot of the kept periods, or the date in the lead.
 
 A room expires **7 days** after it is created; a daily scheduled job then deletes it.
 
@@ -138,6 +138,7 @@ src/
     present/page.tsx                Pairing a TV or a projector with the code from the host's phone
     recap/[token]/page.tsx          Read-only recap behind the link the host shares (no seat, no names)
     r/[slug]/export/route.ts               Markdown / CSV export
+    r/[slug]/calendar/route.ts             Calendar file of a topic's decided date (also under recap/[token]/)
     api/cron/purge/route.ts                Purge of expired rooms
   components/*.tsx          Reusable global components (+ .stories.tsx and .test.tsx)
   components/ui/            shadcn/ui primitives (Base UI)
@@ -148,6 +149,7 @@ src/
   lib/room.ts               Reads: room context, vote view, recap
   lib/results.ts            Score and qualification rules (pure, tested)
   lib/export.ts             Export formats (pure, tested)
+  lib/calendar.ts           Decided date of a topic and its calendar file (pure, tested)
   lib/release-notes.ts      Parsing of the release notes (pure, tested); release-notes-source.ts loads them
   lib/realtime/             Server-side Pusher notification
   lib/rate-limit.ts         Rate limiting (Upstash, optional)

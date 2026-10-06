@@ -26,6 +26,9 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
   const closed = room.phase === "CLOSED";
   const byRound = (render: (round: (typeof rounds)[number]) => React.ReactNode) => <RecapByRound rounds={rounds} render={render} />;
   const sharePath = await getSharePath(room.id, me);
+  // The latest round only: an earlier one may have settled on something since changed.
+  const calendarHref = (round: (typeof rounds)[number]) =>
+    round.round === current.round ? (themeId: string) => `/r/${slug}/calendar?theme=${themeId}` : undefined;
 
   return (
     <PhaseTransition>
@@ -59,10 +62,12 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
           <div className="min-w-0">
             {/* Printed, always the full list: "topic by topic" would print a single topic. */}
             <ViewChoice
-              list={byRound((round) => <RecapRoundView round={round} />)}
+              list={byRound((round) => <RecapRoundView round={round} calendarHref={calendarHref(round)} />)}
               board={
                 <>
-                  <div className="print:hidden">{byRound((round) => <RecapRoundSpotlight round={round} />)}</div>
+                  <div className="print:hidden">
+                    {byRound((round) => <RecapRoundSpotlight round={round} calendarHref={calendarHref(round)} />)}
+                  </div>
                   <div className="hidden print:block">{byRound((round) => <RecapRoundView round={round} />)}</div>
                 </>
               }
