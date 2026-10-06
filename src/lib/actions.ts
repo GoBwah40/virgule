@@ -7,6 +7,7 @@ import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
+import { Prisma } from "@/generated/prisma/client";
 import type { Phase } from "@/generated/prisma/enums";
 import {
   canRemoveParticipants,
@@ -17,6 +18,7 @@ import {
   LIMITS,
   MAX_PENDING_SUGGESTIONS,
   MAX_THEMES,
+  roomCapacity,
   ROOM_SIZES,
   ROOM_TTL_DAYS,
   SCREEN_CODE_TTL_MINUTES,
@@ -171,25 +173,32 @@ export async function joinRoom(slug: string, input: { pseudo: string }): Promise
   if (ctx.status === "not_found") return fail("roomNotFound");
   if (ctx.status === "expired") return fail("roomExpired");
   if (ctx.me) redirect(phasePath(slug, ctx.room.phase));
+  // Before the checks below: they would otherwise tell, unlimited, which first names are taken.
+  if (await isRateLimited("joinRoom")) return fail("tooManyRequests");
   if (ctx.room.phase === "CLOSED") return fail("roomClosed");
   if (ctx.participants.length >= ctx.room.capacity) return fail("roomFull");
-  if (await isRateLimited("joinRoom")) return fail("tooManyRequests");
-  if (ctx.participants.some((p) => p.pseudo.toLowerCase() === pseudo.toLowerCase())) {
-    return fail("pseudoTaken");
-  }
+  const sameName = (other: string) => other.toLowerCase() === pseudo.toLowerCase();
+  if (ctx.participants.some((p) => sameName(p.pseudo))) return fail("pseudoTaken");
 
   const token = newToken();
   try {
     await db.$transaction(async (tx) => {
       await tx.participant.create({ data: { roomId: ctx.room.id, pseudo, token } });
-      // Recount after insert: guards against two people taking the last seat at the same time.
-      const count = await tx.participant.count({ where: { roomId: ctx.room.id } });
-      if (count > ctx.room.capacity) throw new ActionFailure("roomFull");
+      // Checked again after the insert, against the room as it is now: two people taking the last
+      // seat or the same first name (in any case) at once, or the host shrinking the room meanwhile.
+      const room = await tx.room.findUniqueOrThrow({
+        where: { id: ctx.room.id },
+        select: { maxParticipants: true, participants: { select: { pseudo: true } } },
+      });
+      if (room.participants.length > roomCapacity(room)) throw new ActionFailure("roomFull");
+      if (room.participants.filter((p) => sameName(p.pseudo)).length > 1) throw new ActionFailure("pseudoTaken");
     });
   } catch (error) {
     if (error instanceof ActionFailure) return fail(error.code);
-    // Unique constraint (roomId, pseudo) violated by a concurrent join.
-    return fail("pseudoTaken");
+    // Unique constraint (roomId, pseudo) violated by a concurrent join with the exact same name.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") return fail("pseudoTaken");
+    console.error("[action]", error);
+    return fail("unknown");
   }
 
   await setParticipantToken(slug, token);
@@ -460,9 +469,13 @@ export async function setRoomSize(slug: string, size: number) {
   if (!roomSizeSchema.safeParse(size).success) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
-    const count = await db.participant.count({ where: { roomId: room.id } });
-    if (size < count) throw new ActionFailure("sizeBelowParticipants");
-    await db.room.update({ where: { id: room.id }, data: { maxParticipants: size } });
+    // Counted after the change, in the same transaction: someone joining at that moment is
+    // either counted here or refused by the join, which checks the size again.
+    await db.$transaction(async (tx) => {
+      await tx.room.update({ where: { id: room.id }, data: { maxParticipants: size } });
+      const count = await tx.participant.count({ where: { roomId: room.id } });
+      if (size < count) throw new ActionFailure("sizeBelowParticipants");
+    });
   });
 }
 
@@ -507,19 +520,22 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
     const parsed = parseIdeaInput(theme.kind, raw.data);
     if (!parsed.ok) throw new ActionFailure(parsed.error);
     // Duplicate: same value as an idea still in the running in this topic (visible to all).
-    const existing = await db.idea.findMany({ where: { themeId } });
+    // Checked after the insert, in the same transaction: the same idea sent by two people at
+    // once is kept once.
     const key = ideaKey(theme.kind, parsed.fields);
-    if (existing.some((idea) => isActiveInRound(idea, room.round) && ideaKey(theme.kind, idea) === key)) {
-      throw new ActionFailure("duplicateIdea");
-    }
-    await db.idea.create({
-      data: {
-        roomId: room.id,
-        themeId,
-        authorId: me.id,
-        ...parsed.fields,
-        createdRound: room.round,
-      },
+    await db.$transaction(async (tx) => {
+      await tx.idea.create({
+        data: {
+          roomId: room.id,
+          themeId,
+          authorId: me.id,
+          ...parsed.fields,
+          createdRound: room.round,
+        },
+      });
+      const ideas = await tx.idea.findMany({ where: { themeId } });
+      const same = ideas.filter((idea) => isActiveInRound(idea, room.round) && ideaKey(theme.kind, idea) === key);
+      if (same.length > 1) throw new ActionFailure("duplicateIdea");
     });
   });
 }
@@ -774,10 +790,13 @@ export async function transferHost(slug: string, participantId: string) {
     const { room, me } = await guard(slug, { host: true });
     if (room.phase === "CLOSED") throw new ActionFailure("wrongPhase");
     const target = await otherParticipant(room.id, me.id, participantId);
-    await db.$transaction([
-      db.participant.update({ where: { id: me.id }, data: { isHost: false } }),
-      db.participant.update({ where: { id: target.id }, data: { isHost: true } }),
-    ]);
+    await db.$transaction(async (tx) => {
+      // Only one handover goes through: a second one (two taps, two tabs) finds that this
+      // person no longer hosts, instead of making two hosts.
+      const released = await tx.participant.updateMany({ where: { id: me.id, isHost: true }, data: { isHost: false } });
+      if (released.count === 0) throw new ActionFailure("notHost");
+      await tx.participant.update({ where: { id: target.id }, data: { isHost: true } });
+    });
   });
 }
 

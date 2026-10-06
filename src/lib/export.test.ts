@@ -53,6 +53,25 @@ describe("toMarkdown", () => {
     expect(md).toContain("Camille, Sacha");
   });
 
+  it("shows what participants typed as plain text, never as Markdown or HTML", () => {
+    const md = toMarkdown(
+      {
+        participants: ["*Sam*", "<b>Lea</b>"],
+        rounds: [
+          {
+            ...data.rounds[0],
+            themes: [{ ...data.rounds[0].themes[0], title: "Dinner\n# Hacked", description: "[link](https://x.test)" }],
+          },
+        ],
+      },
+      labels,
+    );
+    expect(md).toContain("\\*Sam\\*, \\<b\\>Lea\\</b\\>");
+    expect(md).toContain("### Dinner # Hacked");
+    expect(md).not.toMatch(/^# Hacked/m);
+    expect(md).toContain("> \\[link\\](https://x.test)");
+  });
+
   it("follows the reader's typography for the colon after a label", () => {
     expect(toMarkdown(data, labels)).toContain("- **Participants**: Camille, Sacha");
     expect(toMarkdown(data, { ...labels, colon: " : " })).toContain("- **Rule** : positive score");
@@ -77,9 +96,13 @@ describe("toCsv", () => {
 
 describe("exportFileName", () => {
   it("produces a file name without accents or spaces", () => {
-    expect(exportFileName("Café Offsite — Q4 ", new Date("2026-09-28T10:00:00Z"))).toBe(
+    expect(exportFileName("Café Offsite — Q4 ", new Date("2026-09-28T10:00:00Z"), "Europe/Paris")).toBe(
       "virgule-cafe-offsite-q4-2026-09-28",
     );
+  });
+
+  it("takes the day in the time zone of the file's date, not in UTC", () => {
+    expect(exportFileName("Offsite", new Date("2026-09-28T22:30:00Z"), "Europe/Paris")).toBe("virgule-offsite-2026-09-29");
   });
 });
 
