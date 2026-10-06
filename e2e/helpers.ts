@@ -11,18 +11,16 @@ const REDIRECT_TIMEOUT = 15_000;
 export const LIVE_TIMEOUT = 10_000;
 
 /** Database of the app started by playwright.config.ts (spec files are loaded as CommonJS). */
-const db = createClient({ url: `file:${path.join(__dirname, "../e2e.db")}` });
 // The server writes to the same file: wait for its lock instead of failing at once (SQLITE_BUSY).
-const ready = db.execute("PRAGMA busy_timeout = 5000");
+// `timeout` applies to every connection of the client's pool, unlike a `PRAGMA busy_timeout`.
+const db = createClient({ url: `file:${path.join(__dirname, "../e2e.db")}`, timeout: 5000 });
 
 async function write(sql: string, args: string[]) {
-  await ready;
   await db.execute({ sql, args });
 }
 
 /** What must never reach a browser: every participant's secret token and id in the session. */
 export async function participantSecrets(link: string) {
-  await ready;
   const { rows } = await db.execute({
     sql: 'SELECT p.token, p.id, p.pseudo FROM "Participant" p JOIN "Room" r ON r.id = p."roomId" WHERE r.slug = ?',
     args: [slugOf(link)],
@@ -32,7 +30,6 @@ export async function participantSecrets(link: string) {
 
 /** Sessions with this name in the test database. */
 export async function countRooms(name: string) {
-  await ready;
   const { rows } = await db.execute({ sql: 'SELECT COUNT(*) AS n FROM "Room" WHERE name = ?', args: [name] });
   return Number(rows[0].n);
 }
@@ -256,7 +253,6 @@ export async function ageIdeas(link: string) {
 
 /** The paired room screen's secret, as stored (null without a screen). */
 export async function screenSecret(link: string) {
-  await ready;
   const { rows } = await db.execute({ sql: 'SELECT "screenToken" FROM "Room" WHERE slug = ?', args: [slugOf(link)] });
   return rows[0].screenToken === null ? null : String(rows[0].screenToken);
 }
