@@ -13,6 +13,8 @@ type Props = Omit<React.ComponentProps<typeof Button>, "onClick" | "children" | 
   absolute?: boolean;
   label: string;
   successMessage: string;
+  /** When the browser refuses (permission denied, page not served over HTTPS…). */
+  errorMessage: string;
   /** On mobile, shows only the icon (screen readers still read the label). */
   hideLabelOnMobile?: boolean;
 };
@@ -22,6 +24,7 @@ export function CopyButton({
   absolute,
   label,
   successMessage,
+  errorMessage,
   hideLabelOnMobile,
   variant = "outline",
   className,
@@ -35,8 +38,12 @@ export function CopyButton({
       className={cn("gap-2", className)}
       {...props}
       onClick={async () => {
-        await navigator.clipboard.writeText(absolute ? `${window.location.origin}${value}` : value);
-        toast.success(successMessage);
+        try {
+          await navigator.clipboard.writeText(absolute ? `${window.location.origin}${value}` : value);
+          toast.success(successMessage);
+        } catch {
+          toast.error(errorMessage);
+        }
       }}
     >
       <Link2 data-icon="inline-start" />

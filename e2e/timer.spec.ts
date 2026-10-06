@@ -115,7 +115,7 @@ test("the timer stops at the recap and starts again with the vote", async ({ pag
   await expect(timer(page)).toHaveCount(0);
 
   // Reopening the vote, or a new round, gives the full time again.
-  await page.getByRole("button", { name: "Reopen voting" }).click();
+  await clickAndConfirm(page, "Reopen voting");
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await expect.poll(() => secondsLeft(page)).toBeGreaterThan(4 * 60 + 50);
 

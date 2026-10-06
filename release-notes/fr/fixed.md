@@ -2,6 +2,13 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.3 — 2026-10-06
+
+- Sur une tablette tenue à la verticale, un tableau choisi plus tôt laisse place à la liste, faute de bouton pour y revenir.
+- Copier le lien d'invitation le dit quand le navigateur refuse, au lieu de ne rien faire.
+- Les petits boutons (retirer une option de liste, le lien vers la carte, fermer une fenêtre) se touchent maintenant facilement, et déplacer un sujet garde le focus du clavier.
+- Les animations oubliées respectent maintenant le réglage « réduire les animations » ; le bilan accorde au pluriel le nombre d'idées retenues.
+
 ## 0.11.2 — 2026-10-06
 
 - Dans un sujet qui limite les votes « pour », appuyer très vite sur plusieurs idées ne permet plus de dépasser la limite.

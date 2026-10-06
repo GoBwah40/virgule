@@ -20,4 +20,13 @@ describe("AmountField", () => {
     expect(screen.getByLabelText("Between (€)")).toHaveAttribute("inputmode", "numeric");
     expect(screen.getByLabelText("And (€)")).toHaveValue("500");
   });
+
+  it("range: explains a second amount below the first, on the second field", () => {
+    renderUi(
+      <AmountField mode="range" idPrefix="t" labels={labels} value={{ min: "500", max: "300" }} onChange={() => {}} error="Too low" />,
+    );
+    expect(screen.getByLabelText("And (€)")).toHaveAccessibleDescription("Too low");
+    expect(screen.getByLabelText("And (€)")).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByLabelText("Between (€)")).not.toHaveAttribute("aria-invalid");
+  });
 });

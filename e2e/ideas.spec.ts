@@ -36,7 +36,10 @@ test("ideas are shared with the group, and only their author can remove them", a
   await expect(idea(page, "Sushi").getByText("Your idea")).toHaveCount(0);
   await expect(idea(page, "Sushi").getByRole("button", { name: "Remove my idea" })).toHaveCount(0);
 
+  // Its votes would go with it: asked first.
   await idea(guest, "Sushi").getByRole("button", { name: "Remove my idea" }).click();
+  await expect(guest.getByRole("alertdialog").getByText("The votes already cast on it go with it.")).toBeVisible();
+  await guest.getByRole("alertdialog").getByRole("button", { name: "Remove my idea" }).click();
   await expect(idea(guest, "Sushi")).toHaveCount(0);
   await expect(idea(page, "Sushi")).toHaveCount(0, { timeout: LIVE_TIMEOUT });
 });

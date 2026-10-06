@@ -2,6 +2,13 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.3 — 2026-10-06
+
+- Removing your idea, reopening voting and disconnecting the room screen now ask first.
+- A range entered the wrong way round, a date or an amount, says why it can't be added.
+- The pairing code for the room screen renews itself when it runs out, and the room screen shows when its rotation is paused.
+- Screen readers hear the time left once a minute, find a heading on the page to join a session, and hear “Close” in the language of the app.
+
 ## 0.11.1 — 2026-10-05
 
 - The list or board switch sits in the page header, on the same line as the step's buttons.

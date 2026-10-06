@@ -49,7 +49,7 @@ export function ExpandableListItem({ children, meta, aside, details, tone = "neu
         <span className="flex shrink-0 items-center gap-2 self-end sm:self-center">
           {aside}
           <ChevronDown
-            className={cn("size-5 text-muted-foreground transition-transform duration-200", open && "rotate-180")}
+            className={cn("size-5 text-muted-foreground motion-safe:transition-transform motion-safe:duration-200", open && "rotate-180")}
             aria-hidden
           />
         </span>

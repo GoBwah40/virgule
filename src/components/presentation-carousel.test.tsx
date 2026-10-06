@@ -42,6 +42,15 @@ describe("PresentationCarousel", () => {
     expect(current()).toBe("Topic 2 of 3");
   });
 
+  it("shows when the rotation is paused", () => {
+    renderUi(<PresentationCarousel {...props} pausedLabel="Paused" />);
+    expect(screen.queryByText("Paused")).toBeNull();
+    fireEvent.keyDown(window, { key: " " });
+    expect(screen.getByText("Paused")).toBeVisible();
+    fireEvent.keyDown(window, { key: " " });
+    expect(screen.queryByText("Paused")).toBeNull();
+  });
+
   it("stays put with a single slide, without a position", () => {
     renderUi(<PresentationCarousel {...props} slides={[<p key="a">Annecy</p>]} positions={["Topic 1 of 1"]} />);
     act(() => vi.advanceTimersByTime(5000));

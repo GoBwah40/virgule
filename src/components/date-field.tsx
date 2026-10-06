@@ -14,13 +14,15 @@ type Props = {
   /** Prefix for the field `id`s (unique in the page). */
   idPrefix: string;
   disabled?: boolean;
+  /** Period: why the end date is refused (shown under the fields, linked to the end date). */
+  error?: string;
 };
 
 /**
  * Date or period input using the phone's native picker.
  * Values are "YYYY-MM-DD". In a period, the end cannot come before the start.
  */
-export function DateField({ mode, value, onChange, labels, idPrefix, disabled }: Props) {
+export function DateField({ mode, value, onChange, labels, idPrefix, disabled, error }: Props) {
   if (mode === "single") {
     return (
       <div className="space-y-1.5">
@@ -38,38 +40,48 @@ export function DateField({ mode, value, onChange, labels, idPrefix, disabled }:
     );
   }
 
+  const errorId = `${idPrefix}-range-error`;
   return (
-    <div className="grid grid-cols-2 gap-2">
-      <div className="space-y-1.5">
-        <Label htmlFor={`${idPrefix}-start`} className="text-sm font-semibold">
-          {labels.from}
-        </Label>
-        <Input
-          id={`${idPrefix}-start`}
-          type="date"
-          value={value.start}
-          max={value.end || undefined}
-          disabled={disabled}
-          // If the new start date passes the end, the end follows it.
-          onChange={(e) => {
-            const start = e.target.value;
-            onChange({ start, end: value.end && value.end < start ? start : value.end });
-          }}
-        />
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-start`} className="text-sm font-semibold">
+            {labels.from}
+          </Label>
+          <Input
+            id={`${idPrefix}-start`}
+            type="date"
+            value={value.start}
+            max={value.end || undefined}
+            disabled={disabled}
+            // If the new start date passes the end, the end follows it.
+            onChange={(e) => {
+              const start = e.target.value;
+              onChange({ start, end: value.end && value.end < start ? start : value.end });
+            }}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor={`${idPrefix}-end`} className="text-sm font-semibold">
+            {labels.to}
+          </Label>
+          <Input
+            id={`${idPrefix}-end`}
+            type="date"
+            value={value.end}
+            min={value.start || undefined}
+            disabled={disabled}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? errorId : undefined}
+            onChange={(e) => onChange({ start: value.start, end: e.target.value })}
+          />
+        </div>
       </div>
-      <div className="space-y-1.5">
-        <Label htmlFor={`${idPrefix}-end`} className="text-sm font-semibold">
-          {labels.to}
-        </Label>
-        <Input
-          id={`${idPrefix}-end`}
-          type="date"
-          value={value.end}
-          min={value.start || undefined}
-          disabled={disabled}
-          onChange={(e) => onChange({ start: value.start, end: e.target.value })}
-        />
-      </div>
+      {error && (
+        <p id={errorId} className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

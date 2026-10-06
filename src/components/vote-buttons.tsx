@@ -31,6 +31,8 @@ type Props = {
 // The `dark:` variants are needed: the `outline` button forces its own background in dark mode.
 const UP_PRESSED =
   "border-success bg-success text-success-foreground hover:bg-success/90 hover:text-success-foreground dark:border-success dark:bg-success dark:hover:bg-success/90";
+const DOWN_PRESSED =
+  "border-destructive bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:text-destructive-foreground dark:border-destructive dark:bg-destructive dark:hover:bg-destructive/90";
 
 /** Pair of ↑ / ↓ buttons (44 px), or a single ✓ in "pick" mode; the label is in the tooltip and the aria-label. */
 export function VoteButtons({
@@ -62,7 +64,7 @@ export function VoteButtons({
           pressed={value === false}
           disabled={disabled}
           onClick={() => onChange(value === false ? null : false)}
-          pressedClassName="border-destructive bg-destructive text-white hover:bg-destructive/90 hover:text-white dark:border-destructive dark:bg-destructive dark:text-background dark:hover:bg-destructive/90 dark:hover:text-background"
+          pressedClassName={DOWN_PRESSED}
         >
           <ArrowDown />
         </VoteButton>
@@ -107,7 +109,7 @@ function VoteButton({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "border-[1.5px] active:scale-95 [&_svg:not([class*='size-'])]:size-5",
+        "border-[1.5px] motion-safe:active:scale-95 [&_svg:not([class*='size-'])]:size-5",
         pressed && pressedClassName,
         // Bounce when the vote becomes active; nothing when it's removed.
         pressed && "motion-safe:animate-pop",

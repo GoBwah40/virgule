@@ -97,7 +97,7 @@ test("reopening the vote brings everyone back with their votes", async ({ page, 
   const { guest } = await setUpSession(page, openAsGuest);
   await voteAndSeeRecap(page, guest);
 
-  await page.getByRole("button", { name: "Reopen voting" }).click();
+  await clickAndConfirm(page, "Reopen voting");
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await expect(guest.getByRole("heading", { name: "The ideas" })).toBeVisible();

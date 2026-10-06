@@ -164,6 +164,7 @@ const EMPTY_AMOUNTS = { min: "", max: "" };
 /** Idea input matching the topic kind: text, date, period, amount or range. */
 function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; kind: ThemeKind }) {
   const t = useTranslations("ideas");
+  const tErrors = useTranslations("errors");
   const [pending, run] = useAction();
   const [content, setContent] = useState("");
   const [dates, setDates] = useState(EMPTY_DATES);
@@ -190,6 +191,14 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
           : null;
     }
   })();
+
+  // A range typed the wrong way round: say why the button stays disabled.
+  const rangeError =
+    kind === "DATE_RANGE" && dates.start && dates.end && dates.end < dates.start
+      ? tErrors("invalidDateRange")
+      : kind === "AMOUNT_RANGE" && amounts.min && amounts.max && Number(amounts.max) < Number(amounts.min)
+        ? tErrors("invalidAmountRange")
+        : undefined;
 
   const submit = () => {
     if (!input) return;
@@ -264,6 +273,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
             value={dates}
             onChange={setDates}
             labels={{ date: t("date"), from: t("dateFrom"), to: t("dateTo") }}
+            error={rangeError}
           />
         </div>
       )}
@@ -275,6 +285,7 @@ function IdeaComposer({ slug, themeId, kind }: { slug: string; themeId: string; 
             value={amounts}
             onChange={setAmounts}
             labels={{ amount: t("amount"), min: t("amountMin"), max: t("amountMax"), currency: t("currency") }}
+            error={rangeError}
           />
         </div>
       )}
@@ -311,18 +322,22 @@ function IdeaItem({
             {!idea.isNew && <Badge variant="outline">{t("carriedOver")}</Badge>}
             {idea.mapQuery && <MapLink query={idea.mapQuery} label={t("mapLink")} />}
             {idea.canDelete && (
-              <Button
+              // Its votes go with it: asked first, like a topic with ideas.
+              <ConfirmButton
                 variant="ghost"
                 size="icon-xs"
                 // Small next to the badges, 44 px to tap.
                 className="touch-target"
                 aria-label={t("delete")}
-                title={t("delete")}
                 disabled={pending}
-                onClick={() => run(() => deleteIdea(slug, idea.id))}
+                title={t("deleteConfirm")}
+                description={t("deleteConfirmHint")}
+                confirmLabel={t("delete")}
+                destructive
+                onConfirm={() => run(() => deleteIdea(slug, idea.id))}
               >
                 <Trash2 />
-              </Button>
+              </ConfirmButton>
             )}
           </>
         )

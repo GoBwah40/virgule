@@ -41,7 +41,7 @@ export function ProgressMeter({ value, max, label, completeLabel, ariaLabel, cla
       {max > MAX_DOTS ? (
         <span className="h-2.5 w-16 overflow-hidden rounded-full bg-muted" aria-hidden>
           <span
-            className={cn("block h-full rounded-full transition-all duration-300", complete ? "bg-success" : "bg-highlight")}
+            className={cn("block h-full rounded-full motion-safe:transition-[width] motion-safe:duration-300", complete ? "bg-success" : "bg-highlight")}
             style={{ width: `${Math.min(100, (value / max) * 100)}%` }}
           />
         </span>

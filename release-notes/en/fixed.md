@@ -2,6 +2,13 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.3 — 2026-10-06
+
+- On a tablet turned upright, a board picked earlier gives way to the list, which had no way back there.
+- Copying the invite link says so when the browser refuses, instead of doing nothing.
+- Small buttons (removing a list option, the map link, closing a window) are now easy to tap, and moving a topic keeps the keyboard focus.
+- Animations that were left out now respect the “reduce motion” setting; in French, the recap counts kept ideas with the right plural.
+
 ## 0.11.2 — 2026-10-06
 
 - In a topic that limits “for” votes, tapping several ideas very quickly no longer lets you go past the limit.

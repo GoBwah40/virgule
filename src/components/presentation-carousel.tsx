@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Pause } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,8 @@ type Props = {
    * keyboard shortcuts across the page (its fields and buttons keep their keys).
    */
   controls?: { previous: string; next: string };
+  /** Room screen: shown while the space bar holds the rotation, so a pause never goes unnoticed. */
+  pausedLabel?: string;
   className?: string;
 };
 
@@ -27,7 +29,7 @@ type Props = {
  * the device showing it, arrows and Page Up / Page Down (a presentation clicker) move between
  * slides, the space bar pauses. With `controls`, buttons instead, for someone's own device.
  */
-export function PresentationCarousel({ slides, positions, label, intervalMs = 12_000, controls, className }: Props) {
+export function PresentationCarousel({ slides, positions, label, intervalMs = 12_000, controls, pausedLabel, className }: Props) {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
@@ -78,6 +80,12 @@ export function PresentationCarousel({ slides, positions, label, intervalMs = 12
             </Button>
           )}
           <span aria-live={paused || !stage ? "polite" : "off"}>{positions[current]}</span>
+          {stage && paused && pausedLabel && (
+            <span className="inline-flex items-center gap-[0.3em] text-foreground">
+              <Pause className="size-[1em]" aria-hidden />
+              {pausedLabel}
+            </span>
+          )}
           <span className="flex gap-[0.4em]" aria-hidden>
             {slides.map((_, i) => (
               <span

@@ -213,10 +213,12 @@ function ThemeRow({
   const remove = () => run(() => deleteTheme(slug, theme.id));
   const actions = (
     <>
-      <Button variant="ghost" size="icon" aria-label={t("moveUp")} disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
+      {/* Focusable even while disabled: moving a topic to the top or the bottom (or waiting for the
+          server) must not drop keyboard focus to the page. */}
+      <Button variant="ghost" size="icon" aria-label={t("moveUp")} title={t("moveUp")} focusableWhenDisabled disabled={pending || isFirst} onClick={() => run(() => moveTheme(slug, theme.id, "up"))}>
         <ArrowUp />
       </Button>
-      <Button variant="ghost" size="icon" aria-label={t("moveDown")} disabled={pending || isLast} onClick={() => run(() => moveTheme(slug, theme.id, "down"))}>
+      <Button variant="ghost" size="icon" aria-label={t("moveDown")} title={t("moveDown")} focusableWhenDisabled disabled={pending || isLast} onClick={() => run(() => moveTheme(slug, theme.id, "down"))}>
         <ArrowDown />
       </Button>
       <Button variant="ghost" size="icon" aria-label={t("edit")} disabled={pending} onClick={() => setEditing(true)}>

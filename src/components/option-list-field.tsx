@@ -53,7 +53,8 @@ export function OptionListField({ idPrefix, value, onChange, labels, max, maxLen
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                className="rounded-full"
+                // 36 px visual inside the 40 px chip, 44 px to tap.
+                className="touch-target rounded-full"
                 aria-label={labels.remove(option)}
                 disabled={disabled}
                 onClick={() => onChange(value.filter((o) => o !== option))}
