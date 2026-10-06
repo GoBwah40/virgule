@@ -1,14 +1,19 @@
 // Pure vote counting logic (no I/O) — tested in results.test.ts.
 
-export type VoteLike = { positive: boolean };
+/** `points`: a vote in a points topic (null or missing for a for / against vote). */
+export type VoteLike = { positive: boolean; points?: number | null };
 
+/**
+ * `up`: "for" votes, or the total points in a points topic; `down`: "against" votes (always 0
+ * in a points topic); `net`: up − down, so a points topic ranks by its total points.
+ */
 export type Score = { up: number; down: number; net: number };
 
 export function scoreVotes(votes: VoteLike[]): Score {
   let up = 0;
   let down = 0;
   for (const v of votes) {
-    if (v.positive) up++;
+    if (v.positive) up += v.points ?? 1;
     else down++;
   }
   return { up, down, net: up - down };
@@ -18,6 +23,8 @@ export function scoreVotes(votes: VoteLike[]): Score {
  * An idea is kept for the next round:
  * - requireNetPositive = true  → more "for" than "against"
  * - requireNetPositive = false → at least one "for"
+ *
+ * Points topics have no "against": both rules come down to the same one, at least one point.
  */
 export function isQualified(score: Score, requireNetPositive: boolean): boolean {
   return requireNetPositive ? score.net > 0 : score.up >= 1;
@@ -31,7 +38,7 @@ export function isActiveInRound(
   return idea.createdRound <= round && (idea.eliminatedRound === null || idea.eliminatedRound > round);
 }
 
-/** Recap sort: best net score, then most "for", then creation order. */
+/** Recap sort: best net score, then most "for", then creation order (points topics: most points). */
 export function compareByScore(a: Score, b: Score): number {
   return b.net - a.net || b.up - a.up;
 }
@@ -61,4 +68,9 @@ export function topQualified<T extends { score: Score; qualified: boolean }>(ide
   const qualified = ideas.filter((idea) => idea.qualified).sort((a, b) => compareByScore(a.score, b.score));
   if (qualified.length === 0) return [];
   return qualified.filter((idea) => compareByScore(idea.score, qualified[0].score) === 0);
+}
+
+/** Points left to a participant in a points topic, from the points they gave its ideas. */
+export function pointsLeft(budget: number, given: number[]): number {
+  return Math.max(0, budget - given.reduce((sum, points) => sum + points, 0));
 }

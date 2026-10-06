@@ -52,6 +52,7 @@ export async function GET(request: Request, { params }: RouteContext<"/r/[slug]/
       up: t("columns.up"),
       down: t("columns.down"),
       net: t("columns.net"),
+      points: t("columns.points"),
       status: t("columns.status"),
     },
   };

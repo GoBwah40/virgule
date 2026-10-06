@@ -17,7 +17,7 @@ const labels: ExportLabels = {
   notQualified: "Dropped",
   overview: (o) => ({ summary: `Common slot: ${o.best.start} → ${o.best.end}`, detail: `Shared by the ${o.best.total} kept periods.` }),
   overviewStatus: "Overview",
-  columns: { round: "Round", theme: "Theme", idea: "Idea", up: "For", down: "Against", net: "Score", status: "Status" },
+  columns: { round: "Round", theme: "Theme", idea: "Idea", up: "For", down: "Against", net: "Score", points: "Points", status: "Status" },
 };
 
 const data: ExportData = {
@@ -34,6 +34,7 @@ const data: ExportData = {
           title: "Onboarding",
           description: null,
           kind: "TEXT",
+          pointsBudget: null,
           overview: null,
           calendar: null,
           ideas: [
@@ -83,15 +84,15 @@ describe("toCsv", () => {
   it("adds the BOM, uses \";\" and neutralises formulas", () => {
     const csv = toCsv(data, labels);
     expect(csv.startsWith("﻿Round;Theme;Idea")).toBe(true);
-    expect(csv).toContain('1;Onboarding;"Video | tutorial\nin 2 min";2;0;2;Kept');
+    expect(csv).toContain('1;Onboarding;"Video | tutorial\nin 2 min";2;0;2;;Kept');
     expect(csv).toContain(`"'=HYPERLINK(""x""); test"`);
   });
 
   it("uses \",\" in English and quotes cells containing a comma", () => {
     const csv = toCsv(data, { ...labels, csvSeparator: "," });
     expect(csv.startsWith("\uFEFFRound,Theme,Idea")).toBe(true);
-    expect(csv).toContain('1,Onboarding,"Video | tutorial\nin 2 min",2,0,2,Kept');
-    expect(csv).toContain(`"'=HYPERLINK(""x""); test",0,1,-1,Dropped`);
+    expect(csv).toContain('1,Onboarding,"Video | tutorial\nin 2 min",2,0,2,,Kept');
+    expect(csv).toContain(`"'=HYPERLINK(""x""); test",0,1,-1,,Dropped`);
   });
 });
 
@@ -140,7 +141,42 @@ describe("overview of Period and Range topics", () => {
 
   it("adds it as the topic's first row in the CSV, without a score", () => {
     expect(toCsv(withOverview, labels)).toContain(
-      "1;Dates;Common slot: 2027-06-12 → 2027-06-14. Shared by the 2 kept periods.;;;;Overview\r\n1;Dates;",
+      "1;Dates;Common slot: 2027-06-12 → 2027-06-14. Shared by the 2 kept periods.;;;;;Overview\r\n1;Dates;",
     );
+  });
+});
+
+describe("points topics", () => {
+  const withPoints: ExportData = {
+    participants: ["Camille", "Sacha"],
+    rounds: [
+      {
+        ...data.rounds[0],
+        themes: [
+          {
+            ...data.rounds[0].themes[0],
+            title: "Where to?",
+            pointsBudget: 5,
+            ideas: [
+              { id: "p1", content: "Annecy", score: { up: 7, down: 0, net: 7 }, qualified: true, tied: false, isMine: false, mapQuery: null },
+              { id: "p2", content: "Lyon", score: { up: 0, down: 0, net: 0 }, qualified: false, tied: false, isMine: false, mapQuery: null },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  it("shows the total points instead of for / against in Markdown", () => {
+    const md = toMarkdown(withPoints, labels);
+    expect(md).toContain("| Idea | Points | Status |\n| --- | ---: | --- |\n| Annecy | 7 | ✅ Kept |\n| Lyon | 0 | Dropped |");
+    expect(md).not.toContain("| For |");
+  });
+
+  it("fills the points column only in the CSV", () => {
+    const csv = toCsv(withPoints, labels);
+    expect(csv.startsWith("\uFEFFRound;Theme;Idea;For;Against;Score;Points;Status\r\n")).toBe(true);
+    expect(csv).toContain("1;Where to?;Annecy;;;;7;Kept\r\n");
+    expect(csv).toContain("1;Where to?;Lyon;;;;0;Dropped\r\n");
   });
 });

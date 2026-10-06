@@ -40,8 +40,8 @@ test("the recap can be exported, but not while votes are open", async ({ page, o
 
   const csv = await downloadExport(page, /CSV/);
   expect(csv.name).toBe(`virgule-friday-night-${today()}.csv`);
-  expect(csv.content).toContain("Round,Topic,Idea,For,Against,Score,Status");
-  expect(csv.content).toContain("1,Dinner,Sushi,2,0,2,Kept");
+  expect(csv.content).toContain("Round,Topic,Idea,For,Against,Score,Points,Status");
+  expect(csv.content).toContain("1,Dinner,Sushi,2,0,2,,Kept");
 
   // Every participant can export; nobody else, and only in known formats.
   expect((await downloadExport(guest, /Markdown/)).content).toContain("| Sushi | 2 | 0 | 2 | ✅ Kept |");
@@ -68,9 +68,9 @@ test("an export in French follows French conventions", async ({ page, openAsGues
 
   const csv = await downloadExport(guest, /CSV/, "Exporter");
   // Excel in French expects ";", and the BOM keeps accents readable.
-  expect(csv.content.startsWith("﻿Tour;Sujet;Idée;Pour;Contre;Score;Statut")).toBe(true);
-  expect(csv.content).toContain("1;Dinner;Sushi;2;0;2;Retenue");
-  expect(csv.content).toContain("1;Dinner;Pizza;1;1;0;Écartée");
+  expect(csv.content.startsWith("﻿Tour;Sujet;Idée;Pour;Contre;Score;Points;Statut")).toBe(true);
+  expect(csv.content).toContain("1;Dinner;Sushi;2;0;2;;Retenue");
+  expect(csv.content).toContain("1;Dinner;Pizza;1;1;0;;Écartée");
 
   const markdown = await downloadExport(guest, /Markdown/, "Exporter");
   expect(markdown.content).toContain("# Bilan — Friday night");
@@ -97,8 +97,8 @@ test("the export follows the qualification rule and lists every round, latest fi
   expect(markdown).toContain("| Pizza | 1 | 1 | 0 | ✅ Kept |");
 
   const csv = (await downloadExport(page, /CSV/)).content;
-  expect(csv).toContain("1,Dinner,Pizza,1,1,0,Kept");
-  expect(csv).toContain("2,Dinner,Sushi,1,0,1,Kept");
+  expect(csv).toContain("1,Dinner,Pizza,1,1,0,,Kept");
+  expect(csv).toContain("2,Dinner,Sushi,1,0,1,,Kept");
 });
 
 test("period topics export their summary", async ({ page, openAsGuest }) => {
@@ -125,7 +125,7 @@ test("period topics export their summary", async ({ page, openAsGuest }) => {
   const markdown = (await downloadExport(page, /Markdown/)).content;
   expect(markdown).toMatch(/\*\*Common slot: June 15\s–\s20, 2027\*\*\. Shared by all 2 periods kept\./);
   const csv = (await downloadExport(page, /CSV/)).content;
-  expect(csv).toMatch(/1,Dates,"?Common slot: June 15\s–\s20, 2027\. Shared by all 2 periods kept\."?,,,,Summary/);
+  expect(csv).toMatch(/1,Dates,"?Common slot: June 15\s–\s20, 2027\. Shared by all 2 periods kept\."?,,,,,Summary/);
 });
 
 test("Print / PDF opens the browser's print dialog, with a clean page", async ({ page, openAsGuest }) => {

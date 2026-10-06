@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.17.0 — 2026-10-06
+
+- Un sujet peut se voter avec des points : chacun répartit 3, 5 ou 10 points entre ses idées, plusieurs sur la même s'il le veut, et le bilan classe les idées selon leur total.
+
 ## 0.16.0 — 2026-10-06
 
 - Pendant les votes, la personne qui anime peut rappeler au groupe de voter : seules les personnes à qui il reste des idées à voter le voient, et personne ne sait qui.

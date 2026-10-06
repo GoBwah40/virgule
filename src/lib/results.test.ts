@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareByScore, isActiveInRound, isQualified, scoreVotes, topQualified, voteProgress } from "@/lib/results";
+import { compareByScore, isActiveInRound, isQualified, pointsLeft, scoreVotes, topQualified, voteProgress } from "@/lib/results";
 
 const votes = (up: number, down: number) => [
   ...Array.from({ length: up }, () => ({ positive: true })),
@@ -82,5 +82,36 @@ describe("topQualified", () => {
   it("ignores dropped ideas", () => {
     expect(topQualified([idea("a", 1, 1, false), idea("b", 1, 1, false)])).toEqual([]);
     expect(topQualified([idea("a", 2, 0), idea("b", 5, 0, false)]).map((i) => i.id)).toEqual(["a"]);
+  });
+});
+
+describe("points topics", () => {
+  const given = (...points: number[]) => points.map((p) => ({ positive: true, points: p }));
+
+  it("scores an idea by its total points, with nothing against", () => {
+    expect(scoreVotes(given(3, 1, 5))).toEqual({ up: 9, down: 0, net: 9 });
+    // A for / against vote counts one, as before.
+    expect(scoreVotes([{ positive: true, points: null }, { positive: false }])).toEqual({ up: 1, down: 1, net: 0 });
+  });
+
+  it("keeps an idea with at least one point, whichever rule is chosen", () => {
+    for (const requireNetPositive of [true, false]) {
+      expect(isQualified(scoreVotes(given(1)), requireNetPositive)).toBe(true);
+      expect(isQualified(scoreVotes([]), requireNetPositive)).toBe(false);
+    }
+  });
+
+  it("ranks by total points and spots ties for a tiebreak round", () => {
+    const idea = (id: string, ...points: number[]) => ({ id, score: scoreVotes(given(...points)), qualified: points.length > 0 });
+    const ideas = [idea("a", 2), idea("b", 3, 2), idea("c", 4, 1), idea("d")];
+    expect([...ideas].sort((x, y) => compareByScore(x.score, y.score)).map((i) => i.id)).toEqual(["b", "c", "a", "d"]);
+    expect(topQualified(ideas).map((i) => i.id)).toEqual(["b", "c"]);
+  });
+
+  it("counts the points left in the budget", () => {
+    expect(pointsLeft(5, [2, 1, 0])).toBe(2);
+    expect(pointsLeft(5, [])).toBe(5);
+    expect(pointsLeft(3, [3])).toBe(0);
+    expect(pointsLeft(3, [4])).toBe(0);
   });
 });

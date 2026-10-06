@@ -20,4 +20,13 @@ describe("VoteSummary", () => {
     const { container } = renderUi(<VoteSummary up={0} down={0} labels={{ up: "0 for", down: "0 against" }} />);
     expect(container.querySelectorAll("div[aria-hidden] > span")).toHaveLength(0);
   });
+
+  it("shows only the points in a points topic, against the leading idea's total", () => {
+    const { container } = renderUi(<VoteSummary up={6} down={0} max={12} labels={{ up: "6 points" }} />);
+    expect(screen.getByText("6 points")).toBeInTheDocument();
+    expect(screen.queryByText(/against/)).not.toBeInTheDocument();
+    const segments = container.querySelectorAll("div[aria-hidden] > span");
+    expect(segments).toHaveLength(1);
+    expect((segments[0] as HTMLElement).style.width).toBe("50%");
+  });
 });

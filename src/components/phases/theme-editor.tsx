@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp, Pencil, Play, Trash2, Vote } from "lucide-react";
+import { ArrowDown, ArrowUp, Coins, Pencil, Play, Trash2, Vote } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 
@@ -22,7 +22,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
 import { addTheme, deleteTheme, moveTheme, setAllowSelfVote, setAutoRecap, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
-import { IDEAS_TIMER_OPTIONS, LIMITS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
+import { DEFAULT_POINTS_BUDGET, IDEAS_TIMER_OPTIONS, LIMITS, POINTS_BUDGET_OPTIONS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,7 @@ type Theme = {
   allowOtherIdeas: boolean;
   singleChoice: boolean;
   maxVotes: number | null;
+  pointsBudget: number | null;
   ideaCount: number;
   inPastRounds: boolean;
 };
@@ -47,6 +48,7 @@ type ThemeValues = {
   allowOtherIdeas: boolean;
   singleChoice: boolean;
   maxVotes: number | null;
+  pointsBudget: number | null;
 };
 
 /** Common topics offered in one tap (keys of the themes.suggestions namespace), with their answer kind. */
@@ -265,6 +267,7 @@ function ThemeRow({
         badges={[
           ...(theme.kind === "TEXT" ? [] : [{ label: t(`kinds.${theme.kind}`), icon: THEME_KIND_ICONS[theme.kind] }]),
           ...(theme.maxVotes === null ? [] : [{ label: t("voteLimitBadge", { count: theme.maxVotes }), icon: Vote }]),
+          ...(theme.pointsBudget === null ? [] : [{ label: t("pointsBadge", { count: theme.pointsBudget }), icon: Coins }]),
         ]}
         actions={actions}
       />
@@ -275,10 +278,11 @@ function ThemeRow({
     <ListItem
       tone="plain"
       meta={
-        (theme.description || theme.kind !== "TEXT" || theme.maxVotes !== null) && (
+        (theme.description || theme.kind !== "TEXT" || theme.maxVotes !== null || theme.pointsBudget !== null) && (
           <>
             {theme.kind !== "TEXT" && <IconBadge icon={THEME_KIND_ICONS[theme.kind]} label={t(`kinds.${theme.kind}`)} />}
             {theme.maxVotes !== null && <IconBadge icon={Vote} label={t("voteLimitBadge", { count: theme.maxVotes })} />}
+            {theme.pointsBudget !== null && <IconBadge icon={Coins} label={t("pointsBadge", { count: theme.pointsBudget })} />}
             {theme.description && <span className="text-sm text-muted-foreground">{theme.description}</span>}
           </>
         )
@@ -311,8 +315,11 @@ function ThemeForm({
   const [allowOtherIdeas, setAllowOtherIdeas] = useState(initial?.allowOtherIdeas ?? false);
   const [singleChoice, setSingleChoice] = useState(initial?.singleChoice ?? false);
   const [maxVotes, setMaxVotes] = useState<number | null>(initial?.maxVotes ?? null);
-  // One answer per person is already a limit of one: no vote limit to choose.
+  const [pointsBudget, setPointsBudget] = useState<number | null>(initial?.pointsBudget ?? null);
+  // One answer per person is already a limit of one: no vote limit to choose, and no points.
   const single = kind === "CHOICE" && singleChoice;
+  // Points: the budget is the limit, and several points can go on one option.
+  const points = !single && pointsBudget !== null;
   const optionsMissing = kind === "CHOICE" && options.length < CHOICE_OPTIONS.min;
   const idPrefix = initial?.id ?? "new";
   // Ideas already exist: changing their kind would make them unreadable.
@@ -325,7 +332,18 @@ function ThemeForm({
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
-            onSubmit({ title, description, kind, options, allowOtherIdeas, singleChoice, maxVotes: single ? null : maxVotes }, () => {
+            onSubmit(
+              {
+                title,
+                description,
+                kind,
+                options,
+                allowOtherIdeas,
+                singleChoice: points ? false : singleChoice,
+                maxVotes: single || points ? null : maxVotes,
+                pointsBudget: points ? pointsBudget : null,
+              },
+              () => {
               setTitle("");
               setDescription("");
               setKind("TEXT");
@@ -333,7 +351,9 @@ function ThemeForm({
               setAllowOtherIdeas(false);
               setSingleChoice(false);
               setMaxVotes(null);
-            });
+              setPointsBudget(null);
+              },
+            );
           }}
         >
           <FormField id={`${idPrefix}-title`} label={t("titleLabel")}>
@@ -389,18 +409,45 @@ function ThemeForm({
                 checked={allowOtherIdeas}
                 onCheckedChange={setAllowOtherIdeas}
               />
-              <SettingSwitch
-                id={`${idPrefix}-single-choice`}
-                label={t("singleChoice")}
-                // Votes may already exist: switching would break the rule for them.
-                hint={kindLocked ? t("singleChoiceLocked") : t("singleChoiceHint")}
-                checked={singleChoice}
-                disabled={kindLocked}
-                onCheckedChange={setSingleChoice}
-              />
+              {!points && (
+                <SettingSwitch
+                  id={`${idPrefix}-single-choice`}
+                  label={t("singleChoice")}
+                  // Votes may already exist: switching would break the rule for them.
+                  hint={kindLocked ? t("singleChoiceLocked") : t("singleChoiceHint")}
+                  checked={singleChoice}
+                  disabled={kindLocked}
+                  onCheckedChange={setSingleChoice}
+                />
+              )}
             </div>
           )}
           {!single && (
+            <SegmentedControl
+              name={`${idPrefix}-voting`}
+              label={t("votingLabel")}
+              options={[
+                { value: "votes", label: t("votingVotes") },
+                { value: "points", label: t("votingPoints") },
+              ]}
+              value={points ? "points" : "votes"}
+              onChange={(value) => setPointsBudget(value === "points" ? DEFAULT_POINTS_BUDGET : null)}
+              // Votes may already exist: switching would break the rule for them.
+              disabled={kindLocked}
+              hint={kindLocked ? t("votingLocked") : points ? t("votingPointsHint") : t("votingVotesHint")}
+            />
+          )}
+          {points && (
+            <SegmentedControl
+              name={`${idPrefix}-points-budget`}
+              label={t("pointsBudgetLabel")}
+              options={POINTS_BUDGET_OPTIONS.map((n) => ({ value: String(n), label: String(n) }))}
+              value={String(pointsBudget)}
+              onChange={(value) => setPointsBudget(Number(value))}
+              disabled={kindLocked}
+            />
+          )}
+          {!single && !points && (
             <SegmentedControl
               name={`${idPrefix}-max-votes`}
               label={t("voteLimitLabel")}

@@ -15,3 +15,5 @@ type Story = StoryObj<typeof meta>;
 export const MostlyFor: Story = {};
 export const Tie: Story = { args: { up: 2, down: 2, labels: { up: "2 for", down: "2 against" } } };
 export const NoVotes: Story = { args: { up: 0, down: 0, labels: { up: "0 for", down: "0 against" } } };
+/** Points topic: the total alone, the bar measured against the leading idea's 12 points. */
+export const Points: Story = { args: { up: 8, down: 0, max: 12, labels: { up: "8 points" } } };

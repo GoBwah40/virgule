@@ -19,6 +19,7 @@ import {
   MAX_PENDING_SUGGESTIONS,
   MAX_THEMES,
   NUDGE_COOLDOWN_SECONDS,
+  POINTS_BUDGET_OPTIONS,
   roomCapacity,
   ROOM_SIZES,
   ROOM_TTL_DAYS,
@@ -71,6 +72,7 @@ type ActionError =
   | "invalidScreenCode"
   | "themeInPastRounds"
   | "voteLimitBelowUsed"
+  | "pointsBudgetExceeded"
   | "editWindowOver"
   | "timerRunning"
   | "nudgeTooSoon"
@@ -199,6 +201,7 @@ export async function reuseTopics(slug: string): Promise<ActionResult> {
             allowOtherIdeas: theme.allowOtherIdeas,
             singleChoice: theme.singleChoice,
             maxVotes: theme.maxVotes,
+            pointsBudget: theme.pointsBudget,
             position,
           })),
         },
@@ -270,6 +273,11 @@ const themeSchema = z.object({
     .refine((n) => VOTE_LIMIT_OPTIONS.includes(n))
     .nullable()
     .optional(),
+  pointsBudget: z
+    .number()
+    .refine((n) => POINTS_BUDGET_OPTIONS.includes(n))
+    .nullable()
+    .optional(),
 });
 
 type ThemeInput = {
@@ -283,14 +291,28 @@ type ThemeInput = {
   singleChoice?: boolean;
   /** Maximum "for" votes per participant (null = no limit). */
   maxVotes?: number | null;
+  /** Points voting: points per participant (null = for / against). */
+  pointsBudget?: number | null;
 };
 
-/** Topic fields to save; options only exist for a list. */
+/**
+ * Topic fields to save; options only exist for a list. Points voting has neither a single
+ * answer nor a "for" vote limit: the budget already is the limit.
+ */
 function themeFields(data: z.infer<typeof themeSchema>) {
-  const base = { title: data.title, description: data.description || null, kind: data.kind, maxVotes: data.maxVotes ?? null };
+  const pointsBudget = data.pointsBudget ?? null;
+  const points = pointsBudget !== null;
+  const base = {
+    title: data.title,
+    description: data.description || null,
+    kind: data.kind,
+    maxVotes: points ? null : (data.maxVotes ?? null),
+    pointsBudget,
+  };
   if (data.kind !== "CHOICE") return { ...base, options: null, allowOtherIdeas: false, singleChoice: false };
   const options = parseChoiceOptions(data.options);
   if (!options) throw new ActionFailure("invalidOptions");
+  if (points && data.singleChoice) throw new ActionFailure("invalidInput");
   const singleChoice = data.singleChoice ?? false;
   return {
     ...base,
@@ -327,13 +349,14 @@ export async function updateTheme(
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     const theme = await db.theme.findFirst({
       where: { id: themeId, roomId: room.id },
-      select: { kind: true, singleChoice: true, maxVotes: true, _count: { select: { ideas: true } } },
+      select: { kind: true, singleChoice: true, maxVotes: true, pointsBudget: true, _count: { select: { ideas: true } } },
     });
     if (!theme) throw new ActionFailure("invalidInput");
     const fields = themeFields(parsed.data);
     // Changing the kind would make ideas already submitted unreadable; switching to a single
-    // answer would leave votes already cast (several options, "against") that break the rule.
-    const changed = theme.kind !== fields.kind || theme.singleChoice !== fields.singleChoice;
+    // answer or to points (or back) would leave votes already cast that break the new rule.
+    const changed =
+      theme.kind !== fields.kind || theme.singleChoice !== fields.singleChoice || theme.pointsBudget !== fields.pointsBudget;
     if (changed && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
     // A tighter limit must still hold the "for" votes already cast in this round.
     const limit = fields.maxVotes;
@@ -646,9 +669,11 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
     const { room, me } = await guard(slug, { phase: "IDEAS" });
     const idea = await db.idea.findFirst({
       where: { id: ideaId, roomId: room.id },
-      include: { theme: { select: { kind: true, singleChoice: true, maxVotes: true } } },
+      include: { theme: { select: { kind: true, singleChoice: true, maxVotes: true, pointsBudget: true } } },
     });
     if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
+    // Points topics are voted with setPoints.
+    if (idea.theme.pointsBudget !== null) throw new ActionFailure("invalidInput");
     if (!room.allowSelfVote && idea.authorId === me.id && !idea.isOption) throw new ActionFailure("selfVoteForbidden");
     const single = idea.theme.kind === "CHOICE" && idea.theme.singleChoice;
     if (single && positive === false) throw new ActionFailure("invalidInput");
@@ -681,6 +706,48 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
         db.vote.upsert({ where, create: { ...key, positive }, update: { positive } }),
       ]);
     }
+  });
+}
+
+/**
+ * Points topic: the points the participant gives an idea this round (0 removes them). Several
+ * points can go on the same idea, within the topic's budget.
+ */
+export async function setPoints(slug: string, ideaId: string, points: number) {
+  if (!isId(ideaId) || !Number.isInteger(points) || points < 0 || points > Math.max(...POINTS_BUDGET_OPTIONS)) {
+    return fail("invalidInput");
+  }
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { phase: "IDEAS" });
+    const idea = await db.idea.findFirst({
+      where: { id: ideaId, roomId: room.id },
+      include: { theme: { select: { pointsBudget: true } } },
+    });
+    if (!idea || !isActiveInRound(idea, room.round)) throw new ActionFailure("ideaNotFound");
+    const budget = idea.theme.pointsBudget;
+    // For / against topics are voted with castVote.
+    if (budget === null) throw new ActionFailure("invalidInput");
+    if (!room.allowSelfVote && idea.authorId === me.id && !idea.isOption) throw new ActionFailure("selfVoteForbidden");
+    const key = { ideaId, participantId: me.id, round: room.round };
+    if (points === 0) {
+      await db.vote.deleteMany({ where: key });
+      return;
+    }
+    // Counted after writing, in the same transaction, like the "for" vote limit: two requests
+    // sent at once cannot both fit in a budget checked before either of them was written.
+    await db.$transaction(async (tx) => {
+      await tx.vote.upsert({
+        where: { ideaId_participantId_round: key },
+        create: { ...key, positive: true, points },
+        update: { positive: true, points },
+      });
+      const mine = await tx.vote.findMany({
+        where: { participantId: me.id, round: room.round, idea: { themeId: idea.themeId } },
+        select: { points: true, idea: { select: { createdRound: true, eliminatedRound: true } } },
+      });
+      const used = mine.filter((v) => isActiveInRound(v.idea, room.round)).reduce((sum, v) => sum + (v.points ?? 0), 0);
+      if (used > budget) throw new ActionFailure("pointsBudgetExceeded");
+    });
   });
 }
 
@@ -782,7 +849,7 @@ export async function startNextRound(slug: string) {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
     const ideas = await db.idea.findMany({
       where: { roomId: room.id, eliminatedRound: null },
-      include: { votes: { where: { round: room.round }, select: { positive: true } } },
+      include: { votes: { where: { round: room.round }, select: { positive: true, points: true } } },
     });
     const eliminated = ideas
       .filter((idea) => !isQualified(scoreVotes(idea.votes), room.requireNetPositive))
@@ -807,7 +874,7 @@ export async function startTiebreakRound(slug: string) {
     const { room } = await guard(slug, { host: true, phase: "RECAP" });
     const ideas = await db.idea.findMany({
       where: { roomId: room.id, eliminatedRound: null },
-      include: { votes: { where: { round: room.round }, select: { positive: true } } },
+      include: { votes: { where: { round: room.round }, select: { positive: true, points: true } } },
     });
     const scored = ideas.map((idea) => {
       const score = scoreVotes(idea.votes);
