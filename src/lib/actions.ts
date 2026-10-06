@@ -65,6 +65,8 @@ type ActionError =
   | "sizeBelowParticipants"
   | "voteLimitReached"
   | "invalidScreenCode"
+  | "themeInPastRounds"
+  | "voteLimitBelowUsed"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -263,7 +265,7 @@ export async function updateTheme(
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
     const theme = await db.theme.findFirst({
       where: { id: themeId, roomId: room.id },
-      select: { kind: true, singleChoice: true, _count: { select: { ideas: true } } },
+      select: { kind: true, singleChoice: true, maxVotes: true, _count: { select: { ideas: true } } },
     });
     if (!theme) throw new ActionFailure("invalidInput");
     const fields = themeFields(parsed.data);
@@ -271,14 +273,35 @@ export async function updateTheme(
     // answer would leave votes already cast (several options, "against") that break the rule.
     const changed = theme.kind !== fields.kind || theme.singleChoice !== fields.singleChoice;
     if (changed && theme._count.ideas > 0) throw new ActionFailure("themeKindLocked");
+    // A tighter limit must still hold the "for" votes already cast in this round.
+    const limit = fields.maxVotes;
+    if (limit !== null && (theme.maxVotes === null || limit < theme.maxVotes) && (await mostForVotes(themeId, room.round)) > limit) {
+      throw new ActionFailure("voteLimitBelowUsed");
+    }
     await db.theme.update({ where: { id: themeId }, data: fields });
   });
+}
+
+/** Highest number of "for" votes a single participant has cast in this topic this round. */
+async function mostForVotes(themeId: string, round: number) {
+  const votes = await db.vote.findMany({
+    where: { round, positive: true, idea: { themeId } },
+    select: { participantId: true, idea: { select: { createdRound: true, eliminatedRound: true } } },
+  });
+  const counts = new Map<string, number>();
+  for (const vote of votes) {
+    if (isActiveInRound(vote.idea, round)) counts.set(vote.participantId, (counts.get(vote.participantId) ?? 0) + 1);
+  }
+  return Math.max(0, ...counts.values());
 }
 
 export async function deleteTheme(slug: string, themeId: string) {
   if (!isId(themeId)) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
+    // Its ideas from earlier rounds are part of recaps already seen (and of the exports).
+    const past = await db.idea.count({ where: { themeId, roomId: room.id, createdRound: { lt: room.round } } });
+    if (past > 0) throw new ActionFailure("themeInPastRounds");
     await db.theme.deleteMany({ where: { id: themeId, roomId: room.id } });
   });
 }
@@ -304,7 +327,18 @@ export async function setAllowSelfVote(slug: string, value: boolean) {
   if (!isBoolean(value)) return fail("invalidInput");
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "THEMES" });
-    await db.room.update({ where: { id: room.id }, data: { allowSelfVote: value } });
+    // Turned off: votes already cast this round on one's own ideas would break the rule.
+    // List options belong to no one, so their votes stay.
+    const ownVotes = value
+      ? []
+      : await db.vote.findMany({
+          where: { round: room.round, idea: { roomId: room.id, isOption: false } },
+          select: { id: true, participantId: true, idea: { select: { authorId: true } } },
+        });
+    await db.$transaction([
+      db.room.update({ where: { id: room.id }, data: { allowSelfVote: value } }),
+      db.vote.deleteMany({ where: { id: { in: ownVotes.filter((v) => v.idea.authorId === v.participantId).map((v) => v.id) } } }),
+    ]);
   });
 }
 
@@ -332,13 +366,16 @@ export async function startIdeasPhase(slug: string) {
           isOption: true,
         }));
     });
-    await db.$transaction([
-      db.idea.createMany({ data: optionIdeas }),
-      db.room.update({
-        where: { id: room.id },
+    await db.$transaction(async (tx) => {
+      // The phase is claimed before creating the options: a second request (double click,
+      // two tabs) finds it already taken instead of creating every option a second time.
+      const claimed = await tx.room.updateMany({
+        where: { id: room.id, phase: "THEMES" },
         data: { phase: "IDEAS", phaseEndsAt: timerEnd(room.ideasTimerMinutes) },
-      }),
-    ]);
+      });
+      if (claimed.count === 0) throw new ActionFailure("wrongPhase");
+      await tx.idea.createMany({ data: optionIdeas });
+    });
   }, "IDEAS");
 }
 
@@ -505,20 +542,23 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
     if (!room.allowSelfVote && idea.authorId === me.id && !idea.isOption) throw new ActionFailure("selfVoteForbidden");
     const single = idea.theme.kind === "CHOICE" && idea.theme.singleChoice;
     if (single && positive === false) throw new ActionFailure("invalidInput");
-    // Limited topic: a new "for" vote must fit in the participant's allowance for this round.
-    // A single-answer list replaces the previous pick instead.
-    if (positive === true && !single && idea.theme.maxVotes !== null) {
-      const mine = await db.vote.findMany({
-        where: { participantId: me.id, round: room.round, positive: true, idea: { themeId: idea.themeId } },
-        select: { ideaId: true, idea: { select: { createdRound: true, eliminatedRound: true } } },
-      });
-      const used = mine.filter((v) => v.ideaId !== ideaId && isActiveInRound(v.idea, room.round)).length;
-      if (used >= idea.theme.maxVotes) throw new ActionFailure("voteLimitReached");
-    }
-
-    const where = { ideaId_participantId_round: { ideaId, participantId: me.id, round: room.round } };
+    const key = { ideaId, participantId: me.id, round: room.round };
+    const where = { ideaId_participantId_round: key };
     if (positive === null) {
-      await db.vote.deleteMany({ where: where.ideaId_participantId_round });
+      await db.vote.deleteMany({ where: key });
+    } else if (positive && !single && idea.theme.maxVotes !== null) {
+      // Limited topic: the "for" vote must fit in the participant's allowance for this round.
+      // Counted after writing, in the same transaction: two votes sent at once cannot both
+      // pass a count made before either of them was written.
+      const max = idea.theme.maxVotes;
+      await db.$transaction(async (tx) => {
+        await tx.vote.upsert({ where, create: { ...key, positive }, update: { positive } });
+        const mine = await tx.vote.findMany({
+          where: { participantId: me.id, round: room.round, positive: true, idea: { themeId: idea.themeId } },
+          select: { idea: { select: { createdRound: true, eliminatedRound: true } } },
+        });
+        if (mine.filter((v) => isActiveInRound(v.idea, room.round)).length > max) throw new ActionFailure("voteLimitReached");
+      });
     } else {
       await db.$transaction([
         ...(single
@@ -528,11 +568,7 @@ export async function castVote(slug: string, ideaId: string, positive: boolean |
               }),
             ]
           : []),
-        db.vote.upsert({
-          where,
-          create: { ideaId, participantId: me.id, round: room.round, positive },
-          update: { positive },
-        }),
+        db.vote.upsert({ where, create: { ...key, positive }, update: { positive } }),
       ]);
     }
   });
@@ -549,7 +585,7 @@ export async function backToThemes(slug: string) {
 export async function goToRecap(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
-    await db.room.update({ where: { id: room.id }, data: { phase: "RECAP", phaseEndsAt: null } });
+    await db.room.update({ where: { id: room.id }, data: { phase: "RECAP", phaseEndsAt: null, recapSeen: true } });
   }, "RECAP");
 }
 

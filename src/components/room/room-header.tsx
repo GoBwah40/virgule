@@ -14,7 +14,7 @@ import { canRemoveParticipants } from "@/lib/config";
 const STEPS: Phase[] = ["THEMES", "IDEAS", "RECAP"];
 
 type Props = {
-  room: { slug: string; name: string; phase: Phase; round: number; expiresAt: Date; capacity: number; screenPaired: boolean };
+  room: { slug: string; name: string; phase: Phase; round: number; recapSeen: boolean; expiresAt: Date; capacity: number; screenPaired: boolean };
   participants: { id: string; pseudo: string; isHost: boolean }[];
   meId: string;
 };

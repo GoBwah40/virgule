@@ -2,6 +2,13 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.11.2 — 2026-10-06
+
+- Dans un sujet qui limite les votes « pour », appuyer très vite sur plusieurs idées ne permet plus de dépasser la limite.
+- Une fois le récap vu, plus personne ne peut partir ni être retiré, même si le vote est rouvert : les résultats déjà vus restent tels quels.
+- Un sujet des tours précédents ne peut plus être supprimé en revenant aux sujets, ce qui l'effaçait des récaps déjà vus et des exports.
+- Baisser la limite de votes d'un sujet, ou désactiver le vote sur ses propres idées, s'applique maintenant aux votes déjà donnés ; lancer les idées deux fois par erreur n'affiche plus deux fois les options d'une liste.
+
 ## 0.6.15 — 2026-10-05
 
 - Un mot long dans un sujet, comme un lien collé, ne pousse plus la page sur le côté, sur téléphone comme sur ordinateur : il passe à la ligne.

@@ -48,6 +48,9 @@ model Room {
   screenCodeExpiresAt DateTime?
   /// Secret of the paired room screen, kept in its cookie (null = no screen). Never exposed.
   screenToken      String?       @unique
+  /// The group has seen a recap: from then on, nobody can leave or be removed (their votes
+  /// would vanish from results already seen), even after voting is reopened.
+  recapSeen        Boolean       @default(false)
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]

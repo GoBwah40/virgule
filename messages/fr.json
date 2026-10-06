@@ -198,7 +198,7 @@
     "moveDown": "Descendre",
     "settings": "Réglages",
     "allowSelfVote": "Voter sur ses propres idées",
-    "allowSelfVoteHint": "Si c'est désactivé, personne ne peut voter pour ou contre les idées qu'il a proposées.",
+    "allowSelfVoteHint": "Si c'est désactivé, personne ne peut voter pour ou contre les idées qu'il a proposées, et ces votes déjà donnés sont retirés.",
     "timerLabel": "Minuteur des idées",
     "timerHint": "Le temps démarre au lancement des idées. À la fin, rien n'est bloqué : c'est un repère pour garder le rythme.",
     "timerOff": "Aucun",
@@ -420,7 +420,9 @@
     "duplicateTheme": "Ce sujet est déjà dans la liste ou déjà proposé.",
     "suggestionNotFound": "Cette proposition a déjà été traitée.",
     "voteLimitReached": "Tu as utilisé tous tes votes « pour » dans ce sujet : retires-en un pour voter pour une autre idée.",
-    "invalidScreenCode": "Ce code ne marche pas : il a peut-être expiré. Demande-en un nouveau."
+    "invalidScreenCode": "Ce code ne marche pas : il a peut-être expiré. Demande-en un nouveau.",
+    "themeInPastRounds": "Ce sujet figure dans les récaps des tours précédents : on ne peut plus le supprimer.",
+    "voteLimitBelowUsed": "Certaines personnes ont déjà donné plus de votes « pour » que ça dans ce sujet : choisis une limite plus haute."
   },
   "theme": {
     "label": "Thème",

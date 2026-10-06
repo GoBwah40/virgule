@@ -9,6 +9,7 @@ import {
   join,
   LIVE_TIMEOUT,
   pick,
+  seeRecap,
   startIdeas,
   suggestIdea,
   test,
@@ -222,4 +223,75 @@ test("going back to the topics keeps the ideas, and locks their answer type", as
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await expect(idea(page, "Pizza")).toBeVisible();
   await expect(idea(guest, "Pizza")).toBeVisible({ timeout: LIVE_TIMEOUT });
+});
+
+test("a topic from an earlier round can no longer be deleted", async ({ page, openAsGuest }) => {
+  const guest = await setUpEmpty(page, openAsGuest);
+  await addTopic(page, "Dinner");
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await vote(page, "Pizza", "For");
+  await seeRecap(page);
+  await clickAndConfirm(page, "Go for another round");
+  await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  await clickAndConfirm(page, "Edit the topics");
+  await expect(page).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
+  await expect(guest).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
+  // "Dinner" is in the round 1 recap: it stays. A topic added now can still go.
+  await expect(topic(page, "Dinner").getByRole("button", { name: "Edit" })).toBeVisible();
+  await expect(topic(page, "Dinner").getByRole("button", { name: "Delete" })).toHaveCount(0);
+  await addTopic(page, "Music");
+  await topic(page, "Music").getByRole("button", { name: "Delete" }).click();
+  await expect(topic(page, "Music")).toHaveCount(0);
+});
+
+test("a vote limit cannot drop below the votes already cast", async ({ page, openAsGuest }) => {
+  const guest = await setUpEmpty(page, openAsGuest);
+  await addTopic(page, "Dinner");
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await suggestIdea(page, "Sushi");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await expect(idea(guest, "Sushi")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await vote(guest, "Pizza", "For");
+  await vote(guest, "Sushi", "For");
+
+  await clickAndConfirm(page, "Edit the topics");
+  await expect(page).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
+  // The edit form comes first, before the form to add a topic.
+  const limit = page.getByRole("group", { name: "“For” votes per person" }).first();
+  const choose = (count: string) => limit.locator("label", { has: page.getByRole("radio", { name: count, exact: true }) }).click();
+
+  await topic(page, "Dinner").getByRole("button", { name: "Edit" }).click();
+  await choose("1");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(page.getByText("Some people have already cast more “for” votes than that in this topic: choose a higher limit.")).toBeVisible();
+
+  await choose("2");
+  await page.getByRole("button", { name: "Save" }).click();
+  await expect(topic(page, "Dinner").getByText("2 votes per person")).toBeVisible();
+});
+
+test("turning off voting on your own ideas removes such votes already cast", async ({ page, openAsGuest }) => {
+  const guest = await setUpEmpty(page, openAsGuest);
+  await addTopic(page, "Dinner");
+  await startIdeas(page);
+  await suggestIdea(page, "Pizza");
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await expect(idea(guest, "Pizza")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await vote(page, "Pizza", "For");
+  await vote(guest, "Pizza", "For");
+
+  await clickAndConfirm(page, "Edit the topics");
+  await expect(page).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
+  const toggle = page.getByRole("switch", { name: "Vote on your own ideas" });
+  await toggle.click();
+  await expect(toggle).not.toBeChecked();
+  await page.getByRole("button", { name: "Resume the ideas" }).click();
+  await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+
+  // Sam's vote on his own idea is gone, Lea's stays.
+  await expect(idea(page, "Pizza").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "false");
+  await expect(idea(guest, "Pizza").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "true", { timeout: LIVE_TIMEOUT });
 });
