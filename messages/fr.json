@@ -292,7 +292,20 @@
     "backToThemesConfirm": "Revenir aux sujets ?",
     "backToThemesHint": "Tout le monde retourne sur la page des sujets. Les idées et les votes sont conservés, mais supprimer un sujet supprime aussi ses idées.",
     "finish": "Voir le bilan",
-    "finishConfirm": "Clore les votes pour tout le monde ?"
+    "finishConfirm": "Clore les votes pour tout le monde ?",
+    "comments": {
+      "toggle": "{count, plural, =0 {Commenter} one {# commentaire} other {# commentaires}}",
+      "list": "Commentaires sur « {idea} »",
+      "mine": "Ton commentaire",
+      "label": "Ton commentaire sur cette idée",
+      "placeholder": "Une précision, une question…",
+      "submit": "Envoyer",
+      "remove": "Retirer mon commentaire",
+      "moderate": "Retirer ce commentaire",
+      "moderateConfirm": "Retirer ce commentaire ?",
+      "moderateHint": "Il disparaît pour tout le monde.",
+      "limitReached": "Tu as laissé {max} commentaires sur cette idée, le maximum possible."
+    }
   },
   "recap": {
     "title": "Le bilan",
@@ -493,7 +506,11 @@
     "voteLimitBelowUsed": "Certaines personnes ont déjà donné plus de votes « pour » que ça dans ce sujet : choisis une limite plus haute.",
     "editWindowOver": "Cette idée ne peut plus être modifiée : tu peux la retirer et en proposer une autre.",
     "timerRunning": "Le minuteur n'est pas encore terminé.",
-    "nudgeTooSoon": "Un rappel vient d'être envoyé : attends une minute avant d'en renvoyer un."
+    "nudgeTooSoon": "Un rappel vient d'être envoyé : attends une minute avant d'en renvoyer un.",
+    "commentNotFound": "Ce commentaire a déjà été retiré.",
+    "notCommentAuthor": "Tu ne peux retirer que tes propres commentaires.",
+    "tooManyComments": "Tu as déjà laissé le maximum de commentaires sur cette idée.",
+    "roomCommentLimit": "Cette séance a atteint son nombre maximum de commentaires."
   },
   "theme": {
     "label": "Thème",

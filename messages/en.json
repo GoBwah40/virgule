@@ -292,7 +292,20 @@
     "backToThemesConfirm": "Go back to the topics?",
     "backToThemesHint": "Everyone goes back to the topics page. Ideas and votes are kept, but deleting a topic also deletes its ideas.",
     "finish": "See the recap",
-    "finishConfirm": "Close voting for everyone?"
+    "finishConfirm": "Close voting for everyone?",
+    "comments": {
+      "toggle": "{count, plural, =0 {Comment} one {# comment} other {# comments}}",
+      "list": "Comments on “{idea}”",
+      "mine": "Your comment",
+      "label": "Your comment on this idea",
+      "placeholder": "A detail, a question…",
+      "submit": "Send",
+      "remove": "Remove my comment",
+      "moderate": "Remove this comment",
+      "moderateConfirm": "Remove this comment?",
+      "moderateHint": "It disappears for everyone.",
+      "limitReached": "You've left {max} comments on this idea, the most you can."
+    }
   },
   "recap": {
     "title": "The recap",
@@ -493,7 +506,11 @@
     "voteLimitBelowUsed": "Some people have already cast more “for” votes than that in this topic: choose a higher limit.",
     "editWindowOver": "This idea can no longer be changed: you can remove it and suggest another one.",
     "timerRunning": "The timer isn't over yet.",
-    "nudgeTooSoon": "A reminder was just sent: wait a minute before sending another."
+    "nudgeTooSoon": "A reminder was just sent: wait a minute before sending another.",
+    "commentNotFound": "This comment has already been removed.",
+    "notCommentAuthor": "You can only remove your own comments.",
+    "tooManyComments": "You've already left as many comments as you can on this idea.",
+    "roomCommentLimit": "This session has reached its maximum number of comments."
   },
   "theme": {
     "label": "Theme",

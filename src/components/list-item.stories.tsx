@@ -36,6 +36,13 @@ export const Dropped: Story = {
   },
 };
 
+export const WithContentBelow: Story = {
+  args: {
+    meta: <Badge variant="outline">2 comments</Badge>,
+    below: <p className="text-sm text-muted-foreground">Comments revealed on demand go here, full width.</p>,
+  },
+};
+
 export const LongText: Story = {
   args: {
     children:

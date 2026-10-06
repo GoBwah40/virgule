@@ -19,4 +19,13 @@ describe("ListItem", () => {
     expect(item).toHaveTextContent("Your idea");
     expect(screen.getByRole("button", { name: "For" })).toBeInTheDocument();
   });
+
+  it("shows content below the row when given", () => {
+    renderUi(
+      <ul>
+        <ListItem below={<p>Two comments</p>}>Community hall</ListItem>
+      </ul>,
+    );
+    expect(screen.getByRole("listitem")).toHaveTextContent("Two comments");
+  });
 });

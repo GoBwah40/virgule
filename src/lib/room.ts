@@ -5,7 +5,7 @@ import { cache } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
 import { type CalendarDates, decidedDates } from "@/lib/calendar";
-import { ideaEditableUntil, roomCapacity } from "@/lib/config";
+import { ideaEditableUntil, MAX_COMMENTS_PER_IDEA, roomCapacity } from "@/lib/config";
 import { db } from "@/lib/db";
 import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
@@ -140,6 +140,29 @@ export async function getThemeSuggestions(roomId: string, me: { id: string; isHo
 
 // ─── "Ideas & votes" phase ─────────────────────────────────────────────────
 
+/** A comment on an idea: never its author, only whether it is the current participant's. */
+export type CommentView = {
+  id: string;
+  content: string;
+  isMine: boolean;
+  /** Removable by the current participant: their own, or anyone's for the host (moderation). */
+  canDelete: boolean;
+};
+
+const commentSelect = { id: true, content: true, authorId: true } as const;
+const commentsOrder = [{ createdAt: "asc" }, { id: "asc" }] as const;
+
+function commentViews(
+  comments: { id: string; content: string; authorId: string }[],
+  me: { id: string; isHost: boolean } | null,
+  removable: boolean,
+): CommentView[] {
+  return comments.map((comment) => {
+    const isMine = me !== null && comment.authorId === me.id;
+    return { id: comment.id, content: comment.content, isMine, canDelete: removable && (isMine || !!me?.isHost) };
+  });
+}
+
 export type VotingIdea = {
   id: string;
   content: string;
@@ -160,6 +183,9 @@ export type VotingIdea = {
   edited: boolean;
   /** Own idea still in its edit window: its raw value, and until when (ISO 8601). */
   edit: { until: string; value: IdeaFields } | null;
+  comments: CommentView[];
+  /** The current participant can still comment on it (MAX_COMMENTS_PER_IDEA). */
+  canComment: boolean;
 };
 
 export type VotingTheme = {
@@ -195,7 +221,10 @@ export async function getVotingView(
     include: {
       ideas: {
         orderBy: { createdAt: "asc" },
-        include: { votes: { where: { round, participantId: meId }, select: { positive: true, points: true } } },
+        include: {
+          votes: { where: { round, participantId: meId }, select: { positive: true, points: true } },
+          comments: { orderBy: [...commentsOrder], select: commentSelect },
+        },
       },
     },
   });
@@ -235,6 +264,8 @@ export async function getVotingView(
           mapQuery: theme.kind === "PLACE" ? idea.content : null,
           edited: idea.editedAt !== null,
           edit: isMine && isNew && ideaEditableUntil(idea.createdAt) > now ? editOf(idea) : null,
+          comments: commentViews(idea.comments, me, true),
+          canComment: idea.comments.filter((comment) => comment.authorId === meId).length < MAX_COMMENTS_PER_IDEA,
         };
       }),
   }));
@@ -375,6 +406,23 @@ export async function getRecap(
     rounds.push({ round, themes: roundThemes, qualifiedCount, ideaCount, tiedThemeCount });
   }
   return rounds;
+}
+
+/**
+ * Comments by idea, read-only, for the session recap of a participant. Never for the room screen,
+ * the shared recap or the exports, which call `getRecap` alone.
+ */
+export async function getRecapComments(roomId: string, meId: string): Promise<Record<string, CommentView[]>> {
+  const comments = await db.comment.findMany({
+    where: { roomId },
+    orderBy: [...commentsOrder],
+    select: { ...commentSelect, ideaId: true },
+  });
+  const byIdea: Record<string, CommentView[]> = {};
+  for (const { ideaId, ...comment } of comments) {
+    (byIdea[ideaId] ??= []).push(...commentViews([comment], { id: meId, isHost: false }, false));
+  }
+  return byIdea;
 }
 
 function overviewOf(

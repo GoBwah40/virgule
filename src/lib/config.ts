@@ -28,7 +28,13 @@ export const LIMITS = {
   themeTitle: 100,
   themeDescription: 300,
   idea: 500,
+  comment: 140,
 } as const;
+
+/** Comments one person can leave on the same idea. */
+export const MAX_COMMENTS_PER_IDEA = 3;
+/** Comments in a whole session, everyone together. */
+export const MAX_COMMENTS_PER_ROOM = 50;
 
 /** Refresh interval when Pusher is not configured. */
 export const POLL_INTERVAL_MS = 3000;

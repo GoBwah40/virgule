@@ -266,6 +266,29 @@ export async function expireScreenCode(link: string) {
   await write('UPDATE Room SET "screenCodeExpiresAt" = createdAt WHERE slug = ?', [slugOf(link)]);
 }
 
+/** Comments of the session as stored, with their author: what must never reach a browser. */
+export async function commentRows(link: string) {
+  await ready;
+  const { rows } = await db.execute({
+    sql: 'SELECT c.id, c."authorId", c.content FROM "Comment" c JOIN "Room" r ON r.id = c."roomId" WHERE r.slug = ?',
+    args: [slugOf(link)],
+  });
+  return rows.map((row) => ({ id: String(row.id), authorId: String(row.authorId), content: String(row.content) }));
+}
+
+/** `count` comments by the host on the session's first idea, written straight to the database. */
+export async function fillComments(link: string, count: number) {
+  for (let i = 0; i < count; i++) {
+    await write(
+      `INSERT INTO "Comment" (id, "roomId", "ideaId", "authorId", content, "createdAt")
+       SELECT ?, r.id, (SELECT i.id FROM "Idea" i WHERE i."roomId" = r.id ORDER BY i."createdAt" LIMIT 1),
+              (SELECT p.id FROM "Participant" p WHERE p."roomId" = r.id AND p."isHost" = 1), ?, ?
+       FROM "Room" r WHERE r.slug = ?`,
+      [`filler-${slugOf(link)}-${i}`, `Filler ${i}`, new Date().toISOString().replace("Z", "+00:00"), slugOf(link)],
+    );
+  }
+}
+
 export async function expireRoom(link: string) {
   // `createdAt` is in the past and stored in the same format as `expiresAt`.
   await write("UPDATE Room SET expiresAt = createdAt WHERE slug = ?", [slugOf(link)]);
