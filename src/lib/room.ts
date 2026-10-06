@@ -409,6 +409,47 @@ export type PresentationView =
  * whose idea it is (no "Your idea", nothing removable), no score nor vote while ideas are open
  * (only how many people have voted), and in the recap the same totals every participant sees.
  */
+/** Path of the read-only recap link, for the host only (null = turned off). */
+export async function getSharePath(roomId: string, me: { isHost: boolean }) {
+  if (!me.isHost) return null;
+  const room = await db.room.findUnique({ where: { id: roomId }, select: { shareToken: true } });
+  return room?.shareToken ? sharePath(room.shareToken) : null;
+}
+
+const sharePath = (token: string) => `/recap/${token}`;
+
+export type SharedRecap =
+  | { status: "not_found" }
+  | { status: "expired" }
+  | {
+      status: "ok";
+      room: { name: string; expiresAt: Date; closed: boolean };
+      hostName: string;
+      /** Null while the group is still deciding (topics or ideas): only a recap is shared. */
+      rounds: RecapRound[] | null;
+    };
+
+/**
+ * Recap behind a read-only link, for people who were not there. Like the exports: no author,
+ * nobody's own votes, no participant list; and only once the recap is shown.
+ */
+export async function getSharedRecap(token: string): Promise<SharedRecap> {
+  if (!token || token.length > 64) return { status: "not_found" };
+  const room = await db.room.findUnique({
+    where: { shareToken: token },
+    include: { participants: { select: { pseudo: true, isHost: true } } },
+  });
+  if (!room) return { status: "not_found" };
+  if (room.expiresAt < new Date()) return { status: "expired" };
+  const shown = room.phase === "RECAP" || room.phase === "CLOSED";
+  return {
+    status: "ok",
+    room: { name: room.name, expiresAt: room.expiresAt, closed: room.phase === "CLOSED" },
+    hostName: hostName(room.participants),
+    rounds: shown ? await getRecap(room, null) : null,
+  };
+}
+
 export async function getPresentationView(room: {
   id: string;
   phase: Phase;

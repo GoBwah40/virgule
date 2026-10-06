@@ -15,8 +15,8 @@ import {
   voteAndSeeRecap,
 } from "./helpers";
 
-/** Date of the export in its file name (UTC, like the server). */
-const today = () => new Date().toISOString().slice(0, 10);
+/** Date of the export in its file name: the day in Paris, like "Generated on" in the file. */
+const today = () => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris" }).format(new Date());
 
 test("the recap can be exported, but not while votes are open", async ({ page, openAsGuest }) => {
   const { link, guest } = await setUpSession(page, openAsGuest);

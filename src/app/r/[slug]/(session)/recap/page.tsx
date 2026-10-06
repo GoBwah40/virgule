@@ -5,13 +5,12 @@ import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/components/page-header";
 import { PhaseTransition } from "@/components/phase-transition";
-import { ExportMenu, RecapHostControls } from "@/components/phases/recap-controls";
-import { RecapRoundSpotlight, RecapRoundView } from "@/components/phases/recap-round";
+import { ExportMenu, RecapHostControls, ShareRecapButton } from "@/components/phases/recap-controls";
+import { RecapByRound, RecapRoundSpotlight, RecapRoundView } from "@/components/phases/recap-round";
 import { ViewChoice, ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getRecap, hostName, loadPhasePage } from "@/lib/room";
+import { getRecap, getSharePath, hostName, loadPhasePage } from "@/lib/room";
 import { cn } from "@/lib/utils";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 
@@ -25,26 +24,8 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
   const rounds = await getRecap(room, me.id);
   const current = rounds[rounds.length - 1];
   const closed = room.phase === "CLOSED";
-  // One round: its recap; several: a tab each, the current one open.
-  const byRound = (render: (round: (typeof rounds)[number]) => React.ReactNode) =>
-    rounds.length === 1 ? (
-      render(current)
-    ) : (
-      <Tabs defaultValue={String(current.round)}>
-        <TabsList className="mb-4">
-          {rounds.map((r) => (
-            <TabsTrigger key={r.round} value={String(r.round)}>
-              {t("roundTab", { round: r.round })}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        {rounds.map((r) => (
-          <TabsContent key={r.round} value={String(r.round)} className="motion-safe:animate-in motion-safe:fade-in motion-safe:duration-300">
-            {render(r)}
-          </TabsContent>
-        ))}
-      </Tabs>
-    );
+  const byRound = (render: (round: (typeof rounds)[number]) => React.ReactNode) => <RecapByRound rounds={rounds} render={render} />;
+  const sharePath = await getSharePath(room.id, me);
 
   return (
     <PhaseTransition>
@@ -61,6 +42,7 @@ export default async function RecapPage({ params }: PageProps<"/r/[slug]/recap">
                   {t("newSession")}
                 </Button>
               )}
+              {me.isHost && <ShareRecapButton slug={slug} sharePath={sharePath} roomName={room.name} />}
               <ExportMenu slug={slug} />
               <ViewChoiceSwitch boardLabel="oneByOne" />
             </>

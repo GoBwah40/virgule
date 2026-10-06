@@ -774,6 +774,32 @@ export async function closeSession(slug: string) {
   });
 }
 
+// ─── Read-only recap link (host) ───────────────────────────────────────────
+
+/** Recap shown, or the session over: the only steps a recap link makes sense from. */
+async function guardRecapHost(slug: string) {
+  const { room } = await guard(slug, { host: true });
+  if (room.phase !== "RECAP" && room.phase !== "CLOSED") throw new ActionFailure("wrongPhase");
+  return room;
+}
+
+/** The host turns on a link to the recap for people who were not there: no seat, nothing to change. */
+export async function enableShareLink(slug: string) {
+  return run(slug, async () => {
+    const room = await guardRecapHost(slug);
+    // Already on: the same link stays, so the one already sent keeps working.
+    await db.room.updateMany({ where: { id: room.id, shareToken: null }, data: { shareToken: newToken() } });
+  });
+}
+
+/** The link stops working; turning it on again gives a new one. */
+export async function disableShareLink(slug: string) {
+  return run(slug, async () => {
+    const room = await guardRecapHost(slug);
+    await db.room.update({ where: { id: room.id }, data: { shareToken: null } });
+  });
+}
+
 // ─── Participants (host) ───────────────────────────────────────────────────
 
 async function otherParticipant(roomId: string, meId: string, participantId: string) {

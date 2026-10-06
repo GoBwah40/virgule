@@ -53,6 +53,9 @@ model Room {
   recapSeen        Boolean       @default(false)
   /// When the ideas timer runs out, the session moves to the recap by itself (set with the timer).
   autoRecap        Boolean       @default(false)
+  /// Secret of the read-only recap link the host shares with people who were not there
+  /// (null = no link). Only the host reads it, to show the link.
+  shareToken       String?       @unique
   participants     Participant[]
   themes           Theme[]
   ideas            Idea[]
