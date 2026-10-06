@@ -11,6 +11,7 @@ import type { Phase } from "@/generated/prisma/enums";
 import {
   canRemoveParticipants,
   EXTEND_TIMER_MINUTES,
+  ideaEditableUntil,
   IDEAS_TIMER_OPTIONS,
   DEFAULT_ROOM_SIZE,
   LIMITS,
@@ -67,6 +68,8 @@ type ActionError =
   | "invalidScreenCode"
   | "themeInPastRounds"
   | "voteLimitBelowUsed"
+  | "editWindowOver"
+  | "timerRunning"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -463,6 +466,15 @@ export async function setRoomSize(slug: string, size: number) {
   });
 }
 
+/** The session moves to the recap by itself when the ideas timer runs out. */
+export async function setAutoRecap(slug: string, value: boolean) {
+  if (!isBoolean(value)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true, phase: "THEMES" });
+    await db.room.update({ where: { id: room.id }, data: { autoRecap: value } });
+  });
+}
+
 /** Ideas phase timer (null = none), set before starting the ideas. */
 export async function setIdeasTimer(slug: string, minutes: number | null) {
   if (minutes !== null && !IDEAS_TIMER_OPTIONS.includes(minutes)) return fail("invalidInput");
@@ -509,6 +521,38 @@ export async function addIdea(slug: string, themeId: string, input: IdeaInput) {
         createdRound: room.round,
       },
     });
+  });
+}
+
+/**
+ * The author changes their idea, within IDEA_EDIT_MINUTES of suggesting it. Votes already cast
+ * on it are removed: they were for something else.
+ */
+export async function updateIdea(slug: string, ideaId: string, input: IdeaInput) {
+  const raw = ideaInputSchema.safeParse(input);
+  if (!raw.success || !isId(ideaId)) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room, me } = await guard(slug, { phase: "IDEAS" });
+    const idea = await db.idea.findFirst({ where: { id: ideaId, roomId: room.id }, include: { theme: true } });
+    if (!idea) throw new ActionFailure("ideaNotFound");
+    if (idea.isOption || idea.authorId !== me.id || idea.createdRound !== room.round) throw new ActionFailure("notAuthor");
+    // A little leeway for the request on its way.
+    if (Date.now() > ideaEditableUntil(idea.createdAt).getTime() + 10_000) throw new ActionFailure("editWindowOver");
+    const parsed = parseIdeaInput(idea.theme.kind, raw.data);
+    if (!parsed.ok) throw new ActionFailure(parsed.error);
+    const others = await db.idea.findMany({ where: { themeId: idea.themeId, id: { not: idea.id } } });
+    const key = ideaKey(idea.theme.kind, parsed.fields);
+    if (others.some((other) => isActiveInRound(other, room.round) && ideaKey(idea.theme.kind, other) === key)) {
+      throw new ActionFailure("duplicateIdea");
+    }
+    // Unchanged: nothing to save, and nobody's vote is lost (a fixed typo or accent does count).
+    const fields = parsed.fields;
+    const same = (Object.keys(fields) as (keyof typeof fields)[]).every((field) => fields[field] === idea[field]);
+    if (same) return;
+    await db.$transaction([
+      db.idea.update({ where: { id: idea.id }, data: { ...parsed.fields, editedAt: new Date() } }),
+      db.vote.deleteMany({ where: { ideaId: idea.id } }),
+    ]);
   });
 }
 
@@ -586,6 +630,23 @@ export async function goToRecap(slug: string) {
   return run(slug, async () => {
     const { room } = await guard(slug, { host: true, phase: "IDEAS" });
     await db.room.update({ where: { id: room.id }, data: { phase: "RECAP", phaseEndsAt: null, recapSeen: true } });
+  }, "RECAP");
+}
+
+/**
+ * The ideas timer has run out and the host chose to move on by itself: any participant's page
+ * asks, the server's clock decides. Only the first request moves the session; the others find
+ * the step already changed.
+ */
+export async function goToRecapOnTimer(slug: string) {
+  return run(slug, async () => {
+    const { room } = await guard(slug, { phase: "IDEAS" });
+    if (!room.autoRecap || !room.phaseEndsAt) throw new ActionFailure("wrongPhase");
+    const moved = await db.room.updateMany({
+      where: { id: room.id, phase: "IDEAS", autoRecap: true, phaseEndsAt: { lte: new Date() } },
+      data: { phase: "RECAP", phaseEndsAt: null, recapSeen: true },
+    });
+    if (moved.count === 0) throw new ActionFailure(room.phaseEndsAt > new Date() ? "timerRunning" : "wrongPhase");
   }, "RECAP");
 }
 

@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import {
+  ageIdeas,
   expect,
   idea,
   LIVE_TIMEOUT,
@@ -110,4 +111,45 @@ test("with self-voting turned off, nobody can vote on their own idea", async ({ 
     "1 idea left without your vote",
     { timeout: LIVE_TIMEOUT },
   );
+});
+
+test("an idea can be changed for two minutes, and the votes on it start over", async ({ page, openAsGuest }) => {
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await suggestIdea(guest, "Pizza");
+  await expect(idea(page, "Pizza")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await vote(page, "Pizza", "For");
+
+  // Only its author can change it.
+  await expect(idea(page, "Pizza").getByRole("button", { name: "Change my idea" })).toHaveCount(0);
+  await idea(guest, "Pizza").getByRole("button", { name: "Change my idea" }).click();
+  await expect(guest.getByText("Votes already cast on it will be removed.")).toBeVisible();
+  await guest.getByLabel("Change my idea").fill("Pizza Napoli");
+  await guest.getByRole("button", { name: "Save" }).click();
+
+  // Everyone sees the new text, marked as changed, and Sam's vote is gone with the old one.
+  for (const p of [guest, page]) await expect(idea(p, "Pizza Napoli").getByText("Changed")).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(idea(page, "Pizza Napoli").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "false");
+
+  // Past the window, it can only be removed.
+  await ageIdeas(link);
+  await guest.reload();
+  await expect(idea(guest, "Pizza Napoli").getByRole("button", { name: "Remove my idea" })).toBeVisible();
+  await expect(idea(guest, "Pizza Napoli").getByRole("button", { name: "Change my idea" })).toHaveCount(0);
+});
+
+test("cancelling a change keeps the idea and its votes", async ({ page, openAsGuest }) => {
+  const { guest } = await setUpSession(page, openAsGuest);
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  await suggestIdea(guest, "Sushi");
+  await vote(page, "Sushi", "For");
+
+  await idea(guest, "Sushi").getByRole("button", { name: "Change my idea" }).click();
+  await guest.getByLabel("Change my idea").fill("Ramen");
+  await guest.getByRole("button", { name: "Cancel" }).click();
+  await expect(idea(guest, "Sushi")).toBeVisible();
+  await expect(idea(guest, "Sushi").getByText("Changed")).toHaveCount(0);
+  await expect(idea(page, "Sushi").getByRole("button", { name: "For" })).toHaveAttribute("aria-pressed", "true");
 });

@@ -2,6 +2,11 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.12.0 — 2026-10-06
+
+- Avec un minuteur sur les idées, la personne qui anime peut choisir de passer au bilan tout seul à la fin du temps, même si son téléphone est en veille.
+- Pendant deux minutes après avoir proposé une idée, tu peux la modifier, pour corriger une faute par exemple ; les votes déjà donnés dessus repartent de zéro, et l'idée indique qu'elle a été modifiée.
+
 ## 0.11.0 — 2026-10-05
 
 - Écran de salle pour un groupe réuni au même endroit : la personne qui anime affiche la séance sur une télé ou un vidéoprojecteur en y tapant un code donné par son téléphone, qui garde la main ; l'écran montre le code pour rejoindre, les idées qui arrivent en direct sans dire qui les a proposées, et le bilan sujet par sujet.

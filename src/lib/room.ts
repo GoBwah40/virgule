@@ -4,12 +4,12 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import type { Phase } from "@/generated/prisma/enums";
-import { roomCapacity } from "@/lib/config";
+import { ideaEditableUntil, roomCapacity } from "@/lib/config";
 import { db } from "@/lib/db";
 import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getIdeaFormat } from "@/lib/idea-format";
-import { describeIdea, readChoiceOptions, type ThemeKind } from "@/lib/idea-value";
+import { describeIdea, type IdeaFields, readChoiceOptions, type ThemeKind } from "@/lib/idea-value";
 import { bestAmountOverlap, bestDateOverlap, type Overlap } from "@/lib/overview";
 import { getParticipantToken, getScreenToken } from "@/lib/session";
 
@@ -32,6 +32,8 @@ export type RoomContext =
         tiebreak: boolean;
         /** A recap has been shown (stays true when voting is reopened). */
         recapSeen: boolean;
+        /** The session moves to the recap by itself when the ideas timer runs out. */
+        autoRecap: boolean;
         /** Number of seats (size chosen by the host). */
         capacity: number;
         /** A room screen is paired (its secret never leaves this module). */
@@ -76,6 +78,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
       phaseEndsAt: room.phaseEndsAt,
       tiebreak: room.tiebreak,
       recapSeen: room.recapSeen,
+      autoRecap: room.autoRecap,
       capacity: roomCapacity(room),
       screenPaired: room.screenToken !== null,
     },
@@ -146,6 +149,10 @@ export type VotingIdea = {
   isOption: boolean;
   /** "Place" topics: text to search on the map. */
   mapQuery: string | null;
+  /** Changed by its author: votes cast before were removed. */
+  edited: boolean;
+  /** Own idea still in its edit window: its raw value, and until when (ISO 8601). */
+  edit: { until: string; value: IdeaFields } | null;
 };
 
 export type VotingTheme = {
@@ -184,6 +191,11 @@ export async function getVotingView(
     },
   });
   const format = await getIdeaFormat();
+  const now = new Date();
+  const editOf = (idea: IdeaFields & { createdAt: Date }) => ({
+    until: ideaEditableUntil(idea.createdAt).toISOString(),
+    value: { content: idea.content, dateStart: idea.dateStart, dateEnd: idea.dateEnd, amountMin: idea.amountMin, amountMax: idea.amountMax },
+  });
 
   return themes.map((theme) => ({
     id: theme.id,
@@ -210,6 +222,8 @@ export async function getVotingView(
           canDelete: isNew && (idea.isOption ? me.isHost : isMine),
           isOption: idea.isOption,
           mapQuery: theme.kind === "PLACE" ? idea.content : null,
+          edited: idea.editedAt !== null,
+          edit: isMine && isNew && ideaEditableUntil(idea.createdAt) > now ? editOf(idea) : null,
         };
       }),
   }));

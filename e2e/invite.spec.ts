@@ -38,7 +38,7 @@ test("the QR code opens the session's join screen", async ({ page, openAsGuest }
 
   // Whoever scans it lands on the join form of this session.
   const newcomer = await openAsGuest(scanned!);
-  await expect(newcomer.getByText("Sam invites you to “Friday night”")).toBeVisible();
+  await expect(newcomer.getByRole("heading", { level: 1, name: "Sam invites you to “Friday night”" })).toBeVisible();
   await join(newcomer, "Noe");
   // The modal dialog hides the rest of the page from assistive tech: close it to read the seats.
   await page.keyboard.press("Escape");

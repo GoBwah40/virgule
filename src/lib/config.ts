@@ -46,5 +46,13 @@ export const VOTE_LIMIT_OPTIONS: readonly number[] = [1, 2, 3, 5];
 /** Time added by the host's "+2 min" button. */
 export const EXTEND_TIMER_MINUTES = 2;
 
+/**
+ * How long after suggesting an idea its author can still change it. A fixed window rather than
+ * "until someone votes": the author must not learn whether anyone has voted on it.
+ */
+const IDEA_EDIT_MINUTES = 2;
+/** End of the window to change an idea. */
+export const ideaEditableUntil = (createdAt: Date) => new Date(createdAt.getTime() + IDEA_EDIT_MINUTES * 60_000);
+
 /** Public repository of the project, linked from the footer. */
 export const REPO_URL = "https://github.com/GoBwah40/virgule";

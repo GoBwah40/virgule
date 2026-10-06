@@ -8,6 +8,6 @@ test("the host creates a session and a guest opens its link", async ({ page, ope
 
   // A guest (no participation cookie) opening the share link is asked for a first name.
   const guest = await openAsGuest(link);
-  await expect(guest.getByText("Sam invites you to “Lea's birthday”")).toBeVisible();
+  await expect(guest.getByRole("heading", { level: 1, name: "Sam invites you to “Lea's birthday”" })).toBeVisible();
   await expect(guest.getByRole("button", { name: "Join the session" })).toBeVisible();
 });

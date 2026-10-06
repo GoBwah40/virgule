@@ -130,3 +130,23 @@ test("the timer stops at the recap and starts again with the vote", async ({ pag
   await expect(page).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
   await expect(timer(page)).toHaveCount(0);
 });
+
+test("when the host chose so, the session moves to the recap once time is up", async ({ page, openAsGuest }) => {
+  const { link, guest } = await setUpSession(page, openAsGuest);
+  const auto = page.getByRole("switch", { name: "Go to the recap when time is up" });
+  // Only with a timer.
+  await expect(auto).toHaveCount(0);
+  await pick(page, "5 min");
+  await auto.click();
+  await expect(auto).toBeChecked();
+  await startIdeas(page);
+  await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
+  for (const p of [page, guest]) await expect(p.getByText("When time is up, we move on to the recap.")).toBeVisible();
+  await suggestIdea(guest, "Sushi");
+
+  // Lea's page alone notices the end: it is enough, and the server checks the time.
+  await elapseTimer(link);
+  await guest.reload();
+  for (const p of [guest, page]) await expect(p).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
+  await expect(idea(page, "Sushi")).toBeVisible();
+});

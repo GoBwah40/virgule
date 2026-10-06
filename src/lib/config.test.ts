@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { canRemoveParticipants, DEFAULT_ROOM_SIZE, MAX_PARTICIPANTS, roomCapacity, ROOM_SIZES } from "@/lib/config";
+import { canRemoveParticipants, DEFAULT_ROOM_SIZE, ideaEditableUntil, MAX_PARTICIPANTS, roomCapacity, ROOM_SIZES } from "@/lib/config";
 
 describe("canRemoveParticipants", () => {
   it("allows removal before the first recap", () => {
@@ -36,5 +36,11 @@ describe("roomCapacity", () => {
   it("offers the default size, and nothing beyond the maximum", () => {
     expect(ROOM_SIZES).toContain(DEFAULT_ROOM_SIZE);
     expect(MAX_PARTICIPANTS).toBe(12);
+  });
+});
+
+describe("ideaEditableUntil", () => {
+  it("leaves two minutes after the idea is suggested, whatever the votes", () => {
+    expect(ideaEditableUntil(new Date("2027-06-12T10:00:00Z"))).toEqual(new Date("2027-06-12T10:02:00Z"));
   });
 });

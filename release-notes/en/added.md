@@ -2,6 +2,11 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.12.0 — 2026-10-06
+
+- With a timer on the ideas, the person hosting can choose to go to the recap by itself once time is up, even if their phone is asleep.
+- For two minutes after suggesting an idea, you can change it, to fix a typo for example; votes already cast on it start over, and the idea shows it was changed.
+
 ## 0.11.0 — 2026-10-05
 
 - Room screen for a group gathered in one place: the person hosting shows the session on a TV or a projector by typing there a code from their phone, which keeps the controls; the screen shows the code to join, the ideas arriving live without who suggested them, and the recap topic by topic.
