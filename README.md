@@ -4,7 +4,7 @@ Brainstorming and planning app for small groups (up to 12 people, 6 by default),
 
 ## How a session works
 
-1. **Topics**: the person who creates the room becomes the **host**. They declare the topics and choose whether people can vote on their own ideas (enabled by default).
+1. **Topics**: the person who creates the room becomes the **host**. They declare the topics and choose whether people can vote on their own ideas (enabled by default). Until the session is over, they can also **rename** it from the pencil next to its name in the header.
 2. **Ideas & votes**: each participant suggests ideas in each topic and votes **for** or **against**. Ideas and votes are **anonymous**. Everyone can change their vote until voting closes; scores are not visible during the vote.
 3. **Recap**: ideas are ranked by score. The host chooses the qualification rule (by default, *positive score*: more "for" than "against"; otherwise, a single "for" is enough). They can then:
    - **start a new round**: only the kept ideas remain, votes are reset and new ideas can be suggested;

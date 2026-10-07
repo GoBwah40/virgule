@@ -107,6 +107,13 @@
       "leave": "Quitter la séance",
       "leaveConfirm": "Quitter la séance ?",
       "leaveConfirmHint": "Tes idées et tes votes sont supprimés et ta place est libérée. Tu pourras revenir avec le lien s'il reste une place."
+    },
+    "rename": {
+      "open": "Renommer la séance",
+      "title": "Renommer la séance",
+      "description": "Tout le monde voit le nouveau nom tout de suite, sur le grand écran et dans le bilan aussi.",
+      "field": "Nom de la séance",
+      "submit": "Renommer"
     }
   },
   "themes": {

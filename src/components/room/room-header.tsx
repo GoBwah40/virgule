@@ -6,6 +6,7 @@ import { Logo } from "@/components/logo";
 import { InviteDialog } from "@/components/room/invite-dialog";
 import { LeaveRoomButton } from "@/components/room/leave-room-button";
 import { PresentDialog } from "@/components/room/present-dialog";
+import { RenameSessionDialog } from "@/components/room/rename-session-dialog";
 import { RoomSeats } from "@/components/room/room-seats";
 import { Badge } from "@/components/ui/badge";
 import type { Phase } from "@/generated/prisma/enums";
@@ -34,7 +35,14 @@ export async function RoomHeader({ room, participants, meId }: Props) {
         {/* space-y-1: room for the logo's touch area above the name. */}
         <div className="min-w-0 space-y-1">
           <Logo label={tApp("name")} href="/" className="text-lg" />
-          <h1 className="truncate text-2xl leading-tight font-extrabold">{room.name}</h1>
+          {/* The host renames the session next to its name, until it is over (read-only then).
+              Negative margin: the 44 px button does not make the row taller than the name. */}
+          <div className="flex min-w-0 items-center gap-1">
+            <h1 className="truncate text-2xl leading-tight font-extrabold">{room.name}</h1>
+            {isHost && room.phase !== "CLOSED" && (
+              <RenameSessionDialog slug={room.slug} name={room.name} className="-my-2 shrink-0 print:hidden" />
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">{t("expiresOn", { date: room.expiresAt })}</p>
         </div>
         {/* Right column: link then seats, stacked tightly on desktop.
