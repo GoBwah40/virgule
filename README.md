@@ -23,7 +23,7 @@ A room expires **7 days** after it is created; a daily scheduled job then delete
 | UI | shadcn/ui (on Base UI), Tailwind CSS v4, lucide-react |
 | Database | Prisma 7 + libSQL adapter: SQLite file locally, [Turso](https://turso.tech) in production |
 | Real time | [Pusher Channels](https://pusher.com/channels) (optional), with automatic fallback to polling |
-| Rate limiting | [Upstash Redis](https://upstash.com) (optional), per IP and per participant |
+| Rate limiting | [Upstash Redis](https://upstash.com) (recommended in production), per IP and per participant, with an in-memory fallback per process |
 | i18n | next-intl: English and French |
 | Quality | Vitest + Testing Library, Playwright, Storybook 10, ESLint, knip |
 | Hosting | Vercel (+ Vercel Cron for the purge) |
@@ -70,7 +70,7 @@ pnpm db:migrate:preview   # if the branch contains a migration
 pnpm preprod              # http://localhost:3001
 ```
 
-Requirement: `.env.preview.local` at the project root (URL and token of `virgule-preview`, ignored by git). The script (`scripts/preprod.sh`) neutralizes the production variables Next.js would otherwise load from `.env.production.local` or `.env.local`: without Pusher values in `.env.preview.local`, preproduction syncs by polling, and without Upstash values, nothing is rate limited. It runs alongside `pnpm dev` without getting in its way.
+Requirement: `.env.preview.local` at the project root (URL and token of `virgule-preview`, ignored by git). The script (`scripts/preprod.sh`) neutralizes the production variables Next.js would otherwise load from `.env.production.local` or `.env.local`: without Pusher values in `.env.preview.local`, preproduction syncs by polling, and without Upstash values, the rate limits are counted in memory (see below). It runs alongside `pnpm dev` without getting in its way.
 
 ## Versions and release notes
 
@@ -152,7 +152,7 @@ src/
   lib/calendar.ts           Decided date of a topic and its calendar file (pure, tested)
   lib/release-notes.ts      Parsing of the release notes (pure, tested); release-notes-source.ts loads them
   lib/realtime/             Server-side Pusher notification
-  lib/rate-limit.ts         Rate limiting (Upstash, optional)
+  lib/rate-limit.ts         Rate limiting (Upstash, or memory-rate-limit.ts per process without it)
   i18n/                     next-intl configuration, supported languages, language detection
 ```
 
@@ -161,6 +161,7 @@ src/
 - **Identity without an account**: joining a room creates a `Participant` with a random token, stored in an httpOnly cookie specific to the room (valid 7 days). Coming back with the same browser therefore does not use up a new seat. If the host loses this cookie (other device, cookies cleared), they also lose their role.
 - **The server is authoritative**: every action checks participation, role (host or not) and the current phase. The client holds no critical business logic.
 - **Anonymity**: the client never receives the author of an idea or other people's votes, only its own votes and, in the recap, the totals.
+- **Rate limiting** (`src/lib/rate-limit.ts`): rooms created, joins and screen pairing attempts per IP, pairing attempts across all IPs, and actions per participant. With Upstash Redis configured, the counters are shared by every server instance: the recommended production setup. Without it, the same limits are counted in memory, **per process**: serverless instances do not share them and a cold start resets them, so it slows down a script without being a fleet-wide guarantee. `RATE_LIMIT_MULTIPLIER` scales every quota; only the end-to-end tests set it (all their requests come from the same address).
 - **Synchronization**: after each mutation, the server sends a content-free notification through Pusher (or, without Pusher, clients poll the server every 3 seconds). Each client first asks for the current step (`/r/<slug>/phase`): if it changed, it navigates straight to the new step's page; otherwise it reloads the current page's state (`router.refresh()`). Navigating directly avoids the blank screen a server redirect would show during the transition.
 - **Typed topics**: the host chooses the answer type of each topic (text, date, period, amount, range, place, list). Input adapts (the phone's date picker, numeric keyboard) and ideas are displayed cleanly ("June 1 – 14, 2027", "From €300 to €500"; in French « Du 1er au 14 juin 2027 », « De 300 € à 500 € »). The "Dates", "Place" and "Budget" suggestions are typed from the start.
   - **Place**: the idea carries a "View on the map" link that opens the installed app (Maps on Apple, Google Maps elsewhere), with no map loaded in Virgule.
@@ -174,7 +175,7 @@ src/
 - **Seat management**: right-click (or click) on an occupied seat, for the person hosting: **hand over hosting** to someone else, or **remove** a person (seat taken by mistake; their ideas and votes go with them).
 - **Gentle reminder**: during voting, everyone sees how many ideas they still have to vote on; the person hosting also sees how many participants have voted, without knowing what. They can also **remind the group to vote** (at most once a minute): only the people who still have ideas left without their vote see it, as a message on their page, and nobody, the person hosting included, learns who.
 - **Room screen**: for a group gathered in one place, the person hosting shows the session on a TV or a projector from the "Show on a big screen" button in the header. No extra link and no seat taken:
-  - **paired with a code**: the phone shows a one-time code (6 unambiguous characters, valid 10 minutes, only its hash stored), typed on the screen at `/present`. The screen then holds a secret of its own in a cookie (`Room.screenToken`, never sent to a page), is no participant, and follows the session while the host keeps the controls on the phone. One screen per session: the host disconnects it from the same dialog, and it goes back to `/present`. Wrong codes count against a per-IP rate limit;
+  - **paired with a code**: the phone shows a one-time code (6 unambiguous characters, valid 10 minutes, only its hash stored), typed on the screen at `/present`. The screen then holds a secret of its own in a cookie (`Room.screenToken`, never sent to a page), is no participant, and follows the session while the host keeps the controls on the phone. One screen per session: the host disconnects it from the same dialog, and it goes back to `/present`. Every try, a wrong code included, counts against a per-IP rate limit and a global one across all IPs;
   - **or on the host's own device**, in a tab of its own (a second display);
   - anyone else opening `/r/<slug>/present` goes back to the session.
 

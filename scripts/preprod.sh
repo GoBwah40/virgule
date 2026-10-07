@@ -18,7 +18,7 @@ set +a
 # `next build` and `next start` also load .env.production.local (production values), but
 # never override a variable that is already set, even if empty: so we set here every one that
 # could point to production. Without Pusher, the app syncs by polling; without Upstash,
-# nothing is rate limited.
+# the rate limits apply in memory, per process.
 export TURSO_AUTH_TOKEN="${TURSO_AUTH_TOKEN:-}"
 export DATABASE_URL="${DATABASE_URL:-}"
 export CRON_SECRET="${CRON_SECRET:-}"

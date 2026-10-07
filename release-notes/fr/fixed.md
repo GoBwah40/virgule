@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.20.2 — 2026-10-07
+
+- Trop d'essais d'affilée pour créer une séance, la rejoindre ou associer un grand écran sont désormais toujours freinés, pour que personne ne puisse trouver le code d'un écran en tâtonnant.
+
 ## 0.20.1 — 2026-10-07
 
 - Le minuteur des idées affiche le même temps restant sur tous les téléphones, même sur un téléphone dont l'horloge a quelques minutes d'écart.

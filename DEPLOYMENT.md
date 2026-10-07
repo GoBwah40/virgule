@@ -86,7 +86,9 @@ Messages sent to Pusher contain no data: they only tell browsers to reload the s
 
 ### Also optional: rate limiting with Upstash
 
-Without Upstash, nothing is limited: a script could create rooms in bulk and fill the database until the nightly purge. With it, the app refuses (with a "You're going a bit fast" message) more than 10 rooms created per hour and 30 joins per 10 minutes from the same IP, and more than 120 actions per minute from the same participant. Limits are in `src/lib/rate-limit.ts`; if Upstash does not answer within a second, requests go through.
+The app refuses (with a "You're going a bit fast" message) more than 10 rooms created per hour, 30 joins and 10 screen pairing attempts per 10 minutes from the same IP, more than 300 pairing attempts per 10 minutes from all IPs together, and more than 120 actions per minute from the same participant. Limits are in `src/lib/rate-limit.ts`; if Upstash does not answer within a second, requests go through.
+
+Without Upstash, the same limits are counted in memory, per server process: each Vercel function instance keeps its own counters and a cold start resets them, so a script spread over several instances, or simply patient, gets more through. Upstash shares the counters across every instance: it is the recommended production setup.
 
 1. Create an account on [upstash.com](https://console.upstash.com), then a **Redis** database in the region closest to Vercel's functions (`eu-west-1`, Ireland). The free plan is enough.
 2. In the database's **REST API** section, note `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.

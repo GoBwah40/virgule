@@ -1134,6 +1134,8 @@ export async function createScreenCode(slug: string): Promise<ScreenCodeResult> 
 export async function pairScreen(input: { code: string }): Promise<ActionResult> {
   // Every try counts, a wrong one included: codes cannot be found by trying them all.
   if (await isRateLimited("pairScreen")) return fail("tooManyRequests");
+  // Then every IP together: many addresses trying codes at once would add up too.
+  if (await isRateLimited("pairScreenGlobal", "all")) return fail("tooManyRequests");
   const code = typeof input?.code === "string" ? normalizeScreenCode(input.code) : null;
   if (!code) return fail("invalidScreenCode");
 
