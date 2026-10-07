@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { compareByScore, isActiveInRound, isQualified, pointsLeft, scoreVotes, topQualified, voteProgress } from "@/lib/results";
+import { compareByScore, isActiveInRound, isQualified, keptInPastRound, pointsLeft, roundResults, scoreVotes, topQualified, voteProgress, } from "@/lib/results";
 
 const votes = (up: number, down: number) => [
   ...Array.from({ length: up }, () => ({ positive: true })),
@@ -113,5 +113,58 @@ describe("points topics", () => {
     expect(pointsLeft(5, [])).toBe(5);
     expect(pointsLeft(3, [3])).toBe(0);
     expect(pointsLeft(3, [4])).toBe(0);
+  });
+});
+
+describe("frozen round results", () => {
+  const points = (...given: number[]) => given.map((p) => ({ positive: true, points: p }));
+
+  it("records whether each idea was kept, under the rule in force", () => {
+    const ideas = [
+      { id: "pizza", votes: votes(2, 0) },
+      { id: "sushi", votes: votes(1, 1) },
+      { id: "tacos", votes: [] },
+    ];
+    expect(roundResults(ideas, true)).toEqual([
+      { ideaId: "pizza", qualified: true },
+      { ideaId: "sushi", qualified: false },
+      { ideaId: "tacos", qualified: false },
+    ]);
+    expect(roundResults(ideas, false).map((r) => r.qualified)).toEqual([true, true, false]);
+  });
+
+  it("keeps any idea with points in a points topic", () => {
+    const ideas = [
+      { id: "a", votes: points(1) },
+      { id: "b", votes: [] },
+    ];
+    expect(roundResults(ideas, true).map((r) => r.qualified)).toEqual([true, false]);
+  });
+
+  it("a tiebreak does not rewrite the kept ideas of the round before", () => {
+    // Round 1: Pizza 2–0 and Sushi 2–0 tied, Tacos 1–0 kept too. The tiebreak (round 2) only keeps
+    // Pizza and Sushi: Tacos is set aside from round 2, yet it was kept in round 1.
+    const round1 = roundResults(
+      [
+        { id: "pizza", votes: votes(2, 0) },
+        { id: "sushi", votes: votes(2, 0) },
+        { id: "tacos", votes: votes(1, 0) },
+      ],
+      true,
+    );
+    const tacos = { createdRound: 1, eliminatedRound: 2 };
+    expect(keptInPastRound(round1.find((r) => r.ideaId === "tacos")?.qualified, tacos, 1)).toBe(true);
+    // Without the frozen result, it would read as dropped.
+    expect(keptInPastRound(undefined, tacos, 1)).toBe(false);
+  });
+
+  it("a frozen result wins over what the next round did", () => {
+    // Dropped in round 1 under the rule then, whatever happened after.
+    expect(keptInPastRound(false, { createdRound: 1, eliminatedRound: null }, 1)).toBe(false);
+  });
+
+  it("falls back to the next round for rounds left before results were frozen", () => {
+    expect(keptInPastRound(undefined, { createdRound: 1, eliminatedRound: null }, 1)).toBe(true);
+    expect(keptInPastRound(undefined, { createdRound: 1, eliminatedRound: 2 }, 1)).toBe(false);
   });
 });

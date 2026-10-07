@@ -124,7 +124,7 @@ release-notes/fr/           Same notes in French (same versions and number of li
 DEPLOYMENT.md               Step-by-step deployment on Vercel + Turso
 messages/en.json            English UI copy (reference, typed keys)
 messages/fr.json            French UI copy (same keys)
-prisma/schema.prisma        Model: Room, Participant, Theme, Idea, Vote, Comment
+prisma/schema.prisma        Model: Room, Participant, Theme, Idea, Vote, Comment, RoundResult
 scripts/migrate-turso.mts   Applies migrations on Turso
 scripts/reset-turso.mts     Empties a Turso database (schema kept)
 scripts/preprod.sh          Local preproduction (production build + preview database)
@@ -186,7 +186,7 @@ src/
 - **Languages**: English and French. The language is, in order: the one picked in the footer (`PreferenceMenu`, saved in the `virgule_locale` cookie), otherwise the first supported language of the device (`Accept-Language` header, `src/i18n/locale.ts`), otherwise English. There is no per-language URL. Exports, the root error page and the release notes follow the language.
 - **Loading and errors**: skeletons with the dimensions of the real content while a step loads (`loading.tsx`), error pages with "Try again" and a way back to the home page, the session header staying visible when the error concerns a step.
 - **Transitions**: step changes animated with React View Transitions (`PhaseTransition`), the header staying in place; soft appearance of new rows (ideas, topics, participants), a bounce on vote, a color fade in the recap. Everything is disabled when the device asks to reduce motion.
-- **Rounds**: an idea carries its creation round (`createdRound`) and, if applicable, the round from which it is set aside (`eliminatedRound`). Votes are recorded per round, which keeps the full history.
+- **Rounds**: an idea carries its creation round (`createdRound`) and, if applicable, the round from which it is set aside (`eliminatedRound`). Votes are recorded per round, which keeps the full history. When a round is left (next round or tiebreak), whether each of its ideas was kept is frozen (`RoundResult`): the recap of a past round, the exports and the shared recap read it, so a later round never rewrites a recap already seen (a tiebreak sets aside ideas that were kept without leading). Rounds left before this existed fall back to whether the idea took part in the next round.
 
 ### Adding a language
 

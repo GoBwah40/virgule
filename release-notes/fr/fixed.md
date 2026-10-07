@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.19.1 — 2026-10-07
+
+- Après un tour de départage, le récap des tours d'avant, les exports et le récap partagé montrent toujours les idées retenues à ce moment-là, au lieu de marquer comme écartées celles qui étaient retenues sans être en tête.
+
 ## 0.12.1 — 2026-10-06
 
 - L'export Markdown montre les prénoms, les sujets et les idées tels qu'ils ont été tapés : des caractères comme * ou [ ne se transforment plus en mise en forme ou en liens, et le nom du fichier porte le même jour que la date indiquée dedans.

@@ -7,7 +7,16 @@ import type { Phase } from "@/generated/prisma/enums";
 import { type CalendarDates, decidedDates } from "@/lib/calendar";
 import { ideaEditableUntil, MAX_COMMENTS_PER_IDEA, roomCapacity } from "@/lib/config";
 import { db } from "@/lib/db";
-import { compareByScore, isActiveInRound, isQualified, scoreVotes, type Score, topQualified, voteProgress } from "@/lib/results";
+import {
+  compareByScore,
+  isActiveInRound,
+  isQualified,
+  keptInPastRound,
+  scoreVotes,
+  type Score,
+  topQualified,
+  voteProgress,
+} from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { getIdeaFormat } from "@/lib/idea-format";
 import { describeIdea, type IdeaFields, readChoiceOptions, type ThemeKind } from "@/lib/idea-value";
@@ -340,7 +349,9 @@ export type RecapRound = {
 
 /**
  * Results of each round, oldest first.
- * - Past rounds: an idea was kept if it took part in the next round.
+ * - Past rounds: as the group saw them when the round was left (`RoundResult`), never rewritten by
+ *   a later round (a tiebreak sets aside ideas that were kept without leading). Rounds left before
+ *   results were frozen: an idea was kept if it took part in the next round.
  * - Current round: the room's current qualification rule applies.
  */
 export async function getRecap(
@@ -353,7 +364,10 @@ export async function getRecap(
     include: {
       ideas: {
         orderBy: { createdAt: "asc" },
-        include: { votes: { select: { round: true, positive: true, points: true } } },
+        include: {
+          votes: { select: { round: true, positive: true, points: true } },
+          roundResults: { select: { round: true, qualified: true } },
+        },
       },
     },
   });
@@ -371,7 +385,7 @@ export async function getRecap(
           const score = scoreVotes(idea.votes.filter((v) => v.round === round));
           const qualified =
             round < room.round
-              ? isActiveInRound(idea, round + 1)
+              ? keptInPastRound(idea.roundResults.find((result) => result.round === round)?.qualified, idea, round)
               : isQualified(score, room.requireNetPositive);
           ideaCount++;
           if (qualified) qualifiedCount++;
