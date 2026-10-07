@@ -107,6 +107,13 @@
       "leave": "Leave the session",
       "leaveConfirm": "Leave the session?",
       "leaveConfirmHint": "Your ideas and votes are deleted and your seat is freed. You can come back with the link if a seat is still free."
+    },
+    "rename": {
+      "open": "Rename the session",
+      "title": "Rename the session",
+      "description": "Everyone sees the new name right away, on the big screen and in the recap too.",
+      "field": "Session name",
+      "submit": "Rename"
     }
   },
   "themes": {

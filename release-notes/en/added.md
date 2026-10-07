@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.20.0 — 2026-10-07
+
+- The person hosting can rename the session at any time until it is over, from the pencil next to its name: everyone sees the new name, on the big screen, in the shared recap and in the exports too.
+
 ## 0.18.0 — 2026-10-06
 
 - The person hosting can turn on comments: while ideas are open, everyone can then leave a short anonymous comment on an idea to clarify it or raise a point before voting; you can remove yours, and the person hosting can remove any of them.

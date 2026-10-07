@@ -148,8 +148,9 @@ async function run(slug: string, fn: () => Promise<void>, goTo?: Phase): Promise
 // ─── Creation / access ─────────────────────────────────────────────────────
 
 const roomSizeSchema = z.number().refine((size) => ROOM_SIZES.includes(size));
+const roomNameSchema = text(LIMITS.roomName);
 const createSchema = z.object({
-  name: text(LIMITS.roomName),
+  name: roomNameSchema,
   pseudo: text(LIMITS.pseudo),
   size: roomSizeSchema.default(DEFAULT_ROOM_SIZE),
 });
@@ -222,6 +223,21 @@ export async function reuseTopics(slug: string): Promise<ActionResult> {
   }
   await setParticipantToken(newRoomSlug, token);
   redirect(`/r/${newRoomSlug}/themes`);
+}
+
+/**
+ * The host renames the session, with the same rule as at creation. Not once it is over: the
+ * session is then read-only, a record that the shared recap and the exports keep as it was.
+ */
+export async function renameRoom(slug: string, name: string): Promise<ActionResult> {
+  const parsed = roomNameSchema.safeParse(name);
+  if (!parsed.success) return fail("invalidInput");
+  return run(slug, async () => {
+    const { room } = await guard(slug, { host: true });
+    // Checked in the update itself: the session may have ended in the meantime.
+    const { count } = await db.room.updateMany({ where: { id: room.id, phase: { not: "CLOSED" } }, data: { name: parsed.data } });
+    if (count === 0) throw new ActionFailure("roomClosed");
+  });
 }
 
 export async function joinRoom(slug: string, input: { pseudo: string }): Promise<ActionResult> {

@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.20.0 — 2026-10-07
+
+- La personne qui anime peut renommer la séance à tout moment jusqu'à la fin, depuis le crayon à côté de son nom : tout le monde voit le nouveau nom, sur le grand écran, dans le bilan partagé et dans les exports aussi.
+
 ## 0.18.0 — 2026-10-06
 
 - La personne qui anime peut activer les commentaires : pendant les idées, chacun peut alors laisser un court commentaire anonyme sur une idée pour la préciser ou soulever un point avant de voter ; tu peux retirer les tiens, et la personne qui anime peut retirer n'importe lequel.
