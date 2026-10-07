@@ -49,6 +49,7 @@ import { pointsLeft } from "@/lib/results";
 import { isBadServerResponse, isNetworkError } from "@/lib/network-error";
 import type { ViewPreference } from "@/lib/view-preference";
 import type { VotingIdea, VotingTheme } from "@/lib/room";
+import { serverNow } from "@/lib/server-clock";
 import { cn } from "@/lib/utils";
 
 /**
@@ -704,7 +705,8 @@ export function AutoRecap({ slug, endsAt }: { slug: string; endsAt: string }) {
         if (again && ++attempts < MAX_ATTEMPTS) timer = setTimeout(ask, 3000);
       });
     // Up to a second and a half later: not every page at the same instant.
-    timer = setTimeout(ask, Math.max(0, new Date(endsAt).getTime() - Date.now()) + Math.random() * 1500);
+    // The end is a server time: waited for on the server's clock, whatever the device's says.
+    timer = setTimeout(ask, Math.max(0, new Date(endsAt).getTime() - serverNow()) + Math.random() * 1500);
     return () => clearTimeout(timer);
   }, [slug, endsAt]);
 

@@ -58,6 +58,8 @@ export type RoomContext =
       me: { id: string; pseudo: string; isHost: boolean } | null;
       /** This browser is the room screen paired by the host (not a participant). */
       isScreen: boolean;
+      /** The server's clock when the room was read (ms): the countdowns correct the device's with it. */
+      serverNow: number;
     };
 
 /** Room + current participant, cached for the duration of a request (layout + page). */
@@ -102,6 +104,7 @@ export const getRoomContext = cache(async (slug: string): Promise<RoomContext> =
     participants: room.participants.map(({ id, pseudo, isHost }) => ({ id, pseudo, isHost })),
     me: meRow ? { id: meRow.id, pseudo: meRow.pseudo, isHost: meRow.isHost } : null,
     isScreen: !!screenToken && screenToken === room.screenToken,
+    serverNow: Date.now(),
   };
 });
 

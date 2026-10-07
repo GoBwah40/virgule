@@ -190,7 +190,7 @@ export default async function PresentPage({ params }: PageProps<"/r/[slug]/prese
         {body}
       </PresentationScreen>
       {/* Same sync as the phones; the page itself shows the current step, so it refreshes in place. */}
-      <RoomLive slug={slug} pusher={pusherClientConfig()} followPhase={false} />
+      <RoomLive slug={slug} pusher={pusherClientConfig()} followPhase={false} serverNow={ctx.serverNow} />
     </>
   );
 }

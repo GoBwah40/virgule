@@ -2,6 +2,11 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.20.1 — 2026-10-07
+
+- Le minuteur des idées affiche le même temps restant sur tous les téléphones, même sur un téléphone dont l'horloge a quelques minutes d'écart.
+- Un téléphone qui sort de veille, revient d'une autre appli ou retrouve sa connexion rattrape tout de suite ce qu'on a fait entre-temps, sans attendre ta prochaine action.
+
 ## 0.19.1 — 2026-10-07
 
 - Après un tour de départage, le récap des tours d'avant, les exports et le récap partagé montrent toujours les idées retenues à ce moment-là, au lieu de marquer comme écartées celles qui étaient retenues sans être en tête.

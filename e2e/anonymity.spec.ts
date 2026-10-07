@@ -42,8 +42,12 @@ async function recordAnswers(page: Page, url: RegExp = /./) {
 const containing = (answers: { url: string; body: string }[], needle: string) =>
   answers.filter((answer) => answer.body.includes(needle)).map((answer) => answer.url);
 
-/** A page update without what Next.js draws at random for each answer. */
-const steady = (body: string) => body.replace(/[\w-]{21}(?=[a-z]")/g, "<id>");
+/**
+ * A page update without what changes on each answer: what Next.js draws at random, and the
+ * server's clock (which the countdowns follow).
+ */
+const steady = (body: string) =>
+  body.replace(/[\w-]{21}(?=[a-z]")/g, "<id>").replace(/"serverNow":\d+/g, '"serverNow":<now>');
 
 test("no page ever receives a participant's token or who suggested an idea", async ({ page, openAsGuest }) => {
   test.slow();
@@ -171,10 +175,10 @@ test("during the ideas phase, another person's vote changes nothing in Lea's pag
 
 test("the step endpoint answers participants only", async ({ page, openAsGuest }) => {
   const { link } = await setUpSession(page, openAsGuest);
-  // Sam's page, with his cookie: the current step, and nothing else.
+  // Sam's page, with his cookie: the current step and the server's clock, nothing else.
   const own = await page.request.get(`${link}/phase`);
   expect(own.status()).toBe(200);
-  expect(await own.json()).toEqual({ phase: "THEMES" });
+  expect(await own.json()).toEqual({ phase: "THEMES", now: expect.any(Number) });
 
   // Someone with the link who has not joined: nothing to learn, not even that the session exists.
   const stranger = await openAsGuest(link);

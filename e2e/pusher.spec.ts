@@ -1,7 +1,7 @@
 import type { Page, WebSocketRoute } from "@playwright/test";
 
 import type { OpenAsGuest } from "./helpers";
-import { addTopic, expect, LIVE_TIMEOUT, setUpSession, startIdeas, test } from "./helpers";
+import { addTopic, expect, LIVE_TIMEOUT, setUpSession, setVisibility, startIdeas, test } from "./helpers";
 
 // Runs on the second server (playwright.config.ts), where the browser gets a Pusher key. The test
 // plays the Pusher server: the app's server sends nothing, so each test sends the notification
@@ -120,6 +120,36 @@ test("a step change missed while disconnected is followed on reconnecting", asyn
 
   pusher.reconnect();
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: AT_ONCE });
+});
+
+test("a tab shown again catches up on what it missed, the connection still up", async ({ page, openAsGuest }) => {
+  const { guest, pusher } = await withPusher(page, openAsGuest);
+  await setVisibility(guest, "hidden");
+  // No notification: lost while the phone was in another app.
+  await addTopic(page, "Drinks");
+
+  await setVisibility(guest, "visible");
+  await expect(topic(guest, "Drinks")).toBeVisible({ timeout: AT_ONCE });
+  expect(pusher.connections).toBe(1);
+});
+
+test("switching back and forth between tabs does not refresh the page in a loop", async ({ page, openAsGuest }) => {
+  const { guest } = await withPusher(page, openAsGuest);
+  let updates = 0;
+  guest.on("request", (request) => {
+    if (new URL(request.url()).pathname.endsWith("/phase")) updates++;
+  });
+  // Shown again ten times in four seconds.
+  for (let i = 0; i < 10; i++) {
+    await setVisibility(guest, "hidden");
+    await guest.waitForTimeout(200);
+    await setVisibility(guest, "visible");
+    await guest.waitForTimeout(200);
+  }
+  await guest.waitForTimeout(2500);
+  // One at once, then at most one every two seconds (and the last one is never lost).
+  expect(updates).toBeGreaterThanOrEqual(1);
+  expect(updates).toBeLessThanOrEqual(4);
 });
 
 test("page updates keep the same Pusher connection", async ({ page, openAsGuest }) => {

@@ -2,6 +2,11 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.20.1 — 2026-10-07
+
+- The ideas timer shows the same time left on every phone, even one whose clock is a few minutes off.
+- A phone coming back from sleep, from another app or from a lost connection catches up at once on what the group did meanwhile, without waiting for your next tap.
+
 ## 0.19.1 — 2026-10-07
 
 - After a tiebreak round, the recap of the rounds before it, the exports and the shared recap keep showing the ideas kept back then, instead of marking as dropped those that were kept without leading.
