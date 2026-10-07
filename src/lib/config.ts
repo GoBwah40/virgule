@@ -40,6 +40,8 @@ export const MAX_COMMENTS_PER_ROOM = 50;
 export const POLL_INTERVAL_MS = 3000;
 /** Safety net when Pusher is active (missed message, reconnection…). */
 export const SAFETY_POLL_INTERVAL_MS = 30000;
+/** Catching up (tab shown again, connection back) happens at most once in this interval. */
+export const CATCH_UP_GAP_MS = 2000;
 
 /** Validity of a room screen pairing code, shown on the host's phone. */
 export const SCREEN_CODE_TTL_MINUTES = 10;

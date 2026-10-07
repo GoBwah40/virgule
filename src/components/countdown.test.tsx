@@ -1,6 +1,7 @@
 import { act, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { recordClockSample, resetServerClock } from "@/lib/server-clock";
 import { renderUi } from "@/test/render";
 
 import { Countdown, formatRemaining } from "./countdown";
@@ -21,7 +22,10 @@ describe("Countdown", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2027-06-12T10:00:00Z"));
   });
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    resetServerClock();
+    vi.useRealTimers();
+  });
 
   it("counts down every second then announces the end", () => {
     renderUi(<Countdown endsAt="2027-06-12T10:00:02Z" labels={labels} />);
@@ -40,6 +44,31 @@ describe("Countdown", () => {
     expect(live()).toHaveTextContent("Time left 2:00");
     act(() => vi.advanceTimersByTime(30_000));
     expect(live()).toHaveTextContent("Time left 1:00");
+  });
+});
+
+describe("Countdown, on a device whose clock is off", () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    // The device thinks it is 10:03; the server, 10:00.
+    vi.setSystemTime(new Date("2027-06-12T10:03:00Z"));
+  });
+  afterEach(() => {
+    resetServerClock();
+    vi.useRealTimers();
+  });
+
+  it("shows the time left on the server's clock", () => {
+    recordClockSample({ offset: -180_000, uncertainty: 50 });
+    renderUi(<Countdown endsAt="2027-06-12T10:05:00Z" labels={labels} />);
+    expect(screen.getByRole("timer")).toHaveTextContent("5:00");
+  });
+
+  it("corrects itself as soon as the server's clock is known", () => {
+    renderUi(<Countdown endsAt="2027-06-12T10:05:00Z" labels={labels} />);
+    expect(screen.getByRole("timer")).toHaveTextContent("2:00");
+    act(() => recordClockSample({ offset: -180_000, uncertainty: 50 }));
+    expect(screen.getByRole("timer")).toHaveTextContent("5:00");
   });
 });
 

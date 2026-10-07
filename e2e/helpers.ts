@@ -91,6 +91,14 @@ export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
   },
 });
 
+/** Sets what `document.visibilityState` reports and tells the page, as the browser would. */
+export const setVisibility = (page: Page, state: DocumentVisibilityState) =>
+  page.evaluate((state) => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
+    Object.defineProperty(document, "hidden", { configurable: true, get: () => state === "hidden" });
+    document.dispatchEvent(new Event("visibilitychange"));
+  }, state);
+
 /** Fills in the join form and waits for the current step of the session. */
 export async function join(page: Page, pseudo: string) {
   await fillAndSubmit([[page.getByLabel("What's your first name?"), pseudo]], page.getByRole("button", { name: "Join the session" }));

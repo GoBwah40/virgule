@@ -2,18 +2,23 @@ import type { CDPSession, Page } from "@playwright/test";
 
 import { POLL_INTERVAL_MS } from "../src/lib/config";
 import type { OpenAsGuest } from "./helpers";
-import { elapseTimer, expect, expireRoom, idea, LIVE_TIMEOUT, pick, seeRecap, setUpSession, startIdeas, suggestIdea, test } from "./helpers";
+import {
+  elapseTimer,
+  expect,
+  expireRoom,
+  idea,
+  LIVE_TIMEOUT,
+  pick,
+  seeRecap,
+  setUpSession,
+  setVisibility,
+  startIdeas,
+  suggestIdea,
+  test,
+} from "./helpers";
 
 // A phone going to sleep: the page is hidden, then frozen (no timer, no request). On waking up,
 // it becomes visible again and must show what the group did meanwhile.
-
-/** Sets what `document.visibilityState` reports and tells the page, as the browser would. */
-const setVisibility = (page: Page, state: DocumentVisibilityState) =>
-  page.evaluate((state) => {
-    Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
-    Object.defineProperty(document, "hidden", { configurable: true, get: () => state === "hidden" });
-    document.dispatchEvent(new Event("visibilitychange"));
-  }, state);
 
 type Sleeping = { page: Page; cdp: CDPSession; requests: () => number };
 

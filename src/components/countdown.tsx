@@ -3,6 +3,7 @@
 import { Hourglass, TimerOff } from "lucide-react";
 import { useSyncExternalStore } from "react";
 
+import { serverNow, subscribeServerClock } from "@/lib/server-clock";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -20,7 +21,10 @@ let timer: ReturnType<typeof setInterval> | undefined;
 function subscribe(listener: () => void) {
   listeners.add(listener);
   timer ??= setInterval(() => listeners.forEach((l) => l()), 1000);
+  // A better estimate of the server's clock shows at once, not at the next tick.
+  const unsubscribeClock = subscribeServerClock(listener);
   return () => {
+    unsubscribeClock();
     listeners.delete(listener);
     if (listeners.size === 0) {
       clearInterval(timer);
@@ -28,8 +32,9 @@ function subscribe(listener: () => void) {
     }
   };
 }
-// Rounded to the second: the snapshot only changes once per second.
-const nowSeconds = () => Math.floor(Date.now() / 1000);
+// The server's time, not the device's (its clock may be off), rounded to the second: the
+// snapshot only changes once per second.
+const nowSeconds = () => Math.floor(serverNow() / 1000);
 
 /** "4:05"; beyond an hour, "1:02:05". */
 export function formatRemaining(seconds: number) {
@@ -43,6 +48,8 @@ export function formatRemaining(seconds: number) {
 /**
  * Discreet countdown: neutral, then mango during the last minute, then the
  * expired label. Screen readers hear the time left once a minute, not every second.
+ * `endsAt` is a server time: the time left follows the server's clock as estimated by
+ * `server-clock`, so a phone whose clock is off still shows the right time.
  */
 export function Countdown({ endsAt, labels, size = "md", className }: Props) {
   const now = useSyncExternalStore(subscribe, nowSeconds, nowSeconds);
@@ -76,7 +83,7 @@ export function Countdown({ endsAt, labels, size = "md", className }: Props) {
           <span className="sr-only sm:not-sr-only sm:text-muted-foreground" aria-hidden>
             {labels.running}
           </span>
-          {/* Server and browser clocks differ slightly: no hydration warning. */}
+          {/* The second may have changed since the server rendered it: no hydration warning. */}
           <span className="font-mono tabular-nums" aria-hidden suppressHydrationWarning>
             {formatRemaining(remaining)}
           </span>

@@ -15,9 +15,10 @@ import {
   vote,
 } from "./helpers";
 
-// The countdown is computed in each browser from the end time the server sends. To make time
-// pass, the end is moved into the past in the database (server and browsers stay in step),
-// or the browser clock is moved forward when only the display matters.
+// The countdown is computed in each browser from the end time the server sends, on the server's
+// clock as the browser estimates it. To make time pass, the end is moved into the past in the
+// database (server and browsers stay in step), or the browser clock is moved forward when only
+// the display matters (a clock already off when the page loads is corrected, not one moved later).
 
 const timer = (page: Page) => page.getByRole("timer", { name: "Time left for ideas" });
 
@@ -59,6 +60,27 @@ test("the countdown runs down for everyone, from the chosen length", async ({ pa
   const before = await secondsLeft(guest);
   await expect.poll(() => secondsLeft(guest)).toBeLessThan(before);
 });
+
+for (const [off, minutes] of [
+  ["ahead", 10],
+  ["behind", -10],
+] as const) {
+  test(`a phone whose clock is ten minutes ${off} still shows the right time left`, async ({ page, openAsGuest }) => {
+    const { guest } = await startWithTimer(page, openAsGuest);
+    await guest.clock.install({ time: Date.now() + minutes * 60_000 });
+    await guest.reload();
+
+    // Counted down by the page itself, so on the phone's clock, corrected.
+    const first = await secondsLeft(guest);
+    await expect.poll(() => secondsLeft(guest)).toBeLessThan(first);
+    expect(await secondsLeft(guest)).toBeGreaterThan(4 * 60);
+    expect(await secondsLeft(guest)).toBeLessThanOrEqual(5 * 60 + ROUNDING);
+    // Still right once the page has measured the server's clock (polling every 3 s).
+    await guest.waitForTimeout(4000);
+    expect(await secondsLeft(guest)).toBeGreaterThan(4 * 60);
+    expect(await secondsLeft(guest)).toBeLessThanOrEqual(5 * 60 + ROUNDING);
+  });
+}
 
 test("only the host adds time or stops the timer", async ({ page, openAsGuest }) => {
   const { guest } = await startWithTimer(page, openAsGuest);
