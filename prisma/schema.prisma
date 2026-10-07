@@ -172,6 +172,7 @@ model Idea {
   editedAt         DateTime?
   votes            Vote[]
   comments         Comment[]
+  roundResults     RoundResult[]
 
   @@index([roomId])
   @@index([themeId])
@@ -194,6 +195,19 @@ model Vote {
 
   @@unique([ideaId, participantId, round])
   @@index([participantId])
+}
+
+/// Whether an idea was kept in a round, frozen when the group leaves that round (next round or
+/// tiebreak): the recap of a past round, the exports and the shared recap keep showing what the
+/// group saw, whatever later rounds do. No row (a round left before this table existed): the
+/// recap falls back to whether the idea took part in the next round.
+model RoundResult {
+  ideaId    String
+  idea      Idea     @relation(fields: [ideaId], references: [id], onDelete: Cascade)
+  round     Int
+  qualified Boolean
+
+  @@id([ideaId, round])
 }
 
 /// Short comment on an idea, during the IDEAS phase: to clarify it or raise a point before voting.

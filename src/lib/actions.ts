@@ -31,7 +31,7 @@ import {
 import { db } from "@/lib/db";
 import { notifyRoom } from "@/lib/realtime/server";
 import { ideaKey, type IdeaInput, parseChoiceOptions, parseIdeaInput, readChoiceOptions, textKey, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
-import { isActiveInRound, isQualified, scoreVotes, topQualified } from "@/lib/results";
+import { isActiveInRound, roundResults, scoreVotes, topQualified } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { isRateLimited } from "@/lib/rate-limit";
 import { getRoomContext } from "@/lib/room";
@@ -898,6 +898,18 @@ export async function setRequireNetPositive(slug: string, value: boolean) {
   });
 }
 
+/**
+ * Freezes the result of the round being left, as its recap last showed it: later rounds (a
+ * tiebreak above all) must not rewrite the recap of a round already seen, nor its exports. Any
+ * earlier result of the same round is replaced (written once per round left, but safe to redo).
+ */
+function freezeRound(room: { id: string; round: number }, results: { ideaId: string; qualified: boolean }[]) {
+  return [
+    db.roundResult.deleteMany({ where: { round: room.round, idea: { roomId: room.id } } }),
+    db.roundResult.createMany({ data: results.map((result) => ({ ...result, round: room.round })) }),
+  ];
+}
+
 /** Eliminates the ideas not kept, then opens the next round (votes reset). */
 export async function startNextRound(slug: string) {
   return run(slug, async () => {
@@ -906,11 +918,11 @@ export async function startNextRound(slug: string) {
       where: { roomId: room.id, eliminatedRound: null },
       include: { votes: { where: { round: room.round }, select: { positive: true, points: true } } },
     });
-    const eliminated = ideas
-      .filter((idea) => !isQualified(scoreVotes(idea.votes), room.requireNetPositive))
-      .map((idea) => idea.id);
+    const results = roundResults(ideas, room.requireNetPositive);
+    const eliminated = results.filter((result) => !result.qualified).map((result) => result.ideaId);
     const nextRound = room.round + 1;
     await db.$transaction([
+      ...freezeRound(room, results),
       db.idea.updateMany({ where: { id: { in: eliminated } }, data: { eliminatedRound: nextRound } }),
       db.room.update({
         where: { id: room.id },
@@ -931,10 +943,13 @@ export async function startTiebreakRound(slug: string) {
       where: { roomId: room.id, eliminatedRound: null },
       include: { votes: { where: { round: room.round }, select: { positive: true, points: true } } },
     });
-    const scored = ideas.map((idea) => {
-      const score = scoreVotes(idea.votes);
-      return { id: idea.id, themeId: idea.themeId, score, qualified: isQualified(score, room.requireNetPositive) };
-    });
+    const results = roundResults(ideas, room.requireNetPositive);
+    const scored = ideas.map((idea, index) => ({
+      id: idea.id,
+      themeId: idea.themeId,
+      score: scoreVotes(idea.votes),
+      qualified: results[index].qualified,
+    }));
     const byTheme = new Map<string, typeof scored>();
     for (const idea of scored) byTheme.set(idea.themeId, [...(byTheme.get(idea.themeId) ?? []), idea]);
     const kept = new Set<string>();
@@ -948,6 +963,7 @@ export async function startTiebreakRound(slug: string) {
 
     const nextRound = room.round + 1;
     await db.$transaction([
+      ...freezeRound(room, results),
       db.idea.updateMany({
         where: { id: { in: scored.filter((idea) => !kept.has(idea.id)).map((idea) => idea.id) } },
         data: { eliminatedRound: nextRound },

@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.19.1 — 2026-10-07
+
+- After a tiebreak round, the recap of the rounds before it, the exports and the shared recap keep showing the ideas kept back then, instead of marking as dropped those that were kept without leading.
+
 ## 0.12.1 — 2026-10-06
 
 - The Markdown export shows names, topics and ideas exactly as typed: characters such as * or [ no longer turn into formatting or links, and the file name carries the same day as the date inside the file.

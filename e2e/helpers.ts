@@ -271,7 +271,6 @@ export async function expireScreenCode(link: string) {
 
 /** Comments of the session as stored, with their author: what must never reach a browser. */
 export async function commentRows(link: string) {
-  await ready;
   const { rows } = await db.execute({
     sql: 'SELECT c.id, c."authorId", c.content FROM "Comment" c JOIN "Room" r ON r.id = c."roomId" WHERE r.slug = ?',
     args: [slugOf(link)],

@@ -38,6 +38,30 @@ export function isActiveInRound(
   return idea.createdRound <= round && (idea.eliminatedRound === null || idea.eliminatedRound > round);
 }
 
+/**
+ * Result of a round as the group last saw it in its recap: whether each of its ideas was kept,
+ * under the rule in force. Frozen when the round is left (next round or tiebreak), so later
+ * rounds never rewrite it: a tiebreak sets aside ideas that were kept without leading.
+ */
+export function roundResults(
+  ideas: { id: string; votes: VoteLike[] }[],
+  requireNetPositive: boolean,
+): { ideaId: string; qualified: boolean }[] {
+  return ideas.map((idea) => ({ ideaId: idea.id, qualified: isQualified(scoreVotes(idea.votes), requireNetPositive) }));
+}
+
+/**
+ * Was an idea kept in a past round: its frozen result, or, for a round left before results were
+ * frozen (`frozen` undefined), whether it took part in the next round.
+ */
+export function keptInPastRound(
+  frozen: boolean | undefined,
+  idea: { createdRound: number; eliminatedRound: number | null },
+  round: number,
+): boolean {
+  return frozen ?? isActiveInRound(idea, round + 1);
+}
+
 /** Recap sort: best net score, then most "for", then creation order (points topics: most points). */
 export function compareByScore(a: Score, b: Score): number {
   return b.net - a.net || b.up - a.up;
