@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.20.2 — 2026-10-07
+
+- Too many tries in a row at creating a session, joining one or pairing a big screen are always slowed down now, so nobody can find a screen code by guessing.
+
 ## 0.20.1 — 2026-10-07
 
 - The ideas timer shows the same time left on every phone, even one whose clock is a few minutes off.

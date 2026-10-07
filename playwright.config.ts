@@ -15,11 +15,15 @@ const offline = {
   NEXT_PUBLIC_PUSHER_CLUSTER: "",
   UPSTASH_REDIS_REST_URL: "",
   UPSTASH_REDIS_REST_TOKEN: "",
+  // Without Upstash, the limits apply in memory. Every test comes from the same address (hundreds
+  // of rooms created, joined and paired): the quotas are scaled up rather than switched off.
+  RATE_LIMIT_MULTIPLIER: "1000",
 };
 
 // End-to-end tests: the production build of the app, against a dedicated SQLite database
 // (`e2e.db`, recreated on each run). Every external service is switched off: no Turso, no
-// Pusher (the app syncs by polling, except on the second server below), no rate limiting.
+// Pusher (the app syncs by polling, except on the second server below), no Upstash (the
+// in-memory rate limits apply, scaled up).
 // Production build rather than `next dev`: dev renders too slowly once several sessions poll
 // at once (page refreshes took up to 14 s), and the tests waiting on them failed at random.
 export default defineConfig({

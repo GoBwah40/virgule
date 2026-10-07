@@ -34,6 +34,11 @@ const configureUpstash = () => {
   vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "token");
 };
 
+const withoutUpstash = () => {
+  vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
+  vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+};
+
 describe("clientIpFrom", () => {
   it("takes the first entry of x-forwarded-for", async () => {
     const { clientIpFrom } = await load();
@@ -48,12 +53,31 @@ describe("clientIpFrom", () => {
 });
 
 describe("isRateLimited", () => {
-  it("limits nothing without Upstash configured", async () => {
-    vi.stubEnv("UPSTASH_REDIS_REST_URL", "");
-    vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "");
+  it("applies the same limits in memory without Upstash configured", async () => {
+    withoutUpstash();
     const { isRateLimited } = await load();
-    expect(await isRateLimited("createRoom")).toBe(false);
+    for (let i = 0; i < 10; i++) expect(await isRateLimited("pairScreen")).toBe(false);
+    expect(await isRateLimited("pairScreen")).toBe(true);
+    // Another key, another bucket: counted apart.
+    expect(await isRateLimited("pairScreen", "198.51.100.2")).toBe(false);
+    expect(await isRateLimited("joinRoom")).toBe(false);
     expect(limit).not.toHaveBeenCalled();
+  });
+
+  it("scales every quota with RATE_LIMIT_MULTIPLIER", async () => {
+    withoutUpstash();
+    vi.stubEnv("RATE_LIMIT_MULTIPLIER", "2");
+    const { isRateLimited } = await load();
+    for (let i = 0; i < 20; i++) expect(await isRateLimited("createRoom")).toBe(false);
+    expect(await isRateLimited("createRoom")).toBe(true);
+  });
+
+  it("ignores an invalid RATE_LIMIT_MULTIPLIER", async () => {
+    withoutUpstash();
+    vi.stubEnv("RATE_LIMIT_MULTIPLIER", "-5");
+    const { isRateLimited } = await load();
+    for (let i = 0; i < 10; i++) expect(await isRateLimited("createRoom")).toBe(false);
+    expect(await isRateLimited("createRoom")).toBe(true);
   });
 
   it("blocks once the quota is used up, keyed by IP by default", async () => {
