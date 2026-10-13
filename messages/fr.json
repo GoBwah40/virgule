@@ -118,9 +118,11 @@
       "remove": "Retirer de la séance",
       "removeConfirm": "Retirer {name} de la séance ?",
       "removeConfirmHint": "Ses idées et ses votes sont supprimés. {name} pourra revenir avec le lien s'il reste une place.",
+      "removeDisabled": "Plus possible après le premier bilan : ses idées et ses votes comptent dans les résultats.",
       "leave": "Quitter la séance",
       "leaveConfirm": "Quitter la séance ?",
-      "leaveConfirmHint": "Tes idées et tes votes sont supprimés et ta place est libérée. Tu pourras revenir avec le lien s'il reste une place."
+      "leaveConfirmHint": "Tes idées et tes votes sont supprimés et ta place est libérée. Tu pourras revenir avec le lien s'il reste une place.",
+      "leaveDisabled": "Plus possible après le premier bilan : tes idées et tes votes comptent dans les résultats."
     },
     "rename": {
       "open": "Renommer la séance",

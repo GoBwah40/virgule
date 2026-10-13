@@ -1,7 +1,7 @@
 "use client";
 
 import { Crown, type LucideIcon, Plus } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import {
   DropdownMenu,
@@ -17,7 +17,14 @@ import { cn } from "@/lib/utils";
 
 export type Seat = { id: string; name: string; isMe?: boolean; isHost?: boolean };
 
-type SeatAction = { id: string; label: string; icon: LucideIcon; destructive?: boolean };
+type SeatAction = {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  destructive?: boolean;
+  /** Shown but not selectable: the reason is written under the label. */
+  disabledReason?: string;
+};
 
 /** Menu for a taken seat, opened by right click, click or keyboard. */
 type SeatMenu = {
@@ -167,19 +174,41 @@ function SeatMenuTrigger({ seat, menu, label, children }: { seat: Seat; menu: Se
       <DropdownMenuContent className="min-w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel>{label}</DropdownMenuLabel>
-          {menu.actions(seat).map(({ id, label: actionLabel, icon: Icon, destructive }) => (
-            <DropdownMenuItem
-              key={id}
-              variant={destructive ? "destructive" : "default"}
-              className="min-h-11"
-              onClick={() => menu.onSelect(seat, id)}
-            >
-              <Icon />
-              {actionLabel}
-            </DropdownMenuItem>
+          {menu.actions(seat).map((action) => (
+            <SeatMenuItem key={action.id} action={action} onSelect={() => menu.onSelect(seat, action.id)} />
           ))}
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>
+  );
+}
+
+function SeatMenuItem({ action: { label, icon: Icon, destructive, disabledReason }, onSelect }: { action: SeatAction; onSelect: () => void }) {
+  const reasonId = useId();
+  if (!disabledReason) {
+    return (
+      <DropdownMenuItem variant={destructive ? "destructive" : "default"} className="min-h-11" onClick={onSelect}>
+        <Icon />
+        {label}
+      </DropdownMenuItem>
+    );
+  }
+  // Only the icon and label fade: the reason underneath stays readable.
+  return (
+    <DropdownMenuItem
+      variant={destructive ? "destructive" : "default"}
+      disabled
+      aria-label={label}
+      aria-describedby={reasonId}
+      className="min-h-11 items-start py-2 data-disabled:opacity-100"
+    >
+      <Icon className="mt-0.5 opacity-50" />
+      <span className="grid gap-0.5">
+        <span className="opacity-50">{label}</span>
+        <span id={reasonId} className="text-xs text-muted-foreground">
+          {disabledReason}
+        </span>
+      </span>
+    </DropdownMenuItem>
   );
 }

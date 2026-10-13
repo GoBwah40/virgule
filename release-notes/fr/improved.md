@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.3 — 2026-10-13
+
+- À partir du premier bilan, retirer quelqu'un et quitter la séance restent visibles mais désactivés, avec la raison.
+
 ## 0.21.2 — 2026-10-13
 
 - Les fenêtres s'ouvrent avec un mouvement court et doux, et désactiver le lien de partage ou déconnecter l'écran de la salle demande confirmation dans la même fenêtre au lieu d'en ouvrir une deuxième par-dessus.

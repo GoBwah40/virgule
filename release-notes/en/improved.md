@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.3 — 2026-10-13
+
+- From the first recap on, removing someone and leaving the session stay visible but disabled, and say why.
+
 ## 0.21.2 — 2026-10-13
 
 - Dialogs open with a short, smooth motion, and turning off the share link or disconnecting the room screen asks inside the same dialog instead of opening a second one on top.

@@ -82,16 +82,20 @@ test("from the first recap on, seats are frozen so the results stay as voted", a
   await seeRecap(page);
   await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
 
-  // The host can still hand over hosting, but no longer remove anyone.
+  // The host can still hand over hosting, but no longer remove anyone: the option says why.
   await page.getByRole("button", { name: "Lea's seat: options" }).click();
   await expect(page.getByRole("menuitem", { name: "Hand over hosting" })).toBeVisible();
-  await expect(page.getByRole("menuitem", { name: "Remove from the session" })).toHaveCount(0);
+  const remove = page.getByRole("menuitem", { name: "Remove from the session" });
+  await expect(remove).toHaveAttribute("aria-disabled", "true");
+  await expect(remove).toHaveAccessibleDescription("No longer possible after the first recap: their ideas and votes count in the results.");
   await page.keyboard.press("Escape");
 
-  // Nor can the guest leave: their seat has no options any more.
-  await expect(guest.getByRole("button", { name: "Leave the session" })).toHaveCount(0);
-  await expect(guest.getByRole("button", { name: "Lea's seat: options" })).toHaveCount(0);
-  await expect(guest.getByLabel("Lea · you")).toBeVisible();
+  // Nor can the guest leave: the header button and their seat's option are disabled, with the reason.
+  await expect(guest.getByRole("button", { name: "Leave the session" })).toBeDisabled();
+  await guest.getByRole("button", { name: "Lea's seat: options" }).click();
+  const leave = guest.getByRole("menuitem", { name: "Leave the session" });
+  await expect(leave).toHaveAttribute("aria-disabled", "true");
+  await expect(leave).toHaveAccessibleDescription("No longer possible after the first recap: your ideas and votes count in the results.");
 });
 
 test("the invite link can be copied", async ({ page, openAsGuest }) => {
@@ -135,7 +139,7 @@ test("reopening the vote after the recap keeps the seats frozen", async ({ page,
   // Still round 1, but the results were seen: nobody leaves, nobody is removed.
   await page.getByRole("button", { name: "Lea's seat: options" }).click();
   await expect(page.getByRole("menuitem", { name: "Hand over hosting" })).toBeVisible();
-  await expect(page.getByRole("menuitem", { name: "Remove from the session" })).toHaveCount(0);
+  await expect(page.getByRole("menuitem", { name: "Remove from the session" })).toHaveAttribute("aria-disabled", "true");
   await page.keyboard.press("Escape");
-  await expect(guest.getByRole("button", { name: "Leave the session" })).toHaveCount(0);
+  await expect(guest.getByRole("button", { name: "Leave the session" })).toBeDisabled();
 });
