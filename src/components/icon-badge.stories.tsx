@@ -13,4 +13,4 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Period: Story = {};
-export const Range: Story = { args: { icon: Coins, label: "Range" } };
+export const Range: Story = { args: { icon: Coins, label: "Amount range" } };

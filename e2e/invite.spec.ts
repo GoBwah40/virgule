@@ -47,7 +47,7 @@ test("the QR code opens the session's join screen", async ({ page, openAsGuest }
 
 test("the QR code stays dark on white in dark mode, so it still scans", async ({ page, openAsGuest }) => {
   const { link } = await setUpSession(page, openAsGuest);
-  await choose(page, "Theme", "Dark");
+  await choose(page, "Appearance", "Dark");
   await openInvite(page);
 
   const frame = page.getByRole("dialog").getByRole("img", { name: "QR code for the invite link" }).locator("..");

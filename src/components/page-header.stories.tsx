@@ -17,7 +17,7 @@ export const WithActions: Story = {
   args: {
     actions: (
       <>
-        <Button>See the recap</Button>
+        <Button>Go to the recap</Button>
         <Button variant="outline">Edit the topics</Button>
       </>
     ),

@@ -13,7 +13,7 @@ test.describe("theme", () => {
   test("follows the device until someone picks one", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
-    await expect(page.getByRole("button", { name: "Theme, Same as device" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Appearance, Same as device" })).toBeVisible();
     await expect(html(page)).not.toHaveAttribute("data-theme");
     expect(await background(page)).toBe(DARK_BACKGROUND);
     // Native fields (date picker…) follow too.
@@ -28,10 +28,10 @@ test.describe("theme", () => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
 
-    await choose(page, "Theme", "Dark");
+    await choose(page, "Appearance", "Dark");
     await expect(html(page)).toHaveAttribute("data-theme", "dark");
     await expect.poll(() => background(page)).toBe(DARK_BACKGROUND);
-    await expect(page.getByRole("button", { name: "Theme, Dark" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Appearance, Dark" })).toBeVisible();
 
     // Rendered dark by the server from the first paint, on every page.
     const link = await createRoom(page, { name: "Night owls", host: "Sam" });
@@ -46,11 +46,11 @@ test.describe("theme", () => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
 
-    await choose(page, "Theme", "Light");
+    await choose(page, "Appearance", "Light");
     await expect(html(page)).toHaveAttribute("data-theme", "light");
     await expect.poll(() => background(page)).toBe(LIGHT_BACKGROUND);
 
-    await choose(page, "Theme", "Same as device");
+    await choose(page, "Appearance", "Same as device");
     await expect(html(page)).not.toHaveAttribute("data-theme");
     await expect.poll(() => background(page)).toBe(DARK_BACKGROUND);
     await page.reload();
@@ -93,7 +93,7 @@ test.describe("language", () => {
 
     await choose(page, "Language", "Français");
     await expect(page.getByRole("heading", { name: "Sur quoi faut-il trancher ?" })).toBeVisible();
-    await expect(page.getByText("Ajoute les sujets à décider ensemble, puis lance les idées.")).toBeVisible();
+    await expect(page.getByText("Ajoute les sujets à décider ensemble, puis passe aux idées.")).toBeVisible();
     // The session name is not translated.
     await expect(page.getByRole("heading", { level: 1, name: "Friday night" })).toBeVisible();
 

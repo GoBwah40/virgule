@@ -63,13 +63,13 @@ test("the ideas cannot start without a topic", async ({ page, openAsGuest }) => 
   await expect(page.getByRole("heading", { name: "What do we need to decide?" })).toBeVisible();
   await expect(page.getByText("No topics yet.")).toBeVisible();
   await expect(page.getByText("Add at least one topic to get started.")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Start the ideas" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Move on to ideas" })).toBeDisabled();
 
   // The guest can only suggest: no editor, no start.
   await expect(guest.getByText("Sam is preparing the topics, and you can suggest some. What comes next will show up here automatically.")).toBeVisible();
   await expect(guest.getByText("No topics yet.")).toBeVisible();
   await expect(guest.getByRole("button", { name: "Add the topic" })).toHaveCount(0);
-  await expect(guest.getByRole("button", { name: "Start the ideas" })).toHaveCount(0);
+  await expect(guest.getByRole("button", { name: "Move on to ideas" })).toHaveCount(0);
 });
 
 test("a topic with details and an answer type shows up for the guest", async ({ page, openAsGuest }) => {
@@ -84,7 +84,7 @@ test("a topic with details and an answer type shows up for the guest", async ({ 
   // The form is emptied for the next topic.
   await expect(topic(page, "When do we leave?")).toBeVisible();
   await expect(page.getByLabel("Topic", { exact: true })).toHaveValue("");
-  await expect(page.getByRole("button", { name: "Start the ideas" })).toBeEnabled();
+  await expect(page.getByRole("button", { name: "Move on to ideas" })).toBeEnabled();
 
   const row = topic(guest, "When do we leave?");
   await expect(row).toBeVisible({ timeout: LIVE_TIMEOUT });
@@ -94,13 +94,13 @@ test("a topic with details and an answer type shows up for the guest", async ({ 
 
 test("a suggested topic is added in one tap", async ({ page, openAsGuest }) => {
   await setUpEmpty(page, openAsGuest);
-  const suggestions = page.getByRole("list", { name: "Topic ideas" });
+  const suggestions = page.getByRole("list", { name: "Common topics" });
 
   await suggestions.getByRole("button", { name: "Budget" }).click();
 
   const row = topic(page, "Budget");
   await expect(row.getByText("How much are we ready to spend?")).toBeVisible();
-  await expect(row.getByText("Range")).toBeVisible();
+  await expect(row.getByText("Amount range")).toBeVisible();
   // A suggestion already used is no longer offered.
   await expect(suggestions.getByRole("button", { name: "Budget" })).toHaveCount(0);
   await expect(suggestions.getByRole("button", { name: "Dates" })).toBeVisible();
@@ -137,7 +137,7 @@ test("a list topic turns its options into ideas to vote on", async ({ page, open
   const guest = await setUpEmpty(page, openAsGuest);
 
   await page.getByLabel("Topic", { exact: true }).fill("Where to?");
-  await pick(page, "List");
+  await pick(page, "Poll");
   const option = page.getByPlaceholder("E.g. Seaside");
   const addTopicButton = page.getByRole("button", { name: "Add the topic" });
   await option.fill("Seaside");
@@ -148,7 +148,7 @@ test("a list topic turns its options into ideas to vote on", async ({ page, open
   await page.getByRole("button", { name: "Add the option" }).click();
   await expect(page.getByRole("button", { name: "Remove the option “Mountain”" })).toBeVisible();
   await addTopicButton.click();
-  await expect(topic(page, "Where to?").getByText("List")).toBeVisible();
+  await expect(topic(page, "Where to?").getByText("Poll")).toBeVisible();
 
   await startIdeas(page);
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
@@ -168,7 +168,7 @@ test("a topic can cap the “for” votes, except a single-answer list", async (
 
   // A single-answer list is already a limit of one: the setting goes away.
   await page.getByLabel("Topic", { exact: true }).fill("Yes or no?");
-  await pick(page, "List");
+  await pick(page, "Poll");
   await expect(limit).toBeVisible();
   await page.getByRole("switch", { name: "One answer per person" }).click();
   await expect(limit).toHaveCount(0);
@@ -219,7 +219,7 @@ test("going back to the topics keeps the ideas, and locks their answer type", as
   await expect(dialog.getByText("1 idea suggested on this topic will be deleted along with its votes.")).toBeVisible();
   await dialog.getByRole("button", { name: "Cancel" }).click();
 
-  await page.getByRole("button", { name: "Resume the ideas" }).click();
+  await page.getByRole("button", { name: "Back to ideas" }).click();
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await expect(idea(page, "Pizza")).toBeVisible();
   await expect(idea(guest, "Pizza")).toBeVisible({ timeout: LIVE_TIMEOUT });
@@ -232,7 +232,7 @@ test("a topic from an earlier round can no longer be deleted", async ({ page, op
   await suggestIdea(page, "Pizza");
   await vote(page, "Pizza", "For");
   await seeRecap(page);
-  await clickAndConfirm(page, "Go for another round");
+  await clickAndConfirm(page, "Start another round");
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
 
   await clickAndConfirm(page, "Edit the topics");
@@ -288,7 +288,7 @@ test("turning off voting on your own ideas removes such votes already cast", asy
   const toggle = page.getByRole("switch", { name: "Vote on your own ideas" });
   await toggle.click();
   await expect(toggle).not.toBeChecked();
-  await page.getByRole("button", { name: "Resume the ideas" }).click();
+  await page.getByRole("button", { name: "Back to ideas" }).click();
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
 
   // Sam's vote on his own idea is gone, Lea's stays.

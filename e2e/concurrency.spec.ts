@@ -99,8 +99,8 @@ test("the host closing the vote from two tabs at once moves everyone once", asyn
   await other.goto(page.url());
 
   const openConfirm = async (p: Page) => {
-    await p.getByRole("button", { name: "See the recap" }).click();
-    return p.getByRole("alertdialog").getByRole("button", { name: "See the recap" });
+    await p.getByRole("button", { name: "Go to the recap" }).click();
+    return p.getByRole("alertdialog").getByRole("button", { name: "Go to the recap" });
   };
   const confirms = [await openConfirm(page), await openConfirm(other)];
   await Promise.all(confirms.map((confirm) => confirm.click()));

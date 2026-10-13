@@ -127,7 +127,7 @@ export async function turnOnComments(page: Page) {
 
 /** Host: starts the ideas phase; the guests' pages follow by themselves. */
 export async function startIdeas(page: Page) {
-  await page.getByRole("button", { name: "Start the ideas" }).click();
+  await page.getByRole("button", { name: "Move on to ideas" }).click();
   await expect(page).toHaveURL(/\/ideas$/, { timeout: REDIRECT_TIMEOUT });
 }
 
@@ -218,7 +218,7 @@ export async function downloadExport(page: Page, format: RegExp, button = "Expor
   return { name: file.suggestedFilename(), content: await readFile(await file.path(), "utf8") };
 }
 
-/** Picks a choice in one of the footer menus ("Theme, Same as device", "Language, English"…). */
+/** Picks a choice in one of the footer menus ("Appearance, Same as device", "Language, English"…). */
 export async function choose(page: Page, menu: string, option: string) {
   await page.getByRole("button", { name: new RegExp(`^${menu}, `) }).click();
   await page.getByRole("menuitemradio", { name: option }).click();
@@ -232,7 +232,7 @@ export async function clickAndConfirm(page: Page, name: string) {
 
 /** Host: closes voting; everyone's page moves to the recap. */
 export async function seeRecap(page: Page) {
-  await clickAndConfirm(page, "See the recap");
+  await clickAndConfirm(page, "Go to the recap");
   await expect(page).toHaveURL(/\/recap$/, { timeout: REDIRECT_TIMEOUT });
 }
 

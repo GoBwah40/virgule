@@ -10,7 +10,7 @@ const options = [
   { value: "DATE", label: "Date", icon: CalendarDays },
   { value: "DATE_RANGE", label: "Period", icon: CalendarRange },
   { value: "AMOUNT", label: "Amount", icon: Euro },
-  { value: "AMOUNT_RANGE", label: "Range", icon: Coins },
+  { value: "AMOUNT_RANGE", label: "Amount range", icon: Coins },
 ];
 
 const meta = {

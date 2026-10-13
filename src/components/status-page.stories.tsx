@@ -24,6 +24,6 @@ export const Expired: Story = {
   args: {
     icon: Clock,
     title: "This session is no longer available",
-    body: "Sessions stay online for 7 days. Create a new one to pick up where you left off.",
+    body: "Sessions stay online for 7 days. To keep going, create a new session.",
   },
 };

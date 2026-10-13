@@ -87,15 +87,15 @@ test("leaving in one tab sends the other back to the join screen", async ({ page
 test("handing over hosting in one tab takes the host controls from the other", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
   const hostTab = await secondTab(page);
-  await expect(hostTab.getByRole("button", { name: "Start the ideas" })).toBeVisible();
+  await expect(hostTab.getByRole("button", { name: "Move on to ideas" })).toBeVisible();
 
   await page.getByRole("button", { name: "Lea's seat: options" }).click();
   await page.getByRole("menuitem", { name: "Hand over hosting" }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Hand over hosting" }).click();
 
-  await expect(hostTab.getByRole("button", { name: "Start the ideas" })).toHaveCount(0, { timeout: LIVE_TIMEOUT });
+  await expect(hostTab.getByRole("button", { name: "Move on to ideas" })).toHaveCount(0, { timeout: LIVE_TIMEOUT });
   await expect(hostTab.getByLabel("Lea · is hosting")).toBeVisible();
-  await expect(guest.getByRole("button", { name: "Start the ideas" })).toBeVisible({ timeout: LIVE_TIMEOUT });
+  await expect(guest.getByRole("button", { name: "Move on to ideas" })).toBeVisible({ timeout: LIVE_TIMEOUT });
 });
 
 test("two sessions in two tabs keep each their own seat", async ({ page, openAsGuest }) => {
@@ -103,21 +103,21 @@ test("two sessions in two tabs keep each their own seat", async ({ page, openAsG
   // Lea starts her own session in another tab of the same browser.
   const own = await tab.context().newPage();
   await createRoom(own, { name: "Saturday brunch", host: "Lea" });
-  await expect(own.getByRole("button", { name: "Start the ideas" })).toBeVisible();
+  await expect(own.getByRole("button", { name: "Move on to ideas" })).toBeVisible();
 
   // Still a guest in Sam's session, with her seat.
   await tab.goto(link);
   await expect(tab).toHaveURL(/\/ideas$/);
-  await expect(tab.getByRole("button", { name: "See the recap" })).toHaveCount(0);
+  await expect(tab.getByRole("button", { name: "Go to the recap" })).toHaveCount(0);
   await vote(tab, "Pizza", "For");
   await own.reload();
   await expect(own.getByRole("heading", { level: 1, name: "Saturday brunch" })).toBeVisible();
-  await expect(own.getByRole("button", { name: "Start the ideas" })).toBeVisible();
+  await expect(own.getByRole("button", { name: "Move on to ideas" })).toBeVisible();
 });
 
 test("the theme and language picked in one tab follow in the others", async ({ page, openAsGuest }) => {
   const { tab, other } = await leaInTwoTabs(page, openAsGuest);
-  await choose(tab, "Theme", "Dark");
+  await choose(tab, "Appearance", "Dark");
   await choose(tab, "Language", "Français");
 
   // On the other tab's next update.

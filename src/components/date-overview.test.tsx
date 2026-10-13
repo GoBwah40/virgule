@@ -12,7 +12,7 @@ const labels = {
   calendar: "Calendar",
   period: "A period kept",
   overlap: "Overlap",
-  best: "Slot shown",
+  best: "Best slot",
   days: "Days covered",
 };
 const props = {

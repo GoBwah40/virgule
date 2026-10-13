@@ -7,7 +7,7 @@ const meta = {
   title: "Components/SuggestionChips",
   component: SuggestionChips,
   args: {
-    label: "Topic ideas",
+    label: "Common topics",
     onSelect: fn(),
     items: ["Goal", "Dates", "Place", "Budget", "Priorities", "Who does what"].map((label) => ({ id: label, label })),
   },

@@ -34,7 +34,7 @@ async function setUpPointsTopic(page: Page, openAsGuest: (link: string) => Promi
   const budget = page.getByRole("group", { name: "Points per person" });
   await page.getByLabel("Topic", { exact: true }).fill("Where to?");
   // Points leave no room for a single answer nor a "for" vote limit.
-  await pick(page, "List");
+  await pick(page, "Poll");
   await expect(page.getByRole("switch", { name: "One answer per person" })).toBeVisible();
   await pick(page, "Points");
   await expect(page.getByRole("switch", { name: "One answer per person" })).toHaveCount(0);
@@ -134,6 +134,6 @@ test("points stay off your own ideas when self-voting is off, and the setting lo
   await clickAndConfirm(page, "Edit the topics");
   await expect(page).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
   await page.getByRole("listitem").filter({ hasText: "Where to?" }).getByRole("button", { name: "Edit" }).click();
-  await expect(page.getByText("Ideas have already been suggested: the voting can no longer change.")).toBeVisible();
+  await expect(page.getByText("Ideas have already been suggested: the voting method can no longer change.")).toBeVisible();
   await expect(page.locator("li").getByRole("radio", { name: "For / against", exact: true })).toBeDisabled();
 });

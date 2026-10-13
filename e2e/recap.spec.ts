@@ -34,7 +34,7 @@ test("turning off the positive score rule keeps every idea with a vote for", asy
   const { guest } = await setUpSession(page, openAsGuest);
   await voteAndSeeRecap(page, guest);
 
-  const rule = page.getByRole("switch", { name: "Require a positive score" });
+  const rule = page.getByRole("switch", { name: "Require more “for” than “against”" });
   await expect(rule).toBeChecked();
   await rule.click();
   await expect(rule).not.toBeChecked();
@@ -49,7 +49,7 @@ test("another round keeps the ideas kept, with votes starting from zero", async 
   await voteAndSeeRecap(page, guest);
   await expect(page.getByText("1 idea kept goes back to the vote, and everyone can suggest new ones.")).toBeVisible();
 
-  await clickAndConfirm(page, "Go for another round");
+  await clickAndConfirm(page, "Start another round");
   for (const p of [page, guest]) {
     await expect(p).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
     await expect(p.getByText("Round 2: we vote again on the ideas we kept, and you can suggest new ones.")).toBeVisible();

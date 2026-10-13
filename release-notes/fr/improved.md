@@ -2,6 +2,11 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.1 — 2026-10-13
+
+- Des formulations plus claires dans toute l'app : les boutons de la personne qui anime disent où ils mènent (« Passer aux idées », « Passer au bilan »), une liste d'options fixée à l'avance devient un « Sondage », et les réglages expliquent ce qu'ils font.
+- Clore les votes et terminer la séance disent ce qui se passe ensuite, et modifier une idée après deux minutes explique pourquoi ce n'est plus possible.
+
 ## 0.11.3 — 2026-10-06
 
 - Retirer ton idée, rouvrir les votes et déconnecter l'écran de la salle demandent maintenant confirmation.
