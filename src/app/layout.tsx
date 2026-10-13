@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { FeedbackButton } from "@/components/site/feedback-button";
 import { KeepFocusVisible } from "@/components/site/keep-focus-visible";
 import { LocalePreferenceToggle } from "@/components/site/locale-preference";
 import { ThemePreferenceToggle } from "@/components/site/theme-preference";
@@ -12,6 +13,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { defaultLocale } from "@/i18n/config";
 import { isLocale } from "@/i18n/locale";
 import { REPO_URL } from "@/lib/config";
+import { isFeedbackConfigured } from "@/lib/feedback";
 import { IGNORE_SKIPPED_VIEW_TRANSITIONS_SCRIPT } from "@/lib/ignore-skipped-view-transitions";
 import { RELOAD_WHEN_BACK_ONLINE_SCRIPT } from "@/lib/reload-when-online";
 import { parseThemePreference, THEME_COOKIE } from "@/lib/theme";
@@ -53,7 +55,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <TooltipProvider>{children}</TooltipProvider>
           {/* Links and preferences: nothing to read on paper. */}
           <footer className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 pb-4 print:hidden">
-            <SourceLink href={REPO_URL} label={tFooter("source")} className="-ml-3" />
+            <div className="-ml-3 flex">
+              <SourceLink href={REPO_URL} label={tFooter("source")} />
+              {isFeedbackConfigured() && <FeedbackButton />}
+            </div>
             <div className="-mr-3 flex">
               <LocalePreferenceToggle initial={isLocale(locale) ? locale : defaultLocale} />
               <ThemePreferenceToggle initial={theme} />

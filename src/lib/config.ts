@@ -29,6 +29,8 @@ export const LIMITS = {
   themeDescription: 300,
   idea: 500,
   comment: 140,
+  feedbackTitle: 100,
+  feedbackDescription: 2000,
 } as const;
 
 /** Comments one person can leave on the same idea. */

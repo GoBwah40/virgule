@@ -7,6 +7,20 @@
   "footer": {
     "source": "Code source"
   },
+  "feedback": {
+    "trigger": "Ton avis",
+    "title": "Une idée ou un bug ?",
+    "description": "Ton message part à l'équipe sous forme de ticket public sur GitHub : tout le monde peut le lire, alors n'y mets ni noms ni informations personnelles.",
+    "kind": "Type",
+    "idea": "Idée",
+    "bug": "Bug",
+    "titleField": "En quelques mots",
+    "descriptionField": "Détails",
+    "details": "Joindre les infos techniques",
+    "detailsHint": "Version, navigateur, langue et page où tu es, sans le lien de la séance. Très utile pour un bug.",
+    "submit": "Envoyer",
+    "sent": "Merci ! Ton message a bien été envoyé à l'équipe."
+  },
   "common": {
     "cancel": "Annuler",
     "confirm": "Confirmer",
@@ -520,7 +534,8 @@
     "notCommentAuthor": "Tu ne peux retirer que tes propres commentaires.",
     "tooManyComments": "Tu as déjà laissé le maximum de commentaires sur cette idée.",
     "roomCommentLimit": "Cette séance a atteint son nombre maximum de commentaires.",
-    "commentsOff": "Les commentaires sont désactivés dans cette séance."
+    "commentsOff": "Les commentaires sont désactivés dans cette séance.",
+    "feedbackUnavailable": "L'envoi d'un avis n'est pas disponible pour le moment."
   },
   "theme": {
     "label": "Thème",
