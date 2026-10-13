@@ -28,7 +28,7 @@ type Props = {
   className?: string;
 };
 
-/** Discreet pencil button that opens a one-field form to rename something. */
+/** Bare pencil icon (no button background, 44 px touch area) that opens a one-field form to rename something. */
 export function RenameDialog({ value, maxLength, labels, pending = false, onSubmit, className }: Props) {
   const id = useId();
   const [open, setOpen] = useState(false);
@@ -44,7 +44,7 @@ export function RenameDialog({ value, maxLength, labels, pending = false, onSubm
       }}
     >
       <DialogTrigger
-        render={<Button variant="ghost" size="icon" className={cn("text-muted-foreground", className)} aria-label={labels.trigger} title={labels.trigger} />}
+        render={<Button variant="link" size="icon" className={cn("text-muted-foreground hover:text-foreground aria-expanded:text-foreground", className)} aria-label={labels.trigger} title={labels.trigger} />}
       >
         <Pencil />
       </DialogTrigger>
