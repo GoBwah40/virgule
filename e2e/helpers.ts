@@ -118,11 +118,36 @@ export async function pick(page: Page, name: string) {
   await expect(radio).toBeChecked();
 }
 
+/**
+ * Host, on the topics page: changes session settings. On phones they sit in a dialog behind the
+ * gear button; it is opened first and closed after (Escape), the page being inert meanwhile.
+ */
+export async function changeSettings(page: Page, change: () => Promise<void>) {
+  // Below `lg` (1024 px): the side column with the settings is replaced by the gear button.
+  const inDialog = (page.viewportSize()?.width ?? 0) < 1024;
+  if (inDialog) {
+    await page.getByRole("button", { name: "Open the settings" }).click();
+    await expect(page.getByRole("dialog", { name: "Settings" })).toBeVisible();
+  }
+  await change();
+  if (inDialog) {
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog", { name: "Settings" })).toHaveCount(0);
+  }
+}
+
 /** Host, on the topics page: turns on comments on ideas (off by default). */
 export async function turnOnComments(page: Page) {
-  const setting = page.getByRole("switch", { name: "Comments on ideas" });
-  await setting.click();
-  await expect(setting).toBeChecked();
+  await changeSettings(page, async () => {
+    const setting = page.getByRole("switch", { name: "Comments on ideas" });
+    await setting.click();
+    await expect(setting).toBeChecked();
+  });
+}
+
+/** Host, on the topics page: shows every option of the topic form (answer type, voting, topic ideas), hidden by default. */
+export async function showAllTopicOptions(page: Page) {
+  await pick(page, "Advanced");
 }
 
 /** Host: starts the ideas phase; the guests' pages follow by themselves. */

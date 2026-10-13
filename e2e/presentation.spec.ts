@@ -1,5 +1,6 @@
 import {
   addTopic,
+  changeSettings,
   clickAndConfirmInDialog,
   createRoom,
   expect,
@@ -11,12 +12,12 @@ import {
   pairScreen,
   pick,
   screenCode,
-  typeScreenCode,
   seeRecap,
   setUpSession,
   startIdeas,
   suggestIdea,
   test,
+  typeScreenCode,
   vote,
 } from "./helpers";
 
@@ -190,7 +191,7 @@ test("the room screen counts the seats of the session's own size", async ({ page
   await expect(screen.getByText("1 seat out of 12 taken").locator("..").locator("li")).toHaveCount(12);
 
   // Down to 4 while preparing: the screen follows, and says when the room is full.
-  await pick(page, "4");
+  await changeSettings(page, () => pick(page, "4"));
   await expect(screen.getByText("1 seat out of 4 taken")).toBeVisible({ timeout: LIVE_TIMEOUT });
   for (const name of ["Lea", "Noah", "Ines"]) await join(await openAsGuest(link), name);
   await expect(screen.getByText("All seats are taken")).toBeVisible({ timeout: LIVE_TIMEOUT });

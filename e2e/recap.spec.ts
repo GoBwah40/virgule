@@ -5,6 +5,7 @@ import {
   LIVE_TIMEOUT,
   seeRecap,
   setUpSession,
+  showAllTopicOptions,
   suggestPizzaAndSushi,
   test,
   vote,
@@ -124,6 +125,7 @@ test("ending the session freezes the recap for everyone", async ({ page, openAsG
 test("a session that is over starts again with the same topics, hosted by whoever asks", async ({ page, openAsGuest }) => {
   const { link, guest } = await setUpSession(page, openAsGuest);
   // A setting of the topic that must come along: at most 2 "for" votes.
+  await showAllTopicOptions(page);
   await page.getByRole("listitem").filter({ hasText: "Dinner" }).getByRole("button", { name: "Edit" }).click();
   const limit = page.getByRole("group", { name: "“For” votes per person" }).first();
   await limit.locator("label", { has: page.getByRole("radio", { name: "2", exact: true }) }).click();

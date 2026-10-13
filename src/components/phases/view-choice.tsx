@@ -4,17 +4,17 @@ import { useTranslations } from "next-intl";
 import { createContext, use, useSyncExternalStore } from "react";
 
 import { ViewSwitch } from "@/components/view-switch";
-import { useViewPreference } from "@/hooks/use-view-preference";
-import type { ViewPreference } from "@/lib/view-preference";
+import { useCookiePreference } from "@/hooks/use-cookie-preference";
+import { VIEW_COOKIE, type ViewPreference } from "@/lib/view-preference";
 
-const ViewContext = createContext<ReturnType<typeof useViewPreference> | null>(null);
+const ViewContext = createContext<ReturnType<typeof useCookiePreference<ViewPreference>> | null>(null);
 
 /**
  * The layout picked by this person, shared by a step's page: the switch sits in the page header,
  * next to the host's buttons, and the content below follows it.
  */
 export function ViewProvider({ initialView, children }: { initialView: ViewPreference; children: React.ReactNode }) {
-  return <ViewContext value={useViewPreference(initialView)}>{children}</ViewContext>;
+  return <ViewContext value={useCookiePreference(VIEW_COOKIE, initialView)}>{children}</ViewContext>;
 }
 
 // Same breakpoint as the switch (`md`): below it, there is no switch to come back to the list.

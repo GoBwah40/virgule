@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import {
+  changeSettings,
   clickAndConfirm,
   createRoom,
   downloadExport,
@@ -10,6 +11,7 @@ import {
   LIVE_TIMEOUT,
   pick,
   seeRecap,
+  showAllTopicOptions,
   startIdeas,
   suggestIdea,
   test,
@@ -30,6 +32,7 @@ async function setUpPointsTopic(page: Page, openAsGuest: (link: string) => Promi
   const guest = await openAsGuest(link);
   await join(guest, "Lea");
 
+  await showAllTopicOptions(page);
   const limit = page.getByRole("group", { name: "“For” votes per person" });
   const budget = page.getByRole("group", { name: "Points per person" });
   await page.getByLabel("Topic", { exact: true }).fill("Where to?");
@@ -120,8 +123,10 @@ test("people spread their points within the budget, the recap ranks the totals",
 
 test("points stay off your own ideas when self-voting is off, and the setting locks once ideas exist", async ({ page, openAsGuest }) => {
   const { guest } = await setUpPointsTopic(page, openAsGuest);
-  await page.getByRole("switch", { name: "Vote on your own ideas" }).click();
-  await expect(page.getByRole("switch", { name: "Vote on your own ideas" })).not.toBeChecked();
+  await changeSettings(page, async () => {
+    await page.getByRole("switch", { name: "Vote on your own ideas" }).click();
+    await expect(page.getByRole("switch", { name: "Vote on your own ideas" })).not.toBeChecked();
+  });
 
   await startIdeas(page);
   await suggestIdea(page, "Annecy");

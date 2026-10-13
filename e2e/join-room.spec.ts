@@ -1,4 +1,4 @@
-import { closeRoom, createRoom, expect, expireRoom, join, LIVE_TIMEOUT, test } from "./helpers";
+import { changeSettings, closeRoom, createRoom, expect, expireRoom, join, LIVE_TIMEOUT, pick, test } from "./helpers";
 
 test("a guest joins the session and the host sees them arrive", async ({ page, openAsGuest }) => {
   const link = await createRoom(page, { name: "Weekend away", host: "Sam" });
@@ -67,8 +67,10 @@ test("a session created for 4 is full with 4 people, and the host can make room"
 
   // The host gives 4 more seats from the topic settings.
   await page.reload();
-  await expect(page.getByRole("radio", { name: "4" })).toBeChecked();
-  await page.getByText("8", { exact: true }).click();
+  await changeSettings(page, async () => {
+    await expect(page.getByRole("radio", { name: "4" })).toBeChecked();
+    await pick(page, "8");
+  });
   await expect(page.getByRole("list", { name: "4 participants out of 8" })).toBeVisible({ timeout: LIVE_TIMEOUT });
   await expect(late.getByRole("button", { name: "Join the session" })).toBeVisible({ timeout: LIVE_TIMEOUT });
 });

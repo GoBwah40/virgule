@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import {
+  changeSettings,
   clickAndConfirm,
   elapseTimer,
   expect,
@@ -34,7 +35,7 @@ async function secondsLeft(page: Page) {
 /** Sam hosts with a 5-minute ideas timer, Lea has joined; both are on the ideas page. */
 async function startWithTimer(page: Page, openAsGuest: (link: string) => Promise<Page>) {
   const { link, guest } = await setUpSession(page, openAsGuest);
-  await pick(page, "5 min");
+  await changeSettings(page, () => pick(page, "5 min"));
   await startIdeas(page);
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   return { link, guest };
@@ -42,7 +43,7 @@ async function startWithTimer(page: Page, openAsGuest: (link: string) => Promise
 
 test("there is no timer unless the host sets one", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
-  await expect(page.getByRole("radio", { name: "None" })).toBeChecked();
+  await changeSettings(page, () => expect(page.getByRole("radio", { name: "None" })).toBeChecked());
   await startIdeas(page);
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
 
@@ -156,11 +157,13 @@ test("the timer stops at the recap and starts again with the vote", async ({ pag
 test("when the host chose so, the session moves to the recap once time is up", async ({ page, openAsGuest }) => {
   const { link, guest } = await setUpSession(page, openAsGuest);
   const auto = page.getByRole("switch", { name: "Go to the recap when time is up" });
-  // Only with a timer.
-  await expect(auto).toHaveCount(0);
-  await pick(page, "5 min");
-  await auto.click();
-  await expect(auto).toBeChecked();
+  await changeSettings(page, async () => {
+    // Only with a timer.
+    await expect(auto).toHaveCount(0);
+    await pick(page, "5 min");
+    await auto.click();
+    await expect(auto).toBeChecked();
+  });
   await startIdeas(page);
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   for (const p of [page, guest]) await expect(p.getByText("When time is up, we move on to the recap.")).toBeVisible();

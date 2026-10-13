@@ -3,6 +3,7 @@ import type { CDPSession, Page } from "@playwright/test";
 import { POLL_INTERVAL_MS } from "../src/lib/config";
 import type { OpenAsGuest } from "./helpers";
 import {
+  changeSettings,
   elapseTimer,
   expect,
   expireRoom,
@@ -40,7 +41,7 @@ async function wakeUp({ page, cdp }: Sleeping) {
 /** Sam hosts, Lea follows into the ideas phase with "Pizza" suggested. */
 async function inIdeas(page: Page, openAsGuest: OpenAsGuest, { timer = false } = {}) {
   const { link, guest } = await setUpSession(page, openAsGuest);
-  if (timer) await pick(page, "5 min");
+  if (timer) await changeSettings(page, () => pick(page, "5 min"));
   await startIdeas(page);
   await suggestIdea(page, "Pizza");
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
