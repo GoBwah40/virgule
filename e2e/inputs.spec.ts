@@ -56,7 +56,6 @@ test("each field stops at the length the server accepts", async ({ page, openAsG
   await expect(page.getByLabel("Topic", { exact: true })).toHaveAttribute("maxlength", String(LIMITS.themeTitle));
   await expect(page.getByLabel("Details (optional)")).toHaveAttribute("maxlength", String(LIMITS.themeDescription));
   await showAllTopicOptions(page);
-  await showAllTopicOptions(page);
   await pick(page, "Poll");
   await expect(page.getByPlaceholder("E.g. Seaside")).toHaveAttribute("maxlength", String(MAX_OPTION_LENGTH));
   await pick(page, "Text");
