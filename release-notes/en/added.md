@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.0 — 2026-10-13
+
+- The first time you host, the topics page offers a short optional tour of what you can do there: inviting the group, adding topics, the simple and advanced forms, the settings and moving on to ideas. You can take it again at any time from the button under “Move on to ideas”.
+
 ## 0.21.0 — 2026-10-13
 
 - A Feedback button at the bottom of every page lets you suggest an idea or report a bug to the team, with no account needed.

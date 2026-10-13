@@ -249,7 +249,45 @@
     "sizeOption": "{count}",
     "start": "Passer aux idées",
     "resume": "Revenir aux idées",
-    "startHint": "Ajoute au moins un sujet pour commencer."
+    "startHint": "Ajoute au moins un sujet pour commencer.",
+    "tour": {
+      "offerTitle": "Première fois que tu animes ?",
+      "offerBody": "Fais un tour rapide de cette page, en moins d'une minute.",
+      "start": "Faire le tour",
+      "dismiss": "Plus tard",
+      "next": "Suivant",
+      "back": "Retour",
+      "done": "C'est compris",
+      "quit": "Quitter le tour",
+      "progress": "Étape {current} sur {total}",
+      "replay": "Faire le tour de la page",
+      "steps": {
+        "invite": {
+          "title": "Invite le groupe",
+          "body": "Partage le lien ou montre le QR code : chacun rejoint avec son prénom, sans compte."
+        },
+        "topic": {
+          "title": "Ajoute tes sujets",
+          "body": "Chaque sujet est une question posée au groupe : donne-lui un titre, et des précisions si besoin."
+        },
+        "formMode": {
+          "title": "Simple ou avancé",
+          "body": "Le formulaire simple demande un titre et des précisions. Avancé ajoute le type de réponse, le mode de vote, une limite de votes et des idées de sujets."
+        },
+        "suggestions": {
+          "title": "Ou pars d'une suggestion",
+          "body": "Les sujets courants s'ajoutent en un geste, et tu peux les modifier ensuite."
+        },
+        "settings": {
+          "title": "Fixe les règles",
+          "body": "Choisis si on peut voter pour ses propres idées et laisser des commentaires, ajoute un minuteur pour les idées et règle le nombre de places. Sur téléphone, ils s'ouvrent depuis le bouton en forme d'engrenage."
+        },
+        "start": {
+          "title": "Passe aux idées",
+          "body": "Quand tes sujets sont prêts, passe à la suite : tout le monde te suit automatiquement à l'étape suivante."
+        }
+      }
+    }
   },
   "ideas": {
     "title": "Les idées",

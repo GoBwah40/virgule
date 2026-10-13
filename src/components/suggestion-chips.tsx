@@ -11,13 +11,15 @@ type Props = {
   label: string;
   disabled?: boolean;
   className?: string;
+  /** Marks the list for a guided tour (see GuidedTour). */
+  "data-tour"?: string;
 };
 
 /** Suggestions added in one tap (dashed pills, 40 px high in a 44 px touch area). */
-export function SuggestionChips({ items, onSelect, label, disabled, className }: Props) {
+export function SuggestionChips({ items, onSelect, label, disabled, className, "data-tour": tour }: Props) {
   if (items.length === 0) return null;
   return (
-    <ul aria-label={label} className={cn("flex flex-wrap gap-2", className)}>
+    <ul aria-label={label} data-tour={tour} className={cn("flex flex-wrap gap-2", className)}>
       {items.map((item) => (
         <li key={item.id}>
           <button

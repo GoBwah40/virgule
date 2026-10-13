@@ -7,6 +7,7 @@ import { useState } from "react";
 import { BoardColumns } from "@/components/board-columns";
 import { ConfirmButton } from "@/components/confirm-button";
 import { FormField } from "@/components/form-field";
+import { GuidedTour } from "@/components/guided-tour";
 import { IconBadge } from "@/components/icon-badge";
 import { ListItem } from "@/components/list-item";
 import { OptionListField } from "@/components/option-list-field";
@@ -64,6 +65,10 @@ const SUGGESTIONS = {
   roles: "TEXT",
 } as const satisfies Record<string, ThemeKind>;
 type SuggestionKey = keyof typeof SUGGESTIONS;
+
+/** Steps of the host's tour (keys of the themes.tour.steps namespace), each on its `data-tour` element. */
+const TOUR_STEPS = ["invite", "topic", "formMode", "suggestions", "settings", "start"] as const;
+const TOUR_STORAGE_KEY = "virgule:host-tour";
 
 /** Session settings, set by the host before the ideas start. */
 type Settings = {
@@ -124,6 +129,7 @@ export function ThemeEditor({
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="min-w-0 space-y-4">
         <div className="flex items-center justify-between gap-2">
+          <div data-tour="formMode">
           <SegmentedControl
             name="topic-form"
             label={t("formLabel")}
@@ -135,10 +141,14 @@ export function ThemeEditor({
             value={form}
             onChange={chooseForm}
           />
+          </div>
           {/* Phones and tablets: the side column ends up below the form, the settings move to a dialog. */}
-          <SettingsDialog className="lg:hidden" labels={{ trigger: t("settingsOpen"), title: t("settings"), close: tc("close") }}>
+          {/* Marked for the tour like the side card: the tour rings whichever one is shown. */}
+          <div data-tour="settings" className="lg:hidden">
+          <SettingsDialog labels={{ trigger: t("settingsOpen"), title: t("settings"), close: tc("close") }}>
             <SessionSettings slug={slug} settings={settings} idPrefix="dialog" />
           </SettingsDialog>
+          </div>
         </div>
 
         {themes.length === 0 ? (
@@ -149,6 +159,7 @@ export function ThemeEditor({
 
         {advanced && (
           <SuggestionChips
+          data-tour="suggestions"
           label={t("suggestionsLabel")}
           items={suggestions}
           disabled={pending}
@@ -169,7 +180,7 @@ export function ThemeEditor({
       </div>
 
       <aside className="space-y-4">
-        <Card className="hidden lg:flex">
+        <Card data-tour="settings" className="hidden lg:flex">
           <CardHeader>
             <CardTitle className="font-heading text-lg font-bold">{t("settings")}</CardTitle>
           </CardHeader>
@@ -179,6 +190,7 @@ export function ThemeEditor({
         </Card>
 
         <Button
+          data-tour="start"
           size="lg"
           className="w-full"
           disabled={pending || themes.length === 0}
@@ -188,6 +200,22 @@ export function ThemeEditor({
           {startLabel}
         </Button>
         {themes.length === 0 && <p className="text-center text-sm text-muted-foreground">{t("startHint")}</p>}
+        <GuidedTour
+          storageKey={TOUR_STORAGE_KEY}
+          steps={TOUR_STEPS.map((key) => ({ target: key, title: t(`tour.steps.${key}.title`), body: t(`tour.steps.${key}.body`) }))}
+          labels={{
+            offerTitle: t("tour.offerTitle"),
+            offerBody: t("tour.offerBody"),
+            start: t("tour.start"),
+            dismiss: t("tour.dismiss"),
+            next: t("tour.next"),
+            back: t("tour.back"),
+            done: t("tour.done"),
+            quit: t("tour.quit"),
+            progress: (current, total) => t("tour.progress", { current, total }),
+            replay: t("tour.replay"),
+          }}
+        />
       </aside>
     </div>
   );
@@ -398,7 +426,7 @@ function ThemeForm({
   const showOptions = advanced || (initial !== undefined && hasCustomOptions(initial));
 
   return (
-    <Card size="sm" className={initial ? undefined : "border-dashed"}>
+    <Card size="sm" className={initial ? undefined : "border-dashed"} data-tour={initial ? undefined : "topic"}>
       <CardContent>
         <form
           className="space-y-3"
