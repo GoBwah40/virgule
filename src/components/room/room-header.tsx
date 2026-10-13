@@ -66,7 +66,9 @@ export async function RoomHeader({ room, participants, meId }: Props) {
               errorMessage={t("linkCopyFailed")}
               hideLabelOnMobile
             />
-            {!isHost && canRemoveParticipants(room) && <LeaveRoomButton slug={room.slug} />}
+            {!isHost && (
+              <LeaveRoomButton slug={room.slug} disabledReason={canRemoveParticipants(room) ? undefined : t("seats.leaveDisabled")} />
+            )}
           </div>
           <RoomSeats
             slug={room.slug}

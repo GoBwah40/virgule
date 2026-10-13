@@ -55,3 +55,25 @@ export const SeatMenu: Story = {
     },
   },
 };
+
+export const SeatMenuWithDisabledAction: Story = {
+  args: {
+    menu: {
+      label: (seat) => `${seat.name}'s seat: options`,
+      actions: (seat) =>
+        seat.isMe
+          ? []
+          : [
+              { id: "host", label: "Hand over hosting", icon: Crown },
+              {
+                id: "remove",
+                label: "Remove from the session",
+                icon: UserMinus,
+                destructive: true,
+                disabledReason: "No longer possible after the first recap: their ideas and votes count in the results.",
+              },
+            ],
+      onSelect: fn(),
+    },
+  },
+};

@@ -21,7 +21,7 @@ type Props = {
   errorMessage: string;
   /** The host can hand over hosting (seat menu); the others can leave from their own seat. */
   canManage: boolean;
-  /** Seats can be freed (only before the first recap): the host removes someone, the others leave. */
+  /** Seats can be freed (only before the first recap): the host removes someone, the others leave. Otherwise these options are disabled, with the reason. */
   canRemove: boolean;
   className?: string;
 };
@@ -61,15 +61,18 @@ export function RoomSeats({ slug, seats, capacity, invitePath, labels, successMe
         }}
         menu={{
           label: (seat) => t("manage", { name: seat.name }),
+          // Once seats are frozen, removing and leaving stay in the menu, disabled with the reason.
           actions: (seat) => {
             if (!canManage) {
-              return seat.isMe && canRemove ? [{ id: "leave", label: t("leave"), icon: LogOut, destructive: true }] : [];
+              return seat.isMe && !seat.isHost
+                ? [{ id: "leave", label: t("leave"), icon: LogOut, destructive: true, disabledReason: canRemove ? undefined : t("leaveDisabled") }]
+                : [];
             }
             return seat.isMe
               ? []
               : [
                   { id: "host", label: t("makeHost"), icon: Crown },
-                  ...(canRemove ? [{ id: "remove", label: t("remove"), icon: UserMinus, destructive: true }] : []),
+                  { id: "remove", label: t("remove"), icon: UserMinus, destructive: true, disabledReason: canRemove ? undefined : t("removeDisabled") },
                 ];
           },
           onSelect: (seat, action) => setPending({ seat, action: action as SeatActionId }),

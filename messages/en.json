@@ -118,9 +118,11 @@
       "remove": "Remove from the session",
       "removeConfirm": "Remove {name} from the session?",
       "removeConfirmHint": "Their ideas and votes are deleted. {name} can come back with the link if a seat is still free.",
+      "removeDisabled": "No longer possible after the first recap: their ideas and votes count in the results.",
       "leave": "Leave the session",
       "leaveConfirm": "Leave the session?",
-      "leaveConfirmHint": "Your ideas and votes are deleted and your seat is freed. You can come back with the link if a seat is still free."
+      "leaveConfirmHint": "Your ideas and votes are deleted and your seat is freed. You can come back with the link if a seat is still free.",
+      "leaveDisabled": "No longer possible after the first recap: your ideas and votes count in the results."
     },
     "rename": {
       "open": "Rename the session",

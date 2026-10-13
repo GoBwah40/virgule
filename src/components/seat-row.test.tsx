@@ -82,6 +82,24 @@ describe("SeatRow", () => {
     expect(onSelect).toHaveBeenCalledWith(seats[1], "leave");
   });
 
+  it("shows a disabled action with its reason, and does not pass it on", async () => {
+    const onSelect = vi.fn();
+    const reason = "No longer possible after the first recap: their ideas and votes count in the results.";
+    const menu = {
+      label: (seat: { name: string }) => `${seat.name}'s seat: options`,
+      actions: () => [{ id: "remove", label: "Remove from the session", icon: UserMinus, destructive: true, disabledReason: reason }],
+      onSelect,
+    };
+    renderUi(<SeatRow seats={seats} capacity={6} labels={labels} menu={menu} />);
+    await userEvent.click(screen.getByRole("button", { name: "Camille's seat: options" }));
+
+    const item = await screen.findByRole("menuitem", { name: "Remove from the session" });
+    expect(item).toHaveAttribute("aria-disabled", "true");
+    expect(item).toHaveAccessibleDescription(reason);
+    await userEvent.click(item);
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it("seats up to 12 people on two rows, lettered A to L", () => {
     const { container } = renderUi(<SeatRow seats={seats} capacity={12} labels={labels} />);
     const list = screen.getByRole("list", { name: labels.row });
