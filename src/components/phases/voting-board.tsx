@@ -625,6 +625,7 @@ export function FinishVotingButton({ slug }: { slug: string }) {
     <ConfirmButton
       disabled={pending}
       title={t("finishConfirm")}
+      description={t("finishConfirmHint")}
       confirmLabel={t("finish")}
       onConfirm={() => run(() => goToRecap(slug))}
     >

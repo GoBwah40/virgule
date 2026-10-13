@@ -28,7 +28,7 @@ async function setUp(page: Page, openAsGuest: (link: string) => Promise<Page>) {
 
 /** Adds one of the suggested topics ("Dates" is a period, "Budget" a range). */
 async function addSuggestedTopic(page: Page, name: "Dates" | "Budget") {
-  await page.getByRole("list", { name: "Topic ideas" }).getByRole("button", { name }).click();
+  await page.getByRole("list", { name: "Common topics" }).getByRole("button", { name }).click();
   await expect(page.getByRole("listitem").filter({ hasText: name })).toBeVisible();
 }
 

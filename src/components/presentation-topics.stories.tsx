@@ -19,7 +19,7 @@ const meta = {
     topics: [
       { id: "1", title: "When do we leave?", description: "Two days, in May or June", kindLabel: "Period" },
       { id: "2", title: "Where to?", description: "Less than two hours from Lyon", kindLabel: "Place" },
-      { id: "3", title: "How much each?", description: "Lodging and meals included", kindLabel: "Range" },
+      { id: "3", title: "How much each?", description: "Lodging and meals included", kindLabel: "Amount range" },
     ],
   },
 } satisfies Meta<typeof PresentationTopics>;

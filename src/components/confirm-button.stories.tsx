@@ -8,7 +8,7 @@ const meta = {
   component: ConfirmButton,
   args: {
     children: "End the session",
-    title: "Is it decided?",
+    title: "End the session?",
     description: "Once the session is over, nobody can suggest or vote anymore.",
     onConfirm: fn(),
   },

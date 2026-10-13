@@ -34,7 +34,7 @@ test("the recap can be exported, but not while votes are open", async ({ page, o
   expect(markdown.name).toBe(`virgule-friday-night-${today()}.md`);
   expect(markdown.content).toContain("# Recap — Friday night");
   expect(markdown.content).toContain("- **Participants**: Sam, Lea");
-  expect(markdown.content).toContain("- **Qualification rule**: positive score (for > against)");
+  expect(markdown.content).toContain("- **Rule for keeping an idea**: more “for” than “against” votes");
   expect(markdown.content).toContain("| Sushi | 2 | 0 | 2 | ✅ Kept |");
   expect(markdown.content).toContain("| Pizza | 1 | 1 | 0 | Dropped |");
 
@@ -52,7 +52,7 @@ test("the recap can be exported, but not while votes are open", async ({ page, o
 
 test("the file name is safe whatever the session name", async ({ page }) => {
   await createRoom(page, { name: "Soirée d'été / Q3 !", host: "Sam" });
-  await page.getByRole("list", { name: "Topic ideas" }).getByRole("button", { name: "Goal" }).click();
+  await page.getByRole("list", { name: "Common topics" }).getByRole("button", { name: "Goal" }).click();
   await startIdeas(page);
   await seeRecap(page);
 
@@ -75,22 +75,22 @@ test("an export in French follows French conventions", async ({ page, openAsGues
   const markdown = await downloadExport(guest, /Markdown/, "Exporter");
   expect(markdown.content).toContain("# Bilan — Friday night");
   expect(markdown.content).toContain("- **Participants** : Sam, Lea");
-  expect(markdown.content).toContain("- **Règle de qualification** : score positif (pour > contre)");
+  expect(markdown.content).toContain("- **Règle pour retenir une idée** : plus de « pour » que de « contre »");
 });
 
 test("the export follows the qualification rule and lists every round, latest first", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
   await voteAndSeeRecap(page, guest);
-  await page.getByRole("switch", { name: "Require a positive score" }).click();
+  await page.getByRole("switch", { name: "Require more “for” than “against”" }).click();
   await expect(page.getByText("2 of 2 ideas kept")).toBeVisible();
 
-  await clickAndConfirm(page, "Go for another round");
+  await clickAndConfirm(page, "Start another round");
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await vote(page, "Sushi", "For");
   await seeRecap(page);
 
   const markdown = (await downloadExport(page, /Markdown/)).content;
-  expect(markdown).toContain("- **Qualification rule**: at least one “for” vote");
+  expect(markdown).toContain("- **Rule for keeping an idea**: at least one “for” vote");
   expect(markdown.indexOf("## Round 2")).toBeGreaterThan(-1);
   expect(markdown.indexOf("## Round 2")).toBeLessThan(markdown.indexOf("## Round 1"));
   // Round 1 under the rule in force: Pizza (1–1) kept too.
@@ -105,7 +105,7 @@ test("period topics export their summary", async ({ page, openAsGuest }) => {
   const link = await createRoom(page, { name: "Holidays", host: "Sam" });
   const guest = await openAsGuest(link);
   await join(guest, "Lea");
-  await page.getByRole("list", { name: "Topic ideas" }).getByRole("button", { name: "Dates" }).click();
+  await page.getByRole("list", { name: "Common topics" }).getByRole("button", { name: "Dates" }).click();
   await startIdeas(page);
 
   const dates = page.locator('[data-slot="card"]').filter({ hasText: "Dates" });

@@ -142,7 +142,7 @@ test("the timer stops at the recap and starts again with the vote", async ({ pag
   await expect.poll(() => secondsLeft(page)).toBeGreaterThan(4 * 60 + 50);
 
   await seeRecap(page);
-  await clickAndConfirm(page, "Go for another round");
+  await clickAndConfirm(page, "Start another round");
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
   for (const p of [page, guest]) await expect.poll(() => secondsLeft(p)).toBeGreaterThan(4 * 60 + 50);

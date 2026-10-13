@@ -12,7 +12,7 @@ test.describe("on a computer", () => {
     await addTopic(page, "Drinks");
 
     // Topics: a list by default, cards on the board, with the host's actions still there.
-    // "List" is also an answer kind in the topic form: the switch is the "Display" group.
+    // The switch is the "Display" group.
     await expect(page.getByRole("group", { name: "Display" }).getByRole("radio", { name: "List" })).toBeChecked();
     await pick(page, "Board");
     const drinks = page.getByRole("listitem").filter({ has: page.getByRole("heading", { name: "Drinks" }) });

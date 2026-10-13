@@ -11,7 +11,7 @@ describe("SuggestionChips", () => {
     const onSelect = vi.fn();
     renderUi(
       <SuggestionChips
-        label="Topic ideas"
+        label="Common topics"
         items={[
           { id: "dates", label: "Dates" },
           { id: "budget", label: "Budget" },
@@ -24,12 +24,12 @@ describe("SuggestionChips", () => {
   });
 
   it("gives every chip a 44 px touch area", () => {
-    renderUi(<SuggestionChips label="Topic ideas" items={[{ id: "dates", label: "Dates" }]} onSelect={() => {}} />);
+    renderUi(<SuggestionChips label="Common topics" items={[{ id: "dates", label: "Dates" }]} onSelect={() => {}} />);
     expect(screen.getByRole("button", { name: "Dates" })).toHaveClass("touch-target");
   });
 
   it("renders nothing when there are no suggestions left", () => {
-    renderUi(<SuggestionChips label="Topic ideas" items={[]} onSelect={() => {}} />);
+    renderUi(<SuggestionChips label="Common topics" items={[]} onSelect={() => {}} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 });

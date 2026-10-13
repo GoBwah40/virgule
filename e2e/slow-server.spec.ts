@@ -88,11 +88,11 @@ test("a slow action keeps its buttons busy and goes through once", async ({ page
     await route.fallback();
   });
 
-  await page.getByRole("button", { name: "See the recap" }).click();
-  await page.getByRole("alertdialog").getByRole("button", { name: "See the recap" }).click();
+  await page.getByRole("button", { name: "Go to the recap" }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Go to the recap" }).click();
   // The dialog has closed; the button that opened it waits for the answer.
   await expect(page.getByRole("alertdialog")).toHaveCount(0);
-  await expect(page.getByRole("button", { name: "See the recap" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Go to the recap" })).toBeDisabled();
 
   await expect(page).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });
   await expect(guest).toHaveURL(/\/recap$/, { timeout: LIVE_TIMEOUT });

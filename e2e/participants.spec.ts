@@ -33,7 +33,7 @@ test("the host hands over hosting and stays as a participant", async ({ page, op
 
   // Lea gets the topic editor and the seat options.
   await expect(guest.getByLabel("Topic", { exact: true })).toBeVisible({ timeout: LIVE_TIMEOUT });
-  await expect(guest.getByRole("button", { name: "Start the ideas" })).toBeEnabled();
+  await expect(guest.getByRole("button", { name: "Move on to ideas" })).toBeEnabled();
   await expect(guest.getByRole("button", { name: "Sam's seat: options" })).toBeVisible();
   await expect(guest.getByRole("button", { name: "Leave the session" })).toHaveCount(0);
 });

@@ -29,7 +29,7 @@ test("the printed recap keeps the session and who took part, without the screen-
   await expect(copyLink).toBeHidden();
   await expect(footer).toBeHidden();
   await expect(page.getByRole("button", { name: /^Language/ })).toBeHidden();
-  await expect(page.getByRole("button", { name: /^Theme/ })).toBeHidden();
+  await expect(page.getByRole("button", { name: /^Appearance/ })).toBeHidden();
 
   await page.emulateMedia({ media: "screen" });
   await expect(invite).toBeVisible();

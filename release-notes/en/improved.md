@@ -2,6 +2,11 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.1 — 2026-10-13
+
+- Clearer wording across the app: the host's buttons say where they lead (“Move on to ideas”, “Go to the recap”), a host-defined list of options is now a “Poll”, and the settings explain what they do.
+- Closing voting and ending the session say what happens next, and changing an idea after two minutes explains why it is no longer possible.
+
 ## 0.11.3 — 2026-10-06
 
 - Removing your idea, reopening voting and disconnecting the room screen now ask first.
