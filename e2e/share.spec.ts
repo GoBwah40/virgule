@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 
 import {
   clickAndConfirm,
+  clickAndConfirmInDialog,
   expect,
   idea,
   LIVE_TIMEOUT,
@@ -47,7 +48,7 @@ test("someone who was not there reads the recap from the host's link, without a 
   // The same link while it stays on; turned off, it no longer opens.
   await page.reload();
   expect(await shareLink(page, { create: false })).toBe(shared);
-  await clickAndConfirm(page, "Turn off the link");
+  await clickAndConfirmInDialog(page, "Turn off the link");
   await expect(page.getByRole("dialog").getByRole("button", { name: "Create the link" })).toBeVisible();
   await visitor.reload();
   await expect(visitor.getByRole("heading", { name: "Session not found" })).toBeVisible();

@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.2 — 2026-10-13
+
+- Les fenêtres s'ouvrent avec un mouvement court et doux, et désactiver le lien de partage ou déconnecter l'écran de la salle demande confirmation dans la même fenêtre au lieu d'en ouvrir une deuxième par-dessus.
+
 ## 0.21.1 — 2026-10-13
 
 - Des formulations plus claires dans toute l'app : les boutons de la personne qui anime disent où ils mènent (« Passer aux idées », « Passer au bilan »), une liste d'options fixée à l'avance devient un « Sondage », et les réglages expliquent ce qu'ils font.

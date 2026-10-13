@@ -187,6 +187,7 @@ export function ShareRecapButton({ slug, sharePath, roomName }: { slug: string; 
               <ShareButton path={sharePath} title={roomName} text={t("shareText", { name: roomName })} label={t("shareVia")} />
               <CopyButton value={sharePath} absolute label={t("copy")} successMessage={t("copied")} errorMessage={tRoom("linkCopyFailed")} />
               <ConfirmButton
+                inline
                 variant="ghost"
                 className="text-destructive"
                 disabled={pending}

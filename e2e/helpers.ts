@@ -230,6 +230,14 @@ export async function clickAndConfirm(page: Page, name: string) {
   await page.getByRole("alertdialog").getByRole("button", { name }).click();
 }
 
+/** Same, inside a dialog: the question takes the button's place, no second dialog on top. */
+export async function clickAndConfirmInDialog(page: Page, name: string) {
+  const dialog = page.getByRole("dialog");
+  await dialog.getByRole("button", { name }).click();
+  await expect(page.getByRole("alertdialog")).toHaveCount(0);
+  await dialog.getByRole("group", { name: `${name}?` }).getByRole("button", { name }).click();
+}
+
 /** Host: closes voting; everyone's page moves to the recap. */
 export async function seeRecap(page: Page) {
   await clickAndConfirm(page, "Go to the recap");

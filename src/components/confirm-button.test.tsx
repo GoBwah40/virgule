@@ -34,4 +34,44 @@ describe("ConfirmButton", () => {
     await userEvent.click(await screen.findByRole("button", { name: "Cancel" }));
     expect(onConfirm).not.toHaveBeenCalled();
   });
+
+  describe("inline", () => {
+    it("asks in place of the button, without a dialog", async () => {
+      const onConfirm = vi.fn();
+      renderUi(
+        <ConfirmButton inline title="Turn off the link?" description="It stops working." confirmLabel="Turn off" onConfirm={onConfirm}>
+          Turn off the link
+        </ConfirmButton>,
+      );
+
+      await userEvent.click(screen.getByRole("button", { name: "Turn off the link" }));
+      expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: "Turn off the link" })).not.toBeInTheDocument();
+      const group = screen.getByRole("group", { name: "Turn off the link?" });
+      expect(group).toHaveAccessibleDescription("It stops working.");
+      expect(screen.getByRole("button", { name: "Cancel" })).toHaveFocus();
+
+      await userEvent.click(screen.getByRole("button", { name: "Turn off" }));
+      expect(onConfirm).toHaveBeenCalledOnce();
+      expect(screen.queryByRole("group")).not.toBeInTheDocument();
+    });
+
+    it("gives the button back, focused, when cancelled or on Escape", async () => {
+      const onConfirm = vi.fn();
+      renderUi(
+        <ConfirmButton inline title="Turn off the link?" onConfirm={onConfirm}>
+          Turn off the link
+        </ConfirmButton>,
+      );
+
+      await userEvent.click(screen.getByRole("button", { name: "Turn off the link" }));
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(screen.getByRole("button", { name: "Turn off the link" })).toHaveFocus();
+
+      await userEvent.click(screen.getByRole("button", { name: "Turn off the link" }));
+      await userEvent.keyboard("{Escape}");
+      expect(screen.getByRole("button", { name: "Turn off the link" })).toHaveFocus();
+      expect(onConfirm).not.toHaveBeenCalled();
+    });
+  });
 });

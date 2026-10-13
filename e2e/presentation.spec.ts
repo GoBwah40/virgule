@@ -1,6 +1,6 @@
 import {
   addTopic,
-  clickAndConfirm,
+  clickAndConfirmInDialog,
   createRoom,
   expect,
   expireScreenCode,
@@ -158,7 +158,7 @@ test("a pairing code works once, and not once it has expired", async ({ page, op
   await expect(second).toHaveURL(pairing);
 
   // A new code from the phone, left too long.
-  await clickAndConfirm(page, "Disconnect the screen");
+  await clickAndConfirmInDialog(page, "Disconnect the screen");
   const late = await screenCode(page);
   await expireScreenCode(link);
   const third = await openAsGuest(pairing);
@@ -172,7 +172,7 @@ test("the host disconnects the TV: it goes back to pairing", async ({ page, open
   expect((await tv.request.get(`${link}/phase`)).status()).toBe(200);
 
   await page.getByRole("button", { name: "Show on a big screen" }).click();
-  await clickAndConfirm(page, "Disconnect the screen");
+  await clickAndConfirmInDialog(page, "Disconnect the screen");
   // A new code at once, for another screen.
   await expect(page.getByRole("dialog").locator("p").filter({ hasText: /^Pairing code / })).toHaveText(/[2-9A-Z]{6}$/);
 
