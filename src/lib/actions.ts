@@ -4,7 +4,9 @@ import { randomBytes } from "node:crypto";
 
 import { customAlphabet } from "nanoid";
 import { refresh } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 import { z } from "zod";
 
 import { Prisma } from "@/generated/prisma/client";
@@ -29,11 +31,13 @@ import {
   VOTE_LIMIT_OPTIONS,
 } from "@/lib/config";
 import { db } from "@/lib/db";
+import { buildIssue, createIssue, FEEDBACK_KINDS, isFeedbackConfigured } from "@/lib/feedback";
 import { notifyRoom } from "@/lib/realtime/server";
 import { ideaKey, type IdeaInput, parseChoiceOptions, parseIdeaInput, readChoiceOptions, textKey, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
 import { isActiveInRound, roundResults, scoreVotes, topQualified } from "@/lib/results";
 import { phasePath } from "@/lib/phase-path";
 import { isRateLimited } from "@/lib/rate-limit";
+import { APP_VERSION } from "@/lib/release-notes-source";
 import { getRoomContext } from "@/lib/room";
 import { hashScreenCode, newScreenCode, normalizeScreenCode } from "@/lib/screen-code";
 import { clearParticipantToken, setParticipantToken, setScreenToken } from "@/lib/session";
@@ -83,6 +87,7 @@ type ActionError =
   | "tooManyComments"
   | "roomCommentLimit"
   | "commentsOff"
+  | "feedbackUnavailable"
   | "unknown";
 
 export type ActionResult = { ok: true } | { ok: false; error: ActionError };
@@ -1170,4 +1175,39 @@ export async function unpairScreen(slug: string) {
       data: { screenToken: null, screenCodeHash: null, screenCodeExpiresAt: null },
     });
   });
+}
+
+// ─── Feedback ──────────────────────────────────────────────────────────────
+
+const feedbackSchema = z.object({
+  kind: z.enum(FEEDBACK_KINDS),
+  title: text(LIMITS.feedbackTitle),
+  description: text(LIMITS.feedbackDescription),
+  /** Page it was sent from, when the person attaches the technical details. */
+  path: z.string().max(500).nullable(),
+  /** Hidden field that only bots fill in. */
+  website: z.string().max(500),
+});
+
+/** An idea or a bug report, sent as a public issue of the GitHub repository. */
+export async function sendFeedback(input: z.input<typeof feedbackSchema>): Promise<ActionResult> {
+  const parsed = feedbackSchema.safeParse(input);
+  if (!parsed.success) return fail("invalidInput");
+  if (!isFeedbackConfigured()) return fail("feedbackUnavailable");
+  if (await isRateLimited("feedback")) return fail("tooManyRequests");
+  const { kind, title, description, path, website } = parsed.data;
+  // A bot is told it worked, and nothing is sent.
+  if (website) return ok();
+
+  const context =
+    path === null
+      ? undefined
+      : { version: APP_VERSION, path, locale: await getLocale(), userAgent: (await headers()).get("user-agent") ?? "" };
+  try {
+    await createIssue(buildIssue({ kind, title, description, context }));
+  } catch (error) {
+    console.error("[feedback]", error);
+    return fail("unknown");
+  }
+  return ok();
 }

@@ -2,6 +2,10 @@
 
 New features, visible to the people using Virgule. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.0 — 2026-10-13
+
+- A Feedback button at the bottom of every page lets you suggest an idea or report a bug to the team, with no account needed.
+
 ## 0.20.0 — 2026-10-07
 
 - The person hosting can rename the session at any time until it is over, from the pencil next to its name: everyone sees the new name, on the big screen, in the shared recap and in the exports too.

@@ -7,6 +7,20 @@
   "footer": {
     "source": "Source code"
   },
+  "feedback": {
+    "trigger": "Feedback",
+    "title": "An idea or a bug?",
+    "description": "Your message goes to the team as a public issue on GitHub: anyone can read it, so leave out names and personal details.",
+    "kind": "Type",
+    "idea": "Idea",
+    "bug": "Bug",
+    "titleField": "In a few words",
+    "descriptionField": "Details",
+    "details": "Attach technical details",
+    "detailsHint": "Version, browser, language and the page you're on, without the session link. Helps a lot with a bug.",
+    "submit": "Send",
+    "sent": "Thanks! Your message has been sent to the team."
+  },
   "common": {
     "cancel": "Cancel",
     "confirm": "Confirm",
@@ -520,7 +534,8 @@
     "notCommentAuthor": "You can only remove your own comments.",
     "tooManyComments": "You've already left as many comments as you can on this idea.",
     "roomCommentLimit": "This session has reached its maximum number of comments.",
-    "commentsOff": "Comments are turned off in this session."
+    "commentsOff": "Comments are turned off in this session.",
+    "feedbackUnavailable": "Sending feedback is not available right now."
   },
   "theme": {
     "label": "Theme",

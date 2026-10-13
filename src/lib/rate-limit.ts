@@ -13,7 +13,7 @@ import { MemoryRateLimiter } from "@/lib/memory-rate-limit";
 // hammering one instance without being a fleet-wide guarantee. If Upstash is slow or down,
 // requests go through.
 
-type Bucket = "createRoom" | "joinRoom" | "pairScreen" | "pairScreenGlobal" | "participant";
+type Bucket = "createRoom" | "joinRoom" | "pairScreen" | "pairScreenGlobal" | "participant" | "feedback";
 
 const MINUTE = 60_000;
 
@@ -30,6 +30,8 @@ const RULES: Record<Bucket, { requests: number; windowMs: number }> = {
   pairScreenGlobal: { requests: 300, windowMs: 10 * MINUTE },
   // Per participant, every action: each one writes and sends a real-time message.
   participant: { requests: 120, windowMs: MINUTE },
+  // Per IP: each one is a public GitHub issue, read by a person.
+  feedback: { requests: 5, windowMs: 60 * MINUTE },
 };
 
 const BUCKETS = Object.keys(RULES) as Bucket[];

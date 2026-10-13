@@ -144,7 +144,7 @@ src/
   components/ui/            shadcn/ui primitives (Base UI)
   components/phases/        Assembly of the global components for each phase
   components/room/          Header, invitation, join form, real-time sync
-  components/site/          Elements shared by every page (theme and language pickers)
+  components/site/          Elements shared by every page (theme and language pickers, feedback button)
   lib/actions.ts            All mutations (Server Actions) and their checks
   lib/room.ts               Reads: room context, vote view, recap
   lib/results.ts            Score and qualification rules (pure, tested)
@@ -153,6 +153,7 @@ src/
   lib/release-notes.ts      Parsing of the release notes (pure, tested); release-notes-source.ts loads them
   lib/realtime/             Server-side Pusher notification
   lib/rate-limit.ts         Rate limiting (Upstash, or memory-rate-limit.ts per process without it)
+  lib/feedback.ts           Ideas and bug reports from the footer, sent as GitHub issues
   i18n/                     next-intl configuration, supported languages, language detection
 ```
 
@@ -161,7 +162,7 @@ src/
 - **Identity without an account**: joining a room creates a `Participant` with a random token, stored in an httpOnly cookie specific to the room (valid 7 days). Coming back with the same browser therefore does not use up a new seat. If the host loses this cookie (other device, cookies cleared), they also lose their role.
 - **The server is authoritative**: every action checks participation, role (host or not) and the current phase. The client holds no critical business logic.
 - **Anonymity**: the client never receives the author of an idea or other people's votes, only its own votes and, in the recap, the totals.
-- **Rate limiting** (`src/lib/rate-limit.ts`): rooms created, joins and screen pairing attempts per IP, pairing attempts across all IPs, and actions per participant. With Upstash Redis configured, the counters are shared by every server instance: the recommended production setup. Without it, the same limits are counted in memory, **per process**: serverless instances do not share them and a cold start resets them, so it slows down a script without being a fleet-wide guarantee. `RATE_LIMIT_MULTIPLIER` scales every quota; only the end-to-end tests set it (all their requests come from the same address).
+- **Rate limiting** (`src/lib/rate-limit.ts`): rooms created, joins, screen pairing attempts and feedback sent per IP, pairing attempts across all IPs, and actions per participant. With Upstash Redis configured, the counters are shared by every server instance: the recommended production setup. Without it, the same limits are counted in memory, **per process**: serverless instances do not share them and a cold start resets them, so it slows down a script without being a fleet-wide guarantee. `RATE_LIMIT_MULTIPLIER` scales every quota; only the end-to-end tests set it (all their requests come from the same address).
 - **Synchronization**: after each mutation, the server sends a content-free notification through Pusher (or, without Pusher, clients poll the server every 3 seconds). Each client first asks for the current step (`/r/<slug>/phase`): if it changed, it navigates straight to the new step's page; otherwise it reloads the current page's state (`router.refresh()`). Navigating directly avoids the blank screen a server redirect would show during the transition.
 - **Typed topics**: the host chooses the answer type of each topic (text, date, period, amount, range, place, list). Input adapts (the phone's date picker, numeric keyboard) and ideas are displayed cleanly ("June 1 – 14, 2027", "From €300 to €500"; in French « Du 1er au 14 juin 2027 », « De 300 € à 500 € »). The "Dates", "Place" and "Budget" suggestions are typed from the start.
   - **Place**: the idea carries a "View on the map" link that opens the installed app (Maps on Apple, Google Maps elsewhere), with no map loaded in Virgule.

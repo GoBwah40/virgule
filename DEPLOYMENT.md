@@ -86,7 +86,7 @@ Messages sent to Pusher contain no data: they only tell browsers to reload the s
 
 ### Also optional: rate limiting with Upstash
 
-The app refuses (with a "You're going a bit fast" message) more than 10 rooms created per hour, 30 joins and 10 screen pairing attempts per 10 minutes from the same IP, more than 300 pairing attempts per 10 minutes from all IPs together, and more than 120 actions per minute from the same participant. Limits are in `src/lib/rate-limit.ts`; if Upstash does not answer within a second, requests go through.
+The app refuses (with a "You're going a bit fast" message) more than 10 rooms created per hour, 30 joins and 10 screen pairing attempts per 10 minutes and 5 feedback messages per hour from the same IP, more than 300 pairing attempts per 10 minutes from all IPs together, and more than 120 actions per minute from the same participant. Limits are in `src/lib/rate-limit.ts`; if Upstash does not answer within a second, requests go through.
 
 Without Upstash, the same limits are counted in memory, per server process: each Vercel function instance keeps its own counters and a cold start resets them, so a script spread over several instances, or simply patient, gets more through. Upstash shares the counters across every instance: it is the recommended production setup.
 
@@ -94,6 +94,15 @@ Without Upstash, the same limits are counted in memory, per server process: each
 2. In the database's **REST API** section, note `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`.
 
 Previews can share the same database: keys only hold counters (IP or participant id), which expire with their window.
+
+### Also optional: feedback as GitHub issues
+
+The **Feedback** button in the footer sends ideas and bug reports as issues of this repository (labels `enhancement` or `bug`), without asking for a GitHub account: the server creates them with its own token, at most 5 per hour from the same IP. Issues are public: the form says so, and the technical details it attaches never include the session link.
+
+1. On GitHub, **Settings → Developer settings → Fine-grained tokens → Generate new token**: repository access *Only select repositories* → `GoBwah40/virgule`, permission **Issues: Read and write**, nothing else.
+2. Note the token: it will be `GITHUB_FEEDBACK_TOKEN`. Without it, the button is not shown.
+
+Leave it out of previews if you do not want test reports among the real ones.
 
 ## 4. Generate the cron secret
 
@@ -122,6 +131,7 @@ Write down the value: it will be `CRON_SECRET`.
 | `NEXT_PUBLIC_PUSHER_CLUSTER` | `cluster`, for example `eu` | No (real time) |
 | `UPSTASH_REDIS_REST_URL` | REST URL from step 3 | No (rate limiting) |
 | `UPSTASH_REDIS_REST_TOKEN` | REST token from step 3 | No (rate limiting) |
+| `GITHUB_FEEDBACK_TOKEN` | fine-grained token from step 3 | No (feedback button) |
 
 Do not set `DATABASE_URL` on Vercel: it is only used locally.
 

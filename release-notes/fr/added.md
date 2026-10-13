@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.0 — 2026-10-13
+
+- Un bouton Ton avis en bas de chaque page permet de proposer une idée ou de signaler un bug à l'équipe, sans compte.
+
 ## 0.20.0 — 2026-10-07
 
 - La personne qui anime peut renommer la séance à tout moment jusqu'à la fin, depuis le crayon à côté de son nom : tout le monde voit le nouveau nom, sur le grand écran, dans le bilan partagé et dans les exports aussi.
