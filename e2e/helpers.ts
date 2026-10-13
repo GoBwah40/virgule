@@ -74,14 +74,31 @@ export { expect };
 /** Opens the share link as a new person (fresh browser context, so no participation cookie). */
 export type OpenAsGuest = (link: string, options?: { locale?: string }) => Promise<Page>;
 
-export const test = base.extend<{ openAsGuest: OpenAsGuest }>({
+/** Marks the host's guided tour as already offered, so its card does not cover the page. */
+const skipHostTour = (context: BrowserContext) =>
+  context.addInitScript(() => {
+    try {
+      localStorage.setItem("virgule:host-tour", "1");
+    } catch {
+      // Opaque origin (about:blank): no storage, and no tour either.
+    }
+  });
+
+export const test = base.extend<{ openAsGuest: OpenAsGuest; hostTour: boolean }>({
+  /** Off by default: the tour's own tests turn it on with `test.use({ hostTour: true })`. */
+  hostTour: [false, { option: true }],
+  context: async ({ context, hostTour }, provide) => {
+    if (!hostTour) await skipHostTour(context);
+    await provide(context);
+  },
   // Closed at the end of each test: an open session page keeps polling the server every 3 s,
   // and leftover guests would slow down the next tests of the worker.
   // `provide` rather than `use`: the React Hooks lint rule would take it for `React.use`.
-  openAsGuest: async ({ browser }, provide) => {
+  openAsGuest: async ({ browser, hostTour }, provide) => {
     const contexts: BrowserContext[] = [];
     await provide(async (link, { locale = "en-US" } = {}) => {
       const context = await browser.newContext({ locale });
+      if (!hostTour) await skipHostTour(context);
       contexts.push(context);
       const page = await context.newPage();
       await page.goto(link);

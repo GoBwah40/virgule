@@ -2,6 +2,10 @@
 
 Nouvelles fonctionnalités, visibles par les personnes qui utilisent Virgule. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.0 — 2026-10-13
+
+- La première fois que tu animes, la page des sujets propose un court tour facultatif de ce que tu peux y faire : inviter le groupe, ajouter des sujets, les formulaires simple et avancé, les réglages et le passage aux idées. Tu peux le refaire à tout moment depuis le bouton sous « Passer aux idées ».
+
 ## 0.21.0 — 2026-10-13
 
 - Un bouton Ton avis en bas de chaque page permet de proposer une idée ou de signaler un bug à l'équipe, sans compte.

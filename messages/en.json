@@ -249,7 +249,45 @@
     "sizeOption": "{count}",
     "start": "Move on to ideas",
     "resume": "Back to ideas",
-    "startHint": "Add at least one topic to get started."
+    "startHint": "Add at least one topic to get started.",
+    "tour": {
+      "offerTitle": "First time hosting?",
+      "offerBody": "Take a quick tour of this page, in under a minute.",
+      "start": "Take the tour",
+      "dismiss": "Not now",
+      "next": "Next",
+      "back": "Back",
+      "done": "Got it",
+      "quit": "Leave the tour",
+      "progress": "Step {current} of {total}",
+      "replay": "Take the tour of this page",
+      "steps": {
+        "invite": {
+          "title": "Invite the group",
+          "body": "Share the link or show the QR code: everyone joins with their first name, no account needed."
+        },
+        "topic": {
+          "title": "Add your topics",
+          "body": "Each topic is a question for the group: give it a title, and details if needed."
+        },
+        "formMode": {
+          "title": "Simple or advanced",
+          "body": "The simple form asks for a title and details. Advanced adds the answer type, how people vote, a vote limit and topic ideas."
+        },
+        "suggestions": {
+          "title": "Or start from a suggestion",
+          "body": "Common topics are added in one tap, and you can edit them afterwards."
+        },
+        "settings": {
+          "title": "Set the rules",
+          "body": "Choose whether people can vote on their own ideas and leave comments, add a timer for the ideas, and set the number of seats. On a phone, they open from the gear button."
+        },
+        "start": {
+          "title": "Move on to ideas",
+          "body": "When your topics are ready, move on: everyone follows you to the next step automatically."
+        }
+      }
+    }
   },
   "ideas": {
     "title": "The ideas",
