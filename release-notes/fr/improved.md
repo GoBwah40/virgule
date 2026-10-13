@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.1 — 2026-10-13
+
+- Le crayon pour renommer la séance est une simple icône à côté de son nom, sans fond de bouton.
+
 ## 0.21.4 — 2026-10-13
 
 - Ajouter des sujets est plus simple : un titre et des précisions par défaut, le type de réponse, le vote et les sujets fréquents sous « Avancé », gardé comme tu l’as laissé. Sur téléphone, les réglages s’ouvrent depuis la roue crantée.

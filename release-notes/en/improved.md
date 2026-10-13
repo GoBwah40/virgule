@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.1 — 2026-10-13
+
+- The pencil to rename the session is a plain icon next to its name, without a button background.
+
 ## 0.21.4 — 2026-10-13
 
 - Adding topics is simpler: just a title and details by default, the answer type, voting and common topics under “Advanced”, kept as you left it. On phones, the settings open from the gear button.
