@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.21.2 — 2026-10-13
+
+- Dialogs open with a short, smooth motion, and turning off the share link or disconnecting the room screen asks inside the same dialog instead of opening a second one on top.
+
 ## 0.21.1 — 2026-10-13
 
 - Clearer wording across the app: the host's buttons say where they lead (“Move on to ideas”, “Go to the recap”), a host-defined list of options is now a “Poll”, and the settings explain what they do.
