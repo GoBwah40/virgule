@@ -8,6 +8,7 @@ import {
   LIVE_TIMEOUT,
   seeRecap,
   setUpSession,
+  showAllTopicOptions,
   startIdeas,
   suggestPizzaAndSushi,
   test,
@@ -52,6 +53,7 @@ test("the recap can be exported, but not while votes are open", async ({ page, o
 
 test("the file name is safe whatever the session name", async ({ page }) => {
   await createRoom(page, { name: "Soirée d'été / Q3 !", host: "Sam" });
+  await showAllTopicOptions(page);
   await page.getByRole("list", { name: "Common topics" }).getByRole("button", { name: "Goal" }).click();
   await startIdeas(page);
   await seeRecap(page);
@@ -105,6 +107,7 @@ test("period topics export their summary", async ({ page, openAsGuest }) => {
   const link = await createRoom(page, { name: "Holidays", host: "Sam" });
   const guest = await openAsGuest(link);
   await join(guest, "Lea");
+  await showAllTopicOptions(page);
   await page.getByRole("list", { name: "Common topics" }).getByRole("button", { name: "Dates" }).click();
   await startIdeas(page);
 

@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 
 import {
   addTopic,
+  changeSettings,
   choose,
   clickAndConfirm,
   createRoom,
@@ -89,7 +90,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await settle(newcomer);
       await expectAccessible(newcomer, "join form");
 
-      await pick(page, "5 min");
+      await changeSettings(page, () => pick(page, "5 min"));
       await startIdeas(page);
       await suggestIdea(page, "Pizza");
       await expect(guest).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
@@ -128,7 +129,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expect(screen.getByRole("heading", { name: "Dinner" })).toBeVisible({ timeout: LIVE_TIMEOUT });
       await expectAccessible(screen, "room screen, topics");
 
-      await pick(page, "5 min");
+      await changeSettings(page, () => pick(page, "5 min"));
       await startIdeas(page);
       await suggestIdea(page, "Pizza");
       await expect(screen.getByRole("timer")).toBeVisible({ timeout: LIVE_TIMEOUT });
@@ -300,7 +301,7 @@ test.describe("reduced motion", () => {
   test("animations play by default", async ({ page, openAsGuest }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await setUpSession(page, openAsGuest);
-    await pick(page, "5 min");
+    await changeSettings(page, () => pick(page, "5 min"));
     await startIdeas(page);
     await suggestIdea(page, "Pizza");
     expect(await voteAnimation(page)).not.toBe("none");
@@ -311,7 +312,7 @@ test.describe("reduced motion", () => {
   test("the app's animations stop when the device asks to reduce motion", async ({ page, openAsGuest }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await setUpSession(page, openAsGuest);
-    await pick(page, "5 min");
+    await changeSettings(page, () => pick(page, "5 min"));
     await startIdeas(page);
     await suggestIdea(page, "Pizza");
     expect(await voteAnimation(page)).toBe("none");

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Host topics step</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Three phone screens side by side: today, proposal A (progressive disclosure), proposal B (simple / advanced switch).
+   Tokens taken from src/app/globals.css (Virgule brand guidelines). */
+:root {
+  --sable: #fff7f0; --carte: #ffffff; --encre: #2a1a24; --encre-douce: #6f5a62; --trait: #eedccf; --creme: #f7ebe1;
+  --papaye: #f26a2e; --papaye-brulee: #c2410c; --mangue: #ffc23d; --mangue-pale: #fff0c7; --olivier: #1f7a4d;
+  --grenade: #b8283f; --sur-action: #ffffff;
+  --f-titre: "Bricolage Grotesque", "Figtree", system-ui, sans-serif;
+  --f-texte: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sable: #1c1216; --carte: #261a1f; --encre: #fbefe6; --encre-douce: #b7a3aa; --trait: #3d2c34; --creme: #30222a;
+    --papaye: #ff8a55; --papaye-brulee: #ff8a55; --mangue: #ffc23d; --mangue-pale: #4a3717; --olivier: #5cc98e;
+    --grenade: #ff6b81; --sur-action: #1c1216; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --sable: #1c1216; --carte: #261a1f; --encre: #fbefe6; --encre-douce: #b7a3aa; --trait: #3d2c34; --creme: #30222a;
+  --papaye: #ff8a55; --papaye-brulee: #ff8a55; --mangue: #ffc23d; --mangue-pale: #4a3717; --olivier: #5cc98e;
+  --grenade: #ff6b81; --sur-action: #1c1216; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--sable); color: var(--encre); font: 16px/1.55 var(--f-texte); margin: 0; padding: 40px 16px 64px; }
+.page { max-width: 1200px; margin: 0 auto; display: grid; gap: 48px; }
+h1, h2, h3 { font-family: var(--f-titre); text-wrap: balance; margin: 0; line-height: 1.1; }
+h1 { font-size: clamp(32px, 6vw, 50px); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(22px, 3vw, 28px); font-weight: 800; }
+p { margin: 0; }
+.eyebrow { font: 700 12px/1 var(--f-texte); letter-spacing: 0.14em; text-transform: uppercase; color: var(--papaye-brulee); }
+.intro { display: grid; gap: 14px; max-width: 70ch; }
+.intro p { color: var(--encre-douce); font-size: 18px; }
+
+.trio { display: grid; gap: 28px; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; }
+@media (max-width: 1000px) { .trio { grid-template-columns: minmax(0, 420px); justify-content: center; } }
+.col { display: grid; gap: 16px; min-width: 0; }
+.col header { display: grid; gap: 6px; }
+.col header p { color: var(--encre-douce); font-size: 15px; }
+.tag { font: 700 12px/1 var(--f-texte); padding: 6px 10px; border-radius: 999px; width: fit-content; background: var(--creme); color: var(--encre-douce); }
+.tag.reco { background: var(--mangue-pale); color: var(--encre); }
+
+.tel { background: var(--creme); border: 1.5px solid var(--trait); border-radius: 34px; padding: 12px; }
+.ecran { background: var(--sable); border-radius: 24px; padding: 18px 14px 20px; display: grid; gap: 12px; }
+.ecran-titre { font: 800 21px/1.1 var(--f-titre); }
+.sous-titre { font-size: 13px; color: var(--encre-douce); }
+.carte { background: var(--carte); border: 1.5px solid var(--trait); border-radius: 18px; padding: 12px 14px; display: grid; gap: 10px; }
+.carte.pointille { border-style: dashed; }
+.carte.suggeree { background: color-mix(in oklab, var(--mangue-pale) 60%, var(--carte)); border-color: color-mix(in oklab, var(--mangue) 50%, transparent); }
+.carte h3 { font-size: 15px; font-weight: 800; }
+.rang { display: flex; align-items: center; gap: 8px; min-height: 44px; }
+.rang .nom { flex: 1; min-width: 0; font-weight: 600; font-size: 15px; }
+.rang .nom small { display: block; font-weight: 400; color: var(--encre-douce); font-size: 12px; }
+.ico { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; color: var(--encre-douce); flex: none; }
+.ico svg, .btn svg, .badge svg { width: 16px; height: 16px; }
+.badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; border: 1.5px solid var(--trait); border-radius: 999px; padding: 1px 8px; color: var(--encre-douce); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; font-weight: 600; border: 1.5px dashed var(--trait); border-radius: 999px; padding: 4px 10px; color: var(--encre-douce); }
+.label { font-size: 12px; font-weight: 700; }
+.champ { border: 1.5px solid var(--trait); border-radius: 12px; min-height: 40px; padding: 8px 12px; font-size: 14px; color: var(--encre-douce); background: var(--carte); }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg span { font-size: 11px; font-weight: 600; border: 1.5px solid var(--trait); border-radius: 999px; padding: 4px 9px; color: var(--encre-douce); }
+.seg span.on { background: var(--encre); color: var(--sable); border-color: var(--encre); }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 600; }
+.switch i { width: 34px; height: 20px; border-radius: 999px; background: var(--trait); position: relative; flex: none; }
+.switch i::after { content: ""; position: absolute; width: 14px; height: 14px; top: 3px; left: 3px; border-radius: 50%; background: var(--carte); }
+.switch i.on { background: var(--papaye-brulee); }
+.switch i.on::after { left: 17px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; border-radius: 14px; font: 700 15px var(--f-texte); padding: 0 16px; border: 0; }
+.btn.plein { background: var(--papaye-brulee); color: var(--sur-action); width: 100%; }
+.btn.petit { min-height: 36px; font-size: 13px; padding: 0 12px; background: var(--encre); color: var(--sable); }
+.btn.lien { background: none; color: var(--papaye-brulee); padding: 0; min-height: 36px; font-size: 13px; }
+.ajout { display: flex; gap: 6px; }
+.ajout .champ { flex: 1; }
+.resume { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--encre-douce); }
+.resume b { color: var(--encre); }
+.compteur { font-size: 12px; color: var(--encre-douce); }
+.mode { display: inline-flex; border: 1.5px solid var(--trait); border-radius: 999px; padding: 2px; background: var(--carte); }
+.mode span { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; color: var(--encre-douce); }
+.mode span.on { background: var(--encre); color: var(--sable); }
+.entete { display: flex; flex-wrap: wrap-reverse; align-items: start; justify-content: space-between; gap: 8px; }
+.entete > div { flex: 1 1 180px; }
+.trop { outline: 2px dashed color-mix(in oklab, var(--grenade) 55%, transparent); outline-offset: 3px; border-radius: 14px; }
+
+/* Disclosure with <details>: works without JS */
+details > summary { list-style: none; cursor: pointer; }
+details > summary::-webkit-details-marker { display: none; }
+details[open] > summary .fleche { transform: rotate(180deg); }
+.fleche { transition: transform 200ms; }
+@media (prefers-reduced-motion: reduce) { .fleche { transition: none; } }
+.deplie { display: grid; gap: 10px; padding-top: 10px; }
+
+.points { display: grid; gap: 8px; padding: 0; margin: 0; list-style: none; }
+.points li { display: grid; grid-template-columns: 16px 1fr; gap: 8px; color: var(--encre-douce); font-size: 14px; }
+.points li::before { content: ""; width: 7px; height: 7px; margin-top: 8px; border-radius: 50%; background: var(--mangue); }
+.points li.moins::before { background: var(--grenade); }
+.points strong { color: var(--encre); font-weight: 600; }
+
+.tableau { width: 100%; border-collapse: collapse; font-size: 15px; }
+.tableau th, .tableau td { text-align: left; padding: 10px 12px; border-bottom: 1.5px solid var(--trait); vertical-align: top; }
+.tableau th { font-size: 13px; color: var(--encre-douce); }
+.scroll { overflow-x: auto; }
+.legende { color: var(--encre-douce); font-size: 13px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"/></symbol>
+  <symbol id="down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
+  <symbol id="pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></symbol>
+  <symbol id="grip" viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></symbol>
+  <symbol id="play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></symbol>
+  <symbol id="cog" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m5 12 5 5 9-10"/></symbol>
+  <symbol id="x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+</svg>
+
+<main class="page">
+  <div class="intro">
+    <span class="eyebrow">Topics step · host</span>
+    <h1>A calmer topics step for the host</h1>
+    <p>Today the host sees everything at once: participants' suggestions, four buttons per topic, six topic ideas, a full topic form (seven answer types, voting mode, vote limit) and five session settings. Most hosts only need to type three topic titles and press Start. Two ways to calm it down, side by side with today's screen.</p>
+  </div>
+
+  <div class="trio">
+    <!-- TODAY -->
+    <section class="col" aria-labelledby="h-today">
+      <header>
+        <span class="tag">Today</span>
+        <h2 id="h-today">Everything open</h2>
+        <p>Outlined in red: what competes for attention before the first topic is even added.</p>
+      </header>
+      <div class="tel"><div class="ecran">
+        <div class="entete">
+          <div><div class="ecran-titre">What do we need to decide?</div><div class="sous-titre">Add the topics to decide together, then start the ideas.</div></div>
+          <span class="mode"><span class="on">List</span><span>Board</span></span>
+        </div>
+        <div class="carte suggeree">
+          <h3>Suggestions from the group</h3>
+          <div class="rang"><span class="nom">Who brings the cake?</span><span class="ico"><svg><use href="#x"/></svg></span><span class="btn petit"><svg><use href="#check"/></svg>Add</span></div>
+        </div>
+        <div class="carte"><div class="rang"><span class="nom">Goal<small>What do we want to achieve?</small></span>
+          <span class="trop" style="display:flex"><span class="ico"><svg><use href="#up"/></svg></span><span class="ico"><svg><use href="#down"/></svg></span><span class="ico"><svg><use href="#pen"/></svg></span><span class="ico"><svg><use href="#trash"/></svg></span></span></div></div>
+        <div class="carte"><div class="rang"><span class="nom">Dates <span class="badge"><svg><use href="#cal"/></svg>Period</span></span>
+          <span class="trop" style="display:flex"><span class="ico"><svg><use href="#up"/></svg></span><span class="ico"><svg><use href="#down"/></svg></span><span class="ico"><svg><use href="#pen"/></svg></span><span class="ico"><svg><use href="#trash"/></svg></span></span></div></div>
+        <div class="trop"><span class="label">Topic ideas</span><div class="chips"><span class="chip">Place</span><span class="chip">Budget</span><span class="chip">Priorities</span><span class="chip">Who does what</span></div></div>
+        <div class="carte pointille trop">
+          <span class="label">Topic</span><div class="champ">e.g. Where do we go?</div>
+          <span class="label">Details (optional)</span><div class="champ" style="min-height:52px"></div>
+          <span class="label">Answer type</span>
+          <div class="seg"><span class="on">Text</span><span>Date</span><span>Period</span><span>Amount</span><span>Range</span><span>Place</span><span>List</span></div>
+          <span class="label">Voting</span><div class="seg"><span class="on">For / against</span><span>Points</span></div>
+          <span class="label">“For” votes per person</span><div class="seg"><span class="on">No limit</span><span>1</span><span>2</span><span>3</span><span>5</span></div>
+          <span class="btn petit" style="justify-self:end">Add the topic</span>
+        </div>
+        <div class="carte trop">
+          <h3>Settings</h3>
+          <div class="switch">Vote on your own ideas<i></i></div>
+          <div class="switch">Comments on ideas<i class="on"></i></div>
+          <span class="label">Ideas timer</span><div class="seg"><span class="on">None</span><span>3 min</span><span>5 min</span><span>10 min</span><span>15 min</span></div>
+          <span class="label">Number of seats</span><div class="seg"><span>4</span><span class="on">6</span><span>8</span><span>12</span></div>
+        </div>
+        <span class="btn plein"><svg><use href="#play"/></svg>Start the ideas</span>
+      </div></div>
+    </section>
+
+    <!-- PROPOSAL A -->
+    <section class="col" aria-labelledby="h-a">
+      <header>
+        <span class="tag reco">A · recommended</span>
+        <h2 id="h-a">Open on demand</h2>
+        <p>Same features, nothing removed: what is rarely used is folded away and opens where you need it. Try the folds.</p>
+      </header>
+      <div class="tel"><div class="ecran">
+        <div class="entete">
+          <div><div class="ecran-titre">What do we need to decide?</div><div class="sous-titre">Add the topics, then start the ideas.</div></div>
+        </div>
+        <div class="carte suggeree">
+          <div class="rang"><span class="nom">Who brings the cake?<small>Suggested by the group</small></span><span class="ico"><svg><use href="#x"/></svg></span><span class="btn petit"><svg><use href="#check"/></svg>Add</span></div>
+        </div>
+        <div class="carte"><div class="rang"><span class="nom">Goal<small>What do we want to achieve?</small></span><span class="ico"><svg><use href="#pen"/></svg></span><span class="ico"><svg><use href="#more"/></svg></span></div></div>
+        <div class="carte"><div class="rang"><span class="nom">Dates <span class="badge"><svg><use href="#cal"/></svg>Period</span></span><span class="ico"><svg><use href="#pen"/></svg></span><span class="ico"><svg><use href="#more"/></svg></span></div></div>
+
+        <div class="carte pointille">
+          <div class="ajout"><div class="champ">Add a topic…</div><span class="btn petit" aria-label="Add"><svg><use href="#plus"/></svg></span></div>
+          <div class="chips"><span class="chip">Place</span><span class="chip">Budget</span><span class="chip">Priorities</span></div>
+          <details>
+            <summary class="btn lien">Answer type and voting <svg class="fleche"><use href="#chev"/></svg></summary>
+            <div class="deplie">
+              <span class="label">Details (optional)</span><div class="champ" style="min-height:52px"></div>
+              <span class="label">Answer type</span>
+              <div class="seg"><span class="on">Text</span><span>Date</span><span>Period</span><span>Amount</span><span>Range</span><span>Place</span><span>List</span></div>
+              <span class="label">Voting</span><div class="seg"><span class="on">For / against</span><span>Points</span></div>
+              <span class="label">“For” votes per person</span><div class="seg"><span class="on">No limit</span><span>1</span><span>2</span><span>3</span><span>5</span></div>
+            </div>
+          </details>
+        </div>
+
+        <details class="carte">
+          <summary class="resume"><svg width="16" height="16"><use href="#cog"/></svg><span style="flex:1"><b>Settings</b> · 6 seats · no timer · comments on</span><svg class="fleche" width="16" height="16"><use href="#chev"/></svg></summary>
+          <div class="deplie">
+            <div class="switch">Vote on your own ideas<i></i></div>
+            <div class="switch">Comments on ideas<i class="on"></i></div>
+            <span class="label">Ideas timer</span><div class="seg"><span class="on">None</span><span>3 min</span><span>5 min</span><span>10 min</span><span>15 min</span></div>
+            <span class="label">Number of seats</span><div class="seg"><span>4</span><span class="on">6</span><span>8</span><span>12</span></div>
+          </div>
+        </details>
+        <span class="btn plein"><svg><use href="#play"/></svg>Start the ideas</span>
+      </div></div>
+    </section>
+
+    <!-- PROPOSAL B -->
+    <section class="col" aria-labelledby="h-b">
+      <header>
+        <span class="tag">B</span>
+        <h2 id="h-b">Simple / Advanced switch</h2>
+        <p>Your idea: a switch in the header. Simple hides the answer types, voting rules and settings; Advanced shows today's screen.</p>
+      </header>
+      <div class="tel"><div class="ecran">
+        <div class="entete">
+          <div><div class="ecran-titre">What do we need to decide?</div><div class="sous-titre">Add the topics, then start the ideas.</div></div>
+          <span class="mode"><span class="on">Simple</span><span>Advanced</span></span>
+        </div>
+        <div class="carte suggeree">
+          <div class="rang"><span class="nom">Who brings the cake?<small>Suggested by the group</small></span><span class="ico"><svg><use href="#x"/></svg></span><span class="btn petit"><svg><use href="#check"/></svg>Add</span></div>
+        </div>
+        <div class="carte"><div class="rang"><span class="nom">Goal<small>What do we want to achieve?</small></span><span class="ico"><svg><use href="#trash"/></svg></span></div></div>
+        <div class="carte"><div class="rang"><span class="nom">Dates <span class="badge"><svg><use href="#cal"/></svg>Period</span></span><span class="ico"><svg><use href="#trash"/></svg></span></div></div>
+        <div class="carte pointille">
+          <div class="ajout"><div class="champ">Add a topic…</div><span class="btn petit" aria-label="Add"><svg><use href="#plus"/></svg></span></div>
+          <div class="chips"><span class="chip">Place</span><span class="chip">Budget</span><span class="chip">Priorities</span></div>
+        </div>
+        <span class="btn plein"><svg><use href="#play"/></svg>Start the ideas</span>
+        <p class="legende" style="text-align:center">“Dates” is a Period topic, but in Simple mode you can't see or change why.</p>
+      </div></div>
+    </section>
+  </div>
+
+  <section class="intro" style="max-width:none" aria-labelledby="h-cmp">
+    <h2 id="h-cmp">Why A rather than B</h2>
+    <div class="scroll">
+      <table class="tableau">
+        <thead><tr><th></th><th>A · open on demand</th><th>B · Simple / Advanced switch</th></tr></thead>
+        <tbody>
+          <tr><td>First screen</td><td>One field, a few chips, Start</td><td>Same in Simple</td></tr>
+          <tr><td>Need a Period topic once</td><td>Open “Answer type and voting” for that topic only</td><td>Switch the whole page to Advanced, everything comes back</td></tr>
+          <tr><td>Hidden state</td><td>Settings summary always visible (“6 seats · no timer”)</td><td>A timer or a vote limit set in Advanced keeps applying in Simple, unseen</td></tr>
+          <tr><td>Switches in the header</td><td>List / Board only</td><td>List / Board <em>and</em> Simple / Advanced</td></tr>
+          <tr><td>Code</td><td>Reuses <code>ExpandableListItem</code>-style folds, one layout</td><td>Two layouts to test, a new preference cookie</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="points">
+      <li><strong>Topic rows:</strong> edit stays visible; move up, move down and delete go into a “⋯” menu (44 px target, keyboard reachable).</li>
+      <li><strong>Add a topic:</strong> a single field. Details, answer type and voting fold under one link; they unfold on their own when editing a topic that already uses them.</li>
+      <li><strong>Topic ideas:</strong> three chips at most, and they disappear once there are three topics.</li>
+      <li><strong>Participants' suggestions:</strong> merged into the list as highlighted rows rather than a separate card.</li>
+      <li><strong>Settings:</strong> a one-line summary that unfolds; on wide screens it stays in the side column, folded too.</li>
+      <li><strong>List / Board:</strong> kept for the host, but hidden until there are four topics (the board adds nothing for two).</li>
+      <li class="moins"><strong>Trade-off:</strong> one more tap for hosts who use typed topics on every topic. The fold remembers its last state per person to soften it.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

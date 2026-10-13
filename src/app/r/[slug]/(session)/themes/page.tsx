@@ -13,6 +13,7 @@ import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { ViewChoice, ViewChoiceSwitch, ViewProvider } from "@/components/phases/view-choice";
 import { TopicCard } from "@/components/topic-card";
 import { getThemes, getThemeSuggestions, hostName, loadPhasePage } from "@/lib/room";
+import { parseTopicFormPreference, TOPIC_FORM_COOKIE } from "@/lib/topic-form-preference";
 import { parseViewPreference, VIEW_COOKIE } from "@/lib/view-preference";
 
 export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes">) {
@@ -23,7 +24,8 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
   const t = await getTranslations("themes");
   const [themes, suggestions] = await Promise.all([getThemes(page.room.id, page.room.round), getThemeSuggestions(page.room.id, page.me)]);
   const host = hostName(page.participants);
-  const initialView = parseViewPreference((await cookies()).get(VIEW_COOKIE)?.value);
+  const cookieStore = await cookies();
+  const initialView = parseViewPreference(cookieStore.get(VIEW_COOKIE)?.value);
 
   if (page.me.isHost) {
     return (
@@ -38,12 +40,15 @@ export default async function ThemesPage({ params }: PageProps<"/r/[slug]/themes
           <ThemeEditor
             slug={slug}
             themes={themes}
-            allowSelfVote={page.room.allowSelfVote}
-            allowComments={page.room.allowComments}
-            ideasTimerMinutes={page.room.ideasTimerMinutes}
-            autoRecap={page.room.autoRecap}
-            capacity={page.room.capacity}
-            participantCount={page.participants.length}
+            settings={{
+              allowSelfVote: page.room.allowSelfVote,
+              allowComments: page.room.allowComments,
+              ideasTimerMinutes: page.room.ideasTimerMinutes,
+              autoRecap: page.room.autoRecap,
+              capacity: page.room.capacity,
+              participantCount: page.participants.length,
+            }}
+            initialForm={parseTopicFormPreference(cookieStore.get(TOPIC_FORM_COOKIE)?.value)}
           />
         </ViewProvider>
       </PhaseTransition>

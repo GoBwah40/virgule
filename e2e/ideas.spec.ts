@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 
 import {
   ageIdeas,
+  changeSettings,
   expect,
   idea,
   LIVE_TIMEOUT,
@@ -98,8 +99,10 @@ test("votes stay secret during the ideas phase and decide the recap", async ({ p
 test("with self-voting turned off, nobody can vote on their own idea", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
   const selfVote = page.getByRole("switch", { name: "Vote on your own ideas" });
-  await selfVote.click();
-  await expect(selfVote).not.toBeChecked();
+  await changeSettings(page, async () => {
+    await selfVote.click();
+    await expect(selfVote).not.toBeChecked();
+  });
   await suggestPizzaAndSushi(page, guest);
 
   await expect(idea(page, "Pizza").getByRole("button", { name: "For" })).toBeDisabled();

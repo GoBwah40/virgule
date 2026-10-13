@@ -2,6 +2,7 @@ import type { Page } from "@playwright/test";
 
 import {
   addTopic,
+  changeSettings,
   clickAndConfirm,
   createRoom,
   expect,
@@ -10,6 +11,7 @@ import {
   LIVE_TIMEOUT,
   pick,
   seeRecap,
+  showAllTopicOptions,
   startIdeas,
   suggestIdea,
   test,
@@ -74,6 +76,7 @@ test("the ideas cannot start without a topic", async ({ page, openAsGuest }) => 
 
 test("a topic with details and an answer type shows up for the guest", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
+  await showAllTopicOptions(page);
 
   await page.getByLabel("Topic", { exact: true }).fill("When do we leave?");
   await page.getByLabel("Details (optional)").fill("Long weekend in May");
@@ -92,8 +95,34 @@ test("a topic with details and an answer type shows up for the guest", async ({ 
   await expect(row.getByText("Period")).toBeVisible();
 });
 
+test("the topic form is simple until the host asks for every option, and stays as they left it", async ({ page, openAsGuest }) => {
+  await setUpEmpty(page, openAsGuest);
+  const kind = page.getByRole("group", { name: "Answer type" });
+  const suggestions = page.getByRole("list", { name: "Common topics" });
+  await expect(page.getByRole("radio", { name: "Simple", exact: true })).toBeChecked();
+  await expect(kind).toHaveCount(0);
+  await expect(page.getByRole("group", { name: "Voting" })).toHaveCount(0);
+  await expect(suggestions).toHaveCount(0);
+
+  await showAllTopicOptions(page);
+  await expect(kind).toBeVisible();
+  await expect(suggestions).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("radio", { name: "Advanced", exact: true })).toBeChecked();
+  await expect(kind).toBeVisible();
+
+  // A topic picked in the advanced form keeps its options in view when edited from the simple one.
+  await suggestions.getByRole("button", { name: "Dates" }).click();
+  await expect(topic(page, "Dates")).toBeVisible();
+  await pick(page, "Simple");
+  await expect(kind).toHaveCount(0);
+  await topic(page, "Dates").getByRole("button", { name: "Edit" }).click();
+  await expect(page.locator("li").getByRole("radio", { name: "Period", exact: true })).toBeChecked();
+});
+
 test("a suggested topic is added in one tap", async ({ page, openAsGuest }) => {
   await setUpEmpty(page, openAsGuest);
+  await showAllTopicOptions(page);
   const suggestions = page.getByRole("list", { name: "Common topics" });
 
   await suggestions.getByRole("button", { name: "Budget" }).click();
@@ -135,6 +164,7 @@ test("the host edits, reorders and deletes topics", async ({ page, openAsGuest }
 
 test("a list topic turns its options into ideas to vote on", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
+  await showAllTopicOptions(page);
 
   await page.getByLabel("Topic", { exact: true }).fill("Where to?");
   await pick(page, "Poll");
@@ -164,6 +194,7 @@ test("a list topic turns its options into ideas to vote on", async ({ page, open
 
 test("a topic can cap the “for” votes, except a single-answer list", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
+  await showAllTopicOptions(page);
   const limit = page.getByRole("group", { name: "“For” votes per person" });
 
   // A single-answer list is already a limit of one: the setting goes away.
@@ -198,6 +229,7 @@ test("a topic can cap the “for” votes, except a single-answer list", async (
 
 test("going back to the topics keeps the ideas, and locks their answer type", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
+  await showAllTopicOptions(page);
   await addTopic(page, "Dinner");
   await startIdeas(page);
   await suggestIdea(page, "Pizza");
@@ -248,6 +280,7 @@ test("a topic from an earlier round can no longer be deleted", async ({ page, op
 
 test("a vote limit cannot drop below the votes already cast", async ({ page, openAsGuest }) => {
   const guest = await setUpEmpty(page, openAsGuest);
+  await showAllTopicOptions(page);
   await addTopic(page, "Dinner");
   await startIdeas(page);
   await suggestIdea(page, "Pizza");
@@ -286,8 +319,10 @@ test("turning off voting on your own ideas removes such votes already cast", asy
   await clickAndConfirm(page, "Edit the topics");
   await expect(page).toHaveURL(/\/themes$/, { timeout: LIVE_TIMEOUT });
   const toggle = page.getByRole("switch", { name: "Vote on your own ideas" });
-  await toggle.click();
-  await expect(toggle).not.toBeChecked();
+  await changeSettings(page, async () => {
+    await toggle.click();
+    await expect(toggle).not.toBeChecked();
+  });
   await page.getByRole("button", { name: "Back to ideas" }).click();
   await expect(page).toHaveURL(/\/ideas$/, { timeout: LIVE_TIMEOUT });
 

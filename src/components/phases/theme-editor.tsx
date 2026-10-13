@@ -14,6 +14,7 @@ import { THEME_KIND_ICONS } from "@/components/phases/theme-kinds";
 import { useView } from "@/components/phases/view-choice";
 import { SegmentedControl } from "@/components/segmented-control";
 import { SettingSwitch } from "@/components/setting-switch";
+import { SettingsDialog } from "@/components/settings-dialog";
 import { SuggestionChips } from "@/components/suggestion-chips";
 import { TopicCard } from "@/components/topic-card";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAction } from "@/hooks/use-action";
+import { useCookiePreference } from "@/hooks/use-cookie-preference";
 import { addTheme, deleteTheme, moveTheme, setAllowComments, setAllowSelfVote, setAutoRecap, setIdeasTimer, setRoomSize, startIdeasPhase, updateTheme } from "@/lib/actions";
 import { DEFAULT_POINTS_BUDGET, IDEAS_TIMER_OPTIONS, LIMITS, POINTS_BUDGET_OPTIONS, ROOM_SIZES, VOTE_LIMIT_OPTIONS } from "@/lib/config";
 import { CHOICE_OPTIONS, MAX_OPTION_LENGTH, THEME_KINDS, type ThemeKind } from "@/lib/idea-value";
+import { TOPIC_FORM_COOKIE, type TopicFormPreference } from "@/lib/topic-form-preference";
 import { cn } from "@/lib/utils";
 
 type Theme = {
@@ -62,28 +65,47 @@ const SUGGESTIONS = {
 } as const satisfies Record<string, ThemeKind>;
 type SuggestionKey = keyof typeof SUGGESTIONS;
 
-export function ThemeEditor({
-  slug,
-  themes,
-  allowSelfVote,
-  allowComments,
-  ideasTimerMinutes,
-  autoRecap,
-  capacity,
-  participantCount,
-}: {
-  slug: string;
-  themes: Theme[];
+/** Session settings, set by the host before the ideas start. */
+type Settings = {
   allowSelfVote: boolean;
   allowComments: boolean;
   ideasTimerMinutes: number | null;
   autoRecap: boolean;
   capacity: number;
   participantCount: number;
+};
+
+/** Options of a new topic: free text, for / against, no limit. */
+const DEFAULT_OPTIONS: Omit<ThemeValues, "title" | "description"> = {
+  kind: "TEXT",
+  options: [],
+  allowOtherIdeas: false,
+  singleChoice: false,
+  maxVotes: null,
+  pointsBudget: null,
+};
+
+/** A topic that leaves the defaults (free text, for / against, no limit): its options stay in view even in the simple form. */
+const hasCustomOptions = (theme: Theme) => theme.kind !== "TEXT" || theme.maxVotes !== null || theme.pointsBudget !== null;
+
+export function ThemeEditor({
+  slug,
+  themes,
+  settings,
+  initialForm,
+}: {
+  slug: string;
+  themes: Theme[];
+  settings: Settings;
+  /** Simple or advanced topic form, as this person last left it (cookie read by the server). */
+  initialForm: TopicFormPreference;
 }) {
   const t = useTranslations("themes");
+  const tc = useTranslations("common");
   const [pending, run] = useAction();
   const [view] = useView();
+  const [form, chooseForm] = useCookiePreference(TOPIC_FORM_COOKIE, initialForm);
+  const advanced = form === "advanced";
   // Back from the ideas phase: we resume rather than start.
   const startLabel = themes.some((th) => th.ideaCount > 0) ? t("resume") : t("start");
 
@@ -95,19 +117,38 @@ export function ThemeEditor({
   );
 
   const rows = themes.map((theme, i) => (
-    <ThemeRow key={theme.id} slug={slug} theme={theme} isFirst={i === 0} isLast={i === themes.length - 1} board={view === "board"} />
+    <ThemeRow key={theme.id} slug={slug} theme={theme} isFirst={i === 0} isLast={i === themes.length - 1} board={view === "board"} advanced={advanced} />
   ));
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
       <div className="min-w-0 space-y-4">
+        <div className="flex items-center justify-between gap-2">
+          <SegmentedControl
+            name="topic-form"
+            label={t("formLabel")}
+            labelHidden
+            options={[
+              { value: "simple", label: t("formSimple") },
+              { value: "advanced", label: t("formAdvanced") },
+            ]}
+            value={form}
+            onChange={chooseForm}
+          />
+          {/* Phones and tablets: the side column ends up below the form, the settings move to a dialog. */}
+          <SettingsDialog className="lg:hidden" labels={{ trigger: t("settingsOpen"), title: t("settings"), close: tc("close") }}>
+            <SessionSettings slug={slug} settings={settings} idPrefix="dialog" />
+          </SettingsDialog>
+        </div>
+
         {themes.length === 0 ? (
           <p className="text-muted-foreground">{t("empty")}</p>
         ) : (
           view === "board" ? <BoardColumns as="ul">{rows}</BoardColumns> : <ul className="space-y-2">{rows}</ul>
         )}
 
-        <SuggestionChips
+        {advanced && (
+          <SuggestionChips
           label={t("suggestionsLabel")}
           items={suggestions}
           disabled={pending}
@@ -121,68 +162,19 @@ export function ThemeEditor({
               }),
             );
           }}
-        />
+          />
+        )}
 
-        <ThemeForm submitLabel={t("add")} pending={pending} onSubmit={(values, reset) => run(() => addTheme(slug, values), reset)} />
+        <ThemeForm submitLabel={t("add")} pending={pending} advanced={advanced} onSubmit={(values, reset) => run(() => addTheme(slug, values), reset)} />
       </div>
 
       <aside className="space-y-4">
-        <Card>
+        <Card className="hidden lg:flex">
           <CardHeader>
             <CardTitle className="font-heading text-lg font-bold">{t("settings")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-5">
-            <SettingSwitch
-              id="self-vote"
-              label={t("allowSelfVote")}
-              hint={t("allowSelfVoteHint")}
-              checked={allowSelfVote}
-              disabled={pending}
-              onCheckedChange={(checked) => run(() => setAllowSelfVote(slug, checked))}
-            />
-            <SettingSwitch
-              id="comments"
-              label={t("allowComments")}
-              hint={t("allowCommentsHint")}
-              checked={allowComments}
-              disabled={pending}
-              onCheckedChange={(checked) => run(() => setAllowComments(slug, checked))}
-            />
-            <SegmentedControl
-              name="ideas-timer"
-              label={t("timerLabel")}
-              hint={t("timerHint")}
-              options={[
-                { value: "off", label: t("timerOff") },
-                ...IDEAS_TIMER_OPTIONS.map((m) => ({ value: String(m), label: t("timerMinutes", { count: m }) })),
-              ]}
-              value={ideasTimerMinutes ? String(ideasTimerMinutes) : "off"}
-              disabled={pending}
-              onChange={(value) => run(() => setIdeasTimer(slug, value === "off" ? null : Number(value)))}
-            />
-            {ideasTimerMinutes !== null && (
-              <SettingSwitch
-                id="auto-recap"
-                label={t("autoRecap")}
-                hint={t("autoRecapHint")}
-                checked={autoRecap}
-                disabled={pending}
-                onCheckedChange={(checked) => run(() => setAutoRecap(slug, checked))}
-              />
-            )}
-            <SegmentedControl
-              name="room-size"
-              label={t("sizeLabel")}
-              hint={t("sizeHint", { count: participantCount })}
-              // Sizes below the people already seated are not offered.
-              options={ROOM_SIZES.filter((n) => n >= participantCount).map((n) => ({
-                value: String(n),
-                label: t("sizeOption", { count: n }),
-              }))}
-              value={String(capacity)}
-              disabled={pending}
-              onChange={(value) => run(() => setRoomSize(slug, Number(value)))}
-            />
+            <SessionSettings slug={slug} settings={settings} idPrefix="aside" />
           </CardContent>
         </Card>
 
@@ -201,12 +193,76 @@ export function ThemeEditor({
   );
 }
 
+/** Session settings: in the side column on wide screens, in a dialog on phones (`idPrefix` keeps their ids apart). */
+function SessionSettings({ slug, settings, idPrefix }: { slug: string; settings: Settings; idPrefix: string }) {
+  const t = useTranslations("themes");
+  const [pending, run] = useAction();
+  const { allowSelfVote, allowComments, ideasTimerMinutes, autoRecap, capacity, participantCount } = settings;
+
+  return (
+    <>
+    <SettingSwitch
+      id={`${idPrefix}-self-vote`}
+      label={t("allowSelfVote")}
+      hint={t("allowSelfVoteHint")}
+      checked={allowSelfVote}
+      disabled={pending}
+      onCheckedChange={(checked) => run(() => setAllowSelfVote(slug, checked))}
+    />
+    <SettingSwitch
+      id={`${idPrefix}-comments`}
+      label={t("allowComments")}
+      hint={t("allowCommentsHint")}
+      checked={allowComments}
+      disabled={pending}
+      onCheckedChange={(checked) => run(() => setAllowComments(slug, checked))}
+    />
+    <SegmentedControl
+      name={`${idPrefix}-ideas-timer`}
+      label={t("timerLabel")}
+      hint={t("timerHint")}
+      options={[
+        { value: "off", label: t("timerOff") },
+        ...IDEAS_TIMER_OPTIONS.map((m) => ({ value: String(m), label: t("timerMinutes", { count: m }) })),
+      ]}
+      value={ideasTimerMinutes ? String(ideasTimerMinutes) : "off"}
+      disabled={pending}
+      onChange={(value) => run(() => setIdeasTimer(slug, value === "off" ? null : Number(value)))}
+    />
+    {ideasTimerMinutes !== null && (
+      <SettingSwitch
+        id={`${idPrefix}-auto-recap`}
+        label={t("autoRecap")}
+        hint={t("autoRecapHint")}
+        checked={autoRecap}
+        disabled={pending}
+        onCheckedChange={(checked) => run(() => setAutoRecap(slug, checked))}
+      />
+    )}
+    <SegmentedControl
+      name={`${idPrefix}-room-size`}
+      label={t("sizeLabel")}
+      hint={t("sizeHint", { count: participantCount })}
+      // Sizes below the people already seated are not offered.
+      options={ROOM_SIZES.filter((n) => n >= participantCount).map((n) => ({
+        value: String(n),
+        label: t("sizeOption", { count: n }),
+      }))}
+      value={String(capacity)}
+      disabled={pending}
+      onChange={(value) => run(() => setRoomSize(slug, Number(value)))}
+    />
+    </>
+  );
+}
+
 function ThemeRow({
   slug,
   theme,
   isFirst,
   isLast,
   board,
+  advanced,
 }: {
   slug: string;
   theme: Theme;
@@ -214,6 +270,7 @@ function ThemeRow({
   isLast: boolean;
   /** A card on the board rather than a row of the list: same actions. */
   board: boolean;
+  advanced: boolean;
 }) {
   const t = useTranslations("themes");
   const [editing, setEditing] = useState(false);
@@ -227,6 +284,7 @@ function ThemeRow({
           initial={theme}
           submitLabel={t("save")}
           pending={pending}
+          advanced={advanced}
           onCancel={() => setEditing(false)}
           onSubmit={(values) => run(() => updateTheme(slug, theme.id, values), () => setEditing(false))}
         />
@@ -308,12 +366,15 @@ function ThemeForm({
   initial,
   submitLabel,
   pending,
+  advanced,
   onSubmit,
   onCancel,
 }: {
   initial?: Theme;
   submitLabel: string;
   pending: boolean;
+  /** Every option, or the title and details only (the hidden options keep their values). */
+  advanced: boolean;
   onSubmit: (values: ThemeValues, reset: () => void) => void;
   onCancel?: () => void;
 }) {
@@ -334,6 +395,7 @@ function ThemeForm({
   const idPrefix = initial?.id ?? "new";
   // Ideas already exist: changing their kind would make them unreadable.
   const kindLocked = (initial?.ideaCount ?? 0) > 0;
+  const showOptions = advanced || (initial !== undefined && hasCustomOptions(initial));
 
   return (
     <Card size="sm" className={initial ? undefined : "border-dashed"}>
@@ -343,16 +405,19 @@ function ThemeForm({
           onSubmit={(e) => {
             e.preventDefault();
             onSubmit(
-              {
-                title,
-                description,
-                kind,
-                options,
-                allowOtherIdeas,
-                singleChoice: points ? false : singleChoice,
-                maxVotes: single || points ? null : maxVotes,
-                pointsBudget: points ? pointsBudget : null,
-              },
+              // Simple form: the options left out are the defaults, not whatever was picked before switching.
+              showOptions
+                ? {
+                    title,
+                    description,
+                    kind,
+                    options,
+                    allowOtherIdeas,
+                    singleChoice: points ? false : singleChoice,
+                    maxVotes: single || points ? null : maxVotes,
+                    pointsBudget: points ? pointsBudget : null,
+                  }
+                : { ...DEFAULT_OPTIONS, title, description },
               () => {
               setTitle("");
               setDescription("");
@@ -387,88 +452,92 @@ function ThemeForm({
               rows={2}
             />
           </FormField>
-          <SegmentedControl
-            name={`${idPrefix}-kind`}
-            label={t("kindLabel")}
-            options={THEME_KINDS.map((k) => ({ value: k, label: t(`kinds.${k}`), icon: THEME_KIND_ICONS[k] }))}
-            value={kind}
-            onChange={setKind}
-            disabled={kindLocked}
-            hint={kindLocked ? t("kindLocked") : t(`kindHints.${kind}`)}
-          />
-          {kind === "CHOICE" && (
-            <div className="space-y-4 rounded-xl bg-muted/50 p-3 motion-safe:animate-in motion-safe:fade-in">
-              <OptionListField
-                idPrefix={idPrefix}
-                value={options}
-                onChange={setOptions}
-                max={CHOICE_OPTIONS.max}
-                maxLength={MAX_OPTION_LENGTH}
-                labels={{
-                  label: t("optionsLabel"),
-                  hint: t("optionsHint", { min: CHOICE_OPTIONS.min, max: CHOICE_OPTIONS.max }),
-                  placeholder: t("optionPlaceholder"),
-                  add: t("optionAdd"),
-                  remove: (option) => t("optionRemove", { option }),
-                }}
-              />
-              <SettingSwitch
-                id={`${idPrefix}-other-ideas`}
-                label={t("allowOtherIdeas")}
-                hint={t("allowOtherIdeasHint")}
-                checked={allowOtherIdeas}
-                onCheckedChange={setAllowOtherIdeas}
-              />
-              {!points && (
-                <SettingSwitch
-                  id={`${idPrefix}-single-choice`}
-                  label={t("singleChoice")}
-                  // Votes may already exist: switching would break the rule for them.
-                  hint={kindLocked ? t("singleChoiceLocked") : t("singleChoiceHint")}
-                  checked={singleChoice}
-                  disabled={kindLocked}
-                  onCheckedChange={setSingleChoice}
+          {showOptions && (
+            <>
+            <SegmentedControl
+              name={`${idPrefix}-kind`}
+              label={t("kindLabel")}
+              options={THEME_KINDS.map((k) => ({ value: k, label: t(`kinds.${k}`), icon: THEME_KIND_ICONS[k] }))}
+              value={kind}
+              onChange={setKind}
+              disabled={kindLocked}
+              hint={kindLocked ? t("kindLocked") : t(`kindHints.${kind}`)}
+            />
+            {kind === "CHOICE" && (
+              <div className="space-y-4 rounded-xl bg-muted/50 p-3 motion-safe:animate-in motion-safe:fade-in">
+                <OptionListField
+                  idPrefix={idPrefix}
+                  value={options}
+                  onChange={setOptions}
+                  max={CHOICE_OPTIONS.max}
+                  maxLength={MAX_OPTION_LENGTH}
+                  labels={{
+                    label: t("optionsLabel"),
+                    hint: t("optionsHint", { min: CHOICE_OPTIONS.min, max: CHOICE_OPTIONS.max }),
+                    placeholder: t("optionPlaceholder"),
+                    add: t("optionAdd"),
+                    remove: (option) => t("optionRemove", { option }),
+                  }}
                 />
-              )}
-            </div>
-          )}
-          {!single && (
-            <SegmentedControl
-              name={`${idPrefix}-voting`}
-              label={t("votingLabel")}
-              options={[
-                { value: "votes", label: t("votingVotes") },
-                { value: "points", label: t("votingPoints") },
-              ]}
-              value={points ? "points" : "votes"}
-              onChange={(value) => setPointsBudget(value === "points" ? DEFAULT_POINTS_BUDGET : null)}
-              // Votes may already exist: switching would break the rule for them.
-              disabled={kindLocked}
-              hint={kindLocked ? t("votingLocked") : points ? t("votingPointsHint") : t("votingVotesHint")}
-            />
-          )}
-          {points && (
-            <SegmentedControl
-              name={`${idPrefix}-points-budget`}
-              label={t("pointsBudgetLabel")}
-              options={POINTS_BUDGET_OPTIONS.map((n) => ({ value: String(n), label: String(n) }))}
-              value={String(pointsBudget)}
-              onChange={(value) => setPointsBudget(Number(value))}
-              disabled={kindLocked}
-            />
-          )}
-          {!single && !points && (
-            <SegmentedControl
-              name={`${idPrefix}-max-votes`}
-              label={t("voteLimitLabel")}
-              hint={t("voteLimitHint")}
-              options={[
-                { value: "none", label: t("voteLimitNone") },
-                ...VOTE_LIMIT_OPTIONS.map((n) => ({ value: String(n), label: String(n) })),
-              ]}
-              value={maxVotes === null ? "none" : String(maxVotes)}
-              onChange={(value) => setMaxVotes(value === "none" ? null : Number(value))}
-            />
+                <SettingSwitch
+                  id={`${idPrefix}-other-ideas`}
+                  label={t("allowOtherIdeas")}
+                  hint={t("allowOtherIdeasHint")}
+                  checked={allowOtherIdeas}
+                  onCheckedChange={setAllowOtherIdeas}
+                />
+                {!points && (
+                  <SettingSwitch
+                    id={`${idPrefix}-single-choice`}
+                    label={t("singleChoice")}
+                    // Votes may already exist: switching would break the rule for them.
+                    hint={kindLocked ? t("singleChoiceLocked") : t("singleChoiceHint")}
+                    checked={singleChoice}
+                    disabled={kindLocked}
+                    onCheckedChange={setSingleChoice}
+                  />
+                )}
+              </div>
+            )}
+            {!single && (
+              <SegmentedControl
+                name={`${idPrefix}-voting`}
+                label={t("votingLabel")}
+                options={[
+                  { value: "votes", label: t("votingVotes") },
+                  { value: "points", label: t("votingPoints") },
+                ]}
+                value={points ? "points" : "votes"}
+                onChange={(value) => setPointsBudget(value === "points" ? DEFAULT_POINTS_BUDGET : null)}
+                // Votes may already exist: switching would break the rule for them.
+                disabled={kindLocked}
+                hint={kindLocked ? t("votingLocked") : points ? t("votingPointsHint") : t("votingVotesHint")}
+              />
+            )}
+            {points && (
+              <SegmentedControl
+                name={`${idPrefix}-points-budget`}
+                label={t("pointsBudgetLabel")}
+                options={POINTS_BUDGET_OPTIONS.map((n) => ({ value: String(n), label: String(n) }))}
+                value={String(pointsBudget)}
+                onChange={(value) => setPointsBudget(Number(value))}
+                disabled={kindLocked}
+              />
+            )}
+            {!single && !points && (
+              <SegmentedControl
+                name={`${idPrefix}-max-votes`}
+                label={t("voteLimitLabel")}
+                hint={t("voteLimitHint")}
+                options={[
+                  { value: "none", label: t("voteLimitNone") },
+                  ...VOTE_LIMIT_OPTIONS.map((n) => ({ value: String(n), label: String(n) })),
+                ]}
+                value={maxVotes === null ? "none" : String(maxVotes)}
+                onChange={(value) => setMaxVotes(value === "none" ? null : Number(value))}
+              />
+            )}
+            </>
           )}
           <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             {onCancel && (
@@ -476,7 +545,7 @@ function ThemeForm({
                 {t("cancel")}
               </Button>
             )}
-            <Button type="submit" disabled={pending || !title.trim() || optionsMissing}>
+            <Button type="submit" disabled={pending || !title.trim() || (showOptions && optionsMissing)}>
               {submitLabel}
             </Button>
           </div>

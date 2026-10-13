@@ -10,6 +10,7 @@ import {
   LIVE_TIMEOUT,
   pick,
   seeRecap,
+  showAllTopicOptions,
   startIdeas,
   test,
   vote,
@@ -21,6 +22,7 @@ import {
 /** Sam hosts "Holidays" and Lea has joined. */
 async function setUp(page: Page, openAsGuest: (link: string) => Promise<Page>) {
   const link = await createRoom(page, { name: "Holidays", host: "Sam" });
+  await showAllTopicOptions(page);
   const guest = await openAsGuest(link);
   await join(guest, "Lea");
   return guest;
@@ -157,6 +159,7 @@ test("the recap finds the common slot and the compatible budget", async ({ page,
 
 test("each person reads dates and amounts in their own language", async ({ page, openAsGuest }) => {
   const link = await createRoom(page, { name: "Holidays", host: "Sam" });
+  await showAllTopicOptions(page);
   await addSuggestedTopic(page, "Dates");
   await addSuggestedTopic(page, "Budget");
   await startIdeas(page);

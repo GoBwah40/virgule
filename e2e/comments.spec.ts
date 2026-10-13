@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
 import {
+  changeSettings,
   clickAndConfirm,
   expect,
   fillAndSubmit,
@@ -43,7 +44,7 @@ async function addComment(page: Page, content: string, text: string) {
 
 test("comments are off until the host turns them on", async ({ page, openAsGuest }) => {
   const { guest } = await setUpSession(page, openAsGuest);
-  await expect(page.getByRole("switch", { name: "Comments on ideas" })).not.toBeChecked();
+  await changeSettings(page, () => expect(page.getByRole("switch", { name: "Comments on ideas" })).not.toBeChecked());
   await suggestPizzaAndSushi(page, guest);
   for (const p of [page, guest]) await expect(toggle(p, "Sushi")).toHaveCount(0);
 });
