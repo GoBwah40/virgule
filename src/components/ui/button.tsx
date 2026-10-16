@@ -66,7 +66,8 @@ function Button({
     >
       {pending ? (
         <>
-          <span className="invisible inline-flex items-center gap-[inherit]">{children}</span>
+          {/* Transparent, not hidden: the label stays the button's accessible name. */}
+          <span className="inline-flex items-center gap-[inherit] opacity-0">{children}</span>
           <span className="absolute inset-0 grid place-items-center">
             <LoadingMark tone="current" className="text-xl" />
           </span>

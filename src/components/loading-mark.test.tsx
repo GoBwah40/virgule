@@ -26,6 +26,8 @@ describe("LoadingMark", () => {
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute("aria-busy", "true");
     expect(button.querySelector('[data-slot="loading-mark"]')).not.toBeNull();
+    // `visibility: hidden` would take the label out of the accessibility tree (jsdom doesn't see it).
+    expect(button.querySelector(".invisible")).toBeNull();
   });
 
   it("leaves an idle button as it is", () => {
