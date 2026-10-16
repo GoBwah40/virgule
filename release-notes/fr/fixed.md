@@ -2,6 +2,10 @@
 
 Problèmes corrigés. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.2 — 2026-10-16
+
+- Un long message dans le formulaire Ton avis ne fait plus sortir le bouton Envoyer de l'écran sur téléphone : les détails défilent une fois qu'ils deviennent longs.
+
 ## 0.20.2 — 2026-10-07
 
 - Trop d'essais d'affilée pour créer une séance, la rejoindre ou associer un grand écran sont désormais toujours freinés, pour que personne ne puisse trouver le code d'un écran en tâtonnant.

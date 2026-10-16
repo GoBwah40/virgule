@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.2 — 2026-10-16
+
+- The Send button of the Feedback form shows a small spinner while your message is on its way.
+
 ## 0.22.1 — 2026-10-13
 
 - The pencil to rename the session is a plain icon next to its name, without a button background.

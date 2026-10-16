@@ -2,6 +2,10 @@
 
 Fixed problems. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.2 — 2026-10-16
+
+- A long message in the Feedback form no longer pushes the Send button off the screen on phones: the details scroll once they get long.
+
 ## 0.20.2 — 2026-10-07
 
 - Too many tries in a row at creating a session, joining one or pairing a big screen are always slowed down now, so nobody can find a screen code by guessing.
