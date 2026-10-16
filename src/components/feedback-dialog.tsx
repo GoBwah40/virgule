@@ -1,6 +1,6 @@
 "use client";
 
-import { Bug, Lightbulb, MessageSquarePlus } from "lucide-react";
+import { Bug, Lightbulb, LoaderCircle, MessageSquarePlus } from "lucide-react";
 import { useId, useState } from "react";
 
 import { FormField } from "@/components/form-field";
@@ -115,7 +115,8 @@ export function FeedbackDialog({ maxLength, labels, pending = false, onSubmit, c
               onChange={(e) => set({ description: e.target.value })}
               maxLength={maxLength.description}
               required
-              className="min-h-28"
+              // Grows with the text up to a point, then scrolls: the send button stays in view.
+              className="max-h-60 min-h-28"
             />
           </FormField>
           <SettingSwitch
@@ -137,7 +138,8 @@ export function FeedbackDialog({ maxLength, labels, pending = false, onSubmit, c
             className="sr-only"
           />
           <DialogFooter>
-            <Button type="submit" disabled={pending || !ready}>
+            <Button type="submit" disabled={pending || !ready} aria-busy={pending}>
+              {pending && <LoaderCircle className="motion-safe:animate-spin" aria-hidden />}
               {labels.submit}
             </Button>
           </DialogFooter>

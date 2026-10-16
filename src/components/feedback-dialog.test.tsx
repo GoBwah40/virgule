@@ -82,6 +82,8 @@ describe("FeedbackDialog", () => {
     expect(screen.getByLabelText("Details")).toHaveAttribute("maxlength", "2000");
     await user.type(screen.getByLabelText("In a few words"), "Dark mode");
     await user.type(screen.getByLabelText("Details"), "Please.");
-    expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
+    const submit = screen.getByRole("button", { name: "Send" });
+    expect(submit).toBeDisabled();
+    expect(submit).toHaveAttribute("aria-busy", "true");
   });
 });

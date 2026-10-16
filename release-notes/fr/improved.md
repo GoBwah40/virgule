@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.2 — 2026-10-16
+
+- Le bouton Envoyer du formulaire Ton avis affiche un petit indicateur de chargement pendant l'envoi de ton message.
+
 ## 0.22.1 — 2026-10-13
 
 - Le crayon pour renommer la séance est une simple icône à côté de son nom, sans fond de bouton.
