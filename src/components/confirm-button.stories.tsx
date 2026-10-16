@@ -27,7 +27,7 @@ const withIcon = (
 );
 
 export const WithIcon: Story = { args: { children: withIcon } };
-/** Confirmed, waiting for the server: a spinner in place of the icon. */
+/** Confirmed, waiting for the server: the loading mark in place of the label. */
 export const Pending: Story = { args: { pending: true, children: withIcon } };
 export const Destructive: Story = { args: { variant: "destructive" } };
 export const DestructiveConfirm: Story = { args: { variant: "outline", destructive: true, children: "Leave the session" } };

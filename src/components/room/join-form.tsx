@@ -72,7 +72,7 @@ export function JoinForm({ slug, roomName, hostName, seats, capacity, full, clos
         </CardContent>
         {!blocked && (
           <CardFooter>
-            <Button type="submit" size="lg" className="w-full" disabled={pending || !pseudo.trim()}>
+            <Button type="submit" size="lg" className="w-full" disabled={!pseudo.trim()} pending={pending}>
               {t("submit")}
             </Button>
           </CardFooter>

@@ -108,6 +108,8 @@ export function ThemeEditor({
   const t = useTranslations("themes");
   const tc = useTranslations("common");
   const [pending, run] = useAction();
+  // Its own transition: adding a topic doesn't make the start button spin.
+  const [starting, runStart] = useAction();
   const [view] = useView();
   const [form, chooseForm] = useCookiePreference(TOPIC_FORM_COOKIE, initialForm);
   const advanced = form === "advanced";
@@ -193,9 +195,9 @@ export function ThemeEditor({
           data-tour="start"
           size="lg"
           className="w-full"
-          pending={pending}
-          disabled={themes.length === 0}
-          onClick={() => run(() => startIdeasPhase(slug))}
+          pending={starting}
+          disabled={pending || themes.length === 0}
+          onClick={() => runStart(() => startIdeasPhase(slug))}
         >
           <Play data-icon="inline-start" />
           {startLabel}

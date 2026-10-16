@@ -18,4 +18,16 @@ describe("LoadingState", () => {
     expect(status).toHaveTextContent("Loading ideas…");
     expect(status.querySelector("[aria-hidden]")).not.toBeNull();
   });
+
+  it("shows the turning rosette on a veil over the skeletons", () => {
+    renderUi(
+      <LoadingState label="Loading ideas…">
+        <PageHeaderSkeleton />
+      </LoadingState>,
+    );
+    const veil = screen.getByRole("status").querySelector(".loading-veil");
+    expect(veil).toHaveClass("bg-scrim");
+    expect(veil?.querySelector("svg")).toHaveClass("motion-safe:animate-rosette-turn");
+    expect(veil?.querySelectorAll("path")).toHaveLength(6);
+  });
 });

@@ -48,7 +48,7 @@ export function ScreenPairForm() {
           </FormField>
         </CardContent>
         <CardFooter>
-          <Button type="submit" size="lg" className="w-full" disabled={pending || !code.trim()}>
+          <Button type="submit" size="lg" className="w-full" disabled={!code.trim()} pending={pending}>
             {t("submit")}
           </Button>
         </CardFooter>

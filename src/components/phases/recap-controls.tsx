@@ -58,7 +58,7 @@ export function RecapHostControls({
 }) {
   const t = useTranslations("recap");
   const [pending, run] = useAction();
-  // Every control waits for the one under way; only the step tapped shows the spinner.
+  // Every control waits for the one under way; only the step tapped shows the loading mark.
   const [step, setStep] = useState<Step | null>(null);
   const goTo = (next: Step, action: Parameters<typeof run>[0]) => {
     setStep(next);

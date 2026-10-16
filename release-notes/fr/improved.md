@@ -2,6 +2,10 @@
 
 Changements qui rendent une fonctionnalité existante plus claire, plus rapide ou plus agréable. Format et règles : [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.3 — 2026-10-16
+
+- Les boutons qui changent de page affichent trois virgules animées à la place de leur texte, au lieu de l’indicateur de chargement, et une page un peu longue à charger montre la rosace qui tourne au milieu de l’écran, sur un voile sombre.
+
 ## 0.22.2 — 2026-10-16
 
 - Les boutons qui font passer la séance à une autre étape (idées, bilan, nouveau tour, retour aux sujets, fin de séance) et le bouton Envoyer du formulaire Ton avis affichent un petit indicateur de chargement pendant que le serveur répond.
