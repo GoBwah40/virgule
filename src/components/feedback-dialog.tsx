@@ -1,6 +1,6 @@
 "use client";
 
-import { Bug, Lightbulb, LoaderCircle, MessageSquarePlus } from "lucide-react";
+import { Bug, Lightbulb, MessageSquarePlus } from "lucide-react";
 import { useId, useState } from "react";
 
 import { FormField } from "@/components/form-field";
@@ -138,8 +138,7 @@ export function FeedbackDialog({ maxLength, labels, pending = false, onSubmit, c
             className="sr-only"
           />
           <DialogFooter>
-            <Button type="submit" disabled={pending || !ready} aria-busy={pending}>
-              {pending && <LoaderCircle className="motion-safe:animate-spin" aria-hidden />}
+            <Button type="submit" pending={pending} disabled={!ready}>
               {labels.submit}
             </Button>
           </DialogFooter>

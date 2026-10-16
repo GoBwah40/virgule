@@ -2,7 +2,7 @@
 
 import { Copy, Download, Equal, Eye, FileSpreadsheet, FileText, Flag, Printer, RotateCcw, Undo2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { ConfirmButton } from "@/components/confirm-button";
 import { CopyButton } from "@/components/copy-button";
@@ -38,6 +38,8 @@ import {
   startTiebreakRound,
 } from "@/lib/actions";
 
+type Step = "next" | "tiebreak" | "reopen" | "close";
+
 export function RecapHostControls({
   slug,
   requireNetPositive,
@@ -56,6 +58,13 @@ export function RecapHostControls({
 }) {
   const t = useTranslations("recap");
   const [pending, run] = useAction();
+  // Every control waits for the one under way; only the step tapped shows the spinner.
+  const [step, setStep] = useState<Step | null>(null);
+  const goTo = (next: Step, action: Parameters<typeof run>[0]) => {
+    setStep(next);
+    run(action);
+  };
+  const isGoing = (target: Step) => pending && step === target;
 
   return (
     <Card className="print:hidden">
@@ -78,9 +87,10 @@ export function RecapHostControls({
           <ConfirmButton
             className="w-full"
             disabled={pending}
+            pending={isGoing("next")}
             title={t("nextRoundConfirm", { round: nextRound })}
             description={t("nextRoundConfirmHint")}
-            onConfirm={() => run(() => startNextRound(slug))}
+            onConfirm={() => goTo("next", () => startNextRound(slug))}
           >
             <RotateCcw data-icon="inline-start" />
             {t("nextRound")}
@@ -93,10 +103,11 @@ export function RecapHostControls({
               variant="outline"
               className="w-full"
               disabled={pending}
+              pending={isGoing("tiebreak")}
               title={t("tiebreakConfirm")}
               description={t("tiebreakConfirmHint")}
               confirmLabel={t("tiebreak")}
-              onConfirm={() => run(() => startTiebreakRound(slug))}
+              onConfirm={() => goTo("tiebreak", () => startTiebreakRound(slug))}
             >
               <Equal data-icon="inline-start" />
               {t("tiebreak")}
@@ -110,10 +121,11 @@ export function RecapHostControls({
           variant="outline"
           className="w-full"
           disabled={pending}
+          pending={isGoing("reopen")}
           title={t("reopenConfirm")}
           description={t("reopenConfirmHint")}
           confirmLabel={t("reopen")}
-          onConfirm={() => run(() => reopenVoting(slug))}
+          onConfirm={() => goTo("reopen", () => reopenVoting(slug))}
         >
           <Undo2 data-icon="inline-start" />
           {t("reopen")}
@@ -122,10 +134,11 @@ export function RecapHostControls({
           variant="destructive"
           className="w-full"
           disabled={pending}
+          pending={isGoing("close")}
           title={t("closeConfirm")}
           description={t("closeConfirmHint")}
           confirmLabel={t("close")}
-          onConfirm={() => run(() => closeSession(slug))}
+          onConfirm={() => goTo("close", () => closeSession(slug))}
         >
           <Flag data-icon="inline-start" />
           {t("close")}
@@ -147,7 +160,7 @@ export function ReuseTopicsButton({ slug }: { slug: string }) {
     <ConfirmButton
       variant="outline"
       className="print:hidden"
-      disabled={pending}
+      pending={pending}
       title={t("reuseConfirm")}
       description={t("reuseConfirmHint")}
       confirmLabel={t("reuse")}

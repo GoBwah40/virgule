@@ -1,5 +1,6 @@
 import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
+import { LoaderCircle } from "lucide-react"
 import { cn } from "cn"
 
 const buttonVariants = cva(
@@ -39,18 +40,42 @@ const buttonVariants = cva(
   }
 )
 
+type ButtonProps = ButtonPrimitive.Props &
+  VariantProps<typeof buttonVariants> & {
+    /** Waiting for the server: disabled, with a spinner in place of the icon (or before the label). */
+    pending?: boolean
+  }
+
 function Button({
   className,
   variant = "default",
   size = "default",
+  pending = false,
+  disabled,
+  children,
   ...props
-}: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
+}: ButtonProps) {
   return (
     <ButtonPrimitive
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        buttonVariants({ variant, size, className }),
+        // The spinner takes the place of the button's own icon.
+        "aria-busy:[&>svg:not([data-slot=spinner])]:hidden"
+      )}
+      disabled={pending || disabled}
+      aria-busy={pending || undefined}
       {...props}
-    />
+    >
+      {pending && (
+        <LoaderCircle
+          data-slot="spinner"
+          className="motion-safe:animate-spin"
+          aria-hidden
+        />
+      )}
+      {children}
+    </ButtonPrimitive>
   )
 }
 

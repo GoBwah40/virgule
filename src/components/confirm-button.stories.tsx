@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Flag } from "lucide-react";
 import { fn } from "storybook/test";
 
 import { ConfirmButton } from "./confirm-button";
@@ -18,6 +19,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+const withIcon = (
+  <>
+    <Flag data-icon="inline-start" />
+    End the session
+  </>
+);
+
+export const WithIcon: Story = { args: { children: withIcon } };
+/** Confirmed, waiting for the server: a spinner in place of the icon. */
+export const Pending: Story = { args: { pending: true, children: withIcon } };
 export const Destructive: Story = { args: { variant: "destructive" } };
 export const DestructiveConfirm: Story = { args: { variant: "outline", destructive: true, children: "Leave the session" } };
 /** Inside a dialog: the question replaces the button, no second dialog on top. */

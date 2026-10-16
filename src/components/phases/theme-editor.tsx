@@ -193,7 +193,8 @@ export function ThemeEditor({
           data-tour="start"
           size="lg"
           className="w-full"
-          disabled={pending || themes.length === 0}
+          pending={pending}
+          disabled={themes.length === 0}
           onClick={() => run(() => startIdeasPhase(slug))}
         >
           <Play data-icon="inline-start" />

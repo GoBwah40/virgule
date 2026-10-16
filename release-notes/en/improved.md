@@ -4,7 +4,7 @@ Changes that make an existing feature clearer, faster or more pleasant. Format a
 
 ## 0.22.2 — 2026-10-16
 
-- The Send button of the Feedback form shows a small spinner while your message is on its way.
+- Buttons that move the session to another step (ideas, recap, next round, back to topics, end of the session) and the Send button of the Feedback form show a small spinner while the server answers.
 
 ## 0.22.1 — 2026-10-13
 

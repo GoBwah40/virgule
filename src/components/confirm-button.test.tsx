@@ -35,6 +35,19 @@ describe("ConfirmButton", () => {
     expect(onConfirm).not.toHaveBeenCalled();
   });
 
+  it("waits with a spinner in place of its icon, and cannot be tapped again", () => {
+    renderUi(
+      <ConfirmButton title="End the session?" pending onConfirm={vi.fn()}>
+        <svg data-icon="inline-start" />
+        End the session
+      </ConfirmButton>,
+    );
+    const button = screen.getByRole("button", { name: "End the session" });
+    expect(button).toBeDisabled();
+    expect(button).toHaveAttribute("aria-busy", "true");
+    expect(button.querySelector("[data-slot=spinner]")).toBeInTheDocument();
+  });
+
   describe("inline", () => {
     it("asks in place of the button, without a dialog", async () => {
       const onConfirm = vi.fn();
