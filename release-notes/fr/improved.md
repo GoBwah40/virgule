@@ -4,7 +4,7 @@ Changements qui rendent une fonctionnalité existante plus claire, plus rapide o
 
 ## 0.22.2 — 2026-10-16
 
-- Le bouton Envoyer du formulaire Ton avis affiche un petit indicateur de chargement pendant l'envoi de ton message.
+- Les boutons qui font passer la séance à une autre étape (idées, bilan, nouveau tour, retour aux sujets, fin de séance) et le bouton Envoyer du formulaire Ton avis affichent un petit indicateur de chargement pendant que le serveur répond.
 
 ## 0.22.1 — 2026-10-13
 

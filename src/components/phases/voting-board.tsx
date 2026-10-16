@@ -606,7 +606,7 @@ export function BackToThemesButton({ slug }: { slug: string }) {
   return (
     <ConfirmButton
       variant="outline"
-      disabled={pending}
+      pending={pending}
       title={t("backToThemesConfirm")}
       description={t("backToThemesHint")}
       confirmLabel={t("backToThemes")}
@@ -623,7 +623,7 @@ export function FinishVotingButton({ slug }: { slug: string }) {
   const [pending, run] = useAction();
   return (
     <ConfirmButton
-      disabled={pending}
+      pending={pending}
       title={t("finishConfirm")}
       description={t("finishConfirmHint")}
       confirmLabel={t("finish")}
