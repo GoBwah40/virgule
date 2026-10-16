@@ -40,7 +40,7 @@ export function LeaveRoomButton({ slug, disabledReason }: { slug: string; disabl
       description={t("leaveConfirmHint")}
       confirmLabel={t("leave")}
       destructive
-      disabled={pending}
+      pending={pending}
       onConfirm={() => run(() => leaveRoom(slug))}
     >
       <LogOut />

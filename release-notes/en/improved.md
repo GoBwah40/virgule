@@ -2,6 +2,10 @@
 
 Changes that make an existing feature clearer, faster or more pleasant. Format and rules: [VERSIONS.md](../../VERSIONS.md).
 
+## 0.22.3 — 2026-10-16
+
+- Buttons that change page show three moving commas in place of their label instead of the spinner, and a page that takes a moment to load shows the turning rosette in the middle of the screen, on a dark veil.
+
 ## 0.22.2 — 2026-10-16
 
 - Buttons that move the session to another step (ideas, recap, next round, back to topics, end of the session) and the Send button of the Feedback form show a small spinner while the server answers.
