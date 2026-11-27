@@ -30,7 +30,7 @@ A room expires **7 days** after it is created; a daily scheduled job then delete
 
 ## Running locally
 
-Requirements: Node.js 20+ and pnpm.
+Requirements: Node.js 22.13 or later (CI runs Node 24) and pnpm 11 (`corepack enable` installs the version pinned in `package.json`). Vitest 5 needs Node 22.12+ and pnpm 11 needs 22.13+, so Node 20 is no longer enough.
 
 ```bash
 pnpm install              # also generates the Prisma client
